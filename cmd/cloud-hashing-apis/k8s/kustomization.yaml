@@ -1,0 +1,6 @@
+commonLabels:
+  # app: cloud-hashing-apis
+
+resources:
+- 01-cloud-hashing-apis.yaml
+- 02-ingress.yaml

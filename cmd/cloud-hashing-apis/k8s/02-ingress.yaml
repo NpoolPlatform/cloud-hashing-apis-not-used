@@ -1,0 +1,57 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: cloud-hashing-apis-npool-top-ingress
+  namespace: kube-system
+  annotations:
+    k8s.kuboard.cn/displayName: cloud-hashing-apis-npool
+    k8s.kuboard.cn/workload: cloud-hashing-apis-npool
+    kubernetes.io/ingress.class: "traefik-internet"
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.middlewares: kube-system-strip-cloud-hashing-apis-prefix@kubernetescrd
+
+spec:
+  rules:
+    - host: api.npool.top
+      http:
+        paths:
+          - path: /cloud-hashing-apis
+            backend:
+              serviceName: cloud-hashing-apis
+              servicePort: 50140
+
+---
+
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: cloud-hashing-apis-xpool-top-ingress
+  namespace: kube-system
+  annotations:
+    k8s.kuboard.cn/displayName: cloud-hashing-apis-xpool
+    k8s.kuboard.cn/workload: cloud-hashing-apis-xpool
+    kubernetes.io/ingress.class: "traefik-internet"
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.middlewares: kube-system-strip-cloud-hashing-apis-prefix@kubernetescrd
+
+spec:
+  rules:
+    - host: api.xpool.top
+      http:
+        paths:
+          - path: /cloud-hashing-apis
+            backend:
+              serviceName: cloud-hashing-apis
+              servicePort: 50140
+
+---
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-cloud-hashing-apis-prefix
+  namespace: kube-system
+spec:
+  stripPrefix:
+    prefixes:
+      - /cloud-hashing-apis

@@ -8,7 +8,7 @@ import (
 	"sync"
 
 	"entgo.io/ent"
-	"github.com/NpoolPlatform/go-service-app-template/pkg/db/ent/predicate"
+	"github.com/NpoolPlatform/cloud-hashing-apis/pkg/db/ent/predicate"
 )
 
 const (
