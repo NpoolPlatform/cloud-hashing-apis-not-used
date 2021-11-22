@@ -11,7 +11,8 @@ import "google/protobuf/empty.proto";
 service CloudHashingApis {
     rpc Version (google.protobuf.Empty) returns (VersionResponse){
         option (google.api.http) = {
-            get: "/version"
+            post: "/version"
+            body: "*"
         };
     }
 
