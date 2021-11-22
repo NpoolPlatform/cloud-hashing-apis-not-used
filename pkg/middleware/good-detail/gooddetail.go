@@ -49,22 +49,9 @@ func constructGoodDetail(info *goodspb.GoodDetail, coinInfos []*coininfopb.CoinI
 		return nil, xerrors.Errorf("not found coin info %v", info.CoinInfoID)
 	}
 
-	return &npool.GoodDetail{
-		ID: info.ID,
-		DeviceInfo: &npool.DeviceInfo{
-			ID:              info.DeviceInfo.ID,
-			Type:            info.DeviceInfo.Type,
-			Manufacturer:    info.DeviceInfo.Manufacturer,
-			PowerComsuption: info.DeviceInfo.PowerComsuption,
-			ShipmentAt:      info.DeviceInfo.ShipmentAt,
-		},
-		SeparateFee:  info.SeparateFee,
-		UnitPower:    info.UnitPower,
-		DurationDays: info.DurationDays,
-		CoinInfo:     myCoinInfo,
-		Actuals:      info.Actuals,
-		DeliveryAt:   info.DeliveryAt,
-		InheritFromGood: &npool.GoodInfo{
+	var inheritFrom *npool.GoodInfo
+	if info.InheritFromGood != nil {
+		inheritFrom = &npool.GoodInfo{
 			ID:                 info.InheritFromGood.ID,
 			Title:              info.InheritFromGood.Title,
 			DeviceInfoID:       info.InheritFromGood.DeviceInfoID,
@@ -84,7 +71,25 @@ func constructGoodDetail(info *goodspb.GoodDetail, coinInfos []*coininfopb.CoinI
 			Total:              info.InheritFromGood.Total,
 			Unit:               info.InheritFromGood.Unit,
 			Start:              info.InheritFromGood.Start,
+		}
+	}
+
+	return &npool.GoodDetail{
+		ID: info.ID,
+		DeviceInfo: &npool.DeviceInfo{
+			ID:              info.DeviceInfo.ID,
+			Type:            info.DeviceInfo.Type,
+			Manufacturer:    info.DeviceInfo.Manufacturer,
+			PowerComsuption: info.DeviceInfo.PowerComsuption,
+			ShipmentAt:      info.DeviceInfo.ShipmentAt,
 		},
+		SeparateFee:     info.SeparateFee,
+		UnitPower:       info.UnitPower,
+		DurationDays:    info.DurationDays,
+		CoinInfo:        myCoinInfo,
+		Actuals:         info.Actuals,
+		DeliveryAt:      info.DeliveryAt,
+		InheritFromGood: inheritFrom,
 		VendorLocation: &npool.VendorLocationInfo{
 			ID:       info.VendorLocation.ID,
 			Country:  info.VendorLocation.Country,
