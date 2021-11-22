@@ -1,7 +1,33 @@
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: cloud-hashing-apis-npool-top-ingress
+  name: cloud-hashing-apis-appid-userid-ingress
+  namespace: kube-system
+  annotations:
+    k8s.kuboard.cn/displayName: cloud-hashing-apis-appid-userid
+    k8s.kuboard.cn/workload: cloud-hashing-apis-appid-userid
+    kubernetes.io/ingress.class: "traefik-internet"
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.middlewares: kube-system-strip-cloud-hashing-apis-prefix@kubernetescrd,kube-system-cookies-appid-to-body@kubernetescrd,kube-system-cookies-userid-to-body@kubernetescrd
+
+spec:
+  rules:
+    - host: api.npool.top
+      http: &http_appid_userid_rules
+        paths:
+          - path: /cloud-hashing-apis
+            backend:
+              serviceName: cloud-hashing-apis
+              servicePort: 50140
+    - host: api.xpool.top
+      http: *http_appid_userid_rules
+
+---
+
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: cloud-hashing-apis-ingress
   namespace: kube-system
   annotations:
     k8s.kuboard.cn/displayName: cloud-hashing-apis-npool
@@ -13,36 +39,18 @@ metadata:
 spec:
   rules:
     - host: api.npool.top
-      http:
+      http: &http_rules
         paths:
-          - path: /cloud-hashing-apis
+          - path: /cloud-hashing-apis/version
             backend:
               serviceName: cloud-hashing-apis
               servicePort: 50140
-
----
-
-apiVersion: networking.k8s.io/v1beta1
-kind: Ingress
-metadata:
-  name: cloud-hashing-apis-xpool-top-ingress
-  namespace: kube-system
-  annotations:
-    k8s.kuboard.cn/displayName: cloud-hashing-apis-xpool
-    k8s.kuboard.cn/workload: cloud-hashing-apis-xpool
-    kubernetes.io/ingress.class: "traefik-internet"
-    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    traefik.ingress.kubernetes.io/router.middlewares: kube-system-strip-cloud-hashing-apis-prefix@kubernetescrd
-
-spec:
-  rules:
+          - path: /cloud-hashing-apis/v1/get/goods/detail
+            backend:
+              serviceName: cloud-hashing-apis
+              servicePort: 50140
     - host: api.xpool.top
-      http:
-        paths:
-          - path: /cloud-hashing-apis
-            backend:
-              serviceName: cloud-hashing-apis
-              servicePort: 50140
+      http: *http_rules
 
 ---
 
