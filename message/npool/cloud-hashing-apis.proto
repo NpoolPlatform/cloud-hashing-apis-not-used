@@ -7,18 +7,130 @@ option go_package = "github.com/NpoolPlatform/cloud-hashing-apis/message/npool";
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 
-// Service Name
+// Cloud Hashing Goods
 service CloudHashingApis {
-    // Method Version
     rpc Version (google.protobuf.Empty) returns (VersionResponse){
         option (google.api.http) = {
-            post: "/version"
+            get: "/version"
+        };
+    }
+
+    rpc GetGoodsDetail(GetGoodsDetailRequest) returns (GetGoodsDetailResponse) {
+        option (google.api.http) = {
+            post: "/v1/get/apis/detail"
             body: "*"
         };
     }
 }
 
-// request body and response
+message PageInfo {
+    int32 PageIndex = 100;
+    int32 PageSize = 101;
+}
+
+// Request body and response
 message VersionResponse {
-    string Info = 100;
+    string Info = 200;
+}
+
+message VendorLocationInfo {
+    string ID = 300;
+    string Country = 301;
+    string Province = 302;
+    string City = 303;
+    string Address = 304;
+}
+
+message TargetAreaInfo {
+    string ID = 1000;
+    string Continent = 1001;
+    string Country = 1002;
+}
+
+message DeviceInfo {
+    string ID = 1700;
+    string Type = 1701;
+    string Manufacturer = 1702;
+    int32 PowerComsuption = 1703;
+    int32 ShipmentAt = 1704;
+}
+
+message GoodInfo {
+    string ID = 2400;
+    string DeviceInfoID = 2401;
+    bool SeparateFee = 2403;
+    int32 UnitPower = 2404;
+    int32 DurationDays = 2405;
+    string CoinInfoID = 2406;
+    bool Actuals = 2407;
+    int32 DeliveryAt = 2408;
+    string InheritFromGoodID = 2409;
+    string VendorLocationID = 2410;
+    double Price = 2411;
+    string BenefitType = 2412;
+    bool Classic = 2413;
+    repeated string SupportCoinTypeIDs = 2414;
+    int32 Total = 2415;
+    string PriceCurrency = 2416;
+    string Title = 2417;
+    string Unit = 2418;
+    uint32 Start = 2419;
+}
+
+message PriceCurrency {
+    string ID = 3010;
+    string Name = 3011;
+    string Unit = 3012;
+    string Symbol = 3013;
+}
+
+message CoinInfo {
+    string ID = 3020;
+    bool PreSale = 3021;
+    string Name = 3022;
+    string Unit = 3023;
+}
+
+message GoodDetail {
+    string ID = 2400;
+    DeviceInfo DeviceInfo = 2401;
+    bool SeparateFee = 2403;
+    int32 UnitPower = 2404;
+    int32 DurationDays = 2405;
+    CoinInfo CoinInfo = 2406;
+    bool Actuals = 2407;
+    int32 DeliveryAt = 2408;
+    GoodInfo InheritFromGood = 2409;
+    VendorLocationInfo VendorLocation = 2410;
+    double Price = 2411;
+    string BenefitType = 2412;
+    bool Classic = 2413;
+    repeated CoinInfo SupportCoins = 2414;
+    int32 Total = 2415;
+    GoodExtraInfo Extra = 2416;
+    string Title = 2417;
+    string Unit = 2418;
+    uint32 Start = 2419;
+    PriceCurrency PriceCurrency = 2420;
+}
+
+message GetGoodsDetailRequest {
+    string AppID = 3210;
+    PageInfo PageInfo = 3211;
+}
+
+message GetGoodsDetailResponse {
+    repeated GoodDetail Details = 3212;
+    int32 Total = 3213;
+}
+
+message GoodExtraInfo {
+    string ID = 5100;
+    string GoodID = 5101;
+    repeated string Posters = 5102;
+    repeated string Labels = 5103;
+    bool OutSale = 5104;
+    bool PreSale = 5105;
+    uint32 VoteCount = 5106;
+    float Rating = 5107;
 }

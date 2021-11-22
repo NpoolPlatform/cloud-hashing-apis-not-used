@@ -4,6 +4,17 @@
 ## Table of Contents
 
 - [npool/cloud-hashing-apis.proto](#npool/cloud-hashing-apis.proto)
+    - [CoinInfo](#cloud.hashing.apis.v1.CoinInfo)
+    - [DeviceInfo](#cloud.hashing.apis.v1.DeviceInfo)
+    - [GetGoodsDetailRequest](#cloud.hashing.apis.v1.GetGoodsDetailRequest)
+    - [GetGoodsDetailResponse](#cloud.hashing.apis.v1.GetGoodsDetailResponse)
+    - [GoodDetail](#cloud.hashing.apis.v1.GoodDetail)
+    - [GoodExtraInfo](#cloud.hashing.apis.v1.GoodExtraInfo)
+    - [GoodInfo](#cloud.hashing.apis.v1.GoodInfo)
+    - [PageInfo](#cloud.hashing.apis.v1.PageInfo)
+    - [PriceCurrency](#cloud.hashing.apis.v1.PriceCurrency)
+    - [TargetAreaInfo](#cloud.hashing.apis.v1.TargetAreaInfo)
+    - [VendorLocationInfo](#cloud.hashing.apis.v1.VendorLocationInfo)
     - [VersionResponse](#cloud.hashing.apis.v1.VersionResponse)
   
     - [CloudHashingApis](#cloud.hashing.apis.v1.CloudHashingApis)
@@ -19,10 +30,238 @@
 
 
 
+<a name="cloud.hashing.apis.v1.CoinInfo"></a>
+
+### CoinInfo
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| ID | [string](#string) |  |  |
+| PreSale | [bool](#bool) |  |  |
+| Name | [string](#string) |  |  |
+| Unit | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.DeviceInfo"></a>
+
+### DeviceInfo
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| ID | [string](#string) |  |  |
+| Type | [string](#string) |  |  |
+| Manufacturer | [string](#string) |  |  |
+| PowerComsuption | [int32](#int32) |  |  |
+| ShipmentAt | [int32](#int32) |  |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.GetGoodsDetailRequest"></a>
+
+### GetGoodsDetailRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| AppID | [string](#string) |  |  |
+| PageInfo | [PageInfo](#cloud.hashing.apis.v1.PageInfo) |  |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.GetGoodsDetailResponse"></a>
+
+### GetGoodsDetailResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| Details | [GoodDetail](#cloud.hashing.apis.v1.GoodDetail) | repeated |  |
+| Total | [int32](#int32) |  |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.GoodDetail"></a>
+
+### GoodDetail
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| ID | [string](#string) |  |  |
+| DeviceInfo | [DeviceInfo](#cloud.hashing.apis.v1.DeviceInfo) |  |  |
+| SeparateFee | [bool](#bool) |  |  |
+| UnitPower | [int32](#int32) |  |  |
+| DurationDays | [int32](#int32) |  |  |
+| CoinInfo | [CoinInfo](#cloud.hashing.apis.v1.CoinInfo) |  |  |
+| Actuals | [bool](#bool) |  |  |
+| DeliveryAt | [int32](#int32) |  |  |
+| InheritFromGood | [GoodInfo](#cloud.hashing.apis.v1.GoodInfo) |  |  |
+| VendorLocation | [VendorLocationInfo](#cloud.hashing.apis.v1.VendorLocationInfo) |  |  |
+| Price | [double](#double) |  |  |
+| BenefitType | [string](#string) |  |  |
+| Classic | [bool](#bool) |  |  |
+| SupportCoins | [CoinInfo](#cloud.hashing.apis.v1.CoinInfo) | repeated |  |
+| Total | [int32](#int32) |  |  |
+| Extra | [GoodExtraInfo](#cloud.hashing.apis.v1.GoodExtraInfo) |  |  |
+| Title | [string](#string) |  |  |
+| Unit | [string](#string) |  |  |
+| Start | [uint32](#uint32) |  |  |
+| PriceCurrency | [PriceCurrency](#cloud.hashing.apis.v1.PriceCurrency) |  |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.GoodExtraInfo"></a>
+
+### GoodExtraInfo
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| ID | [string](#string) |  |  |
+| GoodID | [string](#string) |  |  |
+| Posters | [string](#string) | repeated |  |
+| Labels | [string](#string) | repeated |  |
+| OutSale | [bool](#bool) |  |  |
+| PreSale | [bool](#bool) |  |  |
+| VoteCount | [uint32](#uint32) |  |  |
+| Rating | [float](#float) |  |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.GoodInfo"></a>
+
+### GoodInfo
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| ID | [string](#string) |  |  |
+| DeviceInfoID | [string](#string) |  |  |
+| SeparateFee | [bool](#bool) |  |  |
+| UnitPower | [int32](#int32) |  |  |
+| DurationDays | [int32](#int32) |  |  |
+| CoinInfoID | [string](#string) |  |  |
+| Actuals | [bool](#bool) |  |  |
+| DeliveryAt | [int32](#int32) |  |  |
+| InheritFromGoodID | [string](#string) |  |  |
+| VendorLocationID | [string](#string) |  |  |
+| Price | [double](#double) |  |  |
+| BenefitType | [string](#string) |  |  |
+| Classic | [bool](#bool) |  |  |
+| SupportCoinTypeIDs | [string](#string) | repeated |  |
+| Total | [int32](#int32) |  |  |
+| PriceCurrency | [string](#string) |  |  |
+| Title | [string](#string) |  |  |
+| Unit | [string](#string) |  |  |
+| Start | [uint32](#uint32) |  |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.PageInfo"></a>
+
+### PageInfo
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| PageIndex | [int32](#int32) |  |  |
+| PageSize | [int32](#int32) |  |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.PriceCurrency"></a>
+
+### PriceCurrency
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| ID | [string](#string) |  |  |
+| Name | [string](#string) |  |  |
+| Unit | [string](#string) |  |  |
+| Symbol | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.TargetAreaInfo"></a>
+
+### TargetAreaInfo
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| ID | [string](#string) |  |  |
+| Continent | [string](#string) |  |  |
+| Country | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.VendorLocationInfo"></a>
+
+### VendorLocationInfo
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| ID | [string](#string) |  |  |
+| Country | [string](#string) |  |  |
+| Province | [string](#string) |  |  |
+| City | [string](#string) |  |  |
+| Address | [string](#string) |  |  |
+
+
+
+
+
+
 <a name="cloud.hashing.apis.v1.VersionResponse"></a>
 
 ### VersionResponse
-request body and response
+Request body and response
 
 
 | Field | Type | Label | Description |
@@ -43,11 +282,12 @@ request body and response
 <a name="cloud.hashing.apis.v1.CloudHashingApis"></a>
 
 ### CloudHashingApis
-Service Name
+Cloud Hashing Goods
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| Version | [.google.protobuf.Empty](#google.protobuf.Empty) | [VersionResponse](#cloud.hashing.apis.v1.VersionResponse) | Method Version |
+| Version | [.google.protobuf.Empty](#google.protobuf.Empty) | [VersionResponse](#cloud.hashing.apis.v1.VersionResponse) |  |
+| GetGoodsDetail | [GetGoodsDetailRequest](#cloud.hashing.apis.v1.GetGoodsDetailRequest) | [GetGoodsDetailResponse](#cloud.hashing.apis.v1.GetGoodsDetailResponse) |  |
 
  
 
