@@ -135,7 +135,7 @@ func RegisterCloudHashingApisHandlerServer(ctx context.Context, mux *runtime.Ser
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/cloud.hashing.apis.v1.CloudHashingApis/GetGoodsDetail", runtime.WithHTTPPathPattern("/v1/get/apis/detail"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/cloud.hashing.apis.v1.CloudHashingApis/GetGoodsDetail", runtime.WithHTTPPathPattern("/v1/get/goods/detail"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -217,7 +217,7 @@ func RegisterCloudHashingApisHandlerClient(ctx context.Context, mux *runtime.Ser
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/cloud.hashing.apis.v1.CloudHashingApis/GetGoodsDetail", runtime.WithHTTPPathPattern("/v1/get/apis/detail"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/cloud.hashing.apis.v1.CloudHashingApis/GetGoodsDetail", runtime.WithHTTPPathPattern("/v1/get/goods/detail"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -239,7 +239,7 @@ func RegisterCloudHashingApisHandlerClient(ctx context.Context, mux *runtime.Ser
 var (
 	pattern_CloudHashingApis_Version_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"version"}, ""))
 
-	pattern_CloudHashingApis_GetGoodsDetail_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"v1", "get", "apis", "detail"}, ""))
+	pattern_CloudHashingApis_GetGoodsDetail_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"v1", "get", "goods", "detail"}, ""))
 )
 
 var (
