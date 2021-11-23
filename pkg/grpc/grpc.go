@@ -11,6 +11,12 @@ import (
 	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
 	coininfoconst "github.com/NpoolPlatform/sphinx-coininfo/pkg/message/const" //nolint
 
+	orderpb "github.com/NpoolPlatform/cloud-hashing-order/message/npool"
+	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/message/const" //nolint
+
+	inspirepb "github.com/NpoolPlatform/cloud-hashing-inspire/message/npool"
+	inspireconst "github.com/NpoolPlatform/cloud-hashing-inspire/pkg/message/const" //nolint
+
 	"golang.org/x/xerrors"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -25,6 +31,8 @@ func GetGoodsDetail(ctx context.Context, in *goodspb.GetGoodsDetailRequest) (*go
 	return cli.GetGoodsDetail(ctx, in)
 }
 
+//---------------------------------------------------------------------------------------------------------------------------
+
 func GetCoinInfos(ctx context.Context, in *emptypb.Empty) (*coininfopb.GetCoinInfosResponse, error) {
 	conn, err := grpc2.GetGRPCConn(coininfoconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
@@ -33,4 +41,68 @@ func GetCoinInfos(ctx context.Context, in *emptypb.Empty) (*coininfopb.GetCoinIn
 
 	cli := coininfopb.NewSphinxCoinInfoClient(conn)
 	return cli.GetCoinInfos(ctx, in)
+}
+
+func GetCoinInfo(ctx context.Context, in *coininfopb.GetCoinInfoRequest) (*coininfopb.GetCoinInfoResponse, error) {
+	conn, err := grpc2.GetGRPCConn(coininfoconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get coininfo connection: %v", err)
+	}
+
+	cli := coininfopb.NewSphinxCoinInfoClient(conn)
+	return cli.GetCoinInfo(ctx, in)
+}
+
+//---------------------------------------------------------------------------------------------------------------------------
+
+func GetOrderDetail(ctx context.Context, in *orderpb.GetOrderDetailRequest) (*orderpb.GetOrderDetailResponse, error) {
+	conn, err := grpc2.GetGRPCConn(orderconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get order connection: %v", err)
+	}
+
+	cli := orderpb.NewCloudHashingOrderClient(conn)
+	return cli.GetOrderDetail(ctx, in)
+}
+
+func GetOrdersDetailByAppUser(ctx context.Context, in *orderpb.GetOrdersDetailByAppUserRequest) (*orderpb.GetOrdersDetailByAppUserResponse, error) {
+	conn, err := grpc2.GetGRPCConn(orderconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get order connection: %v", err)
+	}
+
+	cli := orderpb.NewCloudHashingOrderClient(conn)
+	return cli.GetOrdersDetailByAppUser(ctx, in)
+}
+
+func GetOrdersDetailByApp(ctx context.Context, in *orderpb.GetOrdersDetailByAppRequest) (*orderpb.GetOrdersDetailByAppResponse, error) {
+	conn, err := grpc2.GetGRPCConn(orderconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get order connection: %v", err)
+	}
+
+	cli := orderpb.NewCloudHashingOrderClient(conn)
+	return cli.GetOrdersDetailByApp(ctx, in)
+}
+
+func GetOrdersDetailByGood(ctx context.Context, in *orderpb.GetOrdersDetailByGoodRequest) (*orderpb.GetOrdersDetailByGoodResponse, error) {
+	conn, err := grpc2.GetGRPCConn(orderconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get order connection: %v", err)
+	}
+
+	cli := orderpb.NewCloudHashingOrderClient(conn)
+	return cli.GetOrdersDetailByGood(ctx, in)
+}
+
+//---------------------------------------------------------------------------------------------------------------------------
+
+func GetCouponAllocated(ctx context.Context, in *inspirepb.GetCouponAllocatedDetailRequest) (*inspirepb.GetCouponAllocatedDetailResponse, error) {
+	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
+	}
+
+	cli := inspirepb.NewCloudHashingInspireClient(conn)
+	return cli.GetCouponAllocatedDetail(ctx, in)
 }

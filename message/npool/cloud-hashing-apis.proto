@@ -22,6 +22,39 @@ service CloudHashingApis {
             body: "*"
         };
     }
+
+    rpc SubmitOrder(SubmitOrderRequest) returns (SubmitOrderResponse) {
+        option (google.api.http) = {
+            post: "/v1/create/order"
+            body: "*"
+        };
+    }
+
+    rpc GetOrderDetail(GetOrderDetailRequest) returns (GetOrderDetailResponse) {
+        option (google.api.http) = {
+            post: "/v1/get/order/detail"
+            body: "*"
+        };
+    }
+
+    rpc GetOrdersDetailByAppUser(GetOrdersDetailByAppUserRequest) returns (GetOrdersDetailByAppUserResponse) {
+        option (google.api.http) = {
+            post: "/v1/get/orders/detail/by/app/user"
+            body: "*"
+        };
+    }
+    rpc GetOrdersDetailByApp(GetOrdersDetailByAppRequest) returns (GetOrdersDetailByAppResponse) {
+        option (google.api.http) = {
+            post: "/v1/get/orders/detail/by/app"
+            body: "*"
+        };
+    }
+    rpc GetOrdersDetailByGood(GetOrdersDetailByGoodRequest) returns (GetOrdersDetailByGoodResponse) {
+        option (google.api.http) = {
+            post: "/v1/get/orders/detail/by/good"
+            body: "*"
+        };
+    }
 }
 
 message PageInfo {
@@ -114,6 +147,7 @@ message GoodDetail {
     string Unit = 2418;
     uint32 Start = 2419;
     PriceCurrency PriceCurrency = 2420;
+    repeated Fee Fees = 2421;
 }
 
 message GetGoodsDetailRequest {
@@ -135,4 +169,144 @@ message GoodExtraInfo {
     bool PreSale = 5105;
     uint32 VoteCount = 5106;
     float Rating = 5107;
+}
+
+//------------------------------------------------------------------------------
+
+message GoodPaying {
+    string ID = 200;
+    string OrderID = 201;
+    string PaymentID = 202;
+}
+
+message GasPaying {
+    string ID = 700;
+    string OrderID = 701;
+    string PaymentID = 702;
+    uint32 DurationMinutes = 703;
+}
+
+message Compensate {
+    string ID = 2610;
+    string OrderID = 2611;
+    uint32 Start = 2612;
+    uint32 End = 2613;
+    string Message = 2614;
+}
+
+message OutOfGas {
+    string ID = 2610;
+    string OrderID = 2611;
+    uint32 Start = 2612;
+    uint32 End = 2613;
+}
+
+message Payment {
+    string ID = 110;
+    string OrderID = 111;
+    string AccountID = 112;
+    double Amount = 113;
+    CoinInfo CoinInfo = 114;
+    string State = 115;
+    string ChainTransactionID = 116;
+    string PlatformTransactionID = 117;
+}
+
+message CouponPool {
+    string ID = 4600;
+    string AppID = 4601;
+    double Denomination = 4603;
+    uint32 Start = 4605;
+    int32 DurationDays = 4606;
+    string Message = 4607;
+    string Name = 4608;
+}
+
+message Coupon {
+    string ID = 3600;
+    string UserID = 3601;
+    string AppID = 3602;
+    bool Used = 3603;
+    CouponPool Pool = 3604;
+}
+
+message GoodFee {
+    string ID = 1;
+    string AppID = 3;
+    string FeeType = 4;
+    string FeeDescription = 5;
+    string PayType = 6;
+}
+
+message Fee {
+    GoodFee Fee = 1;
+    double Value = 2;
+}
+
+message OrderDetail {
+    string ID = 2700;
+    string GoodID = 2701;
+    string AppID = 2702;
+    string UserID = 2703;
+    uint32 Units = 2704;
+    uint32 Discount = 2705;
+    double SpecialReductionAmount = 2706;
+    GoodPaying GoodPaying = 2708;
+    repeated GasPaying GasPayings = 2709;
+    repeated Compensate Compensates = 2710;
+    repeated OutOfGas OutOfGases = 2711;
+    Payment Payment = 2712;
+    uint32 Start = 2713;
+    uint32 End = 2714;
+    Coupon Coupon = 2715;
+}
+
+message GetOrderDetailRequest {
+    string ID = 2800;
+}
+
+message GetOrderDetailResponse {
+    OrderDetail Detail = 2900;
+}
+
+message GetOrdersDetailByAppUserRequest {
+    string AppID = 3000;
+    string UserID = 3001;
+}
+
+message GetOrdersDetailByAppUserResponse {
+    repeated OrderDetail Details = 3100;
+}
+
+message GetOrdersDetailByAppRequest {
+    string AppID = 3200;
+}
+
+message GetOrdersDetailByAppResponse {
+    repeated OrderDetail Details = 3300;
+}
+
+message GetOrdersDetailByGoodRequest {
+    string GoodID = 3400;
+}
+
+message GetOrdersDetailByGoodResponse {
+    repeated OrderDetail Details = 3500;
+}
+
+message OrderFee {
+    string ID = 3510;
+    uint32 DurationDays = 3503;
+}
+
+message SubmitOrderRequest {
+    string GoodID = 3600;
+    uint32 Units = 3601;
+    string UserID = 3602;
+    string AppID = 3603;
+    repeated OrderFee Fees = 3604;
+}
+
+message SubmitOrderResponse {
+    OrderDetail Info = 3700;
 }
