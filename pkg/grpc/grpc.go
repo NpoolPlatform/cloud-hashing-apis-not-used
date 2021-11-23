@@ -11,8 +11,14 @@ import (
 	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
 	coininfoconst "github.com/NpoolPlatform/sphinx-coininfo/pkg/message/const" //nolint
 
+	tradingpb "github.com/NpoolPlatform/message/npool/trading"
+	tradingconst "github.com/NpoolPlatform/sphinx-coininfo/pkg/message/const" //nolint
+
 	orderpb "github.com/NpoolPlatform/cloud-hashing-order/message/npool"
 	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/message/const" //nolint
+
+	billingpb "github.com/NpoolPlatform/cloud-hashing-billing/message/npool"
+	billingconst "github.com/NpoolPlatform/cloud-hashing-billing/pkg/message/const" //nolint
 
 	inspirepb "github.com/NpoolPlatform/cloud-hashing-inspire/message/npool"
 	inspireconst "github.com/NpoolPlatform/cloud-hashing-inspire/pkg/message/const" //nolint
@@ -29,6 +35,16 @@ func GetGoodsDetail(ctx context.Context, in *goodspb.GetGoodsDetailRequest) (*go
 
 	cli := goodspb.NewCloudHashingGoodsClient(conn)
 	return cli.GetGoodsDetail(ctx, in)
+}
+
+func GetGoodDetail(ctx context.Context, in *goodspb.GetGoodDetailRequest) (*goodspb.GetGoodDetailResponse, error) {
+	conn, err := grpc2.GetGRPCConn(goodsconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get goods connection: %v", err)
+	}
+
+	cli := goodspb.NewCloudHashingGoodsClient(conn)
+	return cli.GetGoodDetail(ctx, in)
 }
 
 //---------------------------------------------------------------------------------------------------------------------------
@@ -95,6 +111,46 @@ func GetOrdersDetailByGood(ctx context.Context, in *orderpb.GetOrdersDetailByGoo
 	return cli.GetOrdersDetailByGood(ctx, in)
 }
 
+func CreateOrder(ctx context.Context, in *orderpb.CreateOrderRequest) (*orderpb.CreateOrderResponse, error) {
+	conn, err := grpc2.GetGRPCConn(orderconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get order connection: %v", err)
+	}
+
+	cli := orderpb.NewCloudHashingOrderClient(conn)
+	return cli.CreateOrder(ctx, in)
+}
+
+func CreateGoodPaying(ctx context.Context, in *orderpb.CreateGoodPayingRequest) (*orderpb.CreateGoodPayingResponse, error) {
+	conn, err := grpc2.GetGRPCConn(orderconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get order connection: %v", err)
+	}
+
+	cli := orderpb.NewCloudHashingOrderClient(conn)
+	return cli.CreateGoodPaying(ctx, in)
+}
+
+func CreateGasPaying(ctx context.Context, in *orderpb.CreateGasPayingRequest) (*orderpb.CreateGasPayingResponse, error) {
+	conn, err := grpc2.GetGRPCConn(orderconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get order connection: %v", err)
+	}
+
+	cli := orderpb.NewCloudHashingOrderClient(conn)
+	return cli.CreateGasPaying(ctx, in)
+}
+
+func CreatePayment(ctx context.Context, in *orderpb.CreatePaymentRequest) (*orderpb.CreatePaymentResponse, error) {
+	conn, err := grpc2.GetGRPCConn(orderconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get order connection: %v", err)
+	}
+
+	cli := orderpb.NewCloudHashingOrderClient(conn)
+	return cli.CreatePayment(ctx, in)
+}
+
 //---------------------------------------------------------------------------------------------------------------------------
 
 func GetCouponAllocated(ctx context.Context, in *inspirepb.GetCouponAllocatedDetailRequest) (*inspirepb.GetCouponAllocatedDetailResponse, error) {
@@ -105,4 +161,28 @@ func GetCouponAllocated(ctx context.Context, in *inspirepb.GetCouponAllocatedDet
 
 	cli := inspirepb.NewCloudHashingInspireClient(conn)
 	return cli.GetCouponAllocatedDetail(ctx, in)
+}
+
+//---------------------------------------------------------------------------------------------------------------------------
+
+func CreateBillingAccount(ctx context.Context, in *billingpb.CreateCoinAccountRequest) (*billingpb.CreateCoinAccountResponse, error) {
+	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get billing connection: %v", err)
+	}
+
+	cli := billingpb.NewCloudHashingBillingClient(conn)
+	return cli.CreateCoinAccount(ctx, in)
+}
+
+//---------------------------------------------------------------------------------------------------------------------------
+
+func CreateCoinAddress(ctx context.Context, in *tradingpb.CreateWalletRequest) (*tradingpb.CreateWalletResponse, error) {
+	conn, err := grpc2.GetGRPCConn(tradingconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get trading connection: %v", err)
+	}
+
+	cli := tradingpb.NewTradingClient(conn)
+	return cli.CreateWallet(ctx, in)
 }

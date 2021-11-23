@@ -592,7 +592,9 @@
 | Units | [uint32](#uint32) |  |  |
 | UserID | [string](#string) |  |  |
 | AppID | [string](#string) |  |  |
+| PaymentCoinTypeID | [string](#string) |  |  |
 | Fees | [OrderFee](#cloud.hashing.apis.v1.OrderFee) | repeated |  |
+| CouponID | [string](#string) |  |  |
 
 
 

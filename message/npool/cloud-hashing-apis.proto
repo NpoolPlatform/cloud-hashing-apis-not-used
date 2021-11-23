@@ -304,7 +304,9 @@ message SubmitOrderRequest {
     uint32 Units = 3601;
     string UserID = 3602;
     string AppID = 3603;
-    repeated OrderFee Fees = 3604;
+    string PaymentCoinTypeID = 3604;
+    repeated OrderFee Fees = 3605;
+    string CouponID = 3606;
 }
 
 message SubmitOrderResponse {
