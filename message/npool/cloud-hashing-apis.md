@@ -42,6 +42,7 @@
 | PreSale | [bool](#bool) |  |  |
 | Name | [string](#string) |  |  |
 | Unit | [string](#string) |  |  |
+| Logo | [string](#string) |  |  |
 
 
 

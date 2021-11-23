@@ -27,6 +27,7 @@ func constructGoodDetail(info *goodspb.GoodDetail, coinInfos []*coininfopb.CoinI
 				PreSale: coinInfo.PreSale,
 				Name:    coinInfo.Name,
 				Unit:    coinInfo.Unit,
+				Logo:    "",
 			}
 			break
 		}
@@ -40,6 +41,7 @@ func constructGoodDetail(info *goodspb.GoodDetail, coinInfos []*coininfopb.CoinI
 					PreSale: coinInfo.PreSale,
 					Name:    coinInfo.Name,
 					Unit:    coinInfo.Unit,
+					Logo:    "",
 				})
 			}
 		}

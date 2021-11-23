@@ -90,6 +90,7 @@ message CoinInfo {
     bool PreSale = 3021;
     string Name = 3022;
     string Unit = 3023;
+    string Logo = 3024;
 }
 
 message GoodDetail {
