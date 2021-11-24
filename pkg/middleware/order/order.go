@@ -3,6 +3,8 @@ package order
 import (
 	"context"
 
+	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+
 	"github.com/NpoolPlatform/cloud-hashing-apis/message/npool"
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	gooddetail "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/good-detail" //nolint
@@ -103,6 +105,24 @@ func constructOrderDetail(
 	}
 }
 
+func expandDetail(ctx context.Context, info *orderpb.OrderDetail) (*npool.OrderDetail, error) {
+	couponAllocated, err := grpc2.GetCouponAllocated(ctx, &inspirepb.GetCouponAllocatedDetailRequest{
+		ID: info.CouponID,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get coupon allocated detail: %v", err)
+	}
+
+	coinInfo, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
+		ID: info.Payment.CoinInfoID,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get payment coin info: %v", err)
+	}
+
+	return constructOrderDetail(info, couponAllocated.Info, coinInfo.Info), nil
+}
+
 func GetOrderDetail(ctx context.Context, in *npool.GetOrderDetailRequest) (*npool.GetOrderDetailResponse, error) {
 	orderDetail, err := grpc2.GetOrderDetail(ctx, &orderpb.GetOrderDetailRequest{
 		ID: in.GetID(),
@@ -111,35 +131,87 @@ func GetOrderDetail(ctx context.Context, in *npool.GetOrderDetailRequest) (*npoo
 		return nil, xerrors.Errorf("fail get order detail: %v", err)
 	}
 
-	couponAllocated, err := grpc2.GetCouponAllocated(ctx, &inspirepb.GetCouponAllocatedDetailRequest{
-		ID: orderDetail.Detail.CouponID,
-	})
+	detail, err := expandDetail(ctx, orderDetail.Detail)
 	if err != nil {
-		return nil, xerrors.Errorf("fail get coupon allocated detail: %v", err)
-	}
-
-	coinInfo, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
-		ID: orderDetail.Detail.Payment.CoinInfoID,
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail get payment coin info: %v", err)
+		return nil, xerrors.Errorf("fail expand order detail: %v", err)
 	}
 
 	return &npool.GetOrderDetailResponse{
-		Detail: constructOrderDetail(orderDetail.Detail, couponAllocated.Info, coinInfo.Info),
+		Detail: detail,
 	}, nil
 }
 
 func GetOrdersDetailByAppUser(ctx context.Context, in *npool.GetOrdersDetailByAppUserRequest) (*npool.GetOrdersDetailByAppUserResponse, error) {
-	return nil, nil
+	ordersDetail, err := grpc2.GetOrdersDetailByAppUser(ctx, &orderpb.GetOrdersDetailByAppUserRequest{
+		AppID:  in.GetAppID(),
+		UserID: in.GetUserID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get orders detail by app user: %v", err)
+	}
+
+	details := []*npool.OrderDetail{}
+	for _, info := range ordersDetail.Details {
+		detail, err := expandDetail(ctx, info)
+		if err != nil {
+			logger.Sugar().Warnf("cannot expand order detail: %v", err)
+			continue
+		}
+
+		details = append(details, detail)
+	}
+
+	return &npool.GetOrdersDetailByAppUserResponse{
+		Details: details,
+	}, nil
 }
 
 func GetOrdersDetailByApp(ctx context.Context, in *npool.GetOrdersDetailByAppRequest) (*npool.GetOrdersDetailByAppResponse, error) {
-	return nil, nil
+	ordersDetail, err := grpc2.GetOrdersDetailByApp(ctx, &orderpb.GetOrdersDetailByAppRequest{
+		AppID: in.GetAppID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get orders detail by app: %v", err)
+	}
+
+	details := []*npool.OrderDetail{}
+	for _, info := range ordersDetail.Details {
+		detail, err := expandDetail(ctx, info)
+		if err != nil {
+			logger.Sugar().Warnf("cannot expand order detail: %v", err)
+			continue
+		}
+
+		details = append(details, detail)
+	}
+
+	return &npool.GetOrdersDetailByAppResponse{
+		Details: details,
+	}, nil
 }
 
 func GetOrdersDetailByGood(ctx context.Context, in *npool.GetOrdersDetailByGoodRequest) (*npool.GetOrdersDetailByGoodResponse, error) {
-	return nil, nil
+	ordersDetail, err := grpc2.GetOrdersDetailByGood(ctx, &orderpb.GetOrdersDetailByGoodRequest{
+		GoodID: in.GetGoodID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get orders detail by good: %v", err)
+	}
+
+	details := []*npool.OrderDetail{}
+	for _, info := range ordersDetail.Details {
+		detail, err := expandDetail(ctx, info)
+		if err != nil {
+			logger.Sugar().Warnf("cannot expand order detail: %v", err)
+			continue
+		}
+
+		details = append(details, detail)
+	}
+
+	return &npool.GetOrdersDetailByGoodResponse{
+		Details: details,
+	}, nil
 }
 
 func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.SubmitOrderResponse, error) {

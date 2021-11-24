@@ -24,6 +24,33 @@ func (s *Server) GetOrderDetail(ctx context.Context, in *npool.GetOrderDetailReq
 	return resp, nil
 }
 
+func (s *Server) GetOrdersDetailByAppUser(ctx context.Context, in *npool.GetOrdersDetailByAppUserRequest) (*npool.GetOrdersDetailByAppUserResponse, error) {
+	resp, err := order.GetOrdersDetailByAppUser(ctx, in)
+	if err != nil {
+		logger.Sugar().Errorf("get order detail by app user error: %w", err)
+		return &npool.GetOrdersDetailByAppUserResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return resp, nil
+}
+
+func (s *Server) GetOrdersDetailByApp(ctx context.Context, in *npool.GetOrdersDetailByAppRequest) (*npool.GetOrdersDetailByAppResponse, error) {
+	resp, err := order.GetOrdersDetailByApp(ctx, in)
+	if err != nil {
+		logger.Sugar().Errorf("get order detail by app error: %w", err)
+		return &npool.GetOrdersDetailByAppResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return resp, nil
+}
+
+func (s *Server) GetOrdersDetailByGood(ctx context.Context, in *npool.GetOrdersDetailByGoodRequest) (*npool.GetOrdersDetailByGoodResponse, error) {
+	resp, err := order.GetOrdersDetailByGood(ctx, in)
+	if err != nil {
+		logger.Sugar().Errorf("get order detail by good error: %w", err)
+		return &npool.GetOrdersDetailByGoodResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return resp, nil
+}
+
 func (s *Server) SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.SubmitOrderResponse, error) {
 	resp, err := order.SubmitOrder(ctx, in)
 	if err != nil {
