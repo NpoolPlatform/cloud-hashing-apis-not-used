@@ -186,3 +186,13 @@ func CreateCoinAddress(ctx context.Context, in *tradingpb.CreateWalletRequest) (
 	cli := tradingpb.NewTradingClient(conn)
 	return cli.CreateWallet(ctx, in)
 }
+
+func GetWalletBalance(ctx context.Context, in *tradingpb.GetWalletBalanceRequest) (*tradingpb.GetWalletBalanceResponse, error) {
+	conn, err := grpc2.GetGRPCConn(tradingconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get trading connection: %v", err)
+	}
+
+	cli := tradingpb.NewTradingClient(conn)
+	return cli.GetWalletBalance(ctx, in)
+}

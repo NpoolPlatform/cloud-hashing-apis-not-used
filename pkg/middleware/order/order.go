@@ -261,6 +261,16 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 		return nil, xerrors.Errorf("fail create billing account: %v", err)
 	}
 
+	balance, err := grpc2.GetWalletBalance(ctx, &tradingpb.GetWalletBalanceRequest{
+		Info: &tradingpb.EntAccount{
+			CoinName: coinInfo.Info.Name,
+			Address:  account.Info.Address,
+		},
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get wallet balance: %v", err)
+	}
+
 	start := (goodInfo.Start + 24*60*60) / 24 / 60 / 60 * 24 * 60 * 60
 	end := start + uint32(goodInfo.DurationDays)*24*60*60
 
@@ -283,10 +293,11 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 	// Generate payment
 	myPayment, err := grpc2.CreatePayment(ctx, &orderpb.CreatePaymentRequest{
 		Info: &orderpb.Payment{
-			OrderID:    myOrder.Info.ID,
-			AccountID:  account.Info.ID,
-			Amount:     amount,
-			CoinInfoID: in.GetPaymentCoinTypeID(),
+			OrderID:     myOrder.Info.ID,
+			AccountID:   account.Info.ID,
+			StartAmount: balance.AmountFloat64,
+			Amount:      amount,
+			CoinInfoID:  in.GetPaymentCoinTypeID(),
 		},
 	})
 	if err != nil {
