@@ -11,8 +11,9 @@ require (
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20211122070118-139aac84bc79
 	github.com/NpoolPlatform/message v0.0.0-20211123165556-9c8ac6d13305
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211122043258-a36fad4afd77
+	github.com/NpoolPlatform/sphinx-service v0.0.0-20211123170603-3312b367a001
 	github.com/go-resty/resty/v2 v2.7.0
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.6.0
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0
 	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/testify v1.7.0
 	github.com/urfave/cli/v2 v2.3.0

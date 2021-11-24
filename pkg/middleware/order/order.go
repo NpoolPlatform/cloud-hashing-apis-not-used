@@ -5,7 +5,7 @@ import (
 
 	"github.com/NpoolPlatform/cloud-hashing-apis/message/npool"
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
-	"github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/good-detail" //nolint
+	gooddetail "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/good-detail" //nolint
 
 	billingpb "github.com/NpoolPlatform/cloud-hashing-billing/message/npool"
 	inspirepb "github.com/NpoolPlatform/cloud-hashing-inspire/message/npool"
