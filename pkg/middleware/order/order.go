@@ -236,6 +236,7 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 	}
 
 	// Check if idle address is available
+	idle := false
 
 	// Generate transaction address
 	address, err := grpc2.CreateCoinAddress(ctx, &tradingpb.CreateWalletRequest{
@@ -261,14 +262,19 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 		return nil, xerrors.Errorf("fail create billing account: %v", err)
 	}
 
-	balance, err := grpc2.GetWalletBalance(ctx, &tradingpb.GetWalletBalanceRequest{
-		Info: &tradingpb.EntAccount{
-			CoinName: coinInfo.Info.Name,
-			Address:  account.Info.Address,
-		},
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail get wallet balance: %v", err)
+	balanceAmount := float64(0)
+
+	if !idle {
+		balance, err := grpc2.GetWalletBalance(ctx, &tradingpb.GetWalletBalanceRequest{
+			Info: &tradingpb.EntAccount{
+				CoinName: coinInfo.Info.Name,
+				Address:  account.Info.Address,
+			},
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail get wallet balance: %v", err)
+		}
+		balanceAmount = balance.AmountFloat64
 	}
 
 	start := (goodInfo.Start + 24*60*60) / 24 / 60 / 60 * 24 * 60 * 60
@@ -295,7 +301,7 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 		Info: &orderpb.Payment{
 			OrderID:     myOrder.Info.ID,
 			AccountID:   account.Info.ID,
-			StartAmount: balance.AmountFloat64,
+			StartAmount: balanceAmount,
 			Amount:      amount,
 			CoinInfoID:  in.GetPaymentCoinTypeID(),
 		},
