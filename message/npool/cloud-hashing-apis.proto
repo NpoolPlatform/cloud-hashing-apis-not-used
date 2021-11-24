@@ -207,10 +207,18 @@ message OutOfGas {
     uint32 End = 2613;
 }
 
+message Account {
+    string ID = 200;
+    string CoinTypeID = 201;
+    string Address = 202;
+    string AppID = 206;
+    string UserID = 207;
+}
+
 message Payment {
     string ID = 110;
     string OrderID = 111;
-    string AccountID = 112;
+    Account Account = 112;
     double Amount = 113;
     CoinInfo CoinInfo = 114;
     string State = 115;

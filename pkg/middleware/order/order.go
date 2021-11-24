@@ -23,7 +23,8 @@ import (
 func constructOrderDetail(
 	info *orderpb.OrderDetail,
 	coupon *inspirepb.CouponAllocatedDetail,
-	paymentCoinInfo *coininfopb.CoinInfo) *npool.OrderDetail {
+	paymentCoinInfo *coininfopb.CoinInfo,
+	account *billingpb.CoinAccountInfo) *npool.OrderDetail {
 	gasPayings := []*npool.GasPaying{}
 	for _, paying := range info.GasPayings {
 		gasPayings = append(gasPayings, &npool.GasPaying{
@@ -91,10 +92,16 @@ func constructOrderDetail(
 		Compensates: compensates,
 		OutOfGases:  outOfGases,
 		Payment: &npool.Payment{
-			ID:        info.Payment.ID,
-			OrderID:   info.Payment.OrderID,
-			AccountID: info.Payment.AccountID,
-			Amount:    info.Payment.Amount,
+			ID:      info.Payment.ID,
+			OrderID: info.Payment.OrderID,
+			Account: &npool.Account{
+				ID:         account.ID,
+				CoinTypeID: account.CoinTypeID,
+				Address:    account.Address,
+				AppID:      account.AppID,
+				UserID:     account.UserID,
+			},
+			Amount: info.Payment.Amount,
 			CoinInfo: &npool.CoinInfo{
 				ID:      paymentCoinInfo.ID,
 				Name:    paymentCoinInfo.Name,
@@ -134,7 +141,14 @@ func expandDetail(ctx context.Context, info *orderpb.OrderDetail) (*npool.OrderD
 		return nil, xerrors.Errorf("fail get payment coin info: %v", err)
 	}
 
-	return constructOrderDetail(info, coupon, coinInfo.Info), nil
+	account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
+		ID: info.Payment.AccountID,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get payment address: %v", err)
+	}
+
+	return constructOrderDetail(info, coupon, coinInfo.Info, account.Info), nil
 }
 
 func GetOrderDetail(ctx context.Context, in *npool.GetOrderDetailRequest) (*npool.GetOrderDetailResponse, error) {

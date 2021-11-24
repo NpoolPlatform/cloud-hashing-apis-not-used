@@ -4,6 +4,7 @@
 ## Table of Contents
 
 - [npool/cloud-hashing-apis.proto](#npool/cloud-hashing-apis.proto)
+    - [Account](#cloud.hashing.apis.v1.Account)
     - [CoinInfo](#cloud.hashing.apis.v1.CoinInfo)
     - [Compensate](#cloud.hashing.apis.v1.Compensate)
     - [Coupon](#cloud.hashing.apis.v1.Coupon)
@@ -51,6 +52,25 @@
 <p align="right"><a href="#top">Top</a></p>
 
 ## npool/cloud-hashing-apis.proto
+
+
+
+<a name="cloud.hashing.apis.v1.Account"></a>
+
+### Account
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| ID | [string](#string) |  |  |
+| CoinTypeID | [string](#string) |  |  |
+| Address | [string](#string) |  |  |
+| AppID | [string](#string) |  |  |
+| UserID | [string](#string) |  |  |
+
+
+
 
 
 
@@ -609,7 +629,7 @@
 | ----- | ---- | ----- | ----------- |
 | ID | [string](#string) |  |  |
 | OrderID | [string](#string) |  |  |
-| AccountID | [string](#string) |  |  |
+| Account | [Account](#cloud.hashing.apis.v1.Account) |  |  |
 | Amount | [double](#double) |  |  |
 | CoinInfo | [CoinInfo](#cloud.hashing.apis.v1.CoinInfo) |  |  |
 | State | [string](#string) |  |  |
