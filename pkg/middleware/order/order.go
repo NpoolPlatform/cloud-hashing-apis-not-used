@@ -113,12 +113,18 @@ func constructOrderDetail(
 }
 
 func expandDetail(ctx context.Context, info *orderpb.OrderDetail) (*npool.OrderDetail, error) {
+	var coupon *inspirepb.CouponAllocatedDetail
+
 	couponAllocated, err := grpc2.GetCouponAllocated(ctx, &inspirepb.GetCouponAllocatedDetailRequest{
 		ID: info.CouponID,
 	})
 	invalidUUID := uuid.UUID{}.String()
 	if err != nil && info.CouponID != invalidUUID {
 		return nil, xerrors.Errorf("fail get coupon allocated detail: %v", err)
+	}
+
+	if couponAllocated != nil {
+		coupon = couponAllocated.Info
 	}
 
 	coinInfo, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
@@ -128,7 +134,7 @@ func expandDetail(ctx context.Context, info *orderpb.OrderDetail) (*npool.OrderD
 		return nil, xerrors.Errorf("fail get payment coin info: %v", err)
 	}
 
-	return constructOrderDetail(info, couponAllocated.Info, coinInfo.Info), nil
+	return constructOrderDetail(info, coupon, coinInfo.Info), nil
 }
 
 func GetOrderDetail(ctx context.Context, in *npool.GetOrderDetailRequest) (*npool.GetOrderDetailResponse, error) {
