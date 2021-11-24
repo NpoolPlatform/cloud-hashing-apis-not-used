@@ -15,6 +15,8 @@ import (
 	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
 	tradingpb "github.com/NpoolPlatform/message/npool/trading"
 
+	"github.com/google/uuid"
+
 	"golang.org/x/xerrors"
 )
 
@@ -53,6 +55,25 @@ func constructOrderDetail(
 		})
 	}
 
+	var myCoupon *npool.Coupon
+	if coupon != nil {
+		myCoupon = &npool.Coupon{
+			ID:     coupon.ID,
+			UserID: coupon.UserID,
+			AppID:  coupon.AppID,
+			Used:   coupon.Used,
+			Pool: &npool.CouponPool{
+				ID:           coupon.Coupon.ID,
+				AppID:        coupon.Coupon.AppID,
+				Denomination: coupon.Coupon.Denomination,
+				Start:        coupon.Coupon.Start,
+				DurationDays: coupon.Coupon.DurationDays,
+				Message:      coupon.Coupon.Message,
+				Name:         coupon.Coupon.Message,
+			},
+		}
+	}
+
 	return &npool.OrderDetail{
 		ID:                     info.ID,
 		GoodID:                 info.GoodID,
@@ -85,23 +106,9 @@ func constructOrderDetail(
 			ChainTransactionID:    info.Payment.ChainTransactionID,
 			PlatformTransactionID: info.Payment.PlatformTransactionID,
 		},
-		Start: info.Start,
-		End:   info.End,
-		Coupon: &npool.Coupon{
-			ID:     coupon.ID,
-			UserID: coupon.UserID,
-			AppID:  coupon.AppID,
-			Used:   coupon.Used,
-			Pool: &npool.CouponPool{
-				ID:           coupon.Coupon.ID,
-				AppID:        coupon.Coupon.AppID,
-				Denomination: coupon.Coupon.Denomination,
-				Start:        coupon.Coupon.Start,
-				DurationDays: coupon.Coupon.DurationDays,
-				Message:      coupon.Coupon.Message,
-				Name:         coupon.Coupon.Message,
-			},
-		},
+		Start:  info.Start,
+		End:    info.End,
+		Coupon: myCoupon,
 	}
 }
 
@@ -109,7 +116,8 @@ func expandDetail(ctx context.Context, info *orderpb.OrderDetail) (*npool.OrderD
 	couponAllocated, err := grpc2.GetCouponAllocated(ctx, &inspirepb.GetCouponAllocatedDetailRequest{
 		ID: info.CouponID,
 	})
-	if err != nil {
+	invalidUUID := uuid.UUID{}.String()
+	if err != nil && info.CouponID != invalidUUID {
 		return nil, xerrors.Errorf("fail get coupon allocated detail: %v", err)
 	}
 

@@ -13,6 +13,7 @@ require (
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211123094225-56e6d9f90828
 	github.com/NpoolPlatform/sphinx-service v0.0.0-20211124061425-6ef21f0b762f
 	github.com/go-resty/resty/v2 v2.7.0
+	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0
 	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/testify v1.7.0
