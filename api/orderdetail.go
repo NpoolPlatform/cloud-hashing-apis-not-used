@@ -59,3 +59,12 @@ func (s *Server) SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) 
 	}
 	return resp, nil
 }
+
+func (s *Server) CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest) (*npool.CreateOrderPaymentResponse, error) {
+	resp, err := order.CreateOrderPayment(ctx, in)
+	if err != nil {
+		logger.Sugar().Errorf("create order payment error: %w", err)
+		return &npool.CreateOrderPaymentResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return resp, nil
+}
