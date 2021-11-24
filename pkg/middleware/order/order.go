@@ -252,7 +252,7 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 			CoinTypeID:  in.GetPaymentCoinTypeID(),
 			Address:     address.Info.Address,
 			GeneratedBy: "platform",
-			UsedFor:     "payment",
+			UsedFor:     "paying",
 			AppID:       in.GetAppID(),
 			UserID:      in.GetUserID(),
 		},
