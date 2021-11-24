@@ -8,6 +8,8 @@
     - [Compensate](#cloud.hashing.apis.v1.Compensate)
     - [Coupon](#cloud.hashing.apis.v1.Coupon)
     - [CouponPool](#cloud.hashing.apis.v1.CouponPool)
+    - [CreateOrderPaymentRequest](#cloud.hashing.apis.v1.CreateOrderPaymentRequest)
+    - [CreateOrderPaymentResponse](#cloud.hashing.apis.v1.CreateOrderPaymentResponse)
     - [DeviceInfo](#cloud.hashing.apis.v1.DeviceInfo)
     - [Fee](#cloud.hashing.apis.v1.Fee)
     - [GasPaying](#cloud.hashing.apis.v1.GasPaying)
@@ -26,6 +28,7 @@
     - [GoodFee](#cloud.hashing.apis.v1.GoodFee)
     - [GoodInfo](#cloud.hashing.apis.v1.GoodInfo)
     - [GoodPaying](#cloud.hashing.apis.v1.GoodPaying)
+    - [Order](#cloud.hashing.apis.v1.Order)
     - [OrderDetail](#cloud.hashing.apis.v1.OrderDetail)
     - [OrderFee](#cloud.hashing.apis.v1.OrderFee)
     - [OutOfGas](#cloud.hashing.apis.v1.OutOfGas)
@@ -123,6 +126,38 @@
 | DurationDays | [int32](#int32) |  |  |
 | Message | [string](#string) |  |  |
 | Name | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.CreateOrderPaymentRequest"></a>
+
+### CreateOrderPaymentRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| OrderID | [string](#string) |  |  |
+| PaymentCoinTypeID | [string](#string) |  |  |
+| Fees | [OrderFee](#cloud.hashing.apis.v1.OrderFee) | repeated |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.CreateOrderPaymentResponse"></a>
+
+### CreateOrderPaymentResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| Info | [OrderDetail](#cloud.hashing.apis.v1.OrderDetail) |  |  |
 
 
 
@@ -461,6 +496,30 @@
 
 
 
+<a name="cloud.hashing.apis.v1.Order"></a>
+
+### Order
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| ID | [string](#string) |  |  |
+| GoodID | [string](#string) |  |  |
+| AppID | [string](#string) |  |  |
+| UserID | [string](#string) |  |  |
+| Units | [uint32](#uint32) |  |  |
+| Discount | [uint32](#uint32) |  |  |
+| SpecialReductionAmount | [double](#double) |  |  |
+| Start | [uint32](#uint32) |  |  |
+| End | [uint32](#uint32) |  |  |
+| CouponID | [string](#string) |  |  |
+
+
+
+
+
+
 <a name="cloud.hashing.apis.v1.OrderDetail"></a>
 
 ### OrderDetail
@@ -592,8 +651,6 @@
 | Units | [uint32](#uint32) |  |  |
 | UserID | [string](#string) |  |  |
 | AppID | [string](#string) |  |  |
-| PaymentCoinTypeID | [string](#string) |  |  |
-| Fees | [OrderFee](#cloud.hashing.apis.v1.OrderFee) | repeated |  |
 | CouponID | [string](#string) |  |  |
 
 
@@ -609,7 +666,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| Info | [OrderDetail](#cloud.hashing.apis.v1.OrderDetail) |  |  |
+| Info | [Order](#cloud.hashing.apis.v1.Order) |  |  |
 
 
 
@@ -683,6 +740,7 @@ Cloud Hashing Goods
 | Version | [.google.protobuf.Empty](#google.protobuf.Empty) | [VersionResponse](#cloud.hashing.apis.v1.VersionResponse) |  |
 | GetGoodsDetail | [GetGoodsDetailRequest](#cloud.hashing.apis.v1.GetGoodsDetailRequest) | [GetGoodsDetailResponse](#cloud.hashing.apis.v1.GetGoodsDetailResponse) |  |
 | SubmitOrder | [SubmitOrderRequest](#cloud.hashing.apis.v1.SubmitOrderRequest) | [SubmitOrderResponse](#cloud.hashing.apis.v1.SubmitOrderResponse) |  |
+| CreateOrderPayment | [CreateOrderPaymentRequest](#cloud.hashing.apis.v1.CreateOrderPaymentRequest) | [CreateOrderPaymentResponse](#cloud.hashing.apis.v1.CreateOrderPaymentResponse) |  |
 | GetOrderDetail | [GetOrderDetailRequest](#cloud.hashing.apis.v1.GetOrderDetailRequest) | [GetOrderDetailResponse](#cloud.hashing.apis.v1.GetOrderDetailResponse) |  |
 | GetOrdersDetailByAppUser | [GetOrdersDetailByAppUserRequest](#cloud.hashing.apis.v1.GetOrdersDetailByAppUserRequest) | [GetOrdersDetailByAppUserResponse](#cloud.hashing.apis.v1.GetOrdersDetailByAppUserResponse) |  |
 | GetOrdersDetailByApp | [GetOrdersDetailByAppRequest](#cloud.hashing.apis.v1.GetOrdersDetailByAppRequest) | [GetOrdersDetailByAppResponse](#cloud.hashing.apis.v1.GetOrdersDetailByAppResponse) |  |

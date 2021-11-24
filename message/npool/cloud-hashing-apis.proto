@@ -29,6 +29,12 @@ service CloudHashingApis {
             body: "*"
         };
     }
+    rpc CreateOrderPayment(CreateOrderPaymentRequest) returns (CreateOrderPaymentResponse) {
+        option (google.api.http) = {
+            post: "/v1/create/order/payment"
+            body: "*"
+        };
+    }
 
     rpc GetOrderDetail(GetOrderDetailRequest) returns (GetOrderDetailResponse) {
         option (google.api.http) = {
@@ -304,11 +310,32 @@ message SubmitOrderRequest {
     uint32 Units = 3601;
     string UserID = 3602;
     string AppID = 3603;
-    string PaymentCoinTypeID = 3604;
-    repeated OrderFee Fees = 3605;
     string CouponID = 3606;
 }
 
+message Order {
+    string ID = 1400;
+    string GoodID = 1401;
+    string AppID = 1402;
+    string UserID = 1403;
+    uint32 Units = 1404;
+    uint32 Discount = 1405;
+    double SpecialReductionAmount = 1406;
+    uint32 Start = 1407;
+    uint32 End = 1408;
+    string CouponID = 1409;
+}
+
 message SubmitOrderResponse {
-    OrderDetail Info = 3700;
+    Order Info = 3700;
+}
+
+message CreateOrderPaymentRequest {
+    string OrderID = 1;
+    string PaymentCoinTypeID = 2;
+    repeated OrderFee Fees = 3;
+}
+
+message CreateOrderPaymentResponse {
+    OrderDetail Info = 1;
 }

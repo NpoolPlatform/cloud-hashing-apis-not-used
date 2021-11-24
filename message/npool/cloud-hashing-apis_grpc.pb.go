@@ -22,6 +22,7 @@ type CloudHashingApisClient interface {
 	Version(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*VersionResponse, error)
 	GetGoodsDetail(ctx context.Context, in *GetGoodsDetailRequest, opts ...grpc.CallOption) (*GetGoodsDetailResponse, error)
 	SubmitOrder(ctx context.Context, in *SubmitOrderRequest, opts ...grpc.CallOption) (*SubmitOrderResponse, error)
+	CreateOrderPayment(ctx context.Context, in *CreateOrderPaymentRequest, opts ...grpc.CallOption) (*CreateOrderPaymentResponse, error)
 	GetOrderDetail(ctx context.Context, in *GetOrderDetailRequest, opts ...grpc.CallOption) (*GetOrderDetailResponse, error)
 	GetOrdersDetailByAppUser(ctx context.Context, in *GetOrdersDetailByAppUserRequest, opts ...grpc.CallOption) (*GetOrdersDetailByAppUserResponse, error)
 	GetOrdersDetailByApp(ctx context.Context, in *GetOrdersDetailByAppRequest, opts ...grpc.CallOption) (*GetOrdersDetailByAppResponse, error)
@@ -57,6 +58,15 @@ func (c *cloudHashingApisClient) GetGoodsDetail(ctx context.Context, in *GetGood
 func (c *cloudHashingApisClient) SubmitOrder(ctx context.Context, in *SubmitOrderRequest, opts ...grpc.CallOption) (*SubmitOrderResponse, error) {
 	out := new(SubmitOrderResponse)
 	err := c.cc.Invoke(ctx, "/cloud.hashing.apis.v1.CloudHashingApis/SubmitOrder", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *cloudHashingApisClient) CreateOrderPayment(ctx context.Context, in *CreateOrderPaymentRequest, opts ...grpc.CallOption) (*CreateOrderPaymentResponse, error) {
+	out := new(CreateOrderPaymentResponse)
+	err := c.cc.Invoke(ctx, "/cloud.hashing.apis.v1.CloudHashingApis/CreateOrderPayment", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -106,6 +116,7 @@ type CloudHashingApisServer interface {
 	Version(context.Context, *emptypb.Empty) (*VersionResponse, error)
 	GetGoodsDetail(context.Context, *GetGoodsDetailRequest) (*GetGoodsDetailResponse, error)
 	SubmitOrder(context.Context, *SubmitOrderRequest) (*SubmitOrderResponse, error)
+	CreateOrderPayment(context.Context, *CreateOrderPaymentRequest) (*CreateOrderPaymentResponse, error)
 	GetOrderDetail(context.Context, *GetOrderDetailRequest) (*GetOrderDetailResponse, error)
 	GetOrdersDetailByAppUser(context.Context, *GetOrdersDetailByAppUserRequest) (*GetOrdersDetailByAppUserResponse, error)
 	GetOrdersDetailByApp(context.Context, *GetOrdersDetailByAppRequest) (*GetOrdersDetailByAppResponse, error)
@@ -125,6 +136,9 @@ func (UnimplementedCloudHashingApisServer) GetGoodsDetail(context.Context, *GetG
 }
 func (UnimplementedCloudHashingApisServer) SubmitOrder(context.Context, *SubmitOrderRequest) (*SubmitOrderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SubmitOrder not implemented")
+}
+func (UnimplementedCloudHashingApisServer) CreateOrderPayment(context.Context, *CreateOrderPaymentRequest) (*CreateOrderPaymentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateOrderPayment not implemented")
 }
 func (UnimplementedCloudHashingApisServer) GetOrderDetail(context.Context, *GetOrderDetailRequest) (*GetOrderDetailResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOrderDetail not implemented")
@@ -201,6 +215,24 @@ func _CloudHashingApis_SubmitOrder_Handler(srv interface{}, ctx context.Context,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CloudHashingApisServer).SubmitOrder(ctx, req.(*SubmitOrderRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CloudHashingApis_CreateOrderPayment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateOrderPaymentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CloudHashingApisServer).CreateOrderPayment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/cloud.hashing.apis.v1.CloudHashingApis/CreateOrderPayment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CloudHashingApisServer).CreateOrderPayment(ctx, req.(*CreateOrderPaymentRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -295,6 +327,10 @@ var CloudHashingApis_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SubmitOrder",
 			Handler:    _CloudHashingApis_SubmitOrder_Handler,
+		},
+		{
+			MethodName: "CreateOrderPayment",
+			Handler:    _CloudHashingApis_CreateOrderPayment_Handler,
 		},
 		{
 			MethodName: "GetOrderDetail",

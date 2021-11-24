@@ -238,6 +238,50 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 	// Validate user id
 	// Validate coupon id
 	// Validate fee ids
+
+	start := (goodInfo.Start + 24*60*60) / 24 / 60 / 60 * 24 * 60 * 60
+	end := start + uint32(goodInfo.DurationDays)*24*60*60
+
+	// Generate order
+	myOrder, err := grpc2.CreateOrder(ctx, &orderpb.CreateOrderRequest{
+		Info: &orderpb.Order{
+			GoodID:   in.GetGoodID(),
+			AppID:    in.GetAppID(),
+			UserID:   in.GetUserID(),
+			Units:    in.GetUnits(),
+			Start:    start,
+			End:      end,
+			CouponID: in.GetCouponID(),
+		},
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail create order: %v", err)
+	}
+
+	return &npool.SubmitOrderResponse{
+		Info: &npool.Order{
+			ID:                     myOrder.Info.ID,
+			GoodID:                 myOrder.Info.GoodID,
+			AppID:                  myOrder.Info.AppID,
+			UserID:                 myOrder.Info.UserID,
+			Units:                  myOrder.Info.Units,
+			Discount:               myOrder.Info.Discount,
+			SpecialReductionAmount: myOrder.Info.SpecialReductionAmount,
+			Start:                  myOrder.Info.Start,
+			End:                    myOrder.Info.End,
+			CouponID:               myOrder.Info.CouponID,
+		},
+	}, nil
+}
+
+func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest) (*npool.CreateOrderPaymentResponse, error) {
+	myOrder, err := grpc2.GetOrder(ctx, &orderpb.GetOrderRequest{
+		ID: in.GetOrderID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get order: %v", err)
+	}
+
 	// Caculate amount
 	amount := 1273.0
 
@@ -255,7 +299,7 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 	// Generate transaction address
 	address, err := grpc2.CreateCoinAddress(ctx, &tradingpb.CreateWalletRequest{
 		CoinName: coinInfo.Info.Name,
-		UUID:     in.GetUserID(),
+		UUID:     myOrder.Info.UserID,
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail create wallet address: %v", err)
@@ -268,8 +312,8 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 			Address:     address.Info.Address,
 			GeneratedBy: "platform",
 			UsedFor:     "paying",
-			AppID:       in.GetAppID(),
-			UserID:      in.GetUserID(),
+			AppID:       myOrder.Info.AppID,
+			UserID:      myOrder.Info.UserID,
 		},
 	})
 	if err != nil {
@@ -289,25 +333,6 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 			return nil, xerrors.Errorf("fail get wallet balance: %v", err)
 		}
 		balanceAmount = balance.AmountFloat64
-	}
-
-	start := (goodInfo.Start + 24*60*60) / 24 / 60 / 60 * 24 * 60 * 60
-	end := start + uint32(goodInfo.DurationDays)*24*60*60
-
-	// Generate order
-	myOrder, err := grpc2.CreateOrder(ctx, &orderpb.CreateOrderRequest{
-		Info: &orderpb.Order{
-			GoodID:   in.GetGoodID(),
-			AppID:    in.GetAppID(),
-			UserID:   in.GetUserID(),
-			Units:    in.GetUnits(),
-			Start:    start,
-			End:      end,
-			CouponID: in.GetCouponID(),
-		},
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail create order: %v", err)
 	}
 
 	// Generate payment
@@ -336,7 +361,7 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 	}
 
 	// Generate gas payings
-	for _, fee := range in.Fees {
+	for _, fee := range in.GetFees() {
 		_, err := grpc2.CreateGasPaying(ctx, &orderpb.CreateGasPayingRequest{
 			Info: &orderpb.GasPaying{
 				OrderID:         myOrder.Info.ID,
@@ -359,7 +384,7 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 
 	// Watch payment address and change payment state
 
-	return &npool.SubmitOrderResponse{
+	return &npool.CreateOrderPaymentResponse{
 		Info: orderDetail.Detail,
 	}, nil
 }
