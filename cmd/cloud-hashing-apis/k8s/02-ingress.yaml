@@ -15,7 +15,7 @@ spec:
     - host: api.npool.top
       http: &http_appid_userid_rules
         paths:
-          - path: /cloud-hashing-apis
+          - path: /api/cloud-hashing-apis
             backend:
               serviceName: cloud-hashing-apis
               servicePort: 50140
@@ -41,11 +41,11 @@ spec:
     - host: api.npool.top
       http: &http_rules
         paths:
-          - path: /cloud-hashing-apis/version
+          - path: /api/cloud-hashing-apis/version
             backend:
               serviceName: cloud-hashing-apis
               servicePort: 50140
-          - path: /cloud-hashing-apis/v1/get/goods/detail
+          - path: /api/cloud-hashing-apis/v1/get/goods/detail
             backend:
               serviceName: cloud-hashing-apis
               servicePort: 50140
@@ -62,4 +62,4 @@ metadata:
 spec:
   stripPrefix:
     prefixes:
-      - /cloud-hashing-apis
+      - /api/cloud-hashing-apis
