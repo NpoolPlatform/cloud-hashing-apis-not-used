@@ -34,8 +34,8 @@ metadata:
   name: cloud-hashing-apis-ingress
   namespace: kube-system
   annotations:
-    k8s.kuboard.cn/displayName: cloud-hashing-apis-npool
-    k8s.kuboard.cn/workload: cloud-hashing-apis-npool
+    k8s.kuboard.cn/displayName: cloud-hashing-apis
+    k8s.kuboard.cn/workload: cloud-hashing-apis
     kubernetes.io/ingress.class: "traefik-internet"
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
     traefik.ingress.kubernetes.io/router.middlewares: kube-system-strip-cloud-hashing-apis-prefix@kubernetescrd,kube-system-common-headers@kubernetescrd
