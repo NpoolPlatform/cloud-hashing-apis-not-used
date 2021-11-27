@@ -189,7 +189,7 @@ func Get(ctx context.Context, in *npool.GetGoodDetailRequest) (*npool.GetGoodDet
 	detail, err := constructGoodDetail(goodResp.Detail, coininfoResp.Infos)
 	if err != nil {
 		return nil, xerrors.Errorf("fail construct good detail: %v", err)
-	}	
+	}
 
 	return &npool.GetGoodDetailResponse{
 		Detail: detail,
