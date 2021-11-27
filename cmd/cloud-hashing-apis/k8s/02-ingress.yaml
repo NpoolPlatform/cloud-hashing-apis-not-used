@@ -21,6 +21,10 @@ spec:
               servicePort: 50140
     - host: api.xpool.top
       http: *http_appid_userid_rules
+    - host: www.npool.top
+      http: *http_appid_userid_rules
+    - host: www.xpool.top
+      http: *http_appid_userid_rules
 
 ---
 
@@ -50,6 +54,10 @@ spec:
               serviceName: cloud-hashing-apis
               servicePort: 50140
     - host: api.xpool.top
+      http: *http_rules
+    - host: www.npool.top
+      http: *http_rules
+    - host: www.xpool.top
       http: *http_rules
 
 ---
