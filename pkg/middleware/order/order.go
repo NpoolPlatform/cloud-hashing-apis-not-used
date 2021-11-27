@@ -310,7 +310,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	// User discount info
 	// Extra reduction
 	// Coupon amount
-	amount := float64(myOrder.Info.Units) * float64(goodInfo.Detail.Price)
+	amount := float64(myOrder.Info.Units) * goodInfo.Detail.Price
 
 	// Validate payment coin info id
 	coinInfo, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
