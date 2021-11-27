@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion7
 type CloudHashingApisClient interface {
 	Version(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*VersionResponse, error)
 	GetGoodsDetail(ctx context.Context, in *GetGoodsDetailRequest, opts ...grpc.CallOption) (*GetGoodsDetailResponse, error)
+	GetGoodDetail(ctx context.Context, in *GetGoodDetailRequest, opts ...grpc.CallOption) (*GetGoodDetailResponse, error)
 	SubmitOrder(ctx context.Context, in *SubmitOrderRequest, opts ...grpc.CallOption) (*SubmitOrderResponse, error)
 	CreateOrderPayment(ctx context.Context, in *CreateOrderPaymentRequest, opts ...grpc.CallOption) (*CreateOrderPaymentResponse, error)
 	GetOrderDetail(ctx context.Context, in *GetOrderDetailRequest, opts ...grpc.CallOption) (*GetOrderDetailResponse, error)
@@ -49,6 +50,15 @@ func (c *cloudHashingApisClient) Version(ctx context.Context, in *emptypb.Empty,
 func (c *cloudHashingApisClient) GetGoodsDetail(ctx context.Context, in *GetGoodsDetailRequest, opts ...grpc.CallOption) (*GetGoodsDetailResponse, error) {
 	out := new(GetGoodsDetailResponse)
 	err := c.cc.Invoke(ctx, "/cloud.hashing.apis.v1.CloudHashingApis/GetGoodsDetail", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *cloudHashingApisClient) GetGoodDetail(ctx context.Context, in *GetGoodDetailRequest, opts ...grpc.CallOption) (*GetGoodDetailResponse, error) {
+	out := new(GetGoodDetailResponse)
+	err := c.cc.Invoke(ctx, "/cloud.hashing.apis.v1.CloudHashingApis/GetGoodDetail", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -115,6 +125,7 @@ func (c *cloudHashingApisClient) GetOrdersDetailByGood(ctx context.Context, in *
 type CloudHashingApisServer interface {
 	Version(context.Context, *emptypb.Empty) (*VersionResponse, error)
 	GetGoodsDetail(context.Context, *GetGoodsDetailRequest) (*GetGoodsDetailResponse, error)
+	GetGoodDetail(context.Context, *GetGoodDetailRequest) (*GetGoodDetailResponse, error)
 	SubmitOrder(context.Context, *SubmitOrderRequest) (*SubmitOrderResponse, error)
 	CreateOrderPayment(context.Context, *CreateOrderPaymentRequest) (*CreateOrderPaymentResponse, error)
 	GetOrderDetail(context.Context, *GetOrderDetailRequest) (*GetOrderDetailResponse, error)
@@ -133,6 +144,9 @@ func (UnimplementedCloudHashingApisServer) Version(context.Context, *emptypb.Emp
 }
 func (UnimplementedCloudHashingApisServer) GetGoodsDetail(context.Context, *GetGoodsDetailRequest) (*GetGoodsDetailResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetGoodsDetail not implemented")
+}
+func (UnimplementedCloudHashingApisServer) GetGoodDetail(context.Context, *GetGoodDetailRequest) (*GetGoodDetailResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetGoodDetail not implemented")
 }
 func (UnimplementedCloudHashingApisServer) SubmitOrder(context.Context, *SubmitOrderRequest) (*SubmitOrderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SubmitOrder not implemented")
@@ -197,6 +211,24 @@ func _CloudHashingApis_GetGoodsDetail_Handler(srv interface{}, ctx context.Conte
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CloudHashingApisServer).GetGoodsDetail(ctx, req.(*GetGoodsDetailRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CloudHashingApis_GetGoodDetail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetGoodDetailRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CloudHashingApisServer).GetGoodDetail(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/cloud.hashing.apis.v1.CloudHashingApis/GetGoodDetail",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CloudHashingApisServer).GetGoodDetail(ctx, req.(*GetGoodDetailRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -323,6 +355,10 @@ var CloudHashingApis_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetGoodsDetail",
 			Handler:    _CloudHashingApis_GetGoodsDetail_Handler,
+		},
+		{
+			MethodName: "GetGoodDetail",
+			Handler:    _CloudHashingApis_GetGoodDetail_Handler,
 		},
 		{
 			MethodName: "SubmitOrder",

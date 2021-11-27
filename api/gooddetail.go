@@ -23,3 +23,12 @@ func (s *Server) GetGoodsDetail(ctx context.Context, in *npool.GetGoodsDetailReq
 	}
 	return resp, nil
 }
+
+func (s *Server) GetGoodDetail(ctx context.Context, in *npool.GetGoodDetailRequest) (*npool.GetGoodDetailResponse, error) {
+	resp, err := gooddetail.Get(ctx, in)
+	if err != nil {
+		logger.Sugar().Errorf("get good detail all error: %w", err)
+		return &npool.GetGoodDetailResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return resp, nil
+}

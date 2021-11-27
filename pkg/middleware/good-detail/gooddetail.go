@@ -173,9 +173,9 @@ func GetAll(ctx context.Context, in *npool.GetGoodsDetailRequest) (*npool.GetGoo
 	}, nil
 }
 
-func Get(ctx context.Context, goodID string) (*npool.GoodDetail, error) {
+func Get(ctx context.Context, in *npool.GetGoodDetailRequest) (*npool.GetGoodDetailResponse, error) {
 	goodResp, err := grpc2.GetGoodDetail(ctx, &goodspb.GetGoodDetailRequest{
-		ID: goodID,
+		ID: in.GetID(),
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get good detail: %v", err)
@@ -186,5 +186,12 @@ func Get(ctx context.Context, goodID string) (*npool.GoodDetail, error) {
 		return nil, xerrors.Errorf("fail get coin infos: %v", err)
 	}
 
-	return constructGoodDetail(goodResp.Detail, coininfoResp.Infos)
+	detail, err := constructGoodDetail(goodResp.Detail, coininfoResp.Infos)
+	if err != nil {
+		return nil, xerrors.Errorf("fail construct good detail: %v", err)
+	}	
+
+	return &npool.GetGoodDetailResponse{
+		Detail: detail,
+	}, nil
 }

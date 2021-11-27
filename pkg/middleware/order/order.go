@@ -244,7 +244,9 @@ func GetOrdersDetailByGood(ctx context.Context, in *npool.GetOrdersDetailByGoodR
 }
 
 func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.SubmitOrderResponse, error) {
-	goodInfo, err := gooddetail.Get(ctx, in.GetGoodID())
+	goodInfo, err := gooddetail.Get(ctx, &npool.GetGoodDetailRequest {
+		ID: in.GetGoodID(),
+	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get order good info: %v", err)
 	}
@@ -254,8 +256,8 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 	// Validate coupon id
 	// Validate fee ids
 
-	start := (goodInfo.Start + 24*60*60) / 24 / 60 / 60 * 24 * 60 * 60
-	end := start + uint32(goodInfo.DurationDays)*24*60*60
+	start := (goodInfo.Detail.Start + 24*60*60) / 24 / 60 / 60 * 24 * 60 * 60
+	end := start + uint32(goodInfo.Detail.DurationDays)*24*60*60
 
 	// Generate order
 	myOrder, err := grpc2.CreateOrder(ctx, &orderpb.CreateOrderRequest{

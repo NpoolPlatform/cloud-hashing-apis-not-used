@@ -14,6 +14,8 @@
     - [DeviceInfo](#cloud.hashing.apis.v1.DeviceInfo)
     - [Fee](#cloud.hashing.apis.v1.Fee)
     - [GasPaying](#cloud.hashing.apis.v1.GasPaying)
+    - [GetGoodDetailRequest](#cloud.hashing.apis.v1.GetGoodDetailRequest)
+    - [GetGoodDetailResponse](#cloud.hashing.apis.v1.GetGoodDetailResponse)
     - [GetGoodsDetailRequest](#cloud.hashing.apis.v1.GetGoodsDetailRequest)
     - [GetGoodsDetailResponse](#cloud.hashing.apis.v1.GetGoodsDetailResponse)
     - [GetOrderDetailRequest](#cloud.hashing.apis.v1.GetOrderDetailRequest)
@@ -231,6 +233,36 @@
 | OrderID | [string](#string) |  |  |
 | PaymentID | [string](#string) |  |  |
 | DurationMinutes | [uint32](#uint32) |  |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.GetGoodDetailRequest"></a>
+
+### GetGoodDetailRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| ID | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.GetGoodDetailResponse"></a>
+
+### GetGoodDetailResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| Detail | [GoodDetail](#cloud.hashing.apis.v1.GoodDetail) |  |  |
 
 
 
@@ -759,6 +791,7 @@ Cloud Hashing Goods
 | ----------- | ------------ | ------------- | ------------|
 | Version | [.google.protobuf.Empty](#google.protobuf.Empty) | [VersionResponse](#cloud.hashing.apis.v1.VersionResponse) |  |
 | GetGoodsDetail | [GetGoodsDetailRequest](#cloud.hashing.apis.v1.GetGoodsDetailRequest) | [GetGoodsDetailResponse](#cloud.hashing.apis.v1.GetGoodsDetailResponse) |  |
+| GetGoodDetail | [GetGoodDetailRequest](#cloud.hashing.apis.v1.GetGoodDetailRequest) | [GetGoodDetailResponse](#cloud.hashing.apis.v1.GetGoodDetailResponse) |  |
 | SubmitOrder | [SubmitOrderRequest](#cloud.hashing.apis.v1.SubmitOrderRequest) | [SubmitOrderResponse](#cloud.hashing.apis.v1.SubmitOrderResponse) |  |
 | CreateOrderPayment | [CreateOrderPaymentRequest](#cloud.hashing.apis.v1.CreateOrderPaymentRequest) | [CreateOrderPaymentResponse](#cloud.hashing.apis.v1.CreateOrderPaymentResponse) |  |
 | GetOrderDetail | [GetOrderDetailRequest](#cloud.hashing.apis.v1.GetOrderDetailRequest) | [GetOrderDetailResponse](#cloud.hashing.apis.v1.GetOrderDetailResponse) |  |

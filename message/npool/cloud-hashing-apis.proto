@@ -22,6 +22,12 @@ service CloudHashingApis {
             body: "*"
         };
     }
+    rpc GetGoodDetail(GetGoodDetailRequest) returns (GetGoodDetailResponse) {
+        option (google.api.http) = {
+            post: "/v1/get/good/detail"
+            body: "*"
+        };
+    }
 
     rpc SubmitOrder(SubmitOrderRequest) returns (SubmitOrderResponse) {
         option (google.api.http) = {
@@ -155,6 +161,15 @@ message GoodDetail {
     PriceCurrency PriceCurrency = 2420;
     repeated Fee Fees = 2421;
 }
+
+message GetGoodDetailRequest {
+    string ID = 1;
+}
+
+message GetGoodDetailResponse {
+    GoodDetail Detail = 1;
+}
+
 
 message GetGoodsDetailRequest {
     string AppID = 3210;
