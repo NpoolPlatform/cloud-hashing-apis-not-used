@@ -1,6 +1,7 @@
 package order
 
 import (
+	"fmt"
 	"context"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
@@ -309,21 +310,27 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 
 	// Check if idle address is available
 	idle := false
+	var coinAddress string
 
-	// Generate transaction address
-	address, err := grpc2.CreateCoinAddress(ctx, &tradingpb.CreateWalletRequest{
-		CoinName: coinInfo.Info.Name,
-		UUID:     myOrder.Info.UserID,
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail create wallet address: %v", err)
+	if coinInfo.Info.PreSale {
+		coinAddress = fmt.Sprintf("placeholder-%v", uuid.New())
+	} else {
+		// Generate transaction address
+		address, err := grpc2.CreateCoinAddress(ctx, &tradingpb.CreateWalletRequest{
+			CoinName: coinInfo.Info.Name,
+			UUID:     myOrder.Info.UserID,
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail create wallet address: %v", err)
+		}
+		coinAddress = address.Info.Address
 	}
 
 	// Create billing account
 	account, err := grpc2.CreateBillingAccount(ctx, &billingpb.CreateCoinAccountRequest{
 		Info: &billingpb.CoinAccountInfo{
 			CoinTypeID:  in.GetPaymentCoinTypeID(),
-			Address:     address.Info.Address,
+			Address:     coinAddress,
 			GeneratedBy: "platform",
 			UsedFor:     "paying",
 			AppID:       myOrder.Info.AppID,
@@ -336,11 +343,11 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 
 	balanceAmount := float64(0)
 
-	if !idle {
+	if !idle && !coinInfo.Info.PreSale {
 		balance, err := grpc2.GetWalletBalance(ctx, &tradingpb.GetWalletBalanceRequest{
 			Info: &tradingpb.EntAccount{
 				CoinName: coinInfo.Info.Name,
-				Address:  account.Info.Address,
+				Address:  coinAddress,
 			},
 		})
 		if err != nil {

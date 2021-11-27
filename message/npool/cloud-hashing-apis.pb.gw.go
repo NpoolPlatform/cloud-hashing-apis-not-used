@@ -524,7 +524,7 @@ func RegisterCloudHashingApisHandlerFromEndpoint(ctx context.Context, mux *runti
 
 // RegisterCloudHashingApisHandler registers the http handlers for service CloudHashingApis to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterCloudHashingApisHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+func RegisterCloudHashingApisHandler(ctx context.Context, mux *runtime.ServeMux, conn grpc.ClientConnInterface) error {
 	return RegisterCloudHashingApisHandlerClient(ctx, mux, NewCloudHashingApisClient(conn))
 }
 
