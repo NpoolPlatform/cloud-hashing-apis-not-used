@@ -244,7 +244,7 @@ func GetOrdersDetailByGood(ctx context.Context, in *npool.GetOrdersDetailByGoodR
 }
 
 func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.SubmitOrderResponse, error) {
-	goodInfo, err := gooddetail.Get(ctx, &npool.GetGoodDetailRequest {
+	goodInfo, err := gooddetail.Get(ctx, &npool.GetGoodDetailRequest{
 		ID: in.GetGoodID(),
 	})
 	if err != nil {
