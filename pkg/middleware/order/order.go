@@ -299,8 +299,18 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		return nil, xerrors.Errorf("fail get order: %v", err)
 	}
 
+	goodInfo, err := gooddetail.Get(ctx, &npool.GetGoodDetailRequest{
+		ID: myOrder.Info.GoodID,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get order good info: %v", err)
+	}
+
 	// Caculate amount
-	amount := 1273.0
+	// User discount info
+	// Extra reduction
+	// Coupon amount
+	amount := myOrder.Info.Units * goodInfo.Info.Price
 
 	// Validate payment coin info id
 	coinInfo, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
