@@ -11,6 +11,8 @@ metadata:
     traefik.ingress.kubernetes.io/router.middlewares: kube-system-strip-cloud-hashing-apis-prefix@kubernetescrd,kube-system-cookies-appid-to-body@kubernetescrd,kube-system-cookies-userid-to-body@kubernetescrd,kube-system-common-headers@kubernetescrd
 
 spec:
+  tls:
+    - secretName: procyon-vip-tls
   rules:
     - host: api.npool.top
       http: &http_appid_userid_rules
@@ -51,6 +53,8 @@ metadata:
     traefik.ingress.kubernetes.io/router.middlewares: kube-system-strip-cloud-hashing-apis-prefix@kubernetescrd,kube-system-cookies-appid-to-body@kubernetescrd,kube-system-common-headers@kubernetescrd
 
 spec:
+  tls:
+    - secretName: procyon-vip-tls
   rules:
     - host: api.npool.top
       http: &http_appid_rules
@@ -84,6 +88,8 @@ metadata:
     traefik.ingress.kubernetes.io/router.middlewares: kube-system-strip-cloud-hashing-apis-prefix@kubernetescrd,kube-system-common-headers@kubernetescrd
 
 spec:
+  tls:
+    - secretName: procyon-vip-tls
   rules:
     - host: api.npool.top
       http: &http_rules
