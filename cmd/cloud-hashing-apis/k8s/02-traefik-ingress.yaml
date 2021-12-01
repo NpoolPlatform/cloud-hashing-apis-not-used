@@ -60,13 +60,13 @@ spec:
               serviceName: cloud-hashing-apis
               servicePort: 50140
     - host: api.xpool.top
-      http: *http_appid_userid_rules
+      http: *http_appid_rules
     - host: www.npool.top
-      http: *http_appid_userid_rules
+      http: *http_appid_rules
     - host: www.xpool.top
-      http: *http_appid_userid_rules
+      http: *http_appid_rules
     - host: www.procyon.vip
-      http: *http_appid_userid_rules
+      http: *http_appid_rules
 
 
 ---
