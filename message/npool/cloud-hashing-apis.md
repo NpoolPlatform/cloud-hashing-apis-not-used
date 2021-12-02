@@ -748,6 +748,8 @@
 | UserID | [string](#string) |  |  |
 | AppID | [string](#string) |  |  |
 | CouponID | [string](#string) |  |  |
+| DiscountCouponID | [string](#string) |  |  |
+| UserSpecialReductionID | [string](#string) |  |  |
 
 
 

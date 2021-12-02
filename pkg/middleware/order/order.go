@@ -333,13 +333,15 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 	// Generate order
 	myOrder, err := grpc2.CreateOrder(ctx, &orderpb.CreateOrderRequest{
 		Info: &orderpb.Order{
-			GoodID:   in.GetGoodID(),
-			AppID:    in.GetAppID(),
-			UserID:   in.GetUserID(),
-			Units:    in.GetUnits(),
-			Start:    start,
-			End:      end,
-			CouponID: in.GetCouponID(),
+			GoodID:                 in.GetGoodID(),
+			AppID:                  in.GetAppID(),
+			UserID:                 in.GetUserID(),
+			Units:                  in.GetUnits(),
+			Start:                  start,
+			End:                    end,
+			CouponID:               in.GetCouponID(),
+			DiscountCouponID:       in.GetDiscountCouponID(),
+			UserSpecialReductionID: in.GetUserSpecialReductionID(),
 		},
 	})
 	if err != nil {
@@ -363,7 +365,7 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 }
 
 func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest) (*npool.CreateOrderPaymentResponse, error) {
-	myOrder, err := grpc2.GetOrder(ctx, &orderpb.GetOrderRequest{
+	myOrder, err := GetOrderDetail(ctx, &npool.GetOrderDetailRequest{
 		ID: in.GetOrderID(),
 	})
 	if err != nil {
@@ -371,17 +373,25 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	}
 
 	goodInfo, err := gooddetail.Get(ctx, &npool.GetGoodDetailRequest{
-		ID: myOrder.Info.GoodID,
+		ID: myOrder.Detail.GoodID,
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get order good info: %v", err)
 	}
 
 	// Caculate amount
+	amount := float64(myOrder.Detail.Units) * goodInfo.Detail.Price
+
+	// TODO: All should validate duration days
 	// User discount info
+	amount *= float64(100 - myOrder.Detail.Discount)
+	amount /= float64(100)
 	// Extra reduction
+	amount -= myOrder.Detail.SpecialReductionAmount
 	// Coupon amount
-	amount := float64(myOrder.Info.Units) * goodInfo.Detail.Price
+	if myOrder.Detail.Coupon != nil {
+		amount -= myOrder.Detail.Coupon.Pool.Denomination
+	}
 
 	// Validate payment coin info id
 	coinInfo, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
@@ -401,7 +411,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		// Generate transaction address
 		address, err := grpc2.CreateCoinAddress(ctx, &tradingpb.CreateWalletRequest{
 			CoinName: coinInfo.Info.Name,
-			UUID:     myOrder.Info.UserID,
+			UUID:     myOrder.Detail.UserID,
 		})
 		if err != nil {
 			return nil, xerrors.Errorf("fail create wallet address: %v", err)
@@ -416,8 +426,8 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 			Address:     coinAddress,
 			GeneratedBy: "platform",
 			UsedFor:     "paying",
-			AppID:       myOrder.Info.AppID,
-			UserID:      myOrder.Info.UserID,
+			AppID:       myOrder.Detail.AppID,
+			UserID:      myOrder.Detail.UserID,
 		},
 	})
 	if err != nil {
@@ -442,7 +452,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	// Generate payment
 	myPayment, err := grpc2.CreatePayment(ctx, &orderpb.CreatePaymentRequest{
 		Info: &orderpb.Payment{
-			OrderID:     myOrder.Info.ID,
+			OrderID:     myOrder.Detail.ID,
 			AccountID:   account.Info.ID,
 			StartAmount: balanceAmount,
 			Amount:      amount,
@@ -456,7 +466,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	// Generate good paying
 	_, err = grpc2.CreateGoodPaying(ctx, &orderpb.CreateGoodPayingRequest{
 		Info: &orderpb.GoodPaying{
-			OrderID:   myOrder.Info.ID,
+			OrderID:   myOrder.Detail.ID,
 			PaymentID: myPayment.Info.ID,
 		},
 	})
@@ -468,7 +478,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	for _, fee := range in.GetFees() {
 		_, err := grpc2.CreateGasPaying(ctx, &orderpb.CreateGasPayingRequest{
 			Info: &orderpb.GasPaying{
-				OrderID:         myOrder.Info.ID,
+				OrderID:         myOrder.Detail.ID,
 				PaymentID:       myPayment.Info.ID,
 				DurationMinutes: fee.DurationDays * 24 * 60,
 				FeeTypeID:       fee.ID,
@@ -480,7 +490,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	}
 
 	orderDetail, err := GetOrderDetail(ctx, &npool.GetOrderDetailRequest{
-		ID: myOrder.Info.ID,
+		ID: myOrder.Detail.ID,
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get order detail: %v", err)

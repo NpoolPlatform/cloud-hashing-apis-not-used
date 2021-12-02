@@ -364,6 +364,8 @@ message SubmitOrderRequest {
     string UserID = 3602;
     string AppID = 3603;
     string CouponID = 3606;
+    string DiscountCouponID = 3607;
+    string UserSpecialReductionID = 3608;
 }
 
 message Order {
