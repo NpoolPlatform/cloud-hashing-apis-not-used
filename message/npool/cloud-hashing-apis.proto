@@ -278,8 +278,8 @@ message OrderDetail {
     string AppID = 2702;
     string UserID = 2703;
     uint32 Units = 2704;
-    uint32 Discount = 2705;
-    double SpecialReductionAmount = 2706;
+    string DiscountCouponID = 2705;
+    string UserSpecialReductionID = 2706;
     GoodPaying GoodPaying = 2708;
     repeated GasPaying GasPayings = 2709;
     repeated Compensate Compensates = 2710;
@@ -342,8 +342,8 @@ message Order {
     string AppID = 1402;
     string UserID = 1403;
     uint32 Units = 1404;
-    uint32 Discount = 1405;
-    double SpecialReductionAmount = 1406;
+    string DiscountCouponID = 1405;
+    string UserSpecialReductionID = 1406;
     uint32 Start = 1407;
     uint32 End = 1408;
     string CouponID = 1409;

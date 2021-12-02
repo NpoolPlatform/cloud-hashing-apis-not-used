@@ -561,8 +561,8 @@
 | AppID | [string](#string) |  |  |
 | UserID | [string](#string) |  |  |
 | Units | [uint32](#uint32) |  |  |
-| Discount | [uint32](#uint32) |  |  |
-| SpecialReductionAmount | [double](#double) |  |  |
+| DiscountCouponID | [string](#string) |  |  |
+| UserSpecialReductionID | [string](#string) |  |  |
 | Start | [uint32](#uint32) |  |  |
 | End | [uint32](#uint32) |  |  |
 | CouponID | [string](#string) |  |  |
@@ -585,8 +585,8 @@
 | AppID | [string](#string) |  |  |
 | UserID | [string](#string) |  |  |
 | Units | [uint32](#uint32) |  |  |
-| Discount | [uint32](#uint32) |  |  |
-| SpecialReductionAmount | [double](#double) |  |  |
+| DiscountCouponID | [string](#string) |  |  |
+| UserSpecialReductionID | [string](#string) |  |  |
 | GoodPaying | [GoodPaying](#cloud.hashing.apis.v1.GoodPaying) |  |  |
 | GasPayings | [GasPaying](#cloud.hashing.apis.v1.GasPaying) | repeated |  |
 | Compensates | [Compensate](#cloud.hashing.apis.v1.Compensate) | repeated |  |
