@@ -173,6 +173,16 @@ func GetCouponAllocated(ctx context.Context, in *inspirepb.GetCouponAllocatedDet
 	return cli.GetCouponAllocatedDetail(ctx, in)
 }
 
+func GetUserSpecialReduction(ctx context.Context, in *inspirepb.GetUserSpecialReductionRequest) (*inspirepb.GetUserSpecialReductionResponse, error) {
+	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
+	}
+
+	cli := inspirepb.NewCloudHashingInspireClient(conn)
+	return cli.GetUserSpecialReduction(ctx, in)
+}
+
 //---------------------------------------------------------------------------------------------------------------------------
 
 func CreateBillingAccount(ctx context.Context, in *billingpb.CreateCoinAccountRequest) (*billingpb.CreateCoinAccountResponse, error) {

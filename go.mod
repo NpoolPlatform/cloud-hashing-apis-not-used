@@ -6,7 +6,7 @@ require (
 	entgo.io/ent v0.9.1
 	github.com/NpoolPlatform/cloud-hashing-billing v0.0.0-20211120094336-58e1a1ffa8be
 	github.com/NpoolPlatform/cloud-hashing-goods v0.0.0-20211123094051-85471c788e25
-	github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20211130170307-8b0f853122fc
+	github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20211202123501-eece2e1c91af
 	github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20211202091651-fc96b10be44f
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20211122070118-139aac84bc79
 	github.com/NpoolPlatform/message v0.0.0-20211123165556-9c8ac6d13305

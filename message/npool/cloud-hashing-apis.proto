@@ -255,8 +255,36 @@ message Coupon {
     string ID = 3600;
     string UserID = 3601;
     string AppID = 3602;
-    bool Used = 3603;
     CouponPool Pool = 3604;
+}
+
+message DiscountPool {
+    string ID = 4600;
+    string AppID = 4601;
+    string ReleaseByUserID = 4602;
+    uint32 Discount = 4604;
+    uint32 Start = 4605;
+    int32 DurationDays = 4606;
+    string Message = 4607;
+    string Name = 4608;
+}
+
+message Discount {
+    string ID = 3600;
+    string UserID = 3601;
+    string AppID = 3602;
+    DiscountPool Pool = 3604;
+}
+
+message UserSpecialReduction {
+    string ID = 1;
+    string AppID = 2;
+    string UserID = 3;
+    double Amount = 4;
+    string ReleaseByUserID = 5;
+    uint32 Start = 6;
+    int32 DurationDays = 7;
+    string Message = 8;
 }
 
 message GoodFee {
@@ -278,8 +306,8 @@ message OrderDetail {
     string AppID = 2702;
     string UserID = 2703;
     uint32 Units = 2704;
-    string DiscountCouponID = 2705;
-    string UserSpecialReductionID = 2706;
+    Discount DiscountCoupon = 2705;
+    UserSpecialReduction UserSpecialReduction = 2706;
     GoodPaying GoodPaying = 2708;
     repeated GasPaying GasPayings = 2709;
     repeated Compensate Compensates = 2710;
@@ -288,6 +316,8 @@ message OrderDetail {
     uint32 Start = 2713;
     uint32 End = 2714;
     Coupon Coupon = 2715;
+    uint32 Discount = 2716;
+    double SpecialReductionAmount = 2717;
 }
 
 message GetOrderDetailRequest {

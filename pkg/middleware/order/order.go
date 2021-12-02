@@ -25,7 +25,9 @@ func constructOrderDetail(
 	info *orderpb.OrderDetail,
 	coupon *inspirepb.CouponAllocatedDetail,
 	paymentCoinInfo *coininfopb.CoinInfo,
-	account *billingpb.CoinAccountInfo) *npool.OrderDetail {
+	account *billingpb.CoinAccountInfo,
+	discountCoupon *inspirepb.CouponAllocatedDetail,
+	userSpecial *inspirepb.UserSpecialReduction) *npool.OrderDetail {
 	gasPayings := []*npool.GasPaying{}
 	for _, paying := range info.GasPayings {
 		gasPayings = append(gasPayings, &npool.GasPaying{
@@ -70,9 +72,45 @@ func constructOrderDetail(
 				Start:        coupon.Coupon.Start,
 				DurationDays: coupon.Coupon.DurationDays,
 				Message:      coupon.Coupon.Message,
-				Name:         coupon.Coupon.Message,
+				Name:         coupon.Coupon.Name,
 			},
 		}
+	}
+
+	var myDiscount *npool.Discount
+	discountAmount := uint32(0)
+
+	if discountCoupon != nil {
+		myDiscount = &npool.Discount{
+			ID:     discountCoupon.ID,
+			AppID:  discountCoupon.AppID,
+			UserID: discountCoupon.UserID,
+			Pool: &npool.DiscountPool{
+				ID:           discountCoupon.Discount.ID,
+				AppID:        discountCoupon.Discount.AppID,
+				Discount:     discountCoupon.Discount.Discount,
+				Start:        discountCoupon.Discount.Start,
+				DurationDays: discountCoupon.Discount.DurationDays,
+				Message:      discountCoupon.Discount.Message,
+				Name:         discountCoupon.Discount.Name,
+			},
+		}
+		discountAmount = discountCoupon.Discount.Discount
+	}
+
+	var specialReduction *npool.UserSpecialReduction
+	reductionAmount := float64(0)
+
+	if userSpecial != nil {
+		specialReduction = &npool.UserSpecialReduction{
+			ID:           userSpecial.ID,
+			AppID:        userSpecial.AppID,
+			UserID:       userSpecial.UserID,
+			Amount:       userSpecial.Amount,
+			Start:        userSpecial.Start,
+			DurationDays: userSpecial.DurationDays,
+		}
+		reductionAmount = userSpecial.Amount
 	}
 
 	return &npool.OrderDetail{
@@ -81,8 +119,10 @@ func constructOrderDetail(
 		AppID:                  info.AppID,
 		UserID:                 info.UserID,
 		Units:                  info.Units,
-		DiscountCouponID:       info.DiscountCouponID,
-		UserSpecialReductionID: info.UserSpecialReductionID,
+		Discount:               discountAmount,
+		SpecialReductionAmount: reductionAmount,
+		DiscountCoupon:         myDiscount,
+		UserSpecialReduction:   specialReduction,
 		GoodPaying: &npool.GoodPaying{
 			ID:        info.GoodPaying.ID,
 			OrderID:   info.GoodPaying.OrderID,
@@ -148,7 +188,39 @@ func expandDetail(ctx context.Context, info *orderpb.OrderDetail) (*npool.OrderD
 		return nil, xerrors.Errorf("fail get payment address: %v", err)
 	}
 
-	return constructOrderDetail(info, coupon, coinInfo.Info, account.Info), nil
+	var discountCoupon *inspirepb.CouponAllocatedDetail
+
+	discount, err := grpc2.GetCouponAllocated(ctx, &inspirepb.GetCouponAllocatedDetailRequest{
+		ID: info.DiscountCouponID,
+	})
+	if err != nil && info.DiscountCouponID != invalidUUID {
+		return nil, xerrors.Errorf("fail get discount coupon allocated detail: %v", err)
+	}
+
+	if discount != nil {
+		discountCoupon = discount.Info
+	}
+
+	var userSpecialReduction *inspirepb.UserSpecialReduction
+
+	userSpecial, err := grpc2.GetUserSpecialReduction(ctx, &inspirepb.GetUserSpecialReductionRequest{
+		ID: info.UserSpecialReductionID,
+	})
+	if err != nil && info.UserSpecialReductionID != invalidUUID {
+		return nil, xerrors.Errorf("fail get user special reduction: %v", err)
+	}
+
+	if userSpecial != nil {
+		userSpecialReduction = userSpecial.Info
+	}
+
+	return constructOrderDetail(
+		info,
+		coupon,
+		coinInfo.Info,
+		account.Info,
+		discountCoupon,
+		userSpecialReduction), nil
 }
 
 func GetOrderDetail(ctx context.Context, in *npool.GetOrderDetailRequest) (*npool.GetOrderDetailResponse, error) {

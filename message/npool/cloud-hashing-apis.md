@@ -12,6 +12,8 @@
     - [CreateOrderPaymentRequest](#cloud.hashing.apis.v1.CreateOrderPaymentRequest)
     - [CreateOrderPaymentResponse](#cloud.hashing.apis.v1.CreateOrderPaymentResponse)
     - [DeviceInfo](#cloud.hashing.apis.v1.DeviceInfo)
+    - [Discount](#cloud.hashing.apis.v1.Discount)
+    - [DiscountPool](#cloud.hashing.apis.v1.DiscountPool)
     - [Fee](#cloud.hashing.apis.v1.Fee)
     - [GasPaying](#cloud.hashing.apis.v1.GasPaying)
     - [GetGoodDetailRequest](#cloud.hashing.apis.v1.GetGoodDetailRequest)
@@ -41,6 +43,7 @@
     - [SubmitOrderRequest](#cloud.hashing.apis.v1.SubmitOrderRequest)
     - [SubmitOrderResponse](#cloud.hashing.apis.v1.SubmitOrderResponse)
     - [TargetAreaInfo](#cloud.hashing.apis.v1.TargetAreaInfo)
+    - [UserSpecialReduction](#cloud.hashing.apis.v1.UserSpecialReduction)
     - [VendorLocationInfo](#cloud.hashing.apis.v1.VendorLocationInfo)
     - [VersionResponse](#cloud.hashing.apis.v1.VersionResponse)
   
@@ -125,7 +128,6 @@
 | ID | [string](#string) |  |  |
 | UserID | [string](#string) |  |  |
 | AppID | [string](#string) |  |  |
-| Used | [bool](#bool) |  |  |
 | Pool | [CouponPool](#cloud.hashing.apis.v1.CouponPool) |  |  |
 
 
@@ -199,6 +201,46 @@
 | Manufacturer | [string](#string) |  |  |
 | PowerComsuption | [int32](#int32) |  |  |
 | ShipmentAt | [int32](#int32) |  |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.Discount"></a>
+
+### Discount
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| ID | [string](#string) |  |  |
+| UserID | [string](#string) |  |  |
+| AppID | [string](#string) |  |  |
+| Pool | [DiscountPool](#cloud.hashing.apis.v1.DiscountPool) |  |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.DiscountPool"></a>
+
+### DiscountPool
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| ID | [string](#string) |  |  |
+| AppID | [string](#string) |  |  |
+| ReleaseByUserID | [string](#string) |  |  |
+| Discount | [uint32](#uint32) |  |  |
+| Start | [uint32](#uint32) |  |  |
+| DurationDays | [int32](#int32) |  |  |
+| Message | [string](#string) |  |  |
+| Name | [string](#string) |  |  |
 
 
 
@@ -585,8 +627,8 @@
 | AppID | [string](#string) |  |  |
 | UserID | [string](#string) |  |  |
 | Units | [uint32](#uint32) |  |  |
-| DiscountCouponID | [string](#string) |  |  |
-| UserSpecialReductionID | [string](#string) |  |  |
+| DiscountCoupon | [Discount](#cloud.hashing.apis.v1.Discount) |  |  |
+| UserSpecialReduction | [UserSpecialReduction](#cloud.hashing.apis.v1.UserSpecialReduction) |  |  |
 | GoodPaying | [GoodPaying](#cloud.hashing.apis.v1.GoodPaying) |  |  |
 | GasPayings | [GasPaying](#cloud.hashing.apis.v1.GasPaying) | repeated |  |
 | Compensates | [Compensate](#cloud.hashing.apis.v1.Compensate) | repeated |  |
@@ -595,6 +637,8 @@
 | Start | [uint32](#uint32) |  |  |
 | End | [uint32](#uint32) |  |  |
 | Coupon | [Coupon](#cloud.hashing.apis.v1.Coupon) |  |  |
+| Discount | [uint32](#uint32) |  |  |
+| SpecialReductionAmount | [double](#double) |  |  |
 
 
 
@@ -736,6 +780,28 @@
 | ID | [string](#string) |  |  |
 | Continent | [string](#string) |  |  |
 | Country | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.UserSpecialReduction"></a>
+
+### UserSpecialReduction
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| ID | [string](#string) |  |  |
+| AppID | [string](#string) |  |  |
+| UserID | [string](#string) |  |  |
+| Amount | [double](#double) |  |  |
+| ReleaseByUserID | [string](#string) |  |  |
+| Start | [uint32](#uint32) |  |  |
+| DurationDays | [int32](#int32) |  |  |
+| Message | [string](#string) |  |  |
 
 
 
