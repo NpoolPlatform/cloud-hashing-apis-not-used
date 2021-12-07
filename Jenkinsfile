@@ -59,24 +59,18 @@ pipeline {
       }
     }
 
-    stage('Unit Tests') {
+    stage('Config target') {
       when {
         expression { BUILD_TARGET == 'true' }
+        expression { DEPLOY_TARGET == 'true' }
       }
       steps {
         sh 'rm .apollo-base-config -rf'
         sh 'git clone https://github.com/NpoolPlatform/apollo-base-config.git .apollo-base-config'
 
         sh (returnStdout: false, script: '''
-          devboxpod=`kubectl get pods -A | grep development-box | awk '{print $2}'`
-          servicename="cloud-hashing-apis"
-
           PASSWORD=`kubectl get secret --namespace "kube-system" mysql-password-secret -o jsonpath="{.data.rootpassword}" | base64 --decode`
-          kubectl -n kube-system exec mysql-0 -- mysql -h 127.0.0.1 -uroot -p$PASSWORD -P3306 -e "create database if not exists cloud_hashing_apis;"
-
-          kubectl exec --namespace kube-system $devboxpod -- make -C /tmp/$servicename after-test || true
-          kubectl exec --namespace kube-system $devboxpod -- rm -rf /tmp/$servicename || true
-          kubectl cp ./ kube-system/$devboxpod:/tmp/$servicename
+          kubectl exec -it --namespace mysql-0 -- mysql -h 127.0.0.1 -uroot -p$PASSWORD -P3306 -e "create database if not exists cloud_hashing_apis;"
 
           username=`helm status rabbitmq --namespace kube-system | grep Username | awk -F ' : ' '{print $2}' | sed 's/"//g'`
           for vhost in `cat cmd/*/*.viper.yaml | grep hostname | awk '{print $2}' | sed 's/"//g' | sed 's/\\./-/g'`; do
@@ -88,6 +82,22 @@ pipeline {
             ./apollo-item-config.sh $APP_ID $TARGET_ENV $vhost database_name cloud_hashing_apis
             cd -
           done
+        '''.stripIndent())
+      }
+    }
+
+    stage('Unit Tests') {
+      when {
+        expression { BUILD_TARGET == 'true' }
+      }
+      steps {
+        sh (returnStdout: false, script: '''
+          devboxpod=`kubectl get pods -A | grep development-box | awk '{print $2}'`
+          servicename="cloud-hashing-apis"
+
+          kubectl exec --namespace kube-system $devboxpod -- make -C /tmp/$servicename after-test || true
+          kubectl exec --namespace kube-system $devboxpod -- rm -rf /tmp/$servicename || true
+          kubectl cp ./ kube-system/$devboxpod:/tmp/$servicename
 
           kubectl exec --namespace kube-system $devboxpod -- make -C /tmp/$servicename deps before-test test after-test
           kubectl exec --namespace kube-system $devboxpod -- rm -rf /tmp/$servicename
@@ -290,32 +300,6 @@ pipeline {
           git checkout $tag
           sed -i "s/cloud-hashing-apis:latest/cloud-hashing-apis:$tag/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml
           TAG=$tag make deploy-to-k8s-cluster
-        '''.stripIndent())
-      }
-    }
-
-    stage('Config target') {
-      when {
-        expression { CONFIG_TARGET == 'true' }
-      }
-      steps {
-        sh 'rm .apollo-base-config -rf'
-        sh 'git clone https://github.com/NpoolPlatform/apollo-base-config.git .apollo-base-config'
-
-        sh (returnStdout: false, script: '''
-          PASSWORD=`kubectl get secret --namespace "kube-system" mysql-password-secret -o jsonpath="{.data.rootpassword}" | base64 --decode`
-          kubectl -n kube-system exec mysql-0 -- mysql -h 127.0.0.1 -uroot -p$PASSWORD -P3306 -e "create database if not exists cloud_hashing_apis;"
-
-          username=`helm status rabbitmq --namespace kube-system | grep Username | awk -F ' : ' '{print $2}' | sed 's/"//g'`
-          for vhost in `cat cmd/*/*.viper.yaml | grep hostname | awk '{print $2}' | sed 's/"//g' | sed 's/\\./-/g'`; do
-            kubectl exec -it --namespace kube-system rabbitmq-0 -- rabbitmqctl add_vhost $vhost
-            kubectl exec -it --namespace kube-system rabbitmq-0 -- rabbitmqctl set_permissions -p $vhost $username ".*" ".*" ".*"
-
-            cd .apollo-base-config
-            ./apollo-base-config.sh $APP_ID $TARGET_ENV $vhost
-            ./apollo-item-config.sh $APP_ID $TARGET_ENV $vhost database_name cloud_hashing_apis
-            cd -
-          done
         '''.stripIndent())
       }
     }
