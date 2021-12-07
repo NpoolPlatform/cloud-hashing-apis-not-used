@@ -146,6 +146,7 @@ pipeline {
                 ;;
               production)
                 patch=$(( $patch + 1 ))
+                git reset --hard
                 git checkout $tag
                 ;;
             esac
@@ -279,6 +280,7 @@ pipeline {
         sh(returnStdout: true, script: '''
           revlist=`git rev-list --tags --max-count=1`
           tag=`git describe --tags $revlist`
+          git reset --hard
           git checkout $tag
           sed -i "s/cloud-hashing-apis:latest/cloud-hashing-apis:$tag/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml
           TAG=$tag make deploy-to-k8s-cluster
@@ -300,6 +302,7 @@ pipeline {
           patch=`echo $tag | awk -F '.' '{ print $3 }'`
           patch=$(( $patch - $patch % 2 ))
           tag=$major.$minor.$patch
+          git reset --hard
           git checkout $tag
           sed -i "s/cloud-hashing-apis:latest/cloud-hashing-apis:$tag/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml
           TAG=$tag make deploy-to-k8s-cluster
