@@ -67,6 +67,13 @@ service CloudHashingApis {
             body: "*"
         };
     }
+
+    rpc Signup(SignupRequest) returns (SignupResponse) {
+        option (google.api.http) = {
+            post: "/v1/signup"
+            body: "*"
+        };
+    }
 }
 
 message PageInfo {
@@ -393,4 +400,47 @@ message CreateOrderPaymentRequest {
 
 message CreateOrderPaymentResponse {
     OrderDetail Info = 1;
+}
+
+message SignupRequest {
+    string Username = 1;
+    string Password = 2;
+    string EmailAddress = 3;
+    string PhoneNumber = 4;
+    string VerificationCode = 5;
+    string AppID = 6;
+    string InvitationCode = 7;
+}
+
+message UserInfo {
+    string UserID = 1;
+    string Username = 2;
+    string Password = 15;
+    string Avatar = 3;
+    uint32 Age = 4;
+    string Gender = 5;
+    string Region = 6;
+    string Birthday = 7;
+    string Country = 8;
+    string Province = 9;
+    string City = 10;
+    string PhoneNumber = 11;
+    string EmailAddress = 12;
+    uint32 CreateAt = 13;
+    uint32 UpdateAt = 14;
+    uint32 LoginTimes = 19;
+    bool KycVerify = 16;
+    bool GaVerify = 17;
+    bool GaLogin = 22;
+    string SignupMethod = 18;
+    string Career = 20;
+    string DisplayName = 21;
+    string FirstName = 23;
+    string LastName = 24;
+    string StreetAddress1 = 25;
+    string StreetAddress2 = 26;
+}
+
+message SignupResponse {
+    UserInfo Info = 1;
 }

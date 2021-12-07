@@ -23,6 +23,9 @@ import (
 	inspirepb "github.com/NpoolPlatform/cloud-hashing-inspire/message/npool"
 	inspireconst "github.com/NpoolPlatform/cloud-hashing-inspire/pkg/message/const" //nolint
 
+	usermgrpb "github.com/NpoolPlatform/user-management/message/npool"
+	usermgrconst "github.com/NpoolPlatform/user-management/pkg/message/const" //nolint
+
 	"golang.org/x/xerrors"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -183,6 +186,16 @@ func GetUserSpecialReduction(ctx context.Context, in *inspirepb.GetUserSpecialRe
 	return cli.GetUserSpecialReduction(ctx, in)
 }
 
+func GetUserInvitationCodeByCode(ctx context.Context, in *inspirepb.GetUserInvitationCodeByCodeRequest) (*inspirepb.GetUserInvitationCodeByCodeResponse, error) {
+	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
+	}
+
+	cli := inspirepb.NewCloudHashingInspireClient(conn)
+	return cli.GetUserInvitationCodeByCode(ctx, in)
+}
+
 //---------------------------------------------------------------------------------------------------------------------------
 
 func CreateBillingAccount(ctx context.Context, in *billingpb.CreateCoinAccountRequest) (*billingpb.CreateCoinAccountResponse, error) {
@@ -225,4 +238,16 @@ func GetWalletBalance(ctx context.Context, in *tradingpb.GetWalletBalanceRequest
 
 	cli := tradingpb.NewTradingClient(conn)
 	return cli.GetWalletBalance(ctx, in)
+}
+
+//---------------------------------------------------------------------------------------------------------------------------
+
+func Signup(ctx context.Context, in *usermgrpb.SignupRequest) (*usermgrpb.SignupResponse, error) {
+	conn, err := grpc2.GetGRPCConn(usermgrconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get usermgr connection: %v", err)
+	}
+
+	cli := usermgrpb.NewUserClient(conn)
+	return cli.SignUp(ctx, in)
 }

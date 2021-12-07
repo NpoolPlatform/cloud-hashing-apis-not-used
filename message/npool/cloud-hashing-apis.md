@@ -40,9 +40,12 @@
     - [PageInfo](#cloud.hashing.apis.v1.PageInfo)
     - [Payment](#cloud.hashing.apis.v1.Payment)
     - [PriceCurrency](#cloud.hashing.apis.v1.PriceCurrency)
+    - [SignupRequest](#cloud.hashing.apis.v1.SignupRequest)
+    - [SignupResponse](#cloud.hashing.apis.v1.SignupResponse)
     - [SubmitOrderRequest](#cloud.hashing.apis.v1.SubmitOrderRequest)
     - [SubmitOrderResponse](#cloud.hashing.apis.v1.SubmitOrderResponse)
     - [TargetAreaInfo](#cloud.hashing.apis.v1.TargetAreaInfo)
+    - [UserInfo](#cloud.hashing.apis.v1.UserInfo)
     - [UserSpecialReduction](#cloud.hashing.apis.v1.UserSpecialReduction)
     - [VendorLocationInfo](#cloud.hashing.apis.v1.VendorLocationInfo)
     - [VersionResponse](#cloud.hashing.apis.v1.VersionResponse)
@@ -735,6 +738,42 @@
 
 
 
+<a name="cloud.hashing.apis.v1.SignupRequest"></a>
+
+### SignupRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| Username | [string](#string) |  |  |
+| Password | [string](#string) |  |  |
+| EmailAddress | [string](#string) |  |  |
+| PhoneNumber | [string](#string) |  |  |
+| VerificationCode | [string](#string) |  |  |
+| AppID | [string](#string) |  |  |
+| InvitationCode | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.SignupResponse"></a>
+
+### SignupResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| Info | [UserInfo](#cloud.hashing.apis.v1.UserInfo) |  |  |
+
+
+
+
+
+
 <a name="cloud.hashing.apis.v1.SubmitOrderRequest"></a>
 
 ### SubmitOrderRequest
@@ -782,6 +821,46 @@
 | ID | [string](#string) |  |  |
 | Continent | [string](#string) |  |  |
 | Country | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.UserInfo"></a>
+
+### UserInfo
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| UserID | [string](#string) |  |  |
+| Username | [string](#string) |  |  |
+| Password | [string](#string) |  |  |
+| Avatar | [string](#string) |  |  |
+| Age | [uint32](#uint32) |  |  |
+| Gender | [string](#string) |  |  |
+| Region | [string](#string) |  |  |
+| Birthday | [string](#string) |  |  |
+| Country | [string](#string) |  |  |
+| Province | [string](#string) |  |  |
+| City | [string](#string) |  |  |
+| PhoneNumber | [string](#string) |  |  |
+| EmailAddress | [string](#string) |  |  |
+| CreateAt | [uint32](#uint32) |  |  |
+| UpdateAt | [uint32](#uint32) |  |  |
+| LoginTimes | [uint32](#uint32) |  |  |
+| KycVerify | [bool](#bool) |  |  |
+| GaVerify | [bool](#bool) |  |  |
+| GaLogin | [bool](#bool) |  |  |
+| SignupMethod | [string](#string) |  |  |
+| Career | [string](#string) |  |  |
+| DisplayName | [string](#string) |  |  |
+| FirstName | [string](#string) |  |  |
+| LastName | [string](#string) |  |  |
+| StreetAddress1 | [string](#string) |  |  |
+| StreetAddress2 | [string](#string) |  |  |
 
 
 
@@ -866,6 +945,7 @@ Cloud Hashing Goods
 | GetOrdersDetailByAppUser | [GetOrdersDetailByAppUserRequest](#cloud.hashing.apis.v1.GetOrdersDetailByAppUserRequest) | [GetOrdersDetailByAppUserResponse](#cloud.hashing.apis.v1.GetOrdersDetailByAppUserResponse) |  |
 | GetOrdersDetailByApp | [GetOrdersDetailByAppRequest](#cloud.hashing.apis.v1.GetOrdersDetailByAppRequest) | [GetOrdersDetailByAppResponse](#cloud.hashing.apis.v1.GetOrdersDetailByAppResponse) |  |
 | GetOrdersDetailByGood | [GetOrdersDetailByGoodRequest](#cloud.hashing.apis.v1.GetOrdersDetailByGoodRequest) | [GetOrdersDetailByGoodResponse](#cloud.hashing.apis.v1.GetOrdersDetailByGoodResponse) |  |
+| Signup | [SignupRequest](#cloud.hashing.apis.v1.SignupRequest) | [SignupResponse](#cloud.hashing.apis.v1.SignupResponse) |  |
 
  
 
