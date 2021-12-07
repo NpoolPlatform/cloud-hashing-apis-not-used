@@ -196,6 +196,16 @@ func GetUserInvitationCodeByCode(ctx context.Context, in *inspirepb.GetUserInvit
 	return cli.GetUserInvitationCodeByCode(ctx, in)
 }
 
+func CreateRegistrationInvitation(ctx context.Context, in *inspirepb.CreateRegistrationInvitationRequest) (*inspirepb.CreateRegistrationInvitationResponse, error) {
+	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
+	}
+
+	cli := inspirepb.NewCloudHashingInspireClient(conn)
+	return cli.CreateRegistrationInvitation(ctx, in)
+}
+
 //---------------------------------------------------------------------------------------------------------------------------
 
 func CreateBillingAccount(ctx context.Context, in *billingpb.CreateCoinAccountRequest) (*billingpb.CreateCoinAccountResponse, error) {
