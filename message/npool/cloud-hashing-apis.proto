@@ -74,6 +74,13 @@ service CloudHashingApis {
             body: "*"
         };
     }
+
+    rpc GetMyInvitations(GetMyInvitationsRequest) returns (GetMyInvitationsResponse) {
+        option (google.api.http) = {
+            post: "/v1/get/my/invitations"
+            body: "*"
+        };
+    }
 }
 
 message PageInfo {
@@ -443,4 +450,18 @@ message UserInfo {
 
 message SignupResponse {
     UserInfo Info = 1;
+}
+
+message Invitation {
+    UserInfo Inviter = 1;
+    repeated UserInfo Invitees = 2;
+}
+
+message GetMyInvitationsRequest {
+    string AppID = 1;
+    string InviterID = 2;
+}
+
+message GetMyInvitationsResponse {
+    repeated Invitation Infos = 1;
 }

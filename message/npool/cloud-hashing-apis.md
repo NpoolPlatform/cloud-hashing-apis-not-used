@@ -20,6 +20,8 @@
     - [GetGoodDetailResponse](#cloud.hashing.apis.v1.GetGoodDetailResponse)
     - [GetGoodsDetailRequest](#cloud.hashing.apis.v1.GetGoodsDetailRequest)
     - [GetGoodsDetailResponse](#cloud.hashing.apis.v1.GetGoodsDetailResponse)
+    - [GetMyInvitationsRequest](#cloud.hashing.apis.v1.GetMyInvitationsRequest)
+    - [GetMyInvitationsResponse](#cloud.hashing.apis.v1.GetMyInvitationsResponse)
     - [GetOrderDetailRequest](#cloud.hashing.apis.v1.GetOrderDetailRequest)
     - [GetOrderDetailResponse](#cloud.hashing.apis.v1.GetOrderDetailResponse)
     - [GetOrdersDetailByAppRequest](#cloud.hashing.apis.v1.GetOrdersDetailByAppRequest)
@@ -33,6 +35,7 @@
     - [GoodFee](#cloud.hashing.apis.v1.GoodFee)
     - [GoodInfo](#cloud.hashing.apis.v1.GoodInfo)
     - [GoodPaying](#cloud.hashing.apis.v1.GoodPaying)
+    - [Invitation](#cloud.hashing.apis.v1.Invitation)
     - [Order](#cloud.hashing.apis.v1.Order)
     - [OrderDetail](#cloud.hashing.apis.v1.OrderDetail)
     - [OrderFee](#cloud.hashing.apis.v1.OrderFee)
@@ -346,6 +349,37 @@
 
 
 
+<a name="cloud.hashing.apis.v1.GetMyInvitationsRequest"></a>
+
+### GetMyInvitationsRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| AppID | [string](#string) |  |  |
+| InviterID | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.GetMyInvitationsResponse"></a>
+
+### GetMyInvitationsResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| Infos | [Invitation](#cloud.hashing.apis.v1.Invitation) | repeated |  |
+
+
+
+
+
+
 <a name="cloud.hashing.apis.v1.GetOrderDetailRequest"></a>
 
 ### GetOrderDetailRequest
@@ -587,6 +621,22 @@
 | ID | [string](#string) |  |  |
 | OrderID | [string](#string) |  |  |
 | PaymentID | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.Invitation"></a>
+
+### Invitation
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| Inviter | [UserInfo](#cloud.hashing.apis.v1.UserInfo) |  |  |
+| Invitees | [UserInfo](#cloud.hashing.apis.v1.UserInfo) | repeated |  |
 
 
 
@@ -946,6 +996,7 @@ Cloud Hashing Goods
 | GetOrdersDetailByApp | [GetOrdersDetailByAppRequest](#cloud.hashing.apis.v1.GetOrdersDetailByAppRequest) | [GetOrdersDetailByAppResponse](#cloud.hashing.apis.v1.GetOrdersDetailByAppResponse) |  |
 | GetOrdersDetailByGood | [GetOrdersDetailByGoodRequest](#cloud.hashing.apis.v1.GetOrdersDetailByGoodRequest) | [GetOrdersDetailByGoodResponse](#cloud.hashing.apis.v1.GetOrdersDetailByGoodResponse) |  |
 | Signup | [SignupRequest](#cloud.hashing.apis.v1.SignupRequest) | [SignupResponse](#cloud.hashing.apis.v1.SignupResponse) |  |
+| GetMyInvitations | [GetMyInvitationsRequest](#cloud.hashing.apis.v1.GetMyInvitationsRequest) | [GetMyInvitationsResponse](#cloud.hashing.apis.v1.GetMyInvitationsResponse) |  |
 
  
 

@@ -95,3 +95,111 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 		Info: convertUserinfo(signupResp.Info),
 	}, nil
 }
+
+func GetMyInvitations(ctx context.Context, in *npool.GetMyInvitationsRequest) (*npool.GetMyInvitationsResponse, error) { //nolint
+	userResp, err := grpc2.GetUser(ctx, &usermgrpb.GetUserRequest{
+		AppID:  in.GetAppID(),
+		UserID: in.GetInviterID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get inviter user information: %v", err)
+	}
+
+	layer := 0
+	goon := true
+
+	type myInvitee struct {
+		layer   int
+		inviter *npool.UserInfo
+		invitee *npool.UserInfo
+	}
+	tmpInvitees := []*myInvitee{&myInvitee{ //nolint
+		layer:   layer,
+		inviter: nil,
+		invitee: &npool.UserInfo{
+			UserID:   userResp.Info.UserID,
+			Username: userResp.Info.Username,
+			Avatar:   userResp.Info.Avatar,
+		},
+	}}
+	layer++
+
+	// TODO: process deadloop
+	for goon {
+		goon = false
+
+		for _, curInvitee := range tmpInvitees {
+			if curInvitee.layer != layer-1 {
+				continue
+			}
+
+			resp, err := grpc2.GetRegistrationInvitationsByAppInviter(ctx, &inspirepb.GetRegistrationInvitationsByAppInviterRequest{
+				AppID:     in.GetAppID(),
+				InviterID: curInvitee.invitee.UserID,
+			})
+			if err != nil {
+				logger.Sugar().Errorf("fail get invitations by inviter: %v", err)
+				continue
+			}
+
+			for _, info := range resp.Infos {
+				if info.AppID != in.GetAppID() ||
+					info.InviterID != curInvitee.invitee.UserID {
+					logger.Sugar().Errorf("invalid inviter id or app id")
+					continue
+				}
+
+				inviteeResp, err := grpc2.GetUser(ctx, &usermgrpb.GetUserRequest{
+					AppID:  in.GetAppID(),
+					UserID: info.InviteeID,
+				})
+				if err != nil {
+					logger.Sugar().Errorf("fail get invitee user info: %v", err)
+					continue
+				}
+
+				tmpInvitees = append(tmpInvitees, &myInvitee{
+					layer:   layer,
+					inviter: curInvitee.invitee,
+					invitee: &npool.UserInfo{
+						UserID:   inviteeResp.Info.UserID,
+						Username: inviteeResp.Info.Username,
+						Avatar:   inviteeResp.Info.Avatar,
+					},
+				})
+
+				goon = true
+			}
+		}
+
+		layer++
+	}
+
+	invitations := []*npool.Invitation{}
+	for _, curInvitee := range tmpInvitees {
+		if curInvitee.inviter == nil {
+			continue
+		}
+
+		inserted := false
+
+		for _, invitation := range invitations {
+			if invitation.Inviter.UserID == curInvitee.inviter.UserID {
+				invitation.Invitees = append(invitation.Invitees, curInvitee.invitee)
+				inserted = true
+				break
+			}
+		}
+
+		if !inserted {
+			invitations = append(invitations, &npool.Invitation{
+				Inviter:  curInvitee.inviter,
+				Invitees: []*npool.UserInfo{curInvitee.invitee},
+			})
+		}
+	}
+
+	return &npool.GetMyInvitationsResponse{
+		Infos: invitations,
+	}, nil
+}

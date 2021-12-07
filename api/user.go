@@ -23,3 +23,12 @@ func (s *Server) Signup(ctx context.Context, in *npool.SignupRequest) (*npool.Si
 	}
 	return resp, nil
 }
+
+func (s *Server) GetMyInvitations(ctx context.Context, in *npool.GetMyInvitationsRequest) (*npool.GetMyInvitationsResponse, error) {
+	resp, err := user.GetMyInvitations(ctx, in)
+	if err != nil {
+		logger.Sugar().Errorf("get my invitations error: %w", err)
+		return &npool.GetMyInvitationsResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return resp, nil
+}

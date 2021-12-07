@@ -206,6 +206,16 @@ func CreateRegistrationInvitation(ctx context.Context, in *inspirepb.CreateRegis
 	return cli.CreateRegistrationInvitation(ctx, in)
 }
 
+func GetRegistrationInvitationsByAppInviter(ctx context.Context, in *inspirepb.GetRegistrationInvitationsByAppInviterRequest) (*inspirepb.GetRegistrationInvitationsByAppInviterResponse, error) {
+	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
+	}
+
+	cli := inspirepb.NewCloudHashingInspireClient(conn)
+	return cli.GetRegistrationInvitationsByAppInviter(ctx, in)
+}
+
 //---------------------------------------------------------------------------------------------------------------------------
 
 func CreateBillingAccount(ctx context.Context, in *billingpb.CreateCoinAccountRequest) (*billingpb.CreateCoinAccountResponse, error) {
@@ -260,4 +270,14 @@ func Signup(ctx context.Context, in *usermgrpb.SignupRequest) (*usermgrpb.Signup
 
 	cli := usermgrpb.NewUserClient(conn)
 	return cli.SignUp(ctx, in)
+}
+
+func GetUser(ctx context.Context, in *usermgrpb.GetUserRequest) (*usermgrpb.GetUserResponse, error) {
+	conn, err := grpc2.GetGRPCConn(usermgrconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get usermgr connection: %v", err)
+	}
+
+	cli := usermgrpb.NewUserClient(conn)
+	return cli.GetUser(ctx, in)
 }
