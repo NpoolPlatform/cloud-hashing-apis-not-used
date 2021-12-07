@@ -231,6 +231,7 @@ pipeline {
         sh(returnStdout: true, script: '''
           revlist=`git rev-list --tags --max-count=1`
           tag=`git describe --tags $revlist`
+          git reset --hard
           git checkout $tag
           images=`docker images | grep entropypool | grep cloud-hashing-apis | grep $tag | awk '{ print $3 }'`
           for image in $images; do
