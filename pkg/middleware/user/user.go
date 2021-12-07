@@ -102,7 +102,7 @@ func GetMyInvitations(ctx context.Context, in *npool.GetMyInvitationsRequest) (*
 		UserID: in.GetInviterID(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get inviter user information: %v", err)
+		return nil, xerrors.Errorf("fail get inviter %v user information: %v", in.GetInviterID(), err)
 	}
 
 	layer := 0
@@ -138,7 +138,7 @@ func GetMyInvitations(ctx context.Context, in *npool.GetMyInvitationsRequest) (*
 				InviterID: curInvitee.invitee.UserID,
 			})
 			if err != nil {
-				logger.Sugar().Errorf("fail get invitations by inviter: %v", err)
+				logger.Sugar().Errorf("fail get invitations by inviter %v: %v", curInvitee.invitee.UserID, err)
 				continue
 			}
 
@@ -154,7 +154,7 @@ func GetMyInvitations(ctx context.Context, in *npool.GetMyInvitationsRequest) (*
 					UserID: info.InviteeID,
 				})
 				if err != nil {
-					logger.Sugar().Errorf("fail get invitee user info: %v", err)
+					logger.Sugar().Errorf("fail get invitee %v user info: %v", info.InviteeID, err)
 					continue
 				}
 
