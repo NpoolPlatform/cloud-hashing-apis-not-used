@@ -20,6 +20,9 @@
     - [GetGoodDetailResponse](#cloud.hashing.apis.v1.GetGoodDetailResponse)
     - [GetGoodsDetailRequest](#cloud.hashing.apis.v1.GetGoodsDetailRequest)
     - [GetGoodsDetailResponse](#cloud.hashing.apis.v1.GetGoodsDetailResponse)
+    - [GetMyDirectInvitationsRequest](#cloud.hashing.apis.v1.GetMyDirectInvitationsRequest)
+    - [GetMyDirectInvitationsResponse](#cloud.hashing.apis.v1.GetMyDirectInvitationsResponse)
+    - [GetMyDirectInvitationsResponse.InfosEntry](#cloud.hashing.apis.v1.GetMyDirectInvitationsResponse.InfosEntry)
     - [GetMyInvitationsRequest](#cloud.hashing.apis.v1.GetMyInvitationsRequest)
     - [GetMyInvitationsResponse](#cloud.hashing.apis.v1.GetMyInvitationsResponse)
     - [GetMyInvitationsResponse.InfosEntry](#cloud.hashing.apis.v1.GetMyInvitationsResponse.InfosEntry)
@@ -345,6 +348,53 @@
 | ----- | ---- | ----- | ----------- |
 | Details | [GoodDetail](#cloud.hashing.apis.v1.GoodDetail) | repeated |  |
 | Total | [int32](#int32) |  |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.GetMyDirectInvitationsRequest"></a>
+
+### GetMyDirectInvitationsRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| AppID | [string](#string) |  |  |
+| InviterID | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.GetMyDirectInvitationsResponse"></a>
+
+### GetMyDirectInvitationsResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| Infos | [GetMyDirectInvitationsResponse.InfosEntry](#cloud.hashing.apis.v1.GetMyDirectInvitationsResponse.InfosEntry) | repeated |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.GetMyDirectInvitationsResponse.InfosEntry"></a>
+
+### GetMyDirectInvitationsResponse.InfosEntry
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| key | [string](#string) |  |  |
+| value | [Invitation](#cloud.hashing.apis.v1.Invitation) |  |  |
 
 
 
@@ -1032,6 +1082,7 @@ Cloud Hashing Goods
 | GetOrdersDetailByGood | [GetOrdersDetailByGoodRequest](#cloud.hashing.apis.v1.GetOrdersDetailByGoodRequest) | [GetOrdersDetailByGoodResponse](#cloud.hashing.apis.v1.GetOrdersDetailByGoodResponse) |  |
 | Signup | [SignupRequest](#cloud.hashing.apis.v1.SignupRequest) | [SignupResponse](#cloud.hashing.apis.v1.SignupResponse) |  |
 | GetMyInvitations | [GetMyInvitationsRequest](#cloud.hashing.apis.v1.GetMyInvitationsRequest) | [GetMyInvitationsResponse](#cloud.hashing.apis.v1.GetMyInvitationsResponse) |  |
+| GetMyDirectInvitations | [GetMyDirectInvitationsRequest](#cloud.hashing.apis.v1.GetMyDirectInvitationsRequest) | [GetMyDirectInvitationsResponse](#cloud.hashing.apis.v1.GetMyDirectInvitationsResponse) |  |
 
  
 

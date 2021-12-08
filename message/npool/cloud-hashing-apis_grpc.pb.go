@@ -30,6 +30,7 @@ type CloudHashingApisClient interface {
 	GetOrdersDetailByGood(ctx context.Context, in *GetOrdersDetailByGoodRequest, opts ...grpc.CallOption) (*GetOrdersDetailByGoodResponse, error)
 	Signup(ctx context.Context, in *SignupRequest, opts ...grpc.CallOption) (*SignupResponse, error)
 	GetMyInvitations(ctx context.Context, in *GetMyInvitationsRequest, opts ...grpc.CallOption) (*GetMyInvitationsResponse, error)
+	GetMyDirectInvitations(ctx context.Context, in *GetMyDirectInvitationsRequest, opts ...grpc.CallOption) (*GetMyDirectInvitationsResponse, error)
 }
 
 type cloudHashingApisClient struct {
@@ -139,6 +140,15 @@ func (c *cloudHashingApisClient) GetMyInvitations(ctx context.Context, in *GetMy
 	return out, nil
 }
 
+func (c *cloudHashingApisClient) GetMyDirectInvitations(ctx context.Context, in *GetMyDirectInvitationsRequest, opts ...grpc.CallOption) (*GetMyDirectInvitationsResponse, error) {
+	out := new(GetMyDirectInvitationsResponse)
+	err := c.cc.Invoke(ctx, "/cloud.hashing.apis.v1.CloudHashingApis/GetMyDirectInvitations", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CloudHashingApisServer is the server API for CloudHashingApis service.
 // All implementations must embed UnimplementedCloudHashingApisServer
 // for forward compatibility
@@ -154,6 +164,7 @@ type CloudHashingApisServer interface {
 	GetOrdersDetailByGood(context.Context, *GetOrdersDetailByGoodRequest) (*GetOrdersDetailByGoodResponse, error)
 	Signup(context.Context, *SignupRequest) (*SignupResponse, error)
 	GetMyInvitations(context.Context, *GetMyInvitationsRequest) (*GetMyInvitationsResponse, error)
+	GetMyDirectInvitations(context.Context, *GetMyDirectInvitationsRequest) (*GetMyDirectInvitationsResponse, error)
 	mustEmbedUnimplementedCloudHashingApisServer()
 }
 
@@ -193,6 +204,9 @@ func (UnimplementedCloudHashingApisServer) Signup(context.Context, *SignupReques
 }
 func (UnimplementedCloudHashingApisServer) GetMyInvitations(context.Context, *GetMyInvitationsRequest) (*GetMyInvitationsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMyInvitations not implemented")
+}
+func (UnimplementedCloudHashingApisServer) GetMyDirectInvitations(context.Context, *GetMyDirectInvitationsRequest) (*GetMyDirectInvitationsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMyDirectInvitations not implemented")
 }
 func (UnimplementedCloudHashingApisServer) mustEmbedUnimplementedCloudHashingApisServer() {}
 
@@ -405,6 +419,24 @@ func _CloudHashingApis_GetMyInvitations_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CloudHashingApis_GetMyDirectInvitations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMyDirectInvitationsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CloudHashingApisServer).GetMyDirectInvitations(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/cloud.hashing.apis.v1.CloudHashingApis/GetMyDirectInvitations",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CloudHashingApisServer).GetMyDirectInvitations(ctx, req.(*GetMyDirectInvitationsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CloudHashingApis_ServiceDesc is the grpc.ServiceDesc for CloudHashingApis service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -455,6 +487,10 @@ var CloudHashingApis_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetMyInvitations",
 			Handler:    _CloudHashingApis_GetMyInvitations_Handler,
+		},
+		{
+			MethodName: "GetMyDirectInvitations",
+			Handler:    _CloudHashingApis_GetMyDirectInvitations_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

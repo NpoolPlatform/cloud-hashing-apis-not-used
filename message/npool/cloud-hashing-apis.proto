@@ -81,6 +81,12 @@ service CloudHashingApis {
             body: "*"
         };
     }
+    rpc GetMyDirectInvitations(GetMyDirectInvitationsRequest) returns (GetMyDirectInvitationsResponse) {
+        option (google.api.http) = {
+            post: "/v1/get/my/direct/invitations"
+            body: "*"
+        };
+    }
 }
 
 message PageInfo {
@@ -469,5 +475,14 @@ message GetMyInvitationsRequest {
 }
 
 message GetMyInvitationsResponse {
+    map<string, Invitation> Infos = 1;
+}
+
+message GetMyDirectInvitationsRequest {
+    string AppID = 1;
+    string InviterID = 2;
+}
+
+message GetMyDirectInvitationsResponse {
     map<string, Invitation> Infos = 1;
 }

@@ -29,6 +29,10 @@ spec:
             backend:
               serviceName: cloud-hashing-apis
               servicePort: 50140
+          - path: /api/cloud-hashing-apis/v1/get/my/direct/invitations
+            backend:
+              serviceName: cloud-hashing-apis
+              servicePort: 50140
     - host: api.xpool.top
       http: *http_appid_userid_rules
     - host: www.npool.top
@@ -62,6 +66,10 @@ spec:
       http: &http_appid_rules
         paths:
           - path: /api/cloud-hashing-apis/v1/get/goods/detail
+            backend:
+              serviceName: cloud-hashing-apis
+              servicePort: 50140
+          - path: /api/cloud-hashing-apis/v1/signup
             backend:
               serviceName: cloud-hashing-apis
               servicePort: 50140

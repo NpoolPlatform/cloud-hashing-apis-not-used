@@ -96,18 +96,18 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 	}, nil
 }
 
-func GetMyInvitations(ctx context.Context, in *npool.GetMyInvitationsRequest) (*npool.GetMyInvitationsResponse, error) { //nolint
+func getInvitations(ctx context.Context, appID, reqInviterID string, directOnly bool) (map[string]*npool.Invitation, error) { //nolint
 	_, err := grpc2.GetUser(ctx, &usermgrpb.GetUserRequest{
-		AppID:  in.GetAppID(),
-		UserID: in.GetInviterID(),
+		AppID:  appID,
+		UserID: reqInviterID,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get inviter %v user information: %v", in.GetInviterID(), err)
+		return nil, xerrors.Errorf("fail get inviter %v user information: %v", reqInviterID, err)
 	}
 
 	goon := true
 	invitations := map[string]*npool.Invitation{}
-	invitations[in.GetInviterID()] = &npool.Invitation{
+	invitations[reqInviterID] = &npool.Invitation{
 		Invitees: []*npool.InvitationUserInfo{},
 	}
 	inviters := map[string]struct{}{}
@@ -124,7 +124,7 @@ func GetMyInvitations(ctx context.Context, in *npool.GetMyInvitationsRequest) (*
 			inviters[inviterID] = struct{}{}
 
 			resp, err := grpc2.GetRegistrationInvitationsByAppInviter(ctx, &inspirepb.GetRegistrationInvitationsByAppInviterRequest{
-				AppID:     in.GetAppID(),
+				AppID:     appID,
 				InviterID: inviterID,
 			})
 			if err != nil {
@@ -133,13 +133,13 @@ func GetMyInvitations(ctx context.Context, in *npool.GetMyInvitationsRequest) (*
 			}
 
 			for _, info := range resp.Infos {
-				if info.AppID != in.GetAppID() || info.InviterID != inviterID {
+				if info.AppID != appID || info.InviterID != inviterID {
 					logger.Sugar().Errorf("invalid inviter id or app id")
 					continue
 				}
 
 				inviteeResp, err := grpc2.GetUser(ctx, &usermgrpb.GetUserRequest{
-					AppID:  in.GetAppID(),
+					AppID:  appID,
 					UserID: info.InviteeID,
 				})
 				if err != nil {
@@ -161,9 +161,11 @@ func GetMyInvitations(ctx context.Context, in *npool.GetMyInvitationsRequest) (*
 						EmailAddress: inviteeResp.Info.EmailAddress,
 					})
 
-				if _, ok := invitations[inviteeResp.Info.UserID]; !ok {
-					invitations[inviteeResp.Info.UserID] = &npool.Invitation{
-						Invitees: []*npool.InvitationUserInfo{},
+				if !directOnly {
+					if _, ok := invitations[inviteeResp.Info.UserID]; !ok {
+						invitations[inviteeResp.Info.UserID] = &npool.Invitation{
+							Invitees: []*npool.InvitationUserInfo{},
+						}
 					}
 				}
 
@@ -172,7 +174,25 @@ func GetMyInvitations(ctx context.Context, in *npool.GetMyInvitationsRequest) (*
 		}
 	}
 
+	return invitations, nil
+}
+
+func GetMyInvitations(ctx context.Context, in *npool.GetMyInvitationsRequest) (*npool.GetMyInvitationsResponse, error) { //nolint
+	invitations, err := getInvitations(ctx, in.GetAppID(), in.GetInviterID(), false)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get invitations: %v", err)
+	}
 	return &npool.GetMyInvitationsResponse{
+		Infos: invitations,
+	}, nil
+}
+
+func GetMyDirectInvitations(ctx context.Context, in *npool.GetMyDirectInvitationsRequest) (*npool.GetMyDirectInvitationsResponse, error) { //nolint
+	invitations, err := getInvitations(ctx, in.GetAppID(), in.GetInviterID(), true)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get invitations: %v", err)
+	}
+	return &npool.GetMyDirectInvitationsResponse{
 		Infos: invitations,
 	}, nil
 }
