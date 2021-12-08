@@ -116,7 +116,7 @@ func GetMyInvitations(ctx context.Context, in *npool.GetMyInvitationsRequest) (*
 	for goon {
 		goon = false
 
-		for inviterID, _ := range invitations {
+		for inviterID, _ := range invitations { //nolint
 			if _, ok := inviters[inviterID]; ok {
 				continue
 			}
