@@ -97,7 +97,7 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 }
 
 func GetMyInvitations(ctx context.Context, in *npool.GetMyInvitationsRequest) (*npool.GetMyInvitationsResponse, error) { //nolint
-	userResp, err := grpc2.GetUser(ctx, &usermgrpb.GetUserRequest{
+	_, err := grpc2.GetUser(ctx, &usermgrpb.GetUserRequest{
 		AppID:  in.GetAppID(),
 		UserID: in.GetInviterID(),
 	})
@@ -105,46 +105,35 @@ func GetMyInvitations(ctx context.Context, in *npool.GetMyInvitationsRequest) (*
 		return nil, xerrors.Errorf("fail get inviter %v user information: %v", in.GetInviterID(), err)
 	}
 
-	layer := 0
 	goon := true
-
-	type myInvitee struct {
-		layer   int
-		inviter *npool.UserInfo
-		invitee *npool.UserInfo
+	invitations := map[string]*npool.Invitation{}
+	invitations[in.GetInviterID()] = &npool.Invitation{
+		Invitees: []*npool.InvitationUserInfo{},
 	}
-	tmpInvitees := []*myInvitee{&myInvitee{ //nolint
-		layer:   layer,
-		inviter: nil,
-		invitee: &npool.UserInfo{
-			UserID:   userResp.Info.UserID,
-			Username: userResp.Info.Username,
-			Avatar:   userResp.Info.Avatar,
-		},
-	}}
-	layer++
+	inviters := map[string]struct{}{}
 
 	// TODO: process deadloop
 	for goon {
 		goon = false
 
-		for _, curInvitee := range tmpInvitees {
-			if curInvitee.layer != layer-1 {
+		for inviterID, _ := range invitations {
+			if _, ok := inviters[inviterID]; ok {
 				continue
 			}
 
+			inviters[inviterID] = struct{}{}
+
 			resp, err := grpc2.GetRegistrationInvitationsByAppInviter(ctx, &inspirepb.GetRegistrationInvitationsByAppInviterRequest{
 				AppID:     in.GetAppID(),
-				InviterID: curInvitee.invitee.UserID,
+				InviterID: inviterID,
 			})
 			if err != nil {
-				logger.Sugar().Errorf("fail get invitations by inviter %v: %v", curInvitee.invitee.UserID, err)
+				logger.Sugar().Errorf("fail get invitations by inviter %v: %v", inviterID, err)
 				continue
 			}
 
 			for _, info := range resp.Infos {
-				if info.AppID != in.GetAppID() ||
-					info.InviterID != curInvitee.invitee.UserID {
+				if info.AppID != in.GetAppID() || info.InviterID != inviterID {
 					logger.Sugar().Errorf("invalid inviter id or app id")
 					continue
 				}
@@ -158,44 +147,28 @@ func GetMyInvitations(ctx context.Context, in *npool.GetMyInvitationsRequest) (*
 					continue
 				}
 
-				tmpInvitees = append(tmpInvitees, &myInvitee{
-					layer:   layer,
-					inviter: curInvitee.invitee,
-					invitee: &npool.UserInfo{
-						UserID:   inviteeResp.Info.UserID,
-						Username: inviteeResp.Info.Username,
-						Avatar:   inviteeResp.Info.Avatar,
-					},
-				})
+				if _, ok := invitations[inviterID]; !ok {
+					invitations[inviterID] = &npool.Invitation{
+						Invitees: []*npool.InvitationUserInfo{},
+					}
+				}
+
+				invitations[inviterID].Invitees = append(
+					invitations[inviterID].Invitees, &npool.InvitationUserInfo{
+						UserID:       inviteeResp.Info.UserID,
+						Username:     inviteeResp.Info.Username,
+						Avatar:       inviteeResp.Info.Avatar,
+						EmailAddress: inviteeResp.Info.EmailAddress,
+					})
+
+				if _, ok := invitations[inviteeResp.Info.UserID]; !ok {
+					invitations[inviteeResp.Info.UserID] = &npool.Invitation{
+						Invitees: []*npool.InvitationUserInfo{},
+					}
+				}
 
 				goon = true
 			}
-		}
-
-		layer++
-	}
-
-	invitations := []*npool.Invitation{}
-	for _, curInvitee := range tmpInvitees {
-		if curInvitee.inviter == nil {
-			continue
-		}
-
-		inserted := false
-
-		for _, invitation := range invitations {
-			if invitation.Inviter.UserID == curInvitee.inviter.UserID {
-				invitation.Invitees = append(invitation.Invitees, curInvitee.invitee)
-				inserted = true
-				break
-			}
-		}
-
-		if !inserted {
-			invitations = append(invitations, &npool.Invitation{
-				Inviter:  curInvitee.inviter,
-				Invitees: []*npool.UserInfo{curInvitee.invitee},
-			})
 		}
 	}
 

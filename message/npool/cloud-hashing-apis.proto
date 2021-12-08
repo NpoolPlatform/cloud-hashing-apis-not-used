@@ -452,9 +452,15 @@ message SignupResponse {
     UserInfo Info = 1;
 }
 
+message InvitationUserInfo {
+    string UserID = 1;
+    string Username = 2;
+    string Avatar = 3;
+    string EmailAddress = 4;
+}
+
 message Invitation {
-    UserInfo Inviter = 1;
-    repeated UserInfo Invitees = 2;
+    repeated InvitationUserInfo Invitees = 1;
 }
 
 message GetMyInvitationsRequest {
@@ -463,5 +469,5 @@ message GetMyInvitationsRequest {
 }
 
 message GetMyInvitationsResponse {
-    repeated Invitation Infos = 1;
+    map<string, Invitation> Infos = 1;
 }

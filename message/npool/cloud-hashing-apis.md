@@ -22,6 +22,7 @@
     - [GetGoodsDetailResponse](#cloud.hashing.apis.v1.GetGoodsDetailResponse)
     - [GetMyInvitationsRequest](#cloud.hashing.apis.v1.GetMyInvitationsRequest)
     - [GetMyInvitationsResponse](#cloud.hashing.apis.v1.GetMyInvitationsResponse)
+    - [GetMyInvitationsResponse.InfosEntry](#cloud.hashing.apis.v1.GetMyInvitationsResponse.InfosEntry)
     - [GetOrderDetailRequest](#cloud.hashing.apis.v1.GetOrderDetailRequest)
     - [GetOrderDetailResponse](#cloud.hashing.apis.v1.GetOrderDetailResponse)
     - [GetOrdersDetailByAppRequest](#cloud.hashing.apis.v1.GetOrdersDetailByAppRequest)
@@ -36,6 +37,7 @@
     - [GoodInfo](#cloud.hashing.apis.v1.GoodInfo)
     - [GoodPaying](#cloud.hashing.apis.v1.GoodPaying)
     - [Invitation](#cloud.hashing.apis.v1.Invitation)
+    - [InvitationUserInfo](#cloud.hashing.apis.v1.InvitationUserInfo)
     - [Order](#cloud.hashing.apis.v1.Order)
     - [OrderDetail](#cloud.hashing.apis.v1.OrderDetail)
     - [OrderFee](#cloud.hashing.apis.v1.OrderFee)
@@ -373,7 +375,23 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| Infos | [Invitation](#cloud.hashing.apis.v1.Invitation) | repeated |  |
+| Infos | [GetMyInvitationsResponse.InfosEntry](#cloud.hashing.apis.v1.GetMyInvitationsResponse.InfosEntry) | repeated |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.GetMyInvitationsResponse.InfosEntry"></a>
+
+### GetMyInvitationsResponse.InfosEntry
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| key | [string](#string) |  |  |
+| value | [Invitation](#cloud.hashing.apis.v1.Invitation) |  |  |
 
 
 
@@ -635,8 +653,25 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| Inviter | [UserInfo](#cloud.hashing.apis.v1.UserInfo) |  |  |
-| Invitees | [UserInfo](#cloud.hashing.apis.v1.UserInfo) | repeated |  |
+| Invitees | [InvitationUserInfo](#cloud.hashing.apis.v1.InvitationUserInfo) | repeated |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.InvitationUserInfo"></a>
+
+### InvitationUserInfo
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| UserID | [string](#string) |  |  |
+| Username | [string](#string) |  |  |
+| Avatar | [string](#string) |  |  |
+| EmailAddress | [string](#string) |  |  |
 
 
 
