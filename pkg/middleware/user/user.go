@@ -45,6 +45,24 @@ func convertUserinfo(info *usermgrpb.UserBasicInfo) *npool.UserInfo {
 }
 
 func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse, error) {
+	invitationCode := in.GetInvitationCode()
+	inviterID := ""
+
+	if invitationCode != "" {
+		getByCodeResp, err := grpc2.GetUserInvitationCodeByCode(ctx, &inspirepb.GetUserInvitationCodeByCodeRequest{
+			Code: invitationCode,
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail get user invitation code: %v", err)
+		}
+
+		if getByCodeResp.Info.AppID != in.GetAppID() {
+			return nil, xerrors.Errorf("invalid invitation code for app")
+		}
+
+		inviterID = getByCodeResp.Info.UserID
+	}
+
 	signupResp, err := grpc2.Signup(ctx, &usermgrpb.SignupRequest{
 		Username:     in.GetUsername(),
 		Password:     in.GetPassword(),
@@ -57,37 +75,16 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 		return nil, xerrors.Errorf("fail signup: %v", err)
 	}
 
-	invitationCode := in.GetInvitationCode()
 	if invitationCode != "" {
-		getByCodeResp, err := grpc2.GetUserInvitationCodeByCode(ctx, &inspirepb.GetUserInvitationCodeByCodeRequest{
-			Code: invitationCode,
-		})
-		if err != nil {
-			logger.Sugar().Errorf("fail get user invitation code: %v", err)
-			return &npool.SignupResponse{
-				Info: convertUserinfo(signupResp.Info),
-			}, nil
-		}
-
-		if getByCodeResp.Info.AppID != in.GetAppID() {
-			logger.Sugar().Errorf("invalid invitation code for app")
-			return &npool.SignupResponse{
-				Info: convertUserinfo(signupResp.Info),
-			}, nil
-		}
-
 		_, err = grpc2.CreateRegistrationInvitation(ctx, &inspirepb.CreateRegistrationInvitationRequest{
 			Info: &inspirepb.RegistrationInvitation{
 				AppID:     in.GetAppID(),
-				InviterID: getByCodeResp.Info.UserID,
+				InviterID: inviterID,
 				InviteeID: signupResp.Info.UserID,
 			},
 		})
 		if err != nil {
-			logger.Sugar().Errorf("fail create registration invitation: %v", err)
-			return &npool.SignupResponse{
-				Info: convertUserinfo(signupResp.Info),
-			}, nil
+			return nil, xerrors.Errorf("fail create registration invitation: %v", err)
 		}
 	}
 
