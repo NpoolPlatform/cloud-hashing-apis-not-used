@@ -21,6 +21,14 @@ spec:
             backend:
               serviceName: cloud-hashing-apis
               servicePort: 50140
+          - path: /api/cloud-hashing-apis/v1/submit/order
+            backend:
+              serviceName: cloud-hashing-apis
+              servicePort: 50140
+          - path: /api/cloud-hashing-apis/v1/create/order/payment
+            backend:
+              serviceName: cloud-hashing-apis
+              servicePort: 50140
           - path: /api/cloud-hashing-apis/v1/get/order/detail
             backend:
               serviceName: cloud-hashing-apis
