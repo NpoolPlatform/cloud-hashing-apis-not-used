@@ -267,6 +267,7 @@
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | ID | [string](#string) |  |  |
+| AppID | [string](#string) |  |  |
 | Fee | [GoodFee](#cloud.hashing.apis.v1.GoodFee) |  |  |
 | Value | [double](#double) |  |  |
 
@@ -635,7 +636,6 @@
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | ID | [string](#string) |  |  |
-| AppID | [string](#string) |  |  |
 | FeeType | [string](#string) |  |  |
 | FeeDescription | [string](#string) |  |  |
 | PayType | [string](#string) |  |  |

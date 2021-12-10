@@ -307,7 +307,6 @@ message UserSpecialReduction {
 
 message GoodFee {
     string ID = 1;
-    string AppID = 3;
     string FeeType = 4;
     string FeeDescription = 5;
     string PayType = 6;
@@ -315,8 +314,9 @@ message GoodFee {
 
 message Fee {
     string ID = 1;
-    GoodFee Fee = 2;
-    double Value = 3;
+    string AppID = 2;
+    GoodFee Fee = 3;
+    double Value = 4;
 }
 
 message OrderDetail {

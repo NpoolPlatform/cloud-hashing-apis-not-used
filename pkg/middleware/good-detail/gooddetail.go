@@ -77,9 +77,10 @@ func constructGoodDetail(info *goodspb.GoodDetail, coinInfos []*coininfopb.CoinI
 	var fees []*npool.Fee //nolint
 	for _, fee := range info.Fees {
 		fees = append(fees, &npool.Fee{
+			ID:    fee.ID,
+			AppID: fee.AppID,
 			Fee: &npool.GoodFee{
 				ID:             fee.Fee.ID,
-				AppID:          fee.Fee.ID,
 				FeeType:        fee.Fee.FeeType,
 				FeeDescription: fee.Fee.FeeDescription,
 				PayType:        fee.Fee.PayType,
