@@ -113,6 +113,49 @@ func constructOrderDetail(
 		reductionAmount = userSpecial.Amount
 	}
 
+	var coinInfo *npool.CoinInfo
+
+	if paymentCoinInfo != nil {
+		coinInfo = &npool.CoinInfo{
+			ID:      paymentCoinInfo.ID,
+			Name:    paymentCoinInfo.Name,
+			PreSale: paymentCoinInfo.PreSale,
+			Logo:    paymentCoinInfo.Logo,
+			Unit:    paymentCoinInfo.Unit,
+		}
+	}
+
+	var myPayment *npool.Payment
+
+	if info.Payment != nil {
+		myPayment = &npool.Payment{
+			ID:      info.Payment.ID,
+			OrderID: info.Payment.OrderID,
+			Account: &npool.Account{
+				ID:         account.ID,
+				CoinTypeID: account.CoinTypeID,
+				Address:    account.Address,
+				AppID:      account.AppID,
+				UserID:     account.UserID,
+			},
+			Amount:                info.Payment.Amount,
+			CoinInfo:              coinInfo,
+			State:                 info.Payment.State,
+			ChainTransactionID:    info.Payment.ChainTransactionID,
+			PlatformTransactionID: info.Payment.PlatformTransactionID,
+		}
+	}
+
+	var goodPaying *npool.GoodPaying
+
+	if info.GoodPaying != nil {
+		goodPaying = &npool.GoodPaying{
+			ID:        info.GoodPaying.ID,
+			OrderID:   info.GoodPaying.OrderID,
+			PaymentID: info.GoodPaying.PaymentID,
+		}
+	}
+
 	return &npool.OrderDetail{
 		ID:                     info.ID,
 		GoodID:                 info.GoodID,
@@ -123,39 +166,14 @@ func constructOrderDetail(
 		SpecialReductionAmount: reductionAmount,
 		DiscountCoupon:         myDiscount,
 		UserSpecialReduction:   specialReduction,
-		GoodPaying: &npool.GoodPaying{
-			ID:        info.GoodPaying.ID,
-			OrderID:   info.GoodPaying.OrderID,
-			PaymentID: info.GoodPaying.PaymentID,
-		},
-		GasPayings:  gasPayings,
-		Compensates: compensates,
-		OutOfGases:  outOfGases,
-		Payment: &npool.Payment{
-			ID:      info.Payment.ID,
-			OrderID: info.Payment.OrderID,
-			Account: &npool.Account{
-				ID:         account.ID,
-				CoinTypeID: account.CoinTypeID,
-				Address:    account.Address,
-				AppID:      account.AppID,
-				UserID:     account.UserID,
-			},
-			Amount: info.Payment.Amount,
-			CoinInfo: &npool.CoinInfo{
-				ID:      paymentCoinInfo.ID,
-				Name:    paymentCoinInfo.Name,
-				PreSale: paymentCoinInfo.PreSale,
-				Logo:    "",
-				Unit:    paymentCoinInfo.Unit,
-			},
-			State:                 info.Payment.State,
-			ChainTransactionID:    info.Payment.ChainTransactionID,
-			PlatformTransactionID: info.Payment.PlatformTransactionID,
-		},
-		Start:  info.Start,
-		End:    info.End,
-		Coupon: myCoupon,
+		GoodPaying:             goodPaying,
+		GasPayings:             gasPayings,
+		Compensates:            compensates,
+		OutOfGases:             outOfGases,
+		Payment:                myPayment,
+		Start:                  info.Start,
+		End:                    info.End,
+		Coupon:                 myCoupon,
 	}
 }
 
@@ -174,18 +192,25 @@ func expandDetail(ctx context.Context, info *orderpb.OrderDetail) (*npool.OrderD
 		coupon = couponAllocated.Info
 	}
 
-	coinInfo, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
-		ID: info.Payment.CoinInfoID,
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail get payment coin info: %v", err)
-	}
+	var paymentCoinInfo *coininfopb.CoinInfo
+	var accountInfo *billingpb.CoinAccountInfo
 
-	account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
-		ID: info.Payment.AccountID,
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail get payment address: %v", err)
+	if info.Payment != nil {
+		coinInfo, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
+			ID: info.Payment.CoinInfoID,
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail get payment coin info: %v", err)
+		}
+		paymentCoinInfo = coinInfo.Info
+
+		account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
+			ID: info.Payment.AccountID,
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail get payment address: %v", err)
+		}
+		accountInfo = account.Info
 	}
 
 	var discountCoupon *inspirepb.CouponAllocatedDetail
@@ -217,8 +242,8 @@ func expandDetail(ctx context.Context, info *orderpb.OrderDetail) (*npool.OrderD
 	return constructOrderDetail(
 		info,
 		coupon,
-		coinInfo.Info,
-		account.Info,
+		paymentCoinInfo,
+		accountInfo,
 		discountCoupon,
 		userSpecialReduction), nil
 }
