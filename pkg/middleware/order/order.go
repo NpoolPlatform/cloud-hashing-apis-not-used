@@ -14,7 +14,7 @@ import (
 	inspirepb "github.com/NpoolPlatform/cloud-hashing-inspire/message/npool"
 	orderpb "github.com/NpoolPlatform/cloud-hashing-order/message/npool"
 	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
-	tradingpb "github.com/NpoolPlatform/message/npool/trading"
+	sphinxproxypb "github.com/NpoolPlatform/message/npool/sphinxproxy"
 
 	"github.com/google/uuid"
 
@@ -409,9 +409,8 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		coinAddress = fmt.Sprintf("placeholder-%v", uuid.New())
 	} else {
 		// Generate transaction address
-		address, err := grpc2.CreateCoinAddress(ctx, &tradingpb.CreateWalletRequest{
-			CoinName: coinInfo.Info.Name,
-			UUID:     myOrder.Detail.UserID,
+		address, err := grpc2.CreateCoinAddress(ctx, &sphinxproxypb.CreateWalletRequest{
+			Name: coinInfo.Info.Name,
 		})
 		if err != nil {
 			return nil, xerrors.Errorf("fail create wallet address: %v", err)
@@ -437,16 +436,14 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	balanceAmount := float64(0)
 
 	if !idle && !coinInfo.Info.PreSale {
-		balance, err := grpc2.GetWalletBalance(ctx, &tradingpb.GetWalletBalanceRequest{
-			Info: &tradingpb.EntAccount{
-				CoinName: coinInfo.Info.Name,
-				Address:  coinAddress,
-			},
+		balance, err := grpc2.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
+			Name:    coinInfo.Info.Name,
+			Address: coinAddress,
 		})
 		if err != nil {
 			return nil, xerrors.Errorf("fail get wallet balance: %v", err)
 		}
-		balanceAmount = balance.AmountFloat64
+		balanceAmount = balance.Info.Balance
 	}
 
 	// Generate payment

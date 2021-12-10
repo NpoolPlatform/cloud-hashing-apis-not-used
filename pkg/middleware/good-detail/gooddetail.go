@@ -13,7 +13,6 @@ import (
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc" //nolint
 
 	"golang.org/x/xerrors"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 func constructGoodDetail(info *goodspb.GoodDetail, coinInfos []*coininfopb.CoinInfo) (*npool.GoodDetail, error) {
@@ -152,7 +151,7 @@ func GetAll(ctx context.Context, in *npool.GetGoodsDetailRequest) (*npool.GetGoo
 		return nil, xerrors.Errorf("fail get goods info: %v", err)
 	}
 
-	coininfoResp, err := grpc2.GetCoinInfos(ctx, &emptypb.Empty{})
+	coininfoResp, err := grpc2.GetCoinInfos(ctx, &coininfopb.GetCoinInfosRequest{})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get coin infos: %v", err)
 	}
@@ -181,7 +180,7 @@ func Get(ctx context.Context, in *npool.GetGoodDetailRequest) (*npool.GetGoodDet
 		return nil, xerrors.Errorf("fail get good detail: %v", err)
 	}
 
-	coininfoResp, err := grpc2.GetCoinInfos(ctx, &emptypb.Empty{})
+	coininfoResp, err := grpc2.GetCoinInfos(ctx, &coininfopb.GetCoinInfosRequest{})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get coin infos: %v", err)
 	}
