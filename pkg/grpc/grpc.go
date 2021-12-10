@@ -12,7 +12,7 @@ import (
 	coininfoconst "github.com/NpoolPlatform/sphinx-coininfo/pkg/message/const" //nolint
 
 	sphinxproxypb "github.com/NpoolPlatform/message/npool/sphinxproxy"
-	sphinxproxyconst "github.com/NpoolPlatform/sphinx-service/pkg/message/const" //nolint
+	sphinxproxyconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const" //nolint
 
 	orderpb "github.com/NpoolPlatform/cloud-hashing-order/message/npool"
 	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/message/const" //nolint
