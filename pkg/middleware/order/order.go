@@ -3,6 +3,7 @@ package order
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
@@ -352,7 +353,7 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 	// Validate coupon id
 	// Validate fee ids
 
-	start := (goodInfo.Detail.Start + 24*60*60) / 24 / 60 / 60 * 24 * 60 * 60
+	start := (uint32(time.Now().Unix()) + 24*60*60) / 24 / 60 / 60 * 24 * 60 * 60
 	end := start + uint32(goodInfo.Detail.DurationDays)*24*60*60
 
 	// Generate order

@@ -71,7 +71,6 @@ func constructGoodDetail(info *goodspb.GoodDetail, coinInfos []*coininfopb.CoinI
 			SupportCoinTypeIDs: info.InheritFromGood.SupportCoinTypeIDs,
 			Total:              info.InheritFromGood.Total,
 			Unit:               info.InheritFromGood.Unit,
-			Start:              info.InheritFromGood.Start,
 		}
 	}
 
@@ -133,7 +132,6 @@ func constructGoodDetail(info *goodspb.GoodDetail, coinInfos []*coininfopb.CoinI
 			VoteCount: info.Extra.VoteCount,
 			Rating:    info.Extra.Rating,
 		},
-		Start: info.Start,
 		Unit:  info.Unit,
 		Title: info.Title,
 		Fees:  fees,
