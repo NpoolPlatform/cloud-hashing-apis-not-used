@@ -45,7 +45,7 @@ func convertUserinfo(info *usermgrpb.UserBasicInfo) *npool.UserInfo {
 	}
 }
 
-func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse, error) {
+func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse, error) { //nolint
 	invitationCode := in.GetInvitationCode()
 	inviterID := ""
 
