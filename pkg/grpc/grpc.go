@@ -26,6 +26,9 @@ import (
 	usermgrpb "github.com/NpoolPlatform/user-management/message/npool"
 	usermgrconst "github.com/NpoolPlatform/user-management/pkg/message/const" //nolint
 
+	appmgrpb "github.com/NpoolPlatform/application-management/message/npool"
+	appmgrconst "github.com/NpoolPlatform/application-management/pkg/message/const" //nolint
+
 	"golang.org/x/xerrors"
 )
 
@@ -279,4 +282,16 @@ func GetUser(ctx context.Context, in *usermgrpb.GetUserRequest) (*usermgrpb.GetU
 
 	cli := usermgrpb.NewUserClient(conn)
 	return cli.GetUser(ctx, in)
+}
+
+//---------------------------------------------------------------------------------------------------------------------------
+
+func GetApp(ctx context.Context, in *appmgrpb.GetApplicationRequest) (*appmgrpb.GetApplicationResponse, error) {
+	conn, err := grpc2.GetGRPCConn(appmgrconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get appmgr connection: %v", err)
+	}
+
+	cli := appmgrpb.NewApplicationManagementClient(conn)
+	return cli.GetApplication(ctx, in)
 }

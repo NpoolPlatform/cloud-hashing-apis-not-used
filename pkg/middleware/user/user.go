@@ -9,6 +9,7 @@ import (
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 
+	appmgrpb "github.com/NpoolPlatform/application-management/message/npool"
 	inspirepb "github.com/NpoolPlatform/cloud-hashing-inspire/message/npool"
 	usermgrpb "github.com/NpoolPlatform/user-management/message/npool"
 
@@ -48,6 +49,13 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 	invitationCode := in.GetInvitationCode()
 	inviterID := ""
 
+	appResp, err := grpc2.GetApp(ctx, &appmgrpb.GetApplicationRequest{
+		AppID: in.GetAppID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app: %v", err)
+	}
+
 	if invitationCode != "" {
 		getByCodeResp, err := grpc2.GetUserInvitationCodeByCode(ctx, &inspirepb.GetUserInvitationCodeByCodeRequest{
 			Code: invitationCode,
@@ -56,11 +64,16 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 			return nil, xerrors.Errorf("fail get user invitation code: %v", err)
 		}
 
-		if getByCodeResp.Info.AppID != in.GetAppID() {
-			return nil, xerrors.Errorf("invalid invitation code for app")
+		if getByCodeResp.Info == nil {
+			if appResp.Info.InvitationCodeMust {
+				return nil, xerrors.Errorf("fail get invitation code")
+			}
+		} else {
+			if getByCodeResp.Info.AppID != in.GetAppID() {
+				return nil, xerrors.Errorf("invalid invitation code for app")
+			}
+			inviterID = getByCodeResp.Info.UserID
 		}
-
-		inviterID = getByCodeResp.Info.UserID
 	}
 
 	signupResp, err := grpc2.Signup(ctx, &usermgrpb.SignupRequest{
@@ -75,7 +88,7 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 		return nil, xerrors.Errorf("fail signup: %v", err)
 	}
 
-	if invitationCode != "" {
+	if invitationCode != "" && inviterID != "" {
 		_, err = grpc2.CreateRegistrationInvitation(ctx, &inspirepb.CreateRegistrationInvitationRequest{
 			Info: &inspirepb.RegistrationInvitation{
 				AppID:     in.GetAppID(),
