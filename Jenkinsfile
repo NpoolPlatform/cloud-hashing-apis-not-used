@@ -319,7 +319,7 @@ pipeline {
           git reset --hard
           git checkout $tag
           sed -i "s/cloud-hashing-apis:latest/cloud-hashing-apis:$tag/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml
-          sed -i "s/registry//entropypool/env.DOCKER_REGISTRY//entropypool/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml
+          sed -i "s/entropyregistry/$DOCKER_REGISTRY/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml
           TAG=$tag make deploy-to-k8s-cluster
         '''.stripIndent())
       }
@@ -342,7 +342,7 @@ pipeline {
           git reset --hard
           git checkout $tag
           sed -i "s/cloud-hashing-apis:latest/cloud-hashing-apis:$tag/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml
-          sed -i "s/registry//entropypool/env.DOCKER_REGISTRY//entropypool/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml
+          sed -i "s/entropyregistry/$DOCKER_REGISTRY/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml
           TAG=$tag make deploy-to-k8s-cluster
         '''.stripIndent())
       }
