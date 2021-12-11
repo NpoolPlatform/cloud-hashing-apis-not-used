@@ -56,6 +56,12 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 		return nil, xerrors.Errorf("fail get app: %v", err)
 	}
 
+	if appResp.Info.InvitationCodeMust {
+		if invitationCode == "" {
+			return nil, xerrors.Errorf("invitation code is must")
+		}
+	}
+
 	if invitationCode != "" {
 		getByCodeResp, err := grpc2.GetUserInvitationCodeByCode(ctx, &inspirepb.GetUserInvitationCodeByCodeRequest{
 			Code: invitationCode,
