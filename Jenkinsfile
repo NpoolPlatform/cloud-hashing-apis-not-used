@@ -303,7 +303,7 @@ pipeline {
         expression { TARGET_ENV == 'development' }
       }
       steps {
-        sh 'sed -i "s/entropyregistry/$DOCKER_REGISTRY/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml'
+        sh 'sed -i "s/uhub.service.ucloud.cn/$DOCKER_REGISTRY/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml'
         sh 'TAG=latest make deploy-to-k8s-cluster'
       }
     }
@@ -320,7 +320,7 @@ pipeline {
           git reset --hard
           git checkout $tag
           sed -i "s/cloud-hashing-apis:latest/cloud-hashing-apis:$tag/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml
-          sed -i "s/entropyregistry/$DOCKER_REGISTRY/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml
+          sed -i "s/uhub.service.ucloud.cn/$DOCKER_REGISTRY/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml
           TAG=$tag make deploy-to-k8s-cluster
         '''.stripIndent())
       }
@@ -343,7 +343,7 @@ pipeline {
           git reset --hard
           git checkout $tag
           sed -i "s/cloud-hashing-apis:latest/cloud-hashing-apis:$tag/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml
-          sed -i "s/entropyregistry/$DOCKER_REGISTRY/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml
+          sed -i "s/uhub.service.ucloud.cn/$DOCKER_REGISTRY/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml
           TAG=$tag make deploy-to-k8s-cluster
         '''.stripIndent())
       }
