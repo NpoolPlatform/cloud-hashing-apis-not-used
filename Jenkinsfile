@@ -303,6 +303,7 @@ pipeline {
         expression { TARGET_ENV == 'development' }
       }
       steps {
+        sh 'sed -i "s/entropyregistry/$DOCKER_REGISTRY/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml'
         sh 'TAG=latest make deploy-to-k8s-cluster'
       }
     }
