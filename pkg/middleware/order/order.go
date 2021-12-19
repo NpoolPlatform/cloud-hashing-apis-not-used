@@ -179,7 +179,7 @@ func constructOrderDetail(
 	}
 }
 
-func expandDetail(ctx context.Context, info *orderpb.OrderDetail) (*npool.OrderDetail, error) {
+func expandDetail(ctx context.Context, info *orderpb.OrderDetail) (*npool.OrderDetail, error) { //nolint
 	var coupon *inspirepb.CouponAllocatedDetail
 
 	couponAllocated, err := grpc2.GetCouponAllocated(ctx, &inspirepb.GetCouponAllocatedDetailRequest{
