@@ -24,6 +24,7 @@ import (
 
 func constructOrderDetail(
 	info *orderpb.OrderDetail,
+	goodInfo *npool.GoodDetail,
 	coupon *inspirepb.CouponAllocatedDetail,
 	paymentCoinInfo *coininfopb.CoinInfo,
 	account *billingpb.CoinAccountInfo,
@@ -159,7 +160,7 @@ func constructOrderDetail(
 
 	return &npool.OrderDetail{
 		ID:                     info.ID,
-		GoodID:                 info.GoodID,
+		Good:                   goodInfo,
 		AppID:                  info.AppID,
 		UserID:                 info.UserID,
 		Units:                  info.Units,
@@ -240,8 +241,16 @@ func expandDetail(ctx context.Context, info *orderpb.OrderDetail) (*npool.OrderD
 		userSpecialReduction = userSpecial.Info
 	}
 
+	goodInfo, err := gooddetail.Get(ctx, &npool.GetGoodDetailRequest{
+		ID: info.GetGoodID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get good info: %v", err)
+	}
+
 	return constructOrderDetail(
 		info,
+		goodInfo.Detail,
 		coupon,
 		paymentCoinInfo,
 		accountInfo,
@@ -399,7 +408,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	}
 
 	goodInfo, err := gooddetail.Get(ctx, &npool.GetGoodDetailRequest{
-		ID: myOrder.Detail.GoodID,
+		ID: myOrder.Detail.Good.ID,
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get order good info: %v", err)

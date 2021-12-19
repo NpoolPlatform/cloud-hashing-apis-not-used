@@ -321,7 +321,7 @@ message Fee {
 
 message OrderDetail {
     string ID = 2700;
-    string GoodID = 2701;
+    GoodDetail Good = 2701;
     string AppID = 2702;
     string UserID = 2703;
     uint32 Units = 2704;

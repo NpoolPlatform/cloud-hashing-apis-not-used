@@ -760,7 +760,7 @@
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | ID | [string](#string) |  |  |
-| GoodID | [string](#string) |  |  |
+| Good | [GoodDetail](#cloud.hashing.apis.v1.GoodDetail) |  |  |
 | AppID | [string](#string) |  |  |
 | UserID | [string](#string) |  |  |
 | Units | [uint32](#uint32) |  |  |
