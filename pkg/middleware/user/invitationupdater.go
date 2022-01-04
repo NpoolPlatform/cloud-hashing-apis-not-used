@@ -232,9 +232,11 @@ func getInvitations(appID, reqInviterID string, directOnly bool, noOrder bool) (
 						Summarys:     summarys,
 					})
 
-				if _, ok := invitations[inviteeResp.Info.UserID]; !ok {
-					invitations[inviteeResp.Info.UserID] = &npool.Invitation{
-						Invitees: []*npool.InvitationUserInfo{},
+				if !directOnly {
+					if _, ok := invitations[inviteeResp.Info.UserID]; !ok {
+						invitations[inviteeResp.Info.UserID] = &npool.Invitation{
+							Invitees: []*npool.InvitationUserInfo{},
+						}
 					}
 				}
 
