@@ -161,6 +161,21 @@ func GetOrdersDetailByAppUser(ctx context.Context, in *orderpb.GetOrdersDetailBy
 	return cli.GetOrdersDetailByAppUser(ctx, in)
 }
 
+func GetOrdersShortDetailByAppUser(ctx context.Context, in *orderpb.GetOrdersShortDetailByAppUserRequest) (*orderpb.GetOrdersShortDetailByAppUserResponse, error) {
+	conn, err := grpc2.GetGRPCConn(orderconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get order connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := orderpb.NewCloudHashingOrderClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetOrdersShortDetailByAppUser(ctx, in)
+}
+
 func GetOrdersDetailByApp(ctx context.Context, in *orderpb.GetOrdersDetailByAppRequest) (*orderpb.GetOrdersDetailByAppResponse, error) {
 	conn, err := grpc2.GetGRPCConn(orderconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {

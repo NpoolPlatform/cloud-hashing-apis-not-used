@@ -13,6 +13,7 @@ import (
 	appmgrpb "github.com/NpoolPlatform/application-management/message/npool"
 	inspirepb "github.com/NpoolPlatform/cloud-hashing-inspire/message/npool"
 	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
+	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
 	usermgrpb "github.com/NpoolPlatform/user-management/message/npool"
 
 	"golang.org/x/xerrors"
@@ -129,6 +130,8 @@ func getInvitations(ctx context.Context, appID, reqInviterID string, directOnly 
 		Invitees: []*npool.InvitationUserInfo{},
 	}
 	inviters := map[string]struct{}{}
+	myGoods := map[string]*npool.GoodDetail{}
+	myCoins := map[string]*coininfopb.CoinInfo{}
 
 	// TODO: process deadloop
 	for goon {
@@ -174,14 +177,17 @@ func getInvitations(ctx context.Context, appID, reqInviterID string, directOnly 
 					continue
 				}
 
-				resp2, err := order.GetOrdersDetailByAppUser(ctx, &npool.GetOrdersDetailByAppUserRequest{
+				resp2, goods, coins, err := order.GetOrdersShortDetailByAppUser(ctx, &npool.GetOrdersDetailByAppUserRequest{
 					AppID:  appID,
 					UserID: inviteeResp.Info.UserID,
-				})
+				}, myGoods, myCoins)
 				if err != nil {
 					logger.Sugar().Errorf("fail get orders detail by app user: %v", err)
 					continue
 				}
+
+				myGoods = goods
+				myCoins = coins
 
 				summarys := map[string]*npool.InvitationSummary{}
 
@@ -258,6 +264,8 @@ func getInvitations(ctx context.Context, appID, reqInviterID string, directOnly 
 				for _, iv := range invitation.Invitees {
 					curInviteeIDs = append(curInviteeIDs, iv.UserID)
 
+					logger.Sugar().Infof("start caculate %v", iv.UserID)
+
 					for coinID, summary := range iv.Summarys {
 						if _, ok := invitee.Summarys[coinID]; !ok {
 							invitee.Summarys[coinID] = &npool.InvitationSummary{}
@@ -269,6 +277,7 @@ func getInvitations(ctx context.Context, appID, reqInviterID string, directOnly 
 						invitee.Summarys[coinID] = mySummary
 					}
 
+					logger.Sugar().Infof("end caculate %v", iv.UserID)
 					goon = true
 				}
 			}
