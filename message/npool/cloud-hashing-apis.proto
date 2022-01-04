@@ -457,11 +457,17 @@ message SignupResponse {
     UserInfo Info = 1;
 }
 
+message InvitationSummary {
+    uint32 Units = 10;
+    double Amount = 20;
+}
+
 message InvitationUserInfo {
     string UserID = 1;
     string Username = 2;
     string Avatar = 3;
     string EmailAddress = 4;
+    map<string, InvitationSummary> InvitationSummarys = 5;
 }
 
 message Invitation {

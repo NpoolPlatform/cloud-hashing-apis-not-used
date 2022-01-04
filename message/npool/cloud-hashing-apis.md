@@ -40,7 +40,9 @@
     - [GoodInfo](#cloud.hashing.apis.v1.GoodInfo)
     - [GoodPaying](#cloud.hashing.apis.v1.GoodPaying)
     - [Invitation](#cloud.hashing.apis.v1.Invitation)
+    - [InvitationSummary](#cloud.hashing.apis.v1.InvitationSummary)
     - [InvitationUserInfo](#cloud.hashing.apis.v1.InvitationUserInfo)
+    - [InvitationUserInfo.InvitationSummarysEntry](#cloud.hashing.apis.v1.InvitationUserInfo.InvitationSummarysEntry)
     - [Order](#cloud.hashing.apis.v1.Order)
     - [OrderDetail](#cloud.hashing.apis.v1.OrderDetail)
     - [OrderFee](#cloud.hashing.apis.v1.OrderFee)
@@ -709,6 +711,22 @@
 
 
 
+<a name="cloud.hashing.apis.v1.InvitationSummary"></a>
+
+### InvitationSummary
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| Units | [uint32](#uint32) |  |  |
+| Amount | [double](#double) |  |  |
+
+
+
+
+
+
 <a name="cloud.hashing.apis.v1.InvitationUserInfo"></a>
 
 ### InvitationUserInfo
@@ -721,6 +739,23 @@
 | Username | [string](#string) |  |  |
 | Avatar | [string](#string) |  |  |
 | EmailAddress | [string](#string) |  |  |
+| InvitationSummarys | [InvitationUserInfo.InvitationSummarysEntry](#cloud.hashing.apis.v1.InvitationUserInfo.InvitationSummarysEntry) | repeated |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.InvitationUserInfo.InvitationSummarysEntry"></a>
+
+### InvitationUserInfo.InvitationSummarysEntry
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| key | [string](#string) |  |  |
+| value | [InvitationSummary](#cloud.hashing.apis.v1.InvitationSummary) |  |  |
 
 
 
