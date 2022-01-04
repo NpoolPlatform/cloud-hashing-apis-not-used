@@ -81,7 +81,7 @@ func getFullInvitations(appID, inviterID string) (map[string]*npool.Invitation, 
 	invitations := appInvitations[appID][inviterID]
 	mutex.Unlock()
 
-	if invitations != nil {
+	if len(invitations) > 0 {
 		return invitations, nil
 	}
 
@@ -98,7 +98,7 @@ func getDirectInvitations(appID, inviterID string) (map[string]*npool.Invitation
 	invitations := appInvitations[appID][inviterID]
 	mutex.Unlock()
 
-	if invitations != nil {
+	if len(invitations) > 0 {
 		return invitations, nil
 	}
 
