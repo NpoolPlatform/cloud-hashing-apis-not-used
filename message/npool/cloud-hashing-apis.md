@@ -42,7 +42,7 @@
     - [Invitation](#cloud.hashing.apis.v1.Invitation)
     - [InvitationSummary](#cloud.hashing.apis.v1.InvitationSummary)
     - [InvitationUserInfo](#cloud.hashing.apis.v1.InvitationUserInfo)
-    - [InvitationUserInfo.InvitationSummarysEntry](#cloud.hashing.apis.v1.InvitationUserInfo.InvitationSummarysEntry)
+    - [InvitationUserInfo.SummarysEntry](#cloud.hashing.apis.v1.InvitationUserInfo.SummarysEntry)
     - [Order](#cloud.hashing.apis.v1.Order)
     - [OrderDetail](#cloud.hashing.apis.v1.OrderDetail)
     - [OrderFee](#cloud.hashing.apis.v1.OrderFee)
@@ -740,16 +740,16 @@
 | Avatar | [string](#string) |  |  |
 | EmailAddress | [string](#string) |  |  |
 | Kol | [bool](#bool) |  |  |
-| InvitationSummarys | [InvitationUserInfo.InvitationSummarysEntry](#cloud.hashing.apis.v1.InvitationUserInfo.InvitationSummarysEntry) | repeated |  |
+| Summarys | [InvitationUserInfo.SummarysEntry](#cloud.hashing.apis.v1.InvitationUserInfo.SummarysEntry) | repeated |  |
 
 
 
 
 
 
-<a name="cloud.hashing.apis.v1.InvitationUserInfo.InvitationSummarysEntry"></a>
+<a name="cloud.hashing.apis.v1.InvitationUserInfo.SummarysEntry"></a>
 
-### InvitationUserInfo.InvitationSummarysEntry
+### InvitationUserInfo.SummarysEntry
 
 
 

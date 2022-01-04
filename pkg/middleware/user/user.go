@@ -8,9 +8,11 @@ import (
 	"github.com/NpoolPlatform/cloud-hashing-apis/message/npool"
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
+	order "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/order"
 
 	appmgrpb "github.com/NpoolPlatform/application-management/message/npool"
 	inspirepb "github.com/NpoolPlatform/cloud-hashing-inspire/message/npool"
+	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
 	usermgrpb "github.com/NpoolPlatform/user-management/message/npool"
 
 	"golang.org/x/xerrors"
@@ -172,6 +174,39 @@ func getInvitations(ctx context.Context, appID, reqInviterID string, directOnly 
 					continue
 				}
 
+				resp2, err := order.GetOrdersDetailByAppUser(ctx, &npool.GetOrdersDetailByAppUserRequest{
+					AppID:  appID,
+					UserID: inviteeResp.Info.UserID,
+				})
+				if err != nil {
+					logger.Sugar().Errorf("fail get orders detail by app user: %v", err)
+					continue
+				}
+
+				summarys := map[string]*npool.InvitationSummary{}
+
+				for _, orderInfo := range resp2.Details {
+					if orderInfo.Payment == nil {
+						continue
+					}
+
+					if orderInfo.Payment.State != orderconst.PaymentStateDone {
+						continue
+					}
+
+					if _, ok := summarys[orderInfo.Good.CoinInfo.ID]; !ok {
+						summarys[orderInfo.Good.CoinInfo.ID] = &npool.InvitationSummary{
+							Units:  0,
+							Amount: 0,
+						}
+					}
+
+					summary := summarys[orderInfo.Good.CoinInfo.ID]
+					summary.Units += orderInfo.Units
+					summary.Amount += orderInfo.Payment.Amount
+					summarys[orderInfo.Good.CoinInfo.ID] = summary
+				}
+
 				kol := false
 				if resp1.Info != nil {
 					kol = true
@@ -190,6 +225,7 @@ func getInvitations(ctx context.Context, appID, reqInviterID string, directOnly 
 						Avatar:       inviteeResp.Info.Avatar,
 						EmailAddress: inviteeResp.Info.EmailAddress,
 						Kol:          kol,
+						Summarys:     summarys,
 					})
 
 				if _, ok := invitations[inviteeResp.Info.UserID]; !ok {

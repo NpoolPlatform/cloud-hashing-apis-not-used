@@ -468,7 +468,7 @@ message InvitationUserInfo {
     string Avatar = 3;
     string EmailAddress = 4;
     bool Kol = 5;
-    map<string, InvitationSummary> InvitationSummarys = 6;
+    map<string, InvitationSummary> Summarys = 6;
 }
 
 message Invitation {
