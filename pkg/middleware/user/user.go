@@ -195,10 +195,7 @@ func getInvitations(ctx context.Context, appID, reqInviterID string, directOnly 
 					}
 
 					if _, ok := summarys[orderInfo.Good.CoinInfo.ID]; !ok {
-						summarys[orderInfo.Good.CoinInfo.ID] = &npool.InvitationSummary{
-							Units:  0,
-							Amount: 0,
-						}
+						summarys[orderInfo.Good.CoinInfo.ID] = &npool.InvitationSummary{}
 					}
 
 					summary := summarys[orderInfo.Good.CoinInfo.ID]
@@ -239,11 +236,52 @@ func getInvitations(ctx context.Context, appID, reqInviterID string, directOnly 
 		}
 	}
 
-	if directOnly {
-		directInvitations := map[string]*npool.Invitation{}
-		directInvitations[reqInviterID] = invitations[reqInviterID]
-		return directInvitations, nil
+	invitation := invitations[reqInviterID]
+
+	for _, invitee := range invitation.Invitees {
+		curInviteeIDs := []string{invitee.UserID}
+		foundInvitees := map[string]struct{}{}
+		goon := true
+
+		for goon {
+			goon = false
+
+			for _, curInviteeID := range curInviteeIDs {
+				if _, ok := foundInvitees[curInviteeID]; ok {
+					continue
+				}
+
+				foundInvitees[curInviteeID] = struct{}{}
+
+				invitation := invitations[curInviteeID]
+
+				for _, iv := range invitation.Invitees {
+					curInviteeIDs = append(curInviteeIDs, iv.UserID)
+
+					for coinID, summary := range iv.Summarys {
+						if _, ok := invitee.Summarys[coinID]; !ok {
+							invitee.Summarys[coinID] = &npool.InvitationSummary{}
+						}
+						// TODO: process different payment coin type
+						mySummary := invitee.Summarys[coinID]
+						mySummary.Units += summary.Units
+						mySummary.Amount += summary.Amount
+						invitee.Summarys[coinID] = mySummary
+					}
+
+					goon = true
+				}
+			}
+		}
 	}
+
+	if directOnly {
+		return map[string]*npool.Invitation{
+			reqInviterID: invitation,
+		}, nil
+	}
+
+	invitations[reqInviterID] = invitation
 
 	return invitations, nil
 }
