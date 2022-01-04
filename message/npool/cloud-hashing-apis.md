@@ -739,6 +739,7 @@
 | Username | [string](#string) |  |  |
 | Avatar | [string](#string) |  |  |
 | EmailAddress | [string](#string) |  |  |
+| Kol | [bool](#bool) |  |  |
 | InvitationSummarys | [InvitationUserInfo.InvitationSummarysEntry](#cloud.hashing.apis.v1.InvitationUserInfo.InvitationSummarysEntry) | repeated |  |
 
 

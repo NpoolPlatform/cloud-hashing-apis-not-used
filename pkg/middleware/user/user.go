@@ -163,6 +163,20 @@ func getInvitations(ctx context.Context, appID, reqInviterID string, directOnly 
 					continue
 				}
 
+				resp1, err := grpc2.GetUserInvitationCodeByAppUser(ctx, &inspirepb.GetUserInvitationCodeByAppUserRequest{
+					AppID:  appID,
+					UserID: inviteeResp.Info.UserID,
+				})
+				if err != nil {
+					logger.Sugar().Errorf("fail get user invitation code: %v", err)
+					continue
+				}
+
+				kol := false
+				if resp1.Info != nil {
+					kol = true
+				}
+
 				if _, ok := invitations[inviterID]; !ok {
 					invitations[inviterID] = &npool.Invitation{
 						Invitees: []*npool.InvitationUserInfo{},
@@ -175,19 +189,24 @@ func getInvitations(ctx context.Context, appID, reqInviterID string, directOnly 
 						Username:     inviteeResp.Info.Username,
 						Avatar:       inviteeResp.Info.Avatar,
 						EmailAddress: inviteeResp.Info.EmailAddress,
+						Kol:          kol,
 					})
 
-				if !directOnly {
-					if _, ok := invitations[inviteeResp.Info.UserID]; !ok {
-						invitations[inviteeResp.Info.UserID] = &npool.Invitation{
-							Invitees: []*npool.InvitationUserInfo{},
-						}
+				if _, ok := invitations[inviteeResp.Info.UserID]; !ok {
+					invitations[inviteeResp.Info.UserID] = &npool.Invitation{
+						Invitees: []*npool.InvitationUserInfo{},
 					}
 				}
 
 				goon = true
 			}
 		}
+	}
+
+	if directOnly {
+		directInvitations := map[string]*npool.Invitation{}
+		directInvitations[reqInviterID] = invitations[reqInviterID]
+		return directInvitations, nil
 	}
 
 	return invitations, nil
