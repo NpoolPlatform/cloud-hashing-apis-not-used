@@ -153,7 +153,9 @@ func getInvitations(ctx context.Context, appID, reqInviterID string, directOnly 
 				continue
 			}
 
-			for _, info := range resp.Infos {
+			for i, info := range resp.Infos {
+				logger.Sugar().Infof("%v of %v", i, len(resp.Infos))
+
 				if info.AppID != appID || info.InviterID != inviterID {
 					logger.Sugar().Errorf("invalid inviter id or app id")
 					continue
