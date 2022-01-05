@@ -745,6 +745,7 @@
 | Summarys | [InvitationUserInfo.SummarysEntry](#cloud.hashing.apis.v1.InvitationUserInfo.SummarysEntry) | repeated |  |
 | MySummarys | [InvitationUserInfo.MySummarysEntry](#cloud.hashing.apis.v1.InvitationUserInfo.MySummarysEntry) | repeated |  |
 | InvitedCount | [uint32](#uint32) |  |  |
+| JoinDate | [uint32](#uint32) |  |  |
 
 
 

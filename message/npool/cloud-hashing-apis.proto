@@ -471,6 +471,7 @@ message InvitationUserInfo {
     map<string, InvitationSummary> Summarys = 6;
     map<string, InvitationSummary> MySummarys = 7;
     uint32 InvitedCount = 8;
+    uint32 JoinDate = 9;
 }
 
 message Invitation {

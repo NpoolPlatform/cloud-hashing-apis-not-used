@@ -233,6 +233,7 @@ func getInvitations(appID, reqInviterID string, directOnly bool, noOrder bool) (
 						EmailAddress: inviteeResp.Info.EmailAddress,
 						Kol:          kol,
 						MySummarys:   summarys,
+						JoinDate:     info.CreateAt,
 					})
 
 				if !directOnly {
