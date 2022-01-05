@@ -50,7 +50,7 @@ func addWatcher(appID, inviterID string) {
 }
 
 func Run() {
-	ticker := time.NewTicker(4 * time.Hour)
+	ticker := time.NewTicker(24 * time.Hour)
 
 	for {
 		appInviters := map[string][]string{}
