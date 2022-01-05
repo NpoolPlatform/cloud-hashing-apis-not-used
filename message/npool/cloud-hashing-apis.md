@@ -429,6 +429,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
+| MySelf | [InvitationUserInfo](#cloud.hashing.apis.v1.InvitationUserInfo) |  |  |
 | Infos | [GetMyInvitationsResponse.InfosEntry](#cloud.hashing.apis.v1.GetMyInvitationsResponse.InfosEntry) | repeated |  |
 
 
@@ -741,6 +742,7 @@
 | EmailAddress | [string](#string) |  |  |
 | Kol | [bool](#bool) |  |  |
 | Summarys | [InvitationUserInfo.SummarysEntry](#cloud.hashing.apis.v1.InvitationUserInfo.SummarysEntry) | repeated |  |
+| InvitedCount | [uint32](#uint32) |  |  |
 
 
 
