@@ -265,7 +265,10 @@ func getInvitations(appID, reqInviterID string, directOnly bool, noOrder bool) (
 
 				foundInvitees[curInviteeID] = struct{}{}
 
-				invitation := invitations[curInviteeID]
+				invitation, ok := invitations[curInviteeID]
+				if !ok {
+					continue
+				}
 
 				for _, iv := range invitation.Invitees {
 					curInviteeIDs = append(curInviteeIDs, iv.UserID)
