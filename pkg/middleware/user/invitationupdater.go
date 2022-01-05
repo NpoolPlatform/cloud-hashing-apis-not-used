@@ -72,7 +72,7 @@ func Run() {
 
 		for appID, inviters := range appInviters {
 			for _, inviterID := range inviters {
-				invitations, userInfo, err := getInvitations(appID, inviterID, false, false)
+				invitations, userInfo, err := getInvitations(appID, inviterID, false)
 				if err != nil {
 					logger.Sugar().Errorf("fail get invitations: %v", err)
 					continue
@@ -99,7 +99,7 @@ func getFullInvitations(appID, inviterID string) (map[string]*npool.Invitation, 
 		return invitations, userInfo, nil
 	}
 
-	invitations, userInfo, err := getInvitations(appID, inviterID, false, true)
+	invitations, userInfo, err := getInvitations(appID, inviterID, false)
 	if err != nil {
 		return nil, nil, xerrors.Errorf("fail get invitations: %v", err)
 	}
@@ -117,7 +117,7 @@ func getDirectInvitations(appID, inviterID string) (map[string]*npool.Invitation
 		return invitations, userInfo, nil
 	}
 
-	invitations, userInfo, err := getInvitations(appID, inviterID, true, true)
+	invitations, userInfo, err := getInvitations(appID, inviterID, true)
 	if err != nil {
 		return nil, nil, xerrors.Errorf("fail get invitations: %v", err)
 	}
@@ -127,7 +127,6 @@ func getDirectInvitations(appID, inviterID string) (map[string]*npool.Invitation
 
 func getInvitationUserInfo( //nolint
 	appID, inviteeID string,
-	noOrder bool,
 	myGoods map[string]*npool.GoodDetail,
 	myCoins map[string]*coininfopb.CoinInfo) (*npool.InvitationUserInfo,
 	map[string]*npool.GoodDetail,
@@ -153,36 +152,34 @@ func getInvitationUserInfo( //nolint
 
 	summarys := map[string]*npool.InvitationSummary{}
 
-	if !noOrder {
-		resp2, goods, coins, err := order.GetOrdersShortDetailByAppUser(ctx, &npool.GetOrdersDetailByAppUserRequest{
-			AppID:  appID,
-			UserID: inviteeResp.Info.UserID,
-		}, myGoods, myCoins)
-		if err != nil {
-			return nil, myGoods, myCoins, xerrors.Errorf("fail get orders detail by app user: %v", err)
+	resp2, goods, coins, err := order.GetOrdersShortDetailByAppUser(ctx, &npool.GetOrdersDetailByAppUserRequest{
+		AppID:  appID,
+		UserID: inviteeResp.Info.UserID,
+	}, myGoods, myCoins)
+	if err != nil {
+		return nil, myGoods, myCoins, xerrors.Errorf("fail get orders detail by app user: %v", err)
+	}
+
+	myGoods = goods
+	myCoins = coins
+
+	for _, orderInfo := range resp2.Details {
+		if orderInfo.Payment == nil {
+			continue
 		}
 
-		myGoods = goods
-		myCoins = coins
-
-		for _, orderInfo := range resp2.Details {
-			if orderInfo.Payment == nil {
-				continue
-			}
-
-			if orderInfo.Payment.State != orderconst.PaymentStateDone {
-				continue
-			}
-
-			if _, ok := summarys[orderInfo.Good.CoinInfo.ID]; !ok {
-				summarys[orderInfo.Good.CoinInfo.ID] = &npool.InvitationSummary{}
-			}
-
-			summary := summarys[orderInfo.Good.CoinInfo.ID]
-			summary.Units += orderInfo.Units
-			summary.Amount += orderInfo.Payment.Amount
-			summarys[orderInfo.Good.CoinInfo.ID] = summary
+		if orderInfo.Payment.State != orderconst.PaymentStateDone {
+			continue
 		}
+
+		if _, ok := summarys[orderInfo.Good.CoinInfo.ID]; !ok {
+			summarys[orderInfo.Good.CoinInfo.ID] = &npool.InvitationSummary{}
+		}
+
+		summary := summarys[orderInfo.Good.CoinInfo.ID]
+		summary.Units += orderInfo.Units
+		summary.Amount += orderInfo.Payment.Amount
+		summarys[orderInfo.Good.CoinInfo.ID] = summary
 	}
 
 	kol := false
@@ -200,7 +197,7 @@ func getInvitationUserInfo( //nolint
 	}, myGoods, myCoins, nil
 }
 
-func getInvitations(appID, reqInviterID string, directOnly, noOrder bool) (map[string]*npool.Invitation, *npool.InvitationUserInfo, error) { //nolint
+func getInvitations(appID, reqInviterID string, directOnly bool) (map[string]*npool.Invitation, *npool.InvitationUserInfo, error) { //nolint
 	ctx := context.Background()
 
 	_, err := grpc2.GetUser(ctx, &usermgrpb.GetUserRequest{
@@ -221,7 +218,7 @@ func getInvitations(appID, reqInviterID string, directOnly, noOrder bool) (map[s
 	myCoins := map[string]*coininfopb.CoinInfo{}
 	myCounts := map[string]uint32{}
 
-	inviterUserInfo, goods, coins, err := getInvitationUserInfo(appID, reqInviterID, directOnly, myGoods, myCoins)
+	inviterUserInfo, goods, coins, err := getInvitationUserInfo(appID, reqInviterID, myGoods, myCoins)
 	if err != nil {
 		return nil, nil, xerrors.Errorf("fail get inviter %v user info: %v", reqInviterID, err)
 	}
@@ -260,7 +257,7 @@ func getInvitations(appID, reqInviterID string, directOnly, noOrder bool) (map[s
 					continue
 				}
 
-				userInfo, goods, coins, err := getInvitationUserInfo(appID, info.InviteeID, directOnly, myGoods, myCoins)
+				userInfo, goods, coins, err := getInvitationUserInfo(appID, info.InviteeID, myGoods, myCoins)
 				if err != nil {
 					logger.Sugar().Errorf("fail get invitation user info: %v", err)
 					continue
