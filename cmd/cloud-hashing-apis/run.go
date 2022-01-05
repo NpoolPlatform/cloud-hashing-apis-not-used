@@ -9,6 +9,7 @@ import (
 	msglistener "github.com/NpoolPlatform/cloud-hashing-apis/pkg/message/listener"
 	msg "github.com/NpoolPlatform/cloud-hashing-apis/pkg/message/message"
 	msgsrv "github.com/NpoolPlatform/cloud-hashing-apis/pkg/message/server"
+	userupdater "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/user"
 
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
@@ -44,6 +45,7 @@ var runCmd = &cli.Command{
 
 		go msglistener.Listen()
 		go msgSender()
+		go userupdater.Run()
 
 		return grpc2.RunGRPCGateWay(rpcGatewayRegister)
 	},
