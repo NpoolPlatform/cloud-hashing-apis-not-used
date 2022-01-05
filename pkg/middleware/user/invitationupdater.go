@@ -294,6 +294,7 @@ func getInvitations(appID, reqInviterID string, directOnly, noOrder bool) (map[s
 	}
 
 	invitation := invitations[reqInviterID]
+	inviterUserInfo.InvitedCount = uint32(len(invitation.Invitees))
 
 	for _, invitee := range invitation.Invitees {
 		curInviteeIDs := []string{invitee.UserID}
