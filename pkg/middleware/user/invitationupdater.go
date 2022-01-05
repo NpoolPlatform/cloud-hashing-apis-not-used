@@ -129,6 +129,7 @@ func getInvitations(appID, reqInviterID string, directOnly bool, noOrder bool) (
 	inviters := map[string]struct{}{}
 	myGoods := map[string]*npool.GoodDetail{}
 	myCoins := map[string]*coininfopb.CoinInfo{}
+	myCounts := map[string]uint32{}
 
 	// TODO: process deadloop
 	for goon {
@@ -149,6 +150,8 @@ func getInvitations(appID, reqInviterID string, directOnly bool, noOrder bool) (
 				logger.Sugar().Errorf("fail get invitations by inviter %v: %v", inviterID, err)
 				continue
 			}
+
+			myCounts[inviterID] = uint32(len(resp.Infos))
 
 			for i, info := range resp.Infos {
 				logger.Sugar().Infof("%v of %v", i, len(resp.Infos))
@@ -229,7 +232,7 @@ func getInvitations(appID, reqInviterID string, directOnly bool, noOrder bool) (
 						Avatar:       inviteeResp.Info.Avatar,
 						EmailAddress: inviteeResp.Info.EmailAddress,
 						Kol:          kol,
-						Summarys:     summarys,
+						MySummarys:   summarys,
 					})
 
 				if !directOnly {
@@ -247,43 +250,42 @@ func getInvitations(appID, reqInviterID string, directOnly bool, noOrder bool) (
 
 	invitation := invitations[reqInviterID]
 
-	if !noOrder {
-		for _, invitee := range invitation.Invitees {
-			curInviteeIDs := []string{invitee.UserID}
-			foundInvitees := map[string]struct{}{}
-			goon := true
+	for _, invitee := range invitation.Invitees {
+		curInviteeIDs := []string{invitee.UserID}
+		foundInvitees := map[string]struct{}{}
+		goon := true
 
-			for goon {
-				goon = false
+		for goon {
+			goon = false
 
-				for _, curInviteeID := range curInviteeIDs {
-					if _, ok := foundInvitees[curInviteeID]; ok {
-						continue
-					}
+			for _, curInviteeID := range curInviteeIDs {
+				if _, ok := foundInvitees[curInviteeID]; ok {
+					continue
+				}
 
-					foundInvitees[curInviteeID] = struct{}{}
+				foundInvitees[curInviteeID] = struct{}{}
 
-					invitation := invitations[curInviteeID]
+				invitation := invitations[curInviteeID]
 
-					for _, iv := range invitation.Invitees {
-						curInviteeIDs = append(curInviteeIDs, iv.UserID)
+				for _, iv := range invitation.Invitees {
+					curInviteeIDs = append(curInviteeIDs, iv.UserID)
 
-						logger.Sugar().Infof("start caculate %v", iv.UserID)
+					logger.Sugar().Infof("start caculate %v", iv.UserID)
+					iv.InvitedCount = myCounts[iv.UserID]
 
-						for coinID, summary := range iv.Summarys {
-							if _, ok := invitee.Summarys[coinID]; !ok {
-								invitee.Summarys[coinID] = &npool.InvitationSummary{}
-							}
-							// TODO: process different payment coin type
-							mySummary := invitee.Summarys[coinID]
-							mySummary.Units += summary.Units
-							mySummary.Amount += summary.Amount
-							invitee.Summarys[coinID] = mySummary
+					for coinID, summary := range iv.MySummarys {
+						if _, ok := invitee.Summarys[coinID]; !ok {
+							invitee.Summarys[coinID] = &npool.InvitationSummary{}
 						}
-
-						logger.Sugar().Infof("end caculate %v", iv.UserID)
-						goon = true
+						// TODO: process different payment coin type
+						mySummary := invitee.Summarys[coinID]
+						mySummary.Units += summary.Units
+						mySummary.Amount += summary.Amount
+						invitee.Summarys[coinID] = mySummary
 					}
+
+					logger.Sugar().Infof("end caculate %v", iv.UserID)
+					goon = true
 				}
 			}
 		}

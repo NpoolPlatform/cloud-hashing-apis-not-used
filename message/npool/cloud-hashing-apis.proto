@@ -469,7 +469,8 @@ message InvitationUserInfo {
     string EmailAddress = 4;
     bool Kol = 5;
     map<string, InvitationSummary> Summarys = 6;
-    uint32 InvitedCount = 7;
+    map<string, InvitationSummary> MySummarys = 7;
+    uint32 InvitedCount = 8;
 }
 
 message Invitation {

@@ -42,6 +42,7 @@
     - [Invitation](#cloud.hashing.apis.v1.Invitation)
     - [InvitationSummary](#cloud.hashing.apis.v1.InvitationSummary)
     - [InvitationUserInfo](#cloud.hashing.apis.v1.InvitationUserInfo)
+    - [InvitationUserInfo.MySummarysEntry](#cloud.hashing.apis.v1.InvitationUserInfo.MySummarysEntry)
     - [InvitationUserInfo.SummarysEntry](#cloud.hashing.apis.v1.InvitationUserInfo.SummarysEntry)
     - [Order](#cloud.hashing.apis.v1.Order)
     - [OrderDetail](#cloud.hashing.apis.v1.OrderDetail)
@@ -742,7 +743,24 @@
 | EmailAddress | [string](#string) |  |  |
 | Kol | [bool](#bool) |  |  |
 | Summarys | [InvitationUserInfo.SummarysEntry](#cloud.hashing.apis.v1.InvitationUserInfo.SummarysEntry) | repeated |  |
+| MySummarys | [InvitationUserInfo.MySummarysEntry](#cloud.hashing.apis.v1.InvitationUserInfo.MySummarysEntry) | repeated |  |
 | InvitedCount | [uint32](#uint32) |  |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.InvitationUserInfo.MySummarysEntry"></a>
+
+### InvitationUserInfo.MySummarysEntry
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| key | [string](#string) |  |  |
+| value | [InvitationSummary](#cloud.hashing.apis.v1.InvitationSummary) |  |  |
 
 
 
