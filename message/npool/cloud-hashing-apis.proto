@@ -494,5 +494,6 @@ message GetMyDirectInvitationsRequest {
 }
 
 message GetMyDirectInvitationsResponse {
-    map<string, Invitation> Infos = 1;
+    InvitationUserInfo MySelf = 1;
+    map<string, Invitation> Infos = 2;
 }

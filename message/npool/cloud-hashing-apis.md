@@ -383,6 +383,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
+| MySelf | [InvitationUserInfo](#cloud.hashing.apis.v1.InvitationUserInfo) |  |  |
 | Infos | [GetMyDirectInvitationsResponse.InfosEntry](#cloud.hashing.apis.v1.GetMyDirectInvitationsResponse.InfosEntry) | repeated |  |
 
 

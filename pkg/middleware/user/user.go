@@ -113,23 +113,25 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 func GetMyInvitations(ctx context.Context, in *npool.GetMyInvitationsRequest) (*npool.GetMyInvitationsResponse, error) { //nolint
 	addWatcher(in.GetAppID(), in.GetInviterID())
 
-	invitations, err := getFullInvitations(in.GetAppID(), in.GetInviterID())
+	invitations, userInfo, err := getFullInvitations(in.GetAppID(), in.GetInviterID())
 	if err != nil {
 		return nil, xerrors.Errorf("fail get invitations: %v", err)
 	}
 	return &npool.GetMyInvitationsResponse{
-		Infos: invitations,
+		MySelf: userInfo,
+		Infos:  invitations,
 	}, nil
 }
 
 func GetMyDirectInvitations(ctx context.Context, in *npool.GetMyDirectInvitationsRequest) (*npool.GetMyDirectInvitationsResponse, error) { //nolint
 	addWatcher(in.GetAppID(), in.GetInviterID())
 
-	invitations, err := getDirectInvitations(in.GetAppID(), in.GetInviterID())
+	invitations, userInfo, err := getDirectInvitations(in.GetAppID(), in.GetInviterID())
 	if err != nil {
 		return nil, xerrors.Errorf("fail get invitations: %v", err)
 	}
 	return &npool.GetMyDirectInvitationsResponse{
-		Infos: invitations,
+		MySelf: userInfo,
+		Infos:  invitations,
 	}, nil
 }
