@@ -50,41 +50,43 @@ func addWatcher(appID, inviterID string) {
 }
 
 func Run() {
-	ticker := time.NewTicker(24 * time.Hour)
+	ticker := time.NewTicker(4 * time.Hour)
 
-	appInviters := map[string][]string{}
+	for {
+		appInviters := map[string][]string{}
 
-	mutex.Lock()
-	for appID, inviterMap := range appInvitations {
-		if _, ok := appInviters[appID]; !ok {
-			appInviters[appID] = []string{}
-		}
-		myInviters := appInviters[appID]
-		for inviterID := range inviterMap {
-			myInviters = append(myInviters, inviterID)
-		}
-		appInviters[appID] = myInviters
-	}
-	mutex.Unlock()
-
-	logger.Sugar().Infof("run async updater at %v", time.Now())
-
-	for appID, inviters := range appInviters {
-		for _, inviterID := range inviters {
-			invitations, userInfo, err := getInvitations(appID, inviterID, false, false)
-			if err != nil {
-				logger.Sugar().Errorf("fail get invitations: %v", err)
-				continue
+		mutex.Lock()
+		for appID, inviterMap := range appInvitations {
+			if _, ok := appInviters[appID]; !ok {
+				appInviters[appID] = []string{}
 			}
-
-			mutex.Lock()
-			appInvitations[appID][inviterID] = invitations
-			appInviterUserInfos[appID][inviterID] = userInfo
-			mutex.Unlock()
+			myInviters := appInviters[appID]
+			for inviterID := range inviterMap {
+				myInviters = append(myInviters, inviterID)
+			}
+			appInviters[appID] = myInviters
 		}
-	}
+		mutex.Unlock()
 
-	<-ticker.C
+		logger.Sugar().Infof("run async updater at %v", time.Now())
+
+		for appID, inviters := range appInviters {
+			for _, inviterID := range inviters {
+				invitations, userInfo, err := getInvitations(appID, inviterID, false, false)
+				if err != nil {
+					logger.Sugar().Errorf("fail get invitations: %v", err)
+					continue
+				}
+
+				mutex.Lock()
+				appInvitations[appID][inviterID] = invitations
+				appInviterUserInfos[appID][inviterID] = userInfo
+				mutex.Unlock()
+			}
+		}
+
+		<-ticker.C
+	}
 }
 
 func getFullInvitations(appID, inviterID string) (map[string]*npool.Invitation, *npool.InvitationUserInfo, error) {
