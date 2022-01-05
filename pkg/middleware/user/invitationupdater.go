@@ -228,6 +228,7 @@ func getInvitations(appID, reqInviterID string, directOnly, noOrder bool) (map[s
 
 	myGoods = goods
 	myCoins = coins
+	layer := 0
 
 	// TODO: process deadloop
 	for goon {
@@ -252,7 +253,7 @@ func getInvitations(appID, reqInviterID string, directOnly, noOrder bool) (map[s
 			myCounts[inviterID] = uint32(len(resp.Infos))
 
 			for i, info := range resp.Infos {
-				logger.Sugar().Infof("%v of %v", i, len(resp.Infos))
+				logger.Sugar().Infof("%v of %v layer %v user %v invited count %v", i, len(resp.Infos), layer, inviterID, myCounts[inviterID])
 
 				if info.AppID != appID || info.InviterID != inviterID {
 					logger.Sugar().Errorf("invalid inviter id or app id")
@@ -277,7 +278,7 @@ func getInvitations(appID, reqInviterID string, directOnly, noOrder bool) (map[s
 
 				invitations[inviterID].Invitees = append(invitations[inviterID].Invitees, userInfo)
 
-				if !directOnly {
+				if !directOnly || layer < 2 {
 					if _, ok := invitations[userInfo.UserID]; !ok {
 						invitations[userInfo.UserID] = &npool.Invitation{
 							Invitees: []*npool.InvitationUserInfo{},
@@ -288,6 +289,8 @@ func getInvitations(appID, reqInviterID string, directOnly, noOrder bool) (map[s
 				goon = true
 			}
 		}
+
+		layer++
 	}
 
 	invitation := invitations[reqInviterID]
@@ -296,6 +299,8 @@ func getInvitations(appID, reqInviterID string, directOnly, noOrder bool) (map[s
 		curInviteeIDs := []string{invitee.UserID}
 		foundInvitees := map[string]struct{}{}
 		goon := true
+
+		invitee.InvitedCount = myCounts[invitee.UserID]
 
 		for goon {
 			goon = false
@@ -315,8 +320,12 @@ func getInvitations(appID, reqInviterID string, directOnly, noOrder bool) (map[s
 				for _, iv := range invitation.Invitees {
 					curInviteeIDs = append(curInviteeIDs, iv.UserID)
 
-					logger.Sugar().Infof("start caculate %v", iv.UserID)
+					logger.Sugar().Infof("caculate %v invited count %v", iv.UserID, myCounts[iv.UserID])
 					iv.InvitedCount = myCounts[iv.UserID]
+
+					if invitee.Summarys == nil {
+						invitee.Summarys = map[string]*npool.InvitationSummary{}
+					}
 
 					for coinID, summary := range iv.MySummarys {
 						if _, ok := invitee.Summarys[coinID]; !ok {
@@ -329,7 +338,6 @@ func getInvitations(appID, reqInviterID string, directOnly, noOrder bool) (map[s
 						invitee.Summarys[coinID] = mySummary
 					}
 
-					logger.Sugar().Infof("end caculate %v", iv.UserID)
 					goon = true
 				}
 			}
