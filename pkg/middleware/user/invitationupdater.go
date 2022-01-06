@@ -350,7 +350,6 @@ func getInvitations(appID, reqInviterID string, directOnly bool) (map[string]*np
 			mySummary := inviterUserInfo.Summarys[coinID]
 			mySummary.Units += summary.Units
 			mySummary.Amount += summary.Amount
-			invitee.Summarys[coinID] = mySummary
 			inviterUserInfo.Summarys[coinID] = mySummary
 		}
 
@@ -395,7 +394,6 @@ func getInvitations(appID, reqInviterID string, directOnly bool) (map[string]*np
 						mySummary = inviterUserInfo.Summarys[coinID]
 						mySummary.Units += summary.Units
 						mySummary.Amount += summary.Amount
-						invitee.Summarys[coinID] = mySummary
 						inviterUserInfo.Summarys[coinID] = mySummary
 					}
 
