@@ -32,3 +32,12 @@ func (s *Server) GetGoodDetail(ctx context.Context, in *npool.GetGoodDetailReque
 	}
 	return resp, nil
 }
+
+func GetRecommendGoodsDetailByApp(ctx context.Context, in *npool.GetRecommendGoodsDetailByAppRequest) (*npool.GetRecommendGoodsDetailByAppResponse, error) {
+	resp, err := gooddetail.GetRecommendsByApp(ctx, in)
+	if err != nil {
+		logger.Sugar().Errorf("get recommend good by app error: %v", err)
+		return &npool.GetRecommendGoodsDetailByAppResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return resp, nil
+}

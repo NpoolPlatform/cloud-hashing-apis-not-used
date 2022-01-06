@@ -77,6 +77,10 @@ spec:
             backend:
               serviceName: cloud-hashing-apis
               servicePort: 50140
+          - path: /api/cloud-hashing-apis/v1/get/recommend/goods/detail/by/app
+            backend:
+              serviceName: cloud-hashing-apis
+              servicePort: 50140
           - path: /api/cloud-hashing-apis/v1/signup
             backend:
               serviceName: cloud-hashing-apis

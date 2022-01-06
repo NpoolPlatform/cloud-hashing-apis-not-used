@@ -28,6 +28,12 @@ service CloudHashingApis {
             body: "*"
         };
     }
+    rpc GetRecommendGoodsDetailByApp(GetRecommendGoodsDetailByAppRequest) returns (GetRecommendGoodsDetailByAppResponse) {
+        option (google.api.http) = {
+            post: "/v1/get/recommend/goods/detail/by/app"
+            body: "*"
+        };
+    }
 
     rpc SubmitOrder(SubmitOrderRequest) returns (SubmitOrderResponse) {
         option (google.api.http) = {
@@ -197,6 +203,27 @@ message GetGoodsDetailRequest {
 message GetGoodsDetailResponse {
     repeated GoodDetail Details = 3212;
     int32 Total = 3213;
+}
+
+message GetRecommendGoodsDetailByAppRequest {
+    string AppID = 3210;
+}
+
+message Recommend {
+    string ID = 10;
+    string AppID = 20;
+    string GoodID = 30;
+    string RecommenderID = 40;
+    string Message = 50;
+}
+
+message RecommendGood {
+    Recommend Recommend = 10;
+    GoodDetail Good = 20;
+}
+
+message GetRecommendGoodsDetailByAppResponse {
+    repeated RecommendGood Details = 3212;
 }
 
 message GoodExtraInfo {

@@ -34,6 +34,8 @@
     - [GetOrdersDetailByAppUserResponse](#cloud.hashing.apis.v1.GetOrdersDetailByAppUserResponse)
     - [GetOrdersDetailByGoodRequest](#cloud.hashing.apis.v1.GetOrdersDetailByGoodRequest)
     - [GetOrdersDetailByGoodResponse](#cloud.hashing.apis.v1.GetOrdersDetailByGoodResponse)
+    - [GetRecommendGoodsDetailByAppRequest](#cloud.hashing.apis.v1.GetRecommendGoodsDetailByAppRequest)
+    - [GetRecommendGoodsDetailByAppResponse](#cloud.hashing.apis.v1.GetRecommendGoodsDetailByAppResponse)
     - [GoodDetail](#cloud.hashing.apis.v1.GoodDetail)
     - [GoodExtraInfo](#cloud.hashing.apis.v1.GoodExtraInfo)
     - [GoodFee](#cloud.hashing.apis.v1.GoodFee)
@@ -51,6 +53,8 @@
     - [PageInfo](#cloud.hashing.apis.v1.PageInfo)
     - [Payment](#cloud.hashing.apis.v1.Payment)
     - [PriceCurrency](#cloud.hashing.apis.v1.PriceCurrency)
+    - [Recommend](#cloud.hashing.apis.v1.Recommend)
+    - [RecommendGood](#cloud.hashing.apis.v1.RecommendGood)
     - [SignupRequest](#cloud.hashing.apis.v1.SignupRequest)
     - [SignupResponse](#cloud.hashing.apis.v1.SignupResponse)
     - [SubmitOrderRequest](#cloud.hashing.apis.v1.SubmitOrderRequest)
@@ -576,6 +580,36 @@
 
 
 
+<a name="cloud.hashing.apis.v1.GetRecommendGoodsDetailByAppRequest"></a>
+
+### GetRecommendGoodsDetailByAppRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| AppID | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.GetRecommendGoodsDetailByAppResponse"></a>
+
+### GetRecommendGoodsDetailByAppResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| Details | [RecommendGood](#cloud.hashing.apis.v1.RecommendGood) | repeated |  |
+
+
+
+
+
+
 <a name="cloud.hashing.apis.v1.GoodDetail"></a>
 
 ### GoodDetail
@@ -930,6 +964,41 @@
 
 
 
+<a name="cloud.hashing.apis.v1.Recommend"></a>
+
+### Recommend
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| ID | [string](#string) |  |  |
+| AppID | [string](#string) |  |  |
+| GoodID | [string](#string) |  |  |
+| RecommenderID | [string](#string) |  |  |
+| Message | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.RecommendGood"></a>
+
+### RecommendGood
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| Recommend | [Recommend](#cloud.hashing.apis.v1.Recommend) |  |  |
+| Good | [GoodDetail](#cloud.hashing.apis.v1.GoodDetail) |  |  |
+
+
+
+
+
+
 <a name="cloud.hashing.apis.v1.SignupRequest"></a>
 
 ### SignupRequest
@@ -1131,6 +1200,7 @@ Cloud Hashing Goods
 | Version | [.google.protobuf.Empty](#google.protobuf.Empty) | [VersionResponse](#cloud.hashing.apis.v1.VersionResponse) |  |
 | GetGoodsDetail | [GetGoodsDetailRequest](#cloud.hashing.apis.v1.GetGoodsDetailRequest) | [GetGoodsDetailResponse](#cloud.hashing.apis.v1.GetGoodsDetailResponse) |  |
 | GetGoodDetail | [GetGoodDetailRequest](#cloud.hashing.apis.v1.GetGoodDetailRequest) | [GetGoodDetailResponse](#cloud.hashing.apis.v1.GetGoodDetailResponse) |  |
+| GetRecommendGoodsDetailByApp | [GetRecommendGoodsDetailByAppRequest](#cloud.hashing.apis.v1.GetRecommendGoodsDetailByAppRequest) | [GetRecommendGoodsDetailByAppResponse](#cloud.hashing.apis.v1.GetRecommendGoodsDetailByAppResponse) |  |
 | SubmitOrder | [SubmitOrderRequest](#cloud.hashing.apis.v1.SubmitOrderRequest) | [SubmitOrderResponse](#cloud.hashing.apis.v1.SubmitOrderResponse) |  |
 | CreateOrderPayment | [CreateOrderPaymentRequest](#cloud.hashing.apis.v1.CreateOrderPaymentRequest) | [CreateOrderPaymentResponse](#cloud.hashing.apis.v1.CreateOrderPaymentResponse) |  |
 | GetOrderDetail | [GetOrderDetailRequest](#cloud.hashing.apis.v1.GetOrderDetailRequest) | [GetOrderDetailResponse](#cloud.hashing.apis.v1.GetOrderDetailResponse) |  |
