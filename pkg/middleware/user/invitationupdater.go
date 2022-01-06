@@ -45,7 +45,7 @@ func addWatcher(appID, inviterID string) {
 		appInviterUserInfos[appID] = map[string]*npool.InvitationUserInfo{}
 	}
 	appInviterUserInfo := appInviterUserInfos[appID]
-	if _, ok := appInviterUserInfos[inviterID]; !ok {
+	if _, ok := appInviterUserInfo[inviterID]; !ok {
 		appInviterUserInfo[inviterID] = &npool.InvitationUserInfo{}
 	}
 	appInviterUserInfos[appID] = appInviterUserInfo
@@ -54,7 +54,7 @@ func addWatcher(appID, inviterID string) {
 		appInviterLastUpdates[appID] = map[string]time.Time{}
 	}
 	appInviterLastUpdate := appInviterLastUpdates[appID]
-	if _, ok := appInviterLastUpdates[inviterID]; !ok {
+	if _, ok := appInviterLastUpdate[inviterID]; !ok {
 		appInviterLastUpdate[inviterID] = time.Time{}
 	}
 	appInviterLastUpdates[appID] = appInviterLastUpdate
