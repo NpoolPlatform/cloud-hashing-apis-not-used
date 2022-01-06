@@ -21,9 +21,11 @@ import (
 )
 
 var (
-	appInvitations      = map[string]map[string]map[string]*npool.Invitation{}
-	appInviterUserInfos = map[string]map[string]*npool.InvitationUserInfo{}
-	mutex               = sync.Mutex{}
+	appInvitations        = map[string]map[string]map[string]*npool.Invitation{}
+	appInviterUserInfos   = map[string]map[string]*npool.InvitationUserInfo{}
+	appInviterLastUpdates = map[string]map[string]time.Time{}
+	notifier              = make(chan struct{})
+	mutex                 = sync.Mutex{}
 )
 
 func addWatcher(appID, inviterID string) {
@@ -46,46 +48,84 @@ func addWatcher(appID, inviterID string) {
 	if _, ok := appInviterUserInfos[inviterID]; !ok {
 		appInviterUserInfo[inviterID] = &npool.InvitationUserInfo{}
 	}
-	appInvitations[appID] = appInvitation
+	appInviterUserInfos[appID] = appInviterUserInfo
+
+	if _, ok := appInviterLastUpdates[appID]; !ok {
+		appInviterLastUpdates[appID] = map[string]time.Time{}
+	}
+	appInviterLastUpdate := appInviterLastUpdates[appID]
+	if _, ok := appInviterLastUpdates[inviterID]; !ok {
+		appInviterLastUpdate[inviterID] = time.Time{}
+	}
+	appInviterLastUpdates[appID] = appInviterLastUpdate
+
+	go func() {
+		notifier <- struct{}{}
+	}()
+}
+
+func update() time.Duration {
+	appInviters := map[string][]string{}
+
+	mutex.Lock()
+	for appID, inviterMap := range appInvitations {
+		if _, ok := appInviters[appID]; !ok {
+			appInviters[appID] = []string{}
+		}
+		myInviters := appInviters[appID]
+		for inviterID := range inviterMap {
+			myInviters = append(myInviters, inviterID)
+		}
+		appInviters[appID] = myInviters
+	}
+	mutex.Unlock()
+
+	logger.Sugar().Infof("run async updater at %v", time.Now())
+	toNext := 24 * time.Hour
+
+	for appID, inviters := range appInviters {
+		for _, inviterID := range inviters {
+			nextSync := appInviterLastUpdates[appID][inviterID].Add(24 * time.Hour)
+			if time.Now().Before(nextSync) {
+				curToNext := time.Until(nextSync)
+				if curToNext < toNext {
+					toNext = curToNext
+				}
+				continue
+			}
+
+			logger.Sugar().Infof("run async updater for %v at %v", inviterID, time.Now())
+
+			invitations, userInfo, err := getInvitations(appID, inviterID, false)
+			if err != nil {
+				logger.Sugar().Errorf("fail get invitations: %v", err)
+				continue
+			}
+
+			mutex.Lock()
+			appInvitations[appID][inviterID] = invitations
+			appInviterUserInfos[appID][inviterID] = userInfo
+			appInviterLastUpdates[appID][inviterID] = time.Now()
+			mutex.Unlock()
+		}
+	}
+
+	return toNext
 }
 
 func Run() {
-	ticker := time.NewTicker(24 * time.Hour)
+	var timeout time.Duration
+
+	timer := time.NewTimer(24 * time.Hour)
 
 	for {
-		appInviters := map[string][]string{}
-
-		mutex.Lock()
-		for appID, inviterMap := range appInvitations {
-			if _, ok := appInviters[appID]; !ok {
-				appInviters[appID] = []string{}
-			}
-			myInviters := appInviters[appID]
-			for inviterID := range inviterMap {
-				myInviters = append(myInviters, inviterID)
-			}
-			appInviters[appID] = myInviters
+		select {
+		case <-timer.C:
+			timeout = update()
+		case <-notifier:
+			timeout = update()
 		}
-		mutex.Unlock()
-
-		logger.Sugar().Infof("run async updater at %v", time.Now())
-
-		for appID, inviters := range appInviters {
-			for _, inviterID := range inviters {
-				invitations, userInfo, err := getInvitations(appID, inviterID, false)
-				if err != nil {
-					logger.Sugar().Errorf("fail get invitations: %v", err)
-					continue
-				}
-
-				mutex.Lock()
-				appInvitations[appID][inviterID] = invitations
-				appInviterUserInfos[appID][inviterID] = userInfo
-				mutex.Unlock()
-			}
-		}
-
-		<-ticker.C
+		timer.Reset(timeout)
 	}
 }
 
@@ -300,6 +340,17 @@ func getInvitations(appID, reqInviterID string, directOnly bool) (map[string]*np
 
 		invitee.InvitedCount = myCounts[invitee.UserID]
 
+		for coinID, summary := range invitee.MySummarys {
+			if _, ok := inviterUserInfo.Summarys[coinID]; !ok {
+				inviterUserInfo.Summarys[coinID] = &npool.InvitationSummary{}
+			}
+			mySummary := inviterUserInfo.Summarys[coinID]
+			mySummary.Units += summary.Units
+			mySummary.Amount += summary.Amount
+			invitee.Summarys[coinID] = mySummary
+			inviterUserInfo.Summarys[coinID] = mySummary
+		}
+
 		for goon {
 			goon = false
 
@@ -334,6 +385,15 @@ func getInvitations(appID, reqInviterID string, directOnly bool) (map[string]*np
 						mySummary.Units += summary.Units
 						mySummary.Amount += summary.Amount
 						invitee.Summarys[coinID] = mySummary
+
+						if _, ok := inviterUserInfo.Summarys[coinID]; !ok {
+							inviterUserInfo.Summarys[coinID] = &npool.InvitationSummary{}
+						}
+						mySummary = inviterUserInfo.Summarys[coinID]
+						mySummary.Units += summary.Units
+						mySummary.Amount += summary.Amount
+						invitee.Summarys[coinID] = mySummary
+						inviterUserInfo.Summarys[coinID] = mySummary
 					}
 
 					goon = true
