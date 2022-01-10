@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func GetKycReviews(ctx context.Context, in *npool.GetKycReviewsRequest) (*npool.GetKycReviewsResponse, error) {
+func (s *Server) GetKycReviews(ctx context.Context, in *npool.GetKycReviewsRequest) (*npool.GetKycReviewsResponse, error) {
 	resp, err := mw.GetKycReviews(ctx, in)
 	if err != nil {
 		logger.Sugar().Errorf("get kyc reviews error: %v", err)
@@ -21,7 +21,7 @@ func GetKycReviews(ctx context.Context, in *npool.GetKycReviewsRequest) (*npool.
 	return resp, nil
 }
 
-func GetGoodReviews(ctx context.Context, in *npool.GetGoodReviewsRequest) (*npool.GetGoodReviewsResponse, error) {
+func (s *Server) GetGoodReviews(ctx context.Context, in *npool.GetGoodReviewsRequest) (*npool.GetGoodReviewsResponse, error) {
 	resp, err := mw.GetGoodReviews(ctx, in)
 	if err != nil {
 		logger.Sugar().Errorf("get good reviews error: %v", err)
