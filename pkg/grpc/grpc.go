@@ -9,6 +9,9 @@ import (
 	goodspb "github.com/NpoolPlatform/cloud-hashing-goods/message/npool"
 	goodsconst "github.com/NpoolPlatform/cloud-hashing-goods/pkg/message/const" //nolint
 
+	reviewpb "github.com/NpoolPlatform/review-service/message/npool"
+	reviewconst "github.com/NpoolPlatform/review-service/pkg/message/const" //nolint
+
 	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
 	coininfoconst "github.com/NpoolPlatform/sphinx-coininfo/pkg/message/const" //nolint
 
@@ -484,4 +487,21 @@ func GetApp(ctx context.Context, in *appmgrpb.GetApplicationRequest) (*appmgrpb.
 	defer cancel()
 
 	return cli.GetApplication(ctx, in)
+}
+
+//---------------------------------------------------------------------------------------------------------------------------
+
+func GetReviewsByDomain(ctx context.Context, in *reviewpb.GetReviewsByDomainRequest) (*reviewpb.GetReviewsByDomainResponse, error) {
+	conn, err := grpc2.GetGRPCConn(reviewconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get review connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := reviewpb.NewReviewServiceClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetReviewsByDomain(ctx, in)
 }

@@ -538,8 +538,19 @@ message GetMyDirectInvitationsResponse {
     map<string, Invitation> Infos = 2;
 }
 
-message KycReview {
+message Review {
     string ID = 10;
+    string ObjectType = 20;
+    string AppID = 30;
+    string ReviewerID = 40;
+    string State = 50;
+    string Message = 60;
+    string ObjectID = 70;
+    string Domain = 80;
+}
+
+message KycReview {
+    Review Review = 10;
 }
 
 message GetKycReviewsRequest {
@@ -551,11 +562,12 @@ message GetKycReviewsResponse {
 }
 
 message GoodReview {
-    string ID = 10;
+    Review Review = 10;
+    UserInfo User = 20;
+    GoodDetail Good = 30;
 }
 
 message GetGoodReviewsRequest {
-    string AppID = 10;
 }
 
 message GetGoodReviewsResponse {

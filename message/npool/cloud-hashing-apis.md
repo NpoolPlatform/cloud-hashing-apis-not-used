@@ -61,6 +61,7 @@
     - [PriceCurrency](#cloud.hashing.apis.v1.PriceCurrency)
     - [Recommend](#cloud.hashing.apis.v1.Recommend)
     - [RecommendGood](#cloud.hashing.apis.v1.RecommendGood)
+    - [Review](#cloud.hashing.apis.v1.Review)
     - [SignupRequest](#cloud.hashing.apis.v1.SignupRequest)
     - [SignupResponse](#cloud.hashing.apis.v1.SignupResponse)
     - [SubmitOrderRequest](#cloud.hashing.apis.v1.SubmitOrderRequest)
@@ -341,11 +342,6 @@
 
 ### GetGoodReviewsRequest
 
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| AppID | [string](#string) |  |  |
 
 
 
@@ -807,7 +803,9 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| ID | [string](#string) |  |  |
+| Review | [Review](#cloud.hashing.apis.v1.Review) |  |  |
+| User | [UserInfo](#cloud.hashing.apis.v1.UserInfo) |  |  |
+| Good | [GoodDetail](#cloud.hashing.apis.v1.GoodDetail) |  |  |
 
 
 
@@ -908,7 +906,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| ID | [string](#string) |  |  |
+| Review | [Review](#cloud.hashing.apis.v1.Review) |  |  |
 
 
 
@@ -1089,6 +1087,28 @@
 | ----- | ---- | ----- | ----------- |
 | Recommend | [Recommend](#cloud.hashing.apis.v1.Recommend) |  |  |
 | Good | [GoodDetail](#cloud.hashing.apis.v1.GoodDetail) |  |  |
+
+
+
+
+
+
+<a name="cloud.hashing.apis.v1.Review"></a>
+
+### Review
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| ID | [string](#string) |  |  |
+| ObjectType | [string](#string) |  |  |
+| AppID | [string](#string) |  |  |
+| ReviewerID | [string](#string) |  |  |
+| State | [string](#string) |  |  |
+| Message | [string](#string) |  |  |
+| ObjectID | [string](#string) |  |  |
+| Domain | [string](#string) |  |  |
 
 
 
