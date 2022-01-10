@@ -93,6 +93,19 @@ service CloudHashingApis {
             body: "*"
         };
     }
+
+    rpc GetKycReviews(GetKycReviewsRequest) returns (GetKycReviewsResponse) {
+        option (google.api.http) = {
+            post: "/v1/get/kyc/reviews"
+            body: "*"
+        };
+    }
+    rpc GetGoodReviews(GetGoodReviewsRequest) returns (GetGoodReviewsResponse) {
+        option (google.api.http) = {
+            post: "/v1/get/good/reviews"
+            body: "*"
+        };
+    }
 }
 
 message PageInfo {
@@ -524,3 +537,28 @@ message GetMyDirectInvitationsResponse {
     InvitationUserInfo MySelf = 1;
     map<string, Invitation> Infos = 2;
 }
+
+message KycReview {
+    string ID = 10;
+}
+
+message GetKycReviewsRequest {
+    string AppID = 10;
+}
+
+message GetKycReviewsResponse {
+    repeated  KycReview Infos = 10;
+}
+
+message GoodReview {
+    string ID = 10;
+}
+
+message GetGoodReviewsRequest {
+    string AppID = 10;
+}
+
+message GetGoodReviewsResponse {
+    repeated GoodReview Infos = 10;
+}
+
