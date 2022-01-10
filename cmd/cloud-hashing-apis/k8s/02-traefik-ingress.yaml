@@ -41,6 +41,10 @@ spec:
             backend:
               serviceName: cloud-hashing-apis
               servicePort: 50140
+          - path: /api/cloud-hashing-apis/v1/get/good/reviews
+            backend:
+              serviceName: cloud-hashing-apis
+              servicePort: 50140
     - host: api.xpool.top
       http: *http_appid_userid_rules
     - host: www.npool.top
