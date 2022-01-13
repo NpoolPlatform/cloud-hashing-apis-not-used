@@ -167,9 +167,9 @@ func getDirectInvitations(appID, inviterID string) (map[string]*npool.Invitation
 
 func getInvitationUserInfo( //nolint
 	appID, inviteeID string,
-	myGoods map[string]*npool.GoodDetail,
+	myGoods map[string]*npool.Good,
 	myCoins map[string]*coininfopb.CoinInfo) (*npool.InvitationUserInfo,
-	map[string]*npool.GoodDetail,
+	map[string]*npool.Good,
 	map[string]*coininfopb.CoinInfo,
 	error) {
 	ctx := context.Background()
@@ -192,7 +192,7 @@ func getInvitationUserInfo( //nolint
 
 	summarys := map[string]*npool.InvitationSummary{}
 
-	resp2, goods, coins, err := order.GetOrdersShortDetailByAppUser(ctx, &npool.GetOrdersDetailByAppUserRequest{
+	resp2, goods, coins, err := order.GetOrdersShortDetailByAppUser(ctx, &npool.GetOrdersByAppUserRequest{
 		AppID:  appID,
 		UserID: inviteeResp.Info.UserID,
 	}, myGoods, myCoins)
@@ -203,23 +203,23 @@ func getInvitationUserInfo( //nolint
 	myGoods = goods
 	myCoins = coins
 
-	for _, orderInfo := range resp2.Details {
-		if orderInfo.Payment == nil {
+	for _, orderInfo := range resp2.Infos {
+		if orderInfo.Order.Payment == nil {
 			continue
 		}
 
-		if orderInfo.Payment.State != orderconst.PaymentStateDone {
+		if orderInfo.Order.Payment.State != orderconst.PaymentStateDone {
 			continue
 		}
 
-		if _, ok := summarys[orderInfo.Good.CoinInfo.ID]; !ok {
-			summarys[orderInfo.Good.CoinInfo.ID] = &npool.InvitationSummary{}
+		if _, ok := summarys[orderInfo.Good.Good.CoinInfoID]; !ok {
+			summarys[orderInfo.Good.Good.CoinInfoID] = &npool.InvitationSummary{}
 		}
 
-		summary := summarys[orderInfo.Good.CoinInfo.ID]
-		summary.Units += orderInfo.Units
-		summary.Amount += orderInfo.Payment.Amount
-		summarys[orderInfo.Good.CoinInfo.ID] = summary
+		summary := summarys[orderInfo.Good.Good.CoinInfoID]
+		summary.Units += orderInfo.Order.Units
+		summary.Amount += orderInfo.Order.Payment.Amount
+		summarys[orderInfo.Good.Good.CoinInfoID] = summary
 	}
 
 	kol := false
@@ -254,7 +254,7 @@ func getInvitations(appID, reqInviterID string, directOnly bool) (map[string]*np
 		Invitees: []*npool.InvitationUserInfo{},
 	}
 	inviters := map[string]struct{}{}
-	myGoods := map[string]*npool.GoodDetail{}
+	myGoods := map[string]*npool.Good{}
 	myCoins := map[string]*coininfopb.CoinInfo{}
 	myCounts := map[string]uint32{}
 

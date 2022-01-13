@@ -22,175 +22,31 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func constructOrderDetail(
+func constructOrder(
 	info *orderpb.OrderDetail,
 	goodInfo *npool.Good,
 	coupon *inspirepb.CouponAllocatedDetail,
 	paymentCoinInfo *coininfopb.CoinInfo,
 	account *billingpb.CoinAccountInfo,
 	discountCoupon *inspirepb.CouponAllocatedDetail,
-	userSpecial *inspirepb.UserSpecialReduction) *npool.OrderDetail {
-	gasPayings := []*npool.GasPaying{}
-	for _, paying := range info.GasPayings {
-		gasPayings = append(gasPayings, &npool.GasPaying{
-			ID:              paying.ID,
-			OrderID:         paying.OrderID,
-			PaymentID:       paying.PaymentID,
-			DurationMinutes: paying.DurationMinutes,
-		})
-	}
-
-	compensates := []*npool.Compensate{}
-	for _, cm := range info.Compensates {
-		compensates = append(compensates, &npool.Compensate{
-			ID:      cm.ID,
-			OrderID: cm.OrderID,
-			Start:   cm.Start,
-			End:     cm.End,
-			Message: cm.Message,
-		})
-	}
-
-	outOfGases := []*npool.OutOfGas{}
-	for _, ofg := range info.OutOfGases {
-		outOfGases = append(outOfGases, &npool.OutOfGas{
-			ID:      ofg.ID,
-			OrderID: ofg.OrderID,
-			Start:   ofg.Start,
-			End:     ofg.End,
-		})
-	}
-
-	var myCoupon *npool.Coupon
-	if coupon != nil {
-		myCoupon = &npool.Coupon{
-			ID:     coupon.ID,
-			UserID: coupon.UserID,
-			AppID:  coupon.AppID,
-			Pool: &npool.CouponPool{
-				ID:           coupon.Coupon.ID,
-				AppID:        coupon.Coupon.AppID,
-				Denomination: coupon.Coupon.Denomination,
-				Start:        coupon.Coupon.Start,
-				DurationDays: coupon.Coupon.DurationDays,
-				Message:      coupon.Coupon.Message,
-				Name:         coupon.Coupon.Name,
-			},
-		}
-	}
-
-	var myDiscount *npool.Discount
-	discountAmount := uint32(0)
-
-	if discountCoupon != nil {
-		myDiscount = &npool.Discount{
-			ID:     discountCoupon.ID,
-			AppID:  discountCoupon.AppID,
-			UserID: discountCoupon.UserID,
-			Pool: &npool.DiscountPool{
-				ID:           discountCoupon.Discount.ID,
-				AppID:        discountCoupon.Discount.AppID,
-				Discount:     discountCoupon.Discount.Discount,
-				Start:        discountCoupon.Discount.Start,
-				DurationDays: discountCoupon.Discount.DurationDays,
-				Message:      discountCoupon.Discount.Message,
-				Name:         discountCoupon.Discount.Name,
-			},
-		}
-		discountAmount = discountCoupon.Discount.Discount
-	}
-
-	var specialReduction *npool.UserSpecialReduction
-	reductionAmount := float64(0)
-
-	if userSpecial != nil {
-		specialReduction = &npool.UserSpecialReduction{
-			ID:           userSpecial.ID,
-			AppID:        userSpecial.AppID,
-			UserID:       userSpecial.UserID,
-			Amount:       userSpecial.Amount,
-			Start:        userSpecial.Start,
-			DurationDays: userSpecial.DurationDays,
-		}
-		reductionAmount = userSpecial.Amount
-	}
-
-	var coinInfo *npool.CoinInfo
-
-	if paymentCoinInfo != nil {
-		coinInfo = &npool.CoinInfo{
-			ID:      paymentCoinInfo.ID,
-			Name:    paymentCoinInfo.Name,
-			PreSale: paymentCoinInfo.PreSale,
-			Logo:    paymentCoinInfo.Logo,
-			Unit:    paymentCoinInfo.Unit,
-		}
-	}
-
-	var myAccount *npool.Account
-
-	if account != nil {
-		myAccount = &npool.Account{
-			ID:         account.ID,
-			CoinTypeID: account.CoinTypeID,
-			Address:    account.Address,
-			AppID:      account.AppID,
-			UserID:     account.UserID,
-		}
-	}
-
-	var myPayment *npool.Payment
-
-	if info.Payment != nil {
-		myPayment = &npool.Payment{
-			ID:                    info.Payment.ID,
-			OrderID:               info.Payment.OrderID,
-			Account:               myAccount,
-			Amount:                info.Payment.Amount,
-			CoinInfo:              coinInfo,
-			State:                 info.Payment.State,
-			ChainTransactionID:    info.Payment.ChainTransactionID,
-			PlatformTransactionID: info.Payment.PlatformTransactionID,
-		}
-	}
-
-	var goodPaying *npool.GoodPaying
-
-	if info.GoodPaying != nil {
-		goodPaying = &npool.GoodPaying{
-			ID:        info.GoodPaying.ID,
-			OrderID:   info.GoodPaying.OrderID,
-			PaymentID: info.GoodPaying.PaymentID,
-		}
-	}
-
-	return &npool.OrderDetail{
-		ID:                     info.ID,
-		Good:                   goodInfo,
-		AppID:                  info.AppID,
-		UserID:                 info.UserID,
-		Units:                  info.Units,
-		Discount:               discountAmount,
-		SpecialReductionAmount: reductionAmount,
-		DiscountCoupon:         myDiscount,
-		UserSpecialReduction:   specialReduction,
-		GoodPaying:             goodPaying,
-		GasPayings:             gasPayings,
-		Compensates:            compensates,
-		OutOfGases:             outOfGases,
-		Payment:                myPayment,
-		Start:                  info.Start,
-		End:                    info.End,
-		Coupon:                 myCoupon,
+	userSpecial *inspirepb.UserSpecialReduction) *npool.Order {
+	return &npool.Order{
+		Order:                info,
+		PayToAccount:         account,
+		Good:                 goodInfo,
+		PayWithCoin:          paymentCoinInfo,
+		FixAmountCoupon:      coupon,
+		DiscountCoupon:       discountCoupon,
+		UserSpecialReduction: userSpecial,
 	}
 }
 
-func expandDetail( //nolint
+func expandOrder( //nolint
 	ctx context.Context,
 	info *orderpb.OrderDetail,
 	base bool,
 	goodsDetail map[string]*npool.Good,
-	coinInfos map[string]*coininfopb.CoinInfo) (*npool.OrderDetail, error) { //nolint
+	coinInfos map[string]*coininfopb.CoinInfo) (*npool.Order, error) { //nolint
 	var coupon *inspirepb.CouponAllocatedDetail
 	invalidUUID := uuid.UUID{}.String()
 
@@ -275,11 +131,11 @@ func expandDetail( //nolint
 		if err != nil {
 			return nil, xerrors.Errorf("fail get good info: %v", err)
 		}
-		goodsDetail[info.GetGoodID()] = resp.Detail
-		goodInfo = resp.Detail
+		goodsDetail[info.GetGoodID()] = resp.Info
+		goodInfo = resp.Info
 	}
 
-	return constructOrderDetail(
+	return constructOrder(
 		info,
 		goodInfo,
 		coupon,
@@ -289,7 +145,7 @@ func expandDetail( //nolint
 		userSpecialReduction), nil
 }
 
-func GetOrderDetail(ctx context.Context, in *npool.GetOrderDetailRequest) (*npool.GetOrderDetailResponse, error) {
+func GetOrder(ctx context.Context, in *npool.GetOrderRequest) (*npool.GetOrderResponse, error) {
 	orderDetail, err := grpc2.GetOrderDetail(ctx, &orderpb.GetOrderDetailRequest{
 		ID: in.GetID(),
 	})
@@ -300,17 +156,17 @@ func GetOrderDetail(ctx context.Context, in *npool.GetOrderDetailRequest) (*npoo
 	goods := map[string]*npool.Good{}
 	coins := map[string]*coininfopb.CoinInfo{}
 
-	detail, err := expandDetail(ctx, orderDetail.Detail, false, goods, coins)
+	detail, err := expandOrder(ctx, orderDetail.Detail, false, goods, coins)
 	if err != nil {
 		return nil, xerrors.Errorf("fail expand order detail: %v", err)
 	}
 
-	return &npool.GetOrderDetailResponse{
-		Detail: detail,
+	return &npool.GetOrderResponse{
+		Info: detail,
 	}, nil
 }
 
-func GetOrdersDetailByAppUser(ctx context.Context, in *npool.GetOrdersDetailByAppUserRequest) (*npool.GetOrdersDetailByAppUserResponse, error) {
+func GetOrdersByAppUser(ctx context.Context, in *npool.GetOrdersByAppUserRequest) (*npool.GetOrdersByAppUserResponse, error) {
 	ordersDetail, err := grpc2.GetOrdersDetailByAppUser(ctx, &orderpb.GetOrdersDetailByAppUserRequest{
 		AppID:  in.GetAppID(),
 		UserID: in.GetUserID(),
@@ -319,12 +175,12 @@ func GetOrdersDetailByAppUser(ctx context.Context, in *npool.GetOrdersDetailByAp
 		return nil, xerrors.Errorf("fail get orders detail by app user: %v", err)
 	}
 
-	details := []*npool.OrderDetail{}
+	details := []*npool.Order{}
 	goods := map[string]*npool.Good{}
 	coins := map[string]*coininfopb.CoinInfo{}
 
 	for _, info := range ordersDetail.Details {
-		detail, err := expandDetail(ctx, info, false, goods, coins)
+		detail, err := expandOrder(ctx, info, false, goods, coins)
 		if err != nil {
 			logger.Sugar().Warnf("cannot expand order detail: %v", err)
 			continue
@@ -333,16 +189,16 @@ func GetOrdersDetailByAppUser(ctx context.Context, in *npool.GetOrdersDetailByAp
 		details = append(details, detail)
 	}
 
-	return &npool.GetOrdersDetailByAppUserResponse{
-		Details: details,
+	return &npool.GetOrdersByAppUserResponse{
+		Infos: details,
 	}, nil
 }
 
 func GetOrdersShortDetailByAppUser( //nolint
 	ctx context.Context,
-	in *npool.GetOrdersDetailByAppUserRequest,
+	in *npool.GetOrdersByAppUserRequest,
 	goods map[string]*npool.Good,
-	coins map[string]*coininfopb.CoinInfo) (*npool.GetOrdersDetailByAppUserResponse,
+	coins map[string]*coininfopb.CoinInfo) (*npool.GetOrdersByAppUserResponse,
 	map[string]*npool.Good,
 	map[string]*coininfopb.CoinInfo,
 	error) {
@@ -354,10 +210,10 @@ func GetOrdersShortDetailByAppUser( //nolint
 		return nil, nil, nil, xerrors.Errorf("fail get orders detail by app user: %v", err)
 	}
 
-	details := []*npool.OrderDetail{}
+	details := []*npool.Order{}
 
 	for _, info := range ordersDetail.Details {
-		detail, err := expandDetail(ctx, info, true, goods, coins)
+		detail, err := expandOrder(ctx, info, true, goods, coins)
 		if err != nil {
 			logger.Sugar().Warnf("cannot expand order detail: %v", err)
 			continue
@@ -366,12 +222,12 @@ func GetOrdersShortDetailByAppUser( //nolint
 		details = append(details, detail)
 	}
 
-	return &npool.GetOrdersDetailByAppUserResponse{
-		Details: details,
+	return &npool.GetOrdersByAppUserResponse{
+		Infos: details,
 	}, goods, coins, nil
 }
 
-func GetOrdersDetailByApp(ctx context.Context, in *npool.GetOrdersDetailByAppRequest) (*npool.GetOrdersDetailByAppResponse, error) {
+func GetOrdersByApp(ctx context.Context, in *npool.GetOrdersByAppRequest) (*npool.GetOrdersByAppResponse, error) {
 	ordersDetail, err := grpc2.GetOrdersDetailByApp(ctx, &orderpb.GetOrdersDetailByAppRequest{
 		AppID: in.GetAppID(),
 	})
@@ -379,12 +235,12 @@ func GetOrdersDetailByApp(ctx context.Context, in *npool.GetOrdersDetailByAppReq
 		return nil, xerrors.Errorf("fail get orders detail by app: %v", err)
 	}
 
-	details := []*npool.OrderDetail{}
+	details := []*npool.Order{}
 	goods := map[string]*npool.Good{}
 	coins := map[string]*coininfopb.CoinInfo{}
 
 	for _, info := range ordersDetail.Details {
-		detail, err := expandDetail(ctx, info, false, goods, coins)
+		detail, err := expandOrder(ctx, info, false, goods, coins)
 		if err != nil {
 			logger.Sugar().Warnf("cannot expand order detail: %v", err)
 			continue
@@ -393,12 +249,12 @@ func GetOrdersDetailByApp(ctx context.Context, in *npool.GetOrdersDetailByAppReq
 		details = append(details, detail)
 	}
 
-	return &npool.GetOrdersDetailByAppResponse{
-		Details: details,
+	return &npool.GetOrdersByAppResponse{
+		Infos: details,
 	}, nil
 }
 
-func GetOrdersDetailByGood(ctx context.Context, in *npool.GetOrdersDetailByGoodRequest) (*npool.GetOrdersDetailByGoodResponse, error) {
+func GetOrdersByGood(ctx context.Context, in *npool.GetOrdersByGoodRequest) (*npool.GetOrdersByGoodResponse, error) {
 	ordersDetail, err := grpc2.GetOrdersDetailByGood(ctx, &orderpb.GetOrdersDetailByGoodRequest{
 		GoodID: in.GetGoodID(),
 	})
@@ -406,12 +262,12 @@ func GetOrdersDetailByGood(ctx context.Context, in *npool.GetOrdersDetailByGoodR
 		return nil, xerrors.Errorf("fail get orders detail by good: %v", err)
 	}
 
-	details := []*npool.OrderDetail{}
+	details := []*npool.Order{}
 	goods := map[string]*npool.Good{}
 	coins := map[string]*coininfopb.CoinInfo{}
 
 	for _, info := range ordersDetail.Details {
-		detail, err := expandDetail(ctx, info, false, goods, coins)
+		detail, err := expandOrder(ctx, info, false, goods, coins)
 		if err != nil {
 			logger.Sugar().Warnf("cannot expand order detail: %v", err)
 			continue
@@ -420,8 +276,8 @@ func GetOrdersDetailByGood(ctx context.Context, in *npool.GetOrdersDetailByGoodR
 		details = append(details, detail)
 	}
 
-	return &npool.GetOrdersDetailByGoodResponse{
-		Details: details,
+	return &npool.GetOrdersByGoodResponse{
+		Infos: details,
 	}, nil
 }
 
@@ -439,7 +295,7 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 	// Validate fee ids
 
 	start := (uint32(time.Now().Unix()) + 24*60*60) / 24 / 60 / 60 * 24 * 60 * 60
-	end := start + uint32(goodInfo.Detail.DurationDays)*24*60*60
+	end := start + uint32(goodInfo.Info.Good.DurationDays)*24*60*60
 
 	// Generate order
 	myOrder, err := grpc2.CreateOrder(ctx, &orderpb.CreateOrderRequest{
@@ -459,49 +315,42 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 		return nil, xerrors.Errorf("fail create order: %v", err)
 	}
 
+	orderDetail, err := GetOrder(ctx, &npool.GetOrderRequest{
+		ID: myOrder.Info.ID,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get order detail:%v", err)
+	}
+
 	return &npool.SubmitOrderResponse{
-		Info: &npool.Order{
-			ID:                     myOrder.Info.ID,
-			GoodID:                 myOrder.Info.GoodID,
-			AppID:                  myOrder.Info.AppID,
-			UserID:                 myOrder.Info.UserID,
-			Units:                  myOrder.Info.Units,
-			DiscountCouponID:       myOrder.Info.DiscountCouponID,
-			UserSpecialReductionID: myOrder.Info.UserSpecialReductionID,
-			Start:                  myOrder.Info.Start,
-			End:                    myOrder.Info.End,
-			CouponID:               myOrder.Info.CouponID,
-		},
+		Info: orderDetail.Info,
 	}, nil
 }
 
 func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest) (*npool.CreateOrderPaymentResponse, error) {
-	myOrder, err := GetOrderDetail(ctx, &npool.GetOrderDetailRequest{
+	myOrder, err := GetOrder(ctx, &npool.GetOrderRequest{
 		ID: in.GetOrderID(),
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get order: %v", err)
 	}
 
-	goodInfo, err := gooddetail.Get(ctx, &npool.GetGoodRequest{
-		ID: myOrder.Detail.Good.ID,
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail get order good info: %v", err)
-	}
-
 	// Caculate amount
-	amount := float64(myOrder.Detail.Units) * goodInfo.Detail.Price
+	amount := float64(myOrder.Info.Order.Units) * myOrder.Info.Good.Good.Price
 
 	// TODO: All should validate duration days
 	// User discount info
-	amount *= float64(100 - myOrder.Detail.Discount)
+	if myOrder.Info.DiscountCoupon != nil {
+		amount *= float64(100 - myOrder.Info.DiscountCoupon.Discount.Discount)
+	}
 	amount /= float64(100)
 	// Extra reduction
-	amount -= myOrder.Detail.SpecialReductionAmount
+	if myOrder.Info.UserSpecialReduction != nil {
+		amount -= myOrder.Info.UserSpecialReduction.Amount
+	}
 	// Coupon amount
-	if myOrder.Detail.Coupon != nil {
-		amount -= myOrder.Detail.Coupon.Pool.Denomination
+	if myOrder.Info.FixAmountCoupon != nil {
+		amount -= myOrder.Info.FixAmountCoupon.Coupon.Denomination
 	}
 
 	// Validate payment coin info id
@@ -536,8 +385,8 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 			Address:     coinAddress,
 			GeneratedBy: "platform",
 			UsedFor:     "paying",
-			AppID:       myOrder.Detail.AppID,
-			UserID:      myOrder.Detail.UserID,
+			AppID:       myOrder.Info.Order.AppID,
+			UserID:      myOrder.Info.Order.UserID,
 		},
 	})
 	if err != nil {
@@ -560,7 +409,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	// Generate payment
 	myPayment, err := grpc2.CreatePayment(ctx, &orderpb.CreatePaymentRequest{
 		Info: &orderpb.Payment{
-			OrderID:     myOrder.Detail.ID,
+			OrderID:     myOrder.Info.Order.ID,
 			AccountID:   account.Info.ID,
 			StartAmount: balanceAmount,
 			Amount:      amount,
@@ -574,7 +423,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	// Generate good paying
 	_, err = grpc2.CreateGoodPaying(ctx, &orderpb.CreateGoodPayingRequest{
 		Info: &orderpb.GoodPaying{
-			OrderID:   myOrder.Detail.ID,
+			OrderID:   myOrder.Info.Order.ID,
 			PaymentID: myPayment.Info.ID,
 		},
 	})
@@ -586,7 +435,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	for _, fee := range in.GetFees() {
 		_, err := grpc2.CreateGasPaying(ctx, &orderpb.CreateGasPayingRequest{
 			Info: &orderpb.GasPaying{
-				OrderID:         myOrder.Detail.ID,
+				OrderID:         myOrder.Info.Order.ID,
 				PaymentID:       myPayment.Info.ID,
 				DurationMinutes: fee.DurationDays * 24 * 60,
 				FeeTypeID:       fee.ID,
@@ -597,8 +446,8 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		}
 	}
 
-	orderDetail, err := GetOrderDetail(ctx, &npool.GetOrderDetailRequest{
-		ID: myOrder.Detail.ID,
+	orderDetail, err := GetOrder(ctx, &npool.GetOrderRequest{
+		ID: myOrder.Info.Order.ID,
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get order detail: %v", err)
@@ -607,6 +456,6 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	// Watch payment address and change payment state
 
 	return &npool.CreateOrderPaymentResponse{
-		Info: orderDetail.Detail,
+		Info: orderDetail.Info,
 	}, nil
 }

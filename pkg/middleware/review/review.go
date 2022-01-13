@@ -30,16 +30,7 @@ func GetGoodReviews(ctx context.Context, in *npool.GetGoodReviewsRequest) (*npoo
 	reviews := []*npool.GoodReview{}
 	for _, info := range resp.Infos {
 		reviews = append(reviews, &npool.GoodReview{
-			Review: &npool.Review{
-				ID:         info.ID,
-				ObjectType: info.ObjectType,
-				AppID:      info.AppID,
-				ReviewerID: info.ReviewerID,
-				State:      info.State,
-				Message:    info.Message,
-				ObjectID:   info.ObjectID,
-				Domain:     info.Domain,
-			},
+			Review: info,
 		})
 	}
 

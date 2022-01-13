@@ -14,35 +14,6 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func convertUserinfo(info *usermgrpb.UserBasicInfo) *npool.UserInfo {
-	return &npool.UserInfo{
-		UserID:         info.UserID,
-		Username:       info.Username,
-		Avatar:         info.Avatar,
-		Age:            info.Age,
-		Gender:         info.Gender,
-		Region:         info.Region,
-		Birthday:       info.Birthday,
-		Country:        info.Country,
-		Province:       info.Province,
-		City:           info.City,
-		PhoneNumber:    info.PhoneNumber,
-		EmailAddress:   info.EmailAddress,
-		CreateAt:       info.CreateAt,
-		LoginTimes:     info.LoginTimes,
-		KycVerify:      info.KycVerify,
-		GaVerify:       info.GaVerify,
-		GaLogin:        info.GaLogin,
-		SignupMethod:   info.SignupMethod,
-		Career:         info.Career,
-		DisplayName:    info.DisplayName,
-		FirstName:      info.FirstName,
-		LastName:       info.LastName,
-		StreetAddress1: info.StreetAddress1,
-		StreetAddress2: info.StreetAddress2,
-	}
-}
-
 func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse, error) { //nolint
 	invitationCode := in.GetInvitationCode()
 	inviterID := ""
@@ -106,7 +77,7 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 	}
 
 	return &npool.SignupResponse{
-		Info: convertUserinfo(signupResp.Info),
+		Info: signupResp.Info,
 	}, nil
 }
 

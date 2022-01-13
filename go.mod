@@ -5,12 +5,12 @@ go 1.16
 require (
 	entgo.io/ent v0.9.1
 	github.com/NpoolPlatform/application-management v0.0.0-20211211055746-45df92c06c5f
-	github.com/NpoolPlatform/cloud-hashing-inspire 8e8b6c8
 	github.com/NpoolPlatform/cloud-hashing-billing v0.0.0-20220113120914-cff59ad0a7f5
 	github.com/NpoolPlatform/cloud-hashing-goods v0.0.0-20220113121137-c2b65b514bad
+	github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220113121537-8e8b6c8966da
 	github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220113122102-b89088ab01cd
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20211222114515-4928e6cf3f1f
-	github.com/NpoolPlatform/message v0.0.0-20220113144023-c718dc8d4cf3
+	github.com/NpoolPlatform/message v0.0.0-20220113155736-5c01d881f4e2
 	github.com/NpoolPlatform/review-service v0.0.0-20220110112744-de3a065181c0
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211208035009-5ad2768d2290
 	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20211210102925-d9b8abe11021

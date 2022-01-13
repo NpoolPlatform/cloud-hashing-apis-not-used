@@ -7,6 +7,7 @@ import (
 
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
+	commonpb "github.com/NpoolPlatform/message/npool"
 	goodspb "github.com/NpoolPlatform/message/npool/cloud-hashing-goods"
 	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
 
@@ -15,19 +16,14 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func constructGoodDetail(info *goodspb.GoodDetail, coinInfos []*coininfopb.CoinInfo) (*npool.GoodDetail, error) {
-	var myCoinInfo *npool.CoinInfo
-	var supportedCoinInfos []*npool.CoinInfo
+// TODO: add review result
+func constructGood(info *goodspb.GoodDetail, coinInfos []*coininfopb.CoinInfo) (*npool.Good, error) {
+	var myCoinInfo *coininfopb.CoinInfo
+	var supportedCoinInfos []*coininfopb.CoinInfo
 
 	for _, coinInfo := range coinInfos {
 		if coinInfo.ID == info.CoinInfoID {
-			myCoinInfo = &npool.CoinInfo{
-				ID:      coinInfo.ID,
-				PreSale: coinInfo.PreSale,
-				Name:    coinInfo.Name,
-				Unit:    coinInfo.Unit,
-				Logo:    "",
-			}
+			myCoinInfo = coinInfo
 			break
 		}
 	}
@@ -35,13 +31,7 @@ func constructGoodDetail(info *goodspb.GoodDetail, coinInfos []*coininfopb.CoinI
 	for _, coinInfo := range coinInfos {
 		for _, coinInfoID := range info.SupportCoinTypeIDs {
 			if coinInfoID == coinInfo.ID {
-				supportedCoinInfos = append(supportedCoinInfos, &npool.CoinInfo{
-					ID:      coinInfo.ID,
-					PreSale: coinInfo.PreSale,
-					Name:    coinInfo.Name,
-					Unit:    coinInfo.Unit,
-					Logo:    "",
-				})
+				supportedCoinInfos = append(supportedCoinInfos, coinInfo)
 			}
 		}
 	}
@@ -50,98 +40,16 @@ func constructGoodDetail(info *goodspb.GoodDetail, coinInfos []*coininfopb.CoinI
 		return nil, xerrors.Errorf("not found coin info %v", info.CoinInfoID)
 	}
 
-	var inheritFrom *npool.GoodInfo
-	if info.InheritFromGood != nil {
-		inheritFrom = &npool.GoodInfo{
-			ID:                 info.InheritFromGood.ID,
-			Title:              info.InheritFromGood.Title,
-			DeviceInfoID:       info.InheritFromGood.DeviceInfoID,
-			SeparateFee:        info.InheritFromGood.SeparateFee,
-			UnitPower:          info.InheritFromGood.UnitPower,
-			DurationDays:       info.InheritFromGood.DurationDays,
-			CoinInfoID:         info.InheritFromGood.CoinInfoID,
-			Actuals:            info.InheritFromGood.Actuals,
-			DeliveryAt:         info.InheritFromGood.DeliveryAt,
-			InheritFromGoodID:  info.InheritFromGood.InheritFromGoodID,
-			VendorLocationID:   info.InheritFromGood.VendorLocationID,
-			Price:              info.InheritFromGood.Price,
-			PriceCurrency:      info.InheritFromGood.PriceCurrency,
-			BenefitType:        info.InheritFromGood.BenefitType,
-			Classic:            info.InheritFromGood.Classic,
-			SupportCoinTypeIDs: info.InheritFromGood.SupportCoinTypeIDs,
-			Total:              info.InheritFromGood.Total,
-			Unit:               info.InheritFromGood.Unit,
-		}
-	}
-
-	var fees []*npool.Fee //nolint
-	for _, fee := range info.Fees {
-		fees = append(fees, &npool.Fee{
-			ID:    fee.ID,
-			AppID: fee.AppID,
-			Fee: &npool.GoodFee{
-				ID:             fee.Fee.ID,
-				FeeType:        fee.Fee.FeeType,
-				FeeDescription: fee.Fee.FeeDescription,
-				PayType:        fee.Fee.PayType,
-			},
-			Value: fee.Value,
-		})
-	}
-
-	return &npool.GoodDetail{
-		ID: info.ID,
-		DeviceInfo: &npool.DeviceInfo{
-			ID:              info.DeviceInfo.ID,
-			Type:            info.DeviceInfo.Type,
-			Manufacturer:    info.DeviceInfo.Manufacturer,
-			PowerComsuption: info.DeviceInfo.PowerComsuption,
-			ShipmentAt:      info.DeviceInfo.ShipmentAt,
-		},
-		SeparateFee:     info.SeparateFee,
-		UnitPower:       info.UnitPower,
-		DurationDays:    info.DurationDays,
-		CoinInfo:        myCoinInfo,
-		Actuals:         info.Actuals,
-		DeliveryAt:      info.DeliveryAt,
-		InheritFromGood: inheritFrom,
-		VendorLocation: &npool.VendorLocationInfo{
-			ID:       info.VendorLocation.ID,
-			Country:  info.VendorLocation.Country,
-			Province: info.VendorLocation.Province,
-			City:     info.VendorLocation.City,
-			Address:  info.VendorLocation.Address,
-		},
-		Price: info.Price,
-		PriceCurrency: &npool.PriceCurrency{
-			ID:     info.PriceCurrency.ID,
-			Name:   info.PriceCurrency.Name,
-			Unit:   info.PriceCurrency.Unit,
-			Symbol: info.PriceCurrency.Symbol,
-		},
-		BenefitType:  info.BenefitType,
-		Classic:      info.Classic,
+	return &npool.Good{
+		Good:         info,
+		Main:         myCoinInfo,
 		SupportCoins: supportedCoinInfos,
-		Total:        info.Total,
-		Extra: &npool.GoodExtraInfo{
-			ID:        info.Extra.ID,
-			GoodID:    info.Extra.GoodID,
-			Posters:   info.Extra.Posters,
-			Labels:    info.Extra.Labels,
-			OutSale:   info.Extra.OutSale,
-			PreSale:   info.Extra.PreSale,
-			VoteCount: info.Extra.VoteCount,
-			Rating:    info.Extra.Rating,
-		},
-		Unit:  info.Unit,
-		Title: info.Title,
-		Fees:  fees,
 	}, nil
 }
 
-func GetAll(ctx context.Context, in *npool.GetGoodsDetailRequest) (*npool.GetGoodsDetailResponse, error) {
+func GetAll(ctx context.Context, in *npool.GetGoodsRequest) (*npool.GetGoodsResponse, error) {
 	goodsResp, err := grpc2.GetGoodsDetail(ctx, &goodspb.GetGoodsDetailRequest{
-		PageInfo: &goodspb.PageInfo{
+		PageInfo: &commonpb.PageInfo{
 			PageIndex: in.GetPageInfo().GetPageIndex(),
 			PageSize:  in.GetPageInfo().GetPageSize(),
 		},
@@ -155,9 +63,9 @@ func GetAll(ctx context.Context, in *npool.GetGoodsDetailRequest) (*npool.GetGoo
 		return nil, xerrors.Errorf("fail get coin infos: %v", err)
 	}
 
-	details := []*npool.GoodDetail{}
+	details := []*npool.Good{}
 	for _, info := range goodsResp.Details {
-		detail, err := constructGoodDetail(info, coininfoResp.Infos)
+		detail, err := constructGood(info, coininfoResp.Infos)
 		if err != nil {
 			logger.Sugar().Errorf("fail to get coin info %v: %v", info.CoinInfoID, err)
 			continue
@@ -166,12 +74,12 @@ func GetAll(ctx context.Context, in *npool.GetGoodsDetailRequest) (*npool.GetGoo
 		details = append(details, detail)
 	}
 
-	return &npool.GetGoodsDetailResponse{
-		Details: details,
+	return &npool.GetGoodsResponse{
+		Infos: details,
 	}, nil
 }
 
-func Get(ctx context.Context, in *npool.GetGoodDetailRequest) (*npool.GetGoodDetailResponse, error) {
+func Get(ctx context.Context, in *npool.GetGoodRequest) (*npool.GetGoodResponse, error) {
 	goodResp, err := grpc2.GetGoodDetail(ctx, &goodspb.GetGoodDetailRequest{
 		ID: in.GetID(),
 	})
@@ -184,17 +92,17 @@ func Get(ctx context.Context, in *npool.GetGoodDetailRequest) (*npool.GetGoodDet
 		return nil, xerrors.Errorf("fail get coin infos: %v", err)
 	}
 
-	detail, err := constructGoodDetail(goodResp.Detail, coininfoResp.Infos)
+	detail, err := constructGood(goodResp.Detail, coininfoResp.Infos)
 	if err != nil {
 		return nil, xerrors.Errorf("fail construct good detail: %v", err)
 	}
 
-	return &npool.GetGoodDetailResponse{
-		Detail: detail,
+	return &npool.GetGoodResponse{
+		Info: detail,
 	}, nil
 }
 
-func GetRecommendsByApp(ctx context.Context, in *npool.GetRecommendGoodsDetailByAppRequest) (*npool.GetRecommendGoodsDetailByAppResponse, error) {
+func GetRecommendsByApp(ctx context.Context, in *npool.GetRecommendGoodsByAppRequest) (*npool.GetRecommendGoodsByAppResponse, error) {
 	goodsResp, err := grpc2.GetRecommendGoodsByApp(ctx, &goodspb.GetRecommendGoodsByAppRequest{
 		AppID: in.GetAppID(),
 	})
@@ -210,25 +118,19 @@ func GetRecommendsByApp(ctx context.Context, in *npool.GetRecommendGoodsDetailBy
 	details := []*npool.RecommendGood{}
 
 	for _, info := range goodsResp.Infos {
-		detail, err := constructGoodDetail(info.Good, coininfoResp.Infos)
+		detail, err := constructGood(info.Good, coininfoResp.Infos)
 		if err != nil {
 			logger.Sugar().Errorf("fail to get coin info %v: %v", info.Good.CoinInfoID, err)
 			continue
 		}
 
 		details = append(details, &npool.RecommendGood{
-			Recommend: &npool.Recommend{
-				ID:            info.Recommend.ID,
-				AppID:         info.Recommend.AppID,
-				GoodID:        info.Recommend.GoodID,
-				RecommenderID: info.Recommend.RecommenderID,
-				Message:       info.Recommend.Message,
-			},
-			Good: detail,
+			Recommend: info.Recommend,
+			Good:      detail,
 		})
 	}
 
-	return &npool.GetRecommendGoodsDetailByAppResponse{
-		Details: details,
+	return &npool.GetRecommendGoodsByAppResponse{
+		Infos: details,
 	}, nil
 }

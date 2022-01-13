@@ -15,29 +15,29 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s *Server) GetGoodsDetail(ctx context.Context, in *npool.GetGoodsDetailRequest) (*npool.GetGoodsDetailResponse, error) {
+func (s *Server) GetGoods(ctx context.Context, in *npool.GetGoodsRequest) (*npool.GetGoodsResponse, error) {
 	resp, err := gooddetail.GetAll(ctx, in)
 	if err != nil {
 		logger.Sugar().Errorf("get good detail all error: %w", err)
-		return &npool.GetGoodsDetailResponse{}, status.Error(codes.Internal, err.Error())
+		return &npool.GetGoodsResponse{}, status.Error(codes.Internal, err.Error())
 	}
 	return resp, nil
 }
 
-func (s *Server) GetGoodDetail(ctx context.Context, in *npool.GetGoodDetailRequest) (*npool.GetGoodDetailResponse, error) {
+func (s *Server) GetGood(ctx context.Context, in *npool.GetGoodRequest) (*npool.GetGoodResponse, error) {
 	resp, err := gooddetail.Get(ctx, in)
 	if err != nil {
 		logger.Sugar().Errorf("get good detail all error: %w", err)
-		return &npool.GetGoodDetailResponse{}, status.Error(codes.Internal, err.Error())
+		return &npool.GetGoodResponse{}, status.Error(codes.Internal, err.Error())
 	}
 	return resp, nil
 }
 
-func GetRecommendGoodsDetailByApp(ctx context.Context, in *npool.GetRecommendGoodsDetailByAppRequest) (*npool.GetRecommendGoodsDetailByAppResponse, error) {
+func GetRecommendGoodsByApp(ctx context.Context, in *npool.GetRecommendGoodsByAppRequest) (*npool.GetRecommendGoodsByAppResponse, error) {
 	resp, err := gooddetail.GetRecommendsByApp(ctx, in)
 	if err != nil {
 		logger.Sugar().Errorf("get recommend good by app error: %v", err)
-		return &npool.GetRecommendGoodsDetailByAppResponse{}, status.Error(codes.Internal, err.Error())
+		return &npool.GetRecommendGoodsByAppResponse{}, status.Error(codes.Internal, err.Error())
 	}
 	return resp, nil
 }
