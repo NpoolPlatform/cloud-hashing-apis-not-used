@@ -3,13 +3,13 @@ package user
 import (
 	"context"
 
-	"github.com/NpoolPlatform/cloud-hashing-apis/message/npool"
+	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 
-	appmgrpb "github.com/NpoolPlatform/application-management/message/npool"
-	inspirepb "github.com/NpoolPlatform/cloud-hashing-inspire/message/npool"
-	usermgrpb "github.com/NpoolPlatform/user-management/message/npool"
+	appmgrpb "github.com/NpoolPlatform/message/npool/application"
+	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
+	usermgrpb "github.com/NpoolPlatform/message/npool/user"
 
 	"golang.org/x/xerrors"
 )

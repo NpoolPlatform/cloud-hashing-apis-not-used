@@ -3,11 +3,11 @@ package review
 import (
 	"context"
 
-	"github.com/NpoolPlatform/cloud-hashing-apis/message/npool"
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
+	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
 	goodsconst "github.com/NpoolPlatform/cloud-hashing-goods/pkg/message/const" //nolint
-	reviewpb "github.com/NpoolPlatform/review-service/message/npool"            //nolint
+	reviewpb "github.com/NpoolPlatform/message/npool/review-service"            //nolint
 
 	"golang.org/x/xerrors"
 )

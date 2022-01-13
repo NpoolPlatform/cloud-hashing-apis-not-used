@@ -5,9 +5,9 @@ import (
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
-	"github.com/NpoolPlatform/cloud-hashing-apis/message/npool"
+	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
-	goodspb "github.com/NpoolPlatform/cloud-hashing-goods/message/npool"
+	goodspb "github.com/NpoolPlatform/message/npool/cloud-hashing-goods"
 	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc" //nolint

@@ -7,13 +7,13 @@ import (
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
-	"github.com/NpoolPlatform/cloud-hashing-apis/message/npool"
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	gooddetail "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/good-detail" //nolint
+	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
-	billingpb "github.com/NpoolPlatform/cloud-hashing-billing/message/npool"
-	inspirepb "github.com/NpoolPlatform/cloud-hashing-inspire/message/npool"
-	orderpb "github.com/NpoolPlatform/cloud-hashing-order/message/npool"
+	billingpb "github.com/NpoolPlatform/message/npool/cloud-hashing-billing"
+	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
+	orderpb "github.com/NpoolPlatform/message/npool/cloud-hashing-order"
 	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
 	sphinxproxypb "github.com/NpoolPlatform/message/npool/sphinxproxy"
 
@@ -24,7 +24,7 @@ import (
 
 func constructOrderDetail(
 	info *orderpb.OrderDetail,
-	goodInfo *npool.GoodDetail,
+	goodInfo *npool.Good,
 	coupon *inspirepb.CouponAllocatedDetail,
 	paymentCoinInfo *coininfopb.CoinInfo,
 	account *billingpb.CoinAccountInfo,
@@ -189,7 +189,7 @@ func expandDetail( //nolint
 	ctx context.Context,
 	info *orderpb.OrderDetail,
 	base bool,
-	goodsDetail map[string]*npool.GoodDetail,
+	goodsDetail map[string]*npool.Good,
 	coinInfos map[string]*coininfopb.CoinInfo) (*npool.OrderDetail, error) { //nolint
 	var coupon *inspirepb.CouponAllocatedDetail
 	invalidUUID := uuid.UUID{}.String()
@@ -265,11 +265,11 @@ func expandDetail( //nolint
 		}
 	}
 
-	var goodInfo *npool.GoodDetail
+	var goodInfo *npool.Good
 	if detail, ok := goodsDetail[info.GetGoodID()]; ok {
 		goodInfo = detail
 	} else {
-		resp, err := gooddetail.Get(ctx, &npool.GetGoodDetailRequest{
+		resp, err := gooddetail.Get(ctx, &npool.GetGoodRequest{
 			ID: info.GetGoodID(),
 		})
 		if err != nil {
@@ -297,7 +297,7 @@ func GetOrderDetail(ctx context.Context, in *npool.GetOrderDetailRequest) (*npoo
 		return nil, xerrors.Errorf("fail get order detail: %v", err)
 	}
 
-	goods := map[string]*npool.GoodDetail{}
+	goods := map[string]*npool.Good{}
 	coins := map[string]*coininfopb.CoinInfo{}
 
 	detail, err := expandDetail(ctx, orderDetail.Detail, false, goods, coins)
@@ -320,7 +320,7 @@ func GetOrdersDetailByAppUser(ctx context.Context, in *npool.GetOrdersDetailByAp
 	}
 
 	details := []*npool.OrderDetail{}
-	goods := map[string]*npool.GoodDetail{}
+	goods := map[string]*npool.Good{}
 	coins := map[string]*coininfopb.CoinInfo{}
 
 	for _, info := range ordersDetail.Details {
@@ -341,9 +341,9 @@ func GetOrdersDetailByAppUser(ctx context.Context, in *npool.GetOrdersDetailByAp
 func GetOrdersShortDetailByAppUser( //nolint
 	ctx context.Context,
 	in *npool.GetOrdersDetailByAppUserRequest,
-	goods map[string]*npool.GoodDetail,
+	goods map[string]*npool.Good,
 	coins map[string]*coininfopb.CoinInfo) (*npool.GetOrdersDetailByAppUserResponse,
-	map[string]*npool.GoodDetail,
+	map[string]*npool.Good,
 	map[string]*coininfopb.CoinInfo,
 	error) {
 	ordersDetail, err := grpc2.GetOrdersShortDetailByAppUser(ctx, &orderpb.GetOrdersShortDetailByAppUserRequest{
@@ -380,7 +380,7 @@ func GetOrdersDetailByApp(ctx context.Context, in *npool.GetOrdersDetailByAppReq
 	}
 
 	details := []*npool.OrderDetail{}
-	goods := map[string]*npool.GoodDetail{}
+	goods := map[string]*npool.Good{}
 	coins := map[string]*coininfopb.CoinInfo{}
 
 	for _, info := range ordersDetail.Details {
@@ -407,7 +407,7 @@ func GetOrdersDetailByGood(ctx context.Context, in *npool.GetOrdersDetailByGoodR
 	}
 
 	details := []*npool.OrderDetail{}
-	goods := map[string]*npool.GoodDetail{}
+	goods := map[string]*npool.Good{}
 	coins := map[string]*coininfopb.CoinInfo{}
 
 	for _, info := range ordersDetail.Details {
@@ -426,7 +426,7 @@ func GetOrdersDetailByGood(ctx context.Context, in *npool.GetOrdersDetailByGoodR
 }
 
 func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.SubmitOrderResponse, error) {
-	goodInfo, err := gooddetail.Get(ctx, &npool.GetGoodDetailRequest{
+	goodInfo, err := gooddetail.Get(ctx, &npool.GetGoodRequest{
 		ID: in.GetGoodID(),
 	})
 	if err != nil {
@@ -483,7 +483,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		return nil, xerrors.Errorf("fail get order: %v", err)
 	}
 
-	goodInfo, err := gooddetail.Get(ctx, &npool.GetGoodDetailRequest{
+	goodInfo, err := gooddetail.Get(ctx, &npool.GetGoodRequest{
 		ID: myOrder.Detail.Good.ID,
 	})
 	if err != nil {
