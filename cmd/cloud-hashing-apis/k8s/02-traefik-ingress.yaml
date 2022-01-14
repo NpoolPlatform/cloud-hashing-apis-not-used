@@ -17,7 +17,7 @@ spec:
     - host: api.npool.top
       http: &http_appid_userid_rules
         paths:
-          - path: /api/cloud-hashing-apis-v2/v1/get/good/detail
+          - path: /api/cloud-hashing-apis-v2/v1/get/good
             backend:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
@@ -29,11 +29,11 @@ spec:
             backend:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/get/order/detail
+          - path: /api/cloud-hashing-apis-v2/v1/get/order
             backend:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/get/orders/detail/by/app/user
+          - path: /api/cloud-hashing-apis-v2/v1/get/orders/by/app/user
             backend:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
@@ -79,11 +79,11 @@ spec:
     - host: api.npool.top
       http: &http_appid_rules
         paths:
-          - path: /api/cloud-hashing-apis-v2/v1/get/goods/detail
+          - path: /api/cloud-hashing-apis-v2/v1/get/goods
             backend:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/get/recommend/goods/detail/by/app
+          - path: /api/cloud-hashing-apis-v2/v1/get/recommend/goods/by/app
             backend:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
