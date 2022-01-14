@@ -79,6 +79,10 @@ func GetAll(ctx context.Context, in *npool.GetGoodsRequest) (*npool.GetGoodsResp
 	}, nil
 }
 
+func Create(ctx context.Context, in *npool.CreateGoodRequest) (*npool.CreateGoodResponse, error) {
+	return nil, nil
+}
+
 func Get(ctx context.Context, in *npool.GetGoodRequest) (*npool.GetGoodResponse, error) {
 	goodResp, err := grpc2.GetGoodDetail(ctx, &goodspb.GetGoodDetailRequest{
 		ID: in.GetID(),
