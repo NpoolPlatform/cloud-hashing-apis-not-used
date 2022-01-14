@@ -48,7 +48,7 @@ cd $OUTPUT/.${service_name}.tmp
 
 user=`whoami`
 if [ "$user" == "root" ]; then
-    docker build -t $registry/entropypool/$service_name:$version .
+    docker build -t $registry/entropypool/${service_name}-v2:$version .
 else
-    sudo docker build -t $registry/entropypool/$service_name:$version .
+    sudo docker build -t $registry/entropypool/${service_name}-v2:$version .
 fi

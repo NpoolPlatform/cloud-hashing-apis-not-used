@@ -27,4 +27,4 @@ set -e
 service_name=$1
 
 echo "Deploy docker image for $PLATFORM -- $version"
-kubectl apply -k ./cmd/$service_name/k8s
+kubectl apply -k ./cmd/${service_name}-v2/k8s

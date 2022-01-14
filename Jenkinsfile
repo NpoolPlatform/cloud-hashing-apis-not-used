@@ -242,7 +242,7 @@ pipeline {
       steps {
         sh 'TAG=latest DOCKER_REGISTRY=$DOCKER_REGISTRY make release-docker-images'
         sh(returnStdout: true, script: '''
-          images=`docker images | grep entropypool | grep cloud-hashing-apis | grep none | awk '{ print $3 }'`
+          images=`docker images | grep entropypool | grep cloud-hashing-apis-v2 | grep none | awk '{ print $3 }'`
           for image in $images; do
             docker rmi $image -f
           done
@@ -260,7 +260,7 @@ pipeline {
           tag=`git describe --tags $revlist`
 
           set +e
-          docker images | grep cloud-hashing-apis | grep $tag
+          docker images | grep cloud-hashing-apis-v2 | grep $tag
           rc=$?
           set -e
           if [ 0 -eq $rc ]; then
@@ -287,7 +287,7 @@ pipeline {
           tag=$major.$minor.$patch
 
           set +e
-          docker images | grep cloud-hashing-apis | grep $tag
+          docker images | grep cloud-hashing-apis-v2 | grep $tag
           rc=$?
           set -e
           if [ 0 -eq $rc ]; then

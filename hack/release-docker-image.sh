@@ -34,7 +34,7 @@ echo "Release docker image for $PLATFORM -- $version"
 
 user=`whoami`
 if [ "$user" == "root" ]; then
-    docker push $registry/entropypool/$service_name:$version
+    docker push $registry/entropypool/${service_name}-v2:$version
 else
-    sudo docker push $registry/entropypool/$service_name:$version
+    sudo docker push $registry/entropypool/${service_name}-v2:$version
 fi

@@ -1,14 +1,14 @@
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: cloud-hashing-apis-appid-userid-ingress
+  name: cloud-hashing-apis-v2-appid-userid-ingress
   namespace: kube-system
   annotations:
-    k8s.kuboard.cn/displayName: cloud-hashing-apis-appid-userid
-    k8s.kuboard.cn/workload: cloud-hashing-apis-appid-userid
+    k8s.kuboard.cn/displayName: cloud-hashing-apis-v2-appid-userid
+    k8s.kuboard.cn/workload: cloud-hashing-apis-v2-appid-userid
     kubernetes.io/ingress.class: "traefik-internet"
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    traefik.ingress.kubernetes.io/router.middlewares: kube-system-strip-cloud-hashing-apis-prefix@kubernetescrd,kube-system-cookies-appid-to-body@kubernetescrd,kube-system-cookies-userid-to-body@kubernetescrd,kube-system-common-headers@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: kube-system-strip-cloud-hashing-apis-v2-prefix@kubernetescrd,kube-system-cookies-appid-to-body@kubernetescrd,kube-system-cookies-userid-to-body@kubernetescrd,kube-system-common-headers@kubernetescrd
 
 spec:
   tls:
@@ -17,33 +17,33 @@ spec:
     - host: api.npool.top
       http: &http_appid_userid_rules
         paths:
-          - path: /api/cloud-hashing-apis/v1/get/good/detail
+          - path: /api/cloud-hashing-apis-v2/v1/get/good/detail
             backend:
-              serviceName: cloud-hashing-apis
+              serviceName: cloud-hashing-apis-v2
               servicePort: 50140
-          - path: /api/cloud-hashing-apis/v1/submit/order
+          - path: /api/cloud-hashing-apis-v2/v1/submit/order
             backend:
-              serviceName: cloud-hashing-apis
+              serviceName: cloud-hashing-apis-v2
               servicePort: 50140
-          - path: /api/cloud-hashing-apis/v1/create/order/payment
+          - path: /api/cloud-hashing-apis-v2/v1/create/order/payment
             backend:
-              serviceName: cloud-hashing-apis
+              serviceName: cloud-hashing-apis-v2
               servicePort: 50140
-          - path: /api/cloud-hashing-apis/v1/get/order/detail
+          - path: /api/cloud-hashing-apis-v2/v1/get/order/detail
             backend:
-              serviceName: cloud-hashing-apis
+              serviceName: cloud-hashing-apis-v2
               servicePort: 50140
-          - path: /api/cloud-hashing-apis/v1/get/orders/detail/by/app/user
+          - path: /api/cloud-hashing-apis-v2/v1/get/orders/detail/by/app/user
             backend:
-              serviceName: cloud-hashing-apis
+              serviceName: cloud-hashing-apis-v2
               servicePort: 50140
-          - path: /api/cloud-hashing-apis/v1/get/my/direct/invitations
+          - path: /api/cloud-hashing-apis-v2/v1/get/my/direct/invitations
             backend:
-              serviceName: cloud-hashing-apis
+              serviceName: cloud-hashing-apis-v2
               servicePort: 50140
-          - path: /api/cloud-hashing-apis/v1/get/good/reviews
+          - path: /api/cloud-hashing-apis-v2/v1/get/good/reviews
             backend:
-              serviceName: cloud-hashing-apis
+              serviceName: cloud-hashing-apis-v2
               servicePort: 50140
     - host: api.xpool.top
       http: *http_appid_userid_rules
@@ -63,14 +63,14 @@ spec:
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: cloud-hashing-apis-appid-ingress
+  name: cloud-hashing-apis-v2-appid-ingress
   namespace: kube-system
   annotations:
-    k8s.kuboard.cn/displayName: cloud-hashing-apis-appid
-    k8s.kuboard.cn/workload: cloud-hashing-apis-appid
+    k8s.kuboard.cn/displayName: cloud-hashing-apis-v2-appid
+    k8s.kuboard.cn/workload: cloud-hashing-apis-v2-appid
     kubernetes.io/ingress.class: "traefik-internet"
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    traefik.ingress.kubernetes.io/router.middlewares: kube-system-strip-cloud-hashing-apis-prefix@kubernetescrd,kube-system-cookies-appid-to-body@kubernetescrd,kube-system-common-headers@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: kube-system-strip-cloud-hashing-apis-v2-prefix@kubernetescrd,kube-system-cookies-appid-to-body@kubernetescrd,kube-system-common-headers@kubernetescrd
 
 spec:
   tls:
@@ -79,17 +79,17 @@ spec:
     - host: api.npool.top
       http: &http_appid_rules
         paths:
-          - path: /api/cloud-hashing-apis/v1/get/goods/detail
+          - path: /api/cloud-hashing-apis-v2/v1/get/goods/detail
             backend:
-              serviceName: cloud-hashing-apis
+              serviceName: cloud-hashing-apis-v2
               servicePort: 50140
-          - path: /api/cloud-hashing-apis/v1/get/recommend/goods/detail/by/app
+          - path: /api/cloud-hashing-apis-v2/v1/get/recommend/goods/detail/by/app
             backend:
-              serviceName: cloud-hashing-apis
+              serviceName: cloud-hashing-apis-v2
               servicePort: 50140
-          - path: /api/cloud-hashing-apis/v1/signup
+          - path: /api/cloud-hashing-apis-v2/v1/signup
             backend:
-              serviceName: cloud-hashing-apis
+              serviceName: cloud-hashing-apis-v2
               servicePort: 50140
     - host: api.xpool.top
       http: *http_appid_rules
@@ -110,14 +110,14 @@ spec:
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: cloud-hashing-apis-ingress
+  name: cloud-hashing-apis-v2-ingress
   namespace: kube-system
   annotations:
-    k8s.kuboard.cn/displayName: cloud-hashing-apis
-    k8s.kuboard.cn/workload: cloud-hashing-apis
+    k8s.kuboard.cn/displayName: cloud-hashing-apis-v2
+    k8s.kuboard.cn/workload: cloud-hashing-apis-v2
     kubernetes.io/ingress.class: "traefik-internet"
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    traefik.ingress.kubernetes.io/router.middlewares: kube-system-strip-cloud-hashing-apis-prefix@kubernetescrd,kube-system-common-headers@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: kube-system-strip-cloud-hashing-apis-v2-prefix@kubernetescrd,kube-system-common-headers@kubernetescrd
 
 spec:
   tls:
@@ -126,9 +126,9 @@ spec:
     - host: api.npool.top
       http: &http_rules
         paths:
-          - path: /api/cloud-hashing-apis/version
+          - path: /api/cloud-hashing-apis-v2/version
             backend:
-              serviceName: cloud-hashing-apis
+              serviceName: cloud-hashing-apis-v2
               servicePort: 50140
     - host: api.xpool.top
       http: *http_rules
@@ -146,9 +146,9 @@ spec:
 apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
 metadata:
-  name: strip-cloud-hashing-apis-prefix
+  name: strip-cloud-hashing-apis-v2-prefix
   namespace: kube-system
 spec:
   stripPrefix:
     prefixes:
-      - /api/cloud-hashing-apis
+      - /api/cloud-hashing-apis-v2
