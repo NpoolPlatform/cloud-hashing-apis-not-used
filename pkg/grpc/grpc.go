@@ -40,6 +40,21 @@ const (
 	grpcTimeout = 5 * time.Second
 )
 
+func CreateGood(ctx context.Context, in *goodspb.CreateGoodRequest) (*goodspb.CreateGoodResponse, error) {
+	conn, err := grpc2.GetGRPCConn(goodsconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get goods connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := goodspb.NewCloudHashingGoodsClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.CreateGood(ctx, in)
+}
+
 func GetGood(ctx context.Context, in *goodspb.GetGoodRequest) (*goodspb.GetGoodResponse, error) {
 	conn, err := grpc2.GetGRPCConn(goodsconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {

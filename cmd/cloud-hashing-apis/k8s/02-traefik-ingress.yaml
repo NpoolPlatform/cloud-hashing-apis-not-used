@@ -21,6 +21,10 @@ spec:
             backend:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
+          - path: /api/cloud-hashing-apis-v2/v1/create/good
+            backend:
+              serviceName: cloud-hashing-apis-v2
+              servicePort: 50140
           - path: /api/cloud-hashing-apis-v2/v1/submit/order
             backend:
               serviceName: cloud-hashing-apis-v2

@@ -80,7 +80,25 @@ func GetAll(ctx context.Context, in *npool.GetGoodsRequest) (*npool.GetGoodsResp
 }
 
 func Create(ctx context.Context, in *npool.CreateGoodRequest) (*npool.CreateGoodResponse, error) {
-	return nil, nil
+	goodResp, err := grpc2.CreateGood(ctx, &goodspb.CreateGoodRequest{
+		Info: in.GetInfo(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail create good: %v", err)
+	}
+
+	// TODO:  Create good review
+
+	detail, err := Get(ctx, &npool.GetGoodRequest{
+		ID: goodResp.Info.ID,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get good detail: %v", err)
+	}
+
+	return &npool.CreateGoodResponse{
+		Info: detail.Info,
+	}, nil
 }
 
 func Get(ctx context.Context, in *npool.GetGoodRequest) (*npool.GetGoodResponse, error) {
