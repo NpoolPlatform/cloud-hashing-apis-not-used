@@ -48,6 +48,7 @@ func constructGood(info *goodspb.GoodDetail, coinInfos []*coininfopb.CoinInfo) (
 }
 
 func GetAll(ctx context.Context, in *npool.GetGoodsRequest) (*npool.GetGoodsResponse, error) {
+	logger.Sugar().Infof("get all %v", in)
 	goodsResp, err := grpc2.GetGoodsDetail(ctx, &goodspb.GetGoodsDetailRequest{
 		PageInfo: &commonpb.PageInfo{
 			PageIndex: in.GetPageInfo().GetPageIndex(),
@@ -57,6 +58,8 @@ func GetAll(ctx context.Context, in *npool.GetGoodsRequest) (*npool.GetGoodsResp
 	if err != nil {
 		return nil, xerrors.Errorf("fail get goods info: %v", err)
 	}
+
+	logger.Sugar().Infof("get all %v: %v", in, len(goodsResp.Details))
 
 	coininfoResp, err := grpc2.GetCoinInfos(ctx, &coininfopb.GetCoinInfosRequest{})
 	if err != nil {
