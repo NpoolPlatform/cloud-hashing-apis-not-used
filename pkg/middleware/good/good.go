@@ -1,4 +1,4 @@
-package gooddetail
+package good
 
 import (
 	"context"
