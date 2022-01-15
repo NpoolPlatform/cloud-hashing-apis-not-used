@@ -7,11 +7,15 @@ import (
 
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
+	goodsconst "github.com/NpoolPlatform/cloud-hashing-goods/pkg/message/const"
 	commonpb "github.com/NpoolPlatform/message/npool"
 	goodspb "github.com/NpoolPlatform/message/npool/cloud-hashing-goods"
 	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
+	reviewpb "github.com/NpoolPlatform/message/npool/review-service"
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc" //nolint
+
+	"github.com/google/uuid"
 
 	"golang.org/x/xerrors"
 )
@@ -87,7 +91,19 @@ func Create(ctx context.Context, in *npool.CreateGoodRequest) (*npool.CreateGood
 		return nil, xerrors.Errorf("fail create good: %v", err)
 	}
 
-	// TODO:  Create good review
+	_, err = grpc2.CreateReview(ctx, &reviewpb.CreateReviewRequest{
+		Info: &reviewpb.Review{
+			ObjectType: "good",
+			AppID:      uuid.UUID{}.String(),
+			ReviewerID: uuid.UUID{}.String(),
+			ObjectID:   goodResp.Info.ID,
+			Domain:     goodsconst.ServiceName,
+		},
+	})
+	if err != nil {
+		// TODO: rollback good database
+		return nil, xerrors.Errorf("fail create good review: %v", err)
+	}
 
 	detail, err := Get(ctx, &npool.GetGoodRequest{
 		ID: goodResp.Info.ID,
