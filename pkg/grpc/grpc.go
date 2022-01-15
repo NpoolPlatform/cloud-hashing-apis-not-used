@@ -520,3 +520,18 @@ func GetReviewsByDomain(ctx context.Context, in *reviewpb.GetReviewsByDomainRequ
 
 	return cli.GetReviewsByDomain(ctx, in)
 }
+
+func CreateReview(ctx context.Context, in *reviewpb.CreateReviewRequest) (*reviewpb.CreateReviewResponse, error) {
+	conn, err := grpc2.GetGRPCConn(reviewconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get review connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := reviewpb.NewReviewServiceClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.CreateReview(ctx, in)
+}
