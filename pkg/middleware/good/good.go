@@ -95,7 +95,6 @@ func Create(ctx context.Context, in *npool.CreateGoodRequest) (*npool.CreateGood
 		Info: &reviewpb.Review{
 			ObjectType: "good",
 			AppID:      uuid.UUID{}.String(),
-			ReviewerID: uuid.UUID{}.String(),
 			ObjectID:   goodResp.Info.ID,
 			Domain:     goodsconst.ServiceName,
 		},
