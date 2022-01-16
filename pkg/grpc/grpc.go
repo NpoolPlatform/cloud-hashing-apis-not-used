@@ -550,3 +550,18 @@ func GetReviewsByAppDomainObjectTypeID(ctx context.Context, in *reviewpb.GetRevi
 
 	return cli.GetReviewsByAppDomainObjectTypeID(ctx, in)
 }
+
+func GetReviewsByAppDomain(ctx context.Context, in *reviewpb.GetReviewsByAppDomainRequest) (*reviewpb.GetReviewsByAppDomainResponse, error) {
+	conn, err := grpc2.GetGRPCConn(reviewconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get review connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := reviewpb.NewReviewServiceClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetReviewsByAppDomain(ctx, in)
+}
