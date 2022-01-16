@@ -8,7 +8,9 @@ import (
 
 	goodsconst "github.com/NpoolPlatform/cloud-hashing-goods/pkg/message/const"
 	kycconst "github.com/NpoolPlatform/kyc-management/pkg/message/const"
+	kycmgrpb "github.com/NpoolPlatform/message/npool/kyc"
 	reviewpb "github.com/NpoolPlatform/message/npool/review-service"
+	usermgrpb "github.com/NpoolPlatform/message/npool/user"
 
 	"golang.org/x/xerrors"
 )
@@ -22,12 +24,33 @@ func GetKycReviews(ctx context.Context, in *npool.GetKycReviewsRequest) (*npool.
 		return nil, xerrors.Errorf("fail get kyc reviews: %v", err)
 	}
 	// TODO: Expand reviewer
-	// TODO: Expand kyc
 
 	reviews := []*npool.KycReview{}
 	for _, info := range resp.Infos {
+		kyc, err := grpc2.GetKycByIDs(ctx, &kycmgrpb.GetKycByKycIDsRequest{
+			KycIDs: []string{
+				info.ID,
+			},
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail get kyc info for %v: %v", info.ID, err)
+		}
+		if len(kyc.Infos) == 0 {
+			continue
+		}
+
+		user, err := grpc2.GetUser(ctx, &usermgrpb.GetUserRequest{
+			AppID:  in.GetAppID(),
+			UserID: kyc.Infos[0].UserID,
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail get user info for %v: %v", kyc.Infos[0].UserID, err)
+		}
+
 		reviews = append(reviews, &npool.KycReview{
 			Review: info,
+			User:   user.Info,
+			Kyc:    kyc.Infos[0],
 		})
 	}
 

@@ -33,6 +33,9 @@ import (
 	appmgrconst "github.com/NpoolPlatform/application-management/pkg/message/const" //nolint
 	appmgrpb "github.com/NpoolPlatform/message/npool/application"
 
+	kycmgrconst "github.com/NpoolPlatform/kyc-management/pkg/message/const" //nolint
+	kycmgrpb "github.com/NpoolPlatform/message/npool/kyc"
+
 	"golang.org/x/xerrors"
 )
 
@@ -564,4 +567,21 @@ func GetReviewsByAppDomain(ctx context.Context, in *reviewpb.GetReviewsByAppDoma
 	defer cancel()
 
 	return cli.GetReviewsByAppDomain(ctx, in)
+}
+
+//---------------------------------------------------------------------------------------------------------------------------
+
+func GetKycByIDs(ctx context.Context, in *kycmgrpb.GetKycByKycIDsRequest) (*kycmgrpb.GetKycByKycIDsResponse, error) {
+	conn, err := grpc2.GetGRPCConn(kycmgrconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get kyc connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := kycmgrpb.NewKycManagementClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetKycByKycIDs(ctx, in)
 }
