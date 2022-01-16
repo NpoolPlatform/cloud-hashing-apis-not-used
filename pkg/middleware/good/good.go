@@ -73,7 +73,17 @@ func GetAll(ctx context.Context, in *npool.GetGoodsRequest) (*npool.GetGoodsResp
 
 	details := []*npool.Good{}
 	for _, info := range goodsResp.Details {
-		detail, err := constructGood(info, coininfoResp.Infos, nil)
+		review, err := grpc2.GetReviewsByAppDomainObjectTypeID(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
+			AppID:      uuid.UUID{}.String(),
+			Domain:     goodsconst.ServiceName,
+			ObjectType: constant.ReviewObjectGood,
+			ObjectID:   info.ID,
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail get reviews by app domain object type id: %v", err)
+		}
+
+		detail, err := constructGood(info, coininfoResp.Infos, review.Infos)
 		if err != nil {
 			logger.Sugar().Errorf("fail to get coin info %v: %v", info.CoinInfoID, err)
 			continue
@@ -169,7 +179,17 @@ func GetRecommendsByApp(ctx context.Context, in *npool.GetRecommendGoodsByAppReq
 	details := []*npool.RecommendGood{}
 
 	for _, info := range goodsResp.Infos {
-		detail, err := constructGood(info.Good, coininfoResp.Infos, nil)
+		review, err := grpc2.GetReviewsByAppDomainObjectTypeID(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
+			AppID:      uuid.UUID{}.String(),
+			Domain:     goodsconst.ServiceName,
+			ObjectType: constant.ReviewObjectGood,
+			ObjectID:   info.Good.ID,
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail get reviews by app domain object type id: %v", err)
+		}
+
+		detail, err := constructGood(info.Good, coininfoResp.Infos, review.Infos)
 		if err != nil {
 			logger.Sugar().Errorf("fail to get coin info %v: %v", info.Good.CoinInfoID, err)
 			continue
