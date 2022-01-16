@@ -3,6 +3,8 @@ package review
 import (
 	"context"
 
+	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
@@ -29,13 +31,14 @@ func GetKycReviews(ctx context.Context, in *npool.GetKycReviewsRequest) (*npool.
 	for _, info := range resp.Infos {
 		kyc, err := grpc2.GetKycByIDs(ctx, &kycmgrpb.GetKycByKycIDsRequest{
 			KycIDs: []string{
-				info.ID,
+				info.ObjectID,
 			},
 		})
 		if err != nil {
 			return nil, xerrors.Errorf("fail get kyc info for %v: %v", info.ID, err)
 		}
 		if len(kyc.Infos) == 0 {
+			logger.Sugar().Warnf("empty kyc info for %v", info.ObjectID)
 			continue
 		}
 
@@ -44,7 +47,8 @@ func GetKycReviews(ctx context.Context, in *npool.GetKycReviewsRequest) (*npool.
 			UserID: kyc.Infos[0].UserID,
 		})
 		if err != nil {
-			return nil, xerrors.Errorf("fail get user info for %v: %v", kyc.Infos[0].UserID, err)
+			logger.Sugar().Errorf("fail get user info for %v: %v", kyc.Infos[0].UserID, err)
+			continue
 		}
 
 		reviews = append(reviews, &npool.KycReview{
