@@ -113,8 +113,8 @@ github.com/NpoolPlatform/message v0.0.0-20220113120026-0a86a9254333/go.mod h1:zv
 github.com/NpoolPlatform/message v0.0.0-20220113121244-1e4c3b169aa3/go.mod h1:zv/FSNmmW0Og/XKErnXrRuLzLeTDMxymEImhjNp/V/w=
 github.com/NpoolPlatform/message v0.0.0-20220113121702-4b1c67be285b/go.mod h1:zv/FSNmmW0Og/XKErnXrRuLzLeTDMxymEImhjNp/V/w=
 github.com/NpoolPlatform/message v0.0.0-20220115121506-39a2f2fb7042/go.mod h1:zv/FSNmmW0Og/XKErnXrRuLzLeTDMxymEImhjNp/V/w=
-github.com/NpoolPlatform/message v0.0.0-20220116065614-7b575777ea71 h1:T+qreYHoUxfIkpebldha8qEWJ/sBFjrbDqfmOuVARYk=
-github.com/NpoolPlatform/message v0.0.0-20220116065614-7b575777ea71/go.mod h1:zv/FSNmmW0Og/XKErnXrRuLzLeTDMxymEImhjNp/V/w=
+github.com/NpoolPlatform/message v0.0.0-20220116085805-2aedf08d5648 h1:lCh9DxNJMR8GIzrOjRbAbLyRJvjCBGOeB/vJwqsT81s=
+github.com/NpoolPlatform/message v0.0.0-20220116085805-2aedf08d5648/go.mod h1:zv/FSNmmW0Og/XKErnXrRuLzLeTDMxymEImhjNp/V/w=
 github.com/NpoolPlatform/review-service v0.0.0-20220116034757-5769c13493d1 h1:0jX8Fbd7EEFxwgiQDiTErpFoQqUTFeX5j3I3+XRYKWY=
 github.com/NpoolPlatform/review-service v0.0.0-20220116034757-5769c13493d1/go.mod h1:TyQanUDw927lZ0AZ0rO6Z0g4GOdQqv54aQHnuZCz11c=
 github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211206035652-888de6e20996/go.mod h1:w203lHGAaRvZqEMLxJI8wBxAoVvE3RHMU3jtwN/AdgE=
