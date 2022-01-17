@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func GetKycByAppUser(ctx context.Context, in *npool.GetKycByAppUserRequest) (*npool.GetKycByAppUserResponse, error) {
+func (s *Server) GetKycByAppUser(ctx context.Context, in *npool.GetKycByAppUserRequest) (*npool.GetKycByAppUserResponse, error) {
 	resp, err := mw.GetByAppUser(ctx, in)
 	if err != nil {
 		logger.Sugar().Errorf("get kyc error: %w", err)
