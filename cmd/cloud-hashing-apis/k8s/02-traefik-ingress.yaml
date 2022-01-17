@@ -53,7 +53,7 @@ spec:
             backend:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/get/kyc/by/user
+          - path: /api/cloud-hashing-apis-v2/v1/get/kyc/by/app/user
             backend:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
