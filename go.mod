@@ -12,7 +12,7 @@ require (
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20211222114515-4928e6cf3f1f
 	github.com/NpoolPlatform/kyc-management v0.0.0-20220113122339-4bef8bdcbc5c
 	github.com/NpoolPlatform/message v0.0.0-20220117083623-1587529745b5
-	github.com/NpoolPlatform/review-service v0.0.0-20220116034757-5769c13493d1
+	github.com/NpoolPlatform/review-service v0.0.0-20220116072628-5d40d102eb24
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211208035009-5ad2768d2290
 	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20211210102925-d9b8abe11021
 	github.com/NpoolPlatform/user-management v0.0.0-20211206121520-304b4b6e1680
