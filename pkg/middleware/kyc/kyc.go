@@ -17,8 +17,6 @@ import (
 )
 
 func Create(ctx context.Context, in *npool.CreateKycRequest) (*npool.CreateKycResponse, error) {
-	// TODO: get my kyc info firstly
-
 	resp, err := grpc2.CreateKyc(ctx, &kycmgrpb.CreateKycRequest{
 		Info: in.GetInfo(),
 	})
@@ -40,6 +38,61 @@ func Create(ctx context.Context, in *npool.CreateKycRequest) (*npool.CreateKycRe
 	}
 
 	return &npool.CreateKycResponse{
+		Info: &npool.Kyc{
+			Kyc:   resp.Info,
+			State: reviewconst.StateWait,
+		},
+	}, nil
+}
+
+func Update(ctx context.Context, in *npool.UpdateKycRequest) (*npool.UpdateKycResponse, error) {
+	allowed := true
+	reviewing := false
+
+	review, err := grpc2.GetReviewsByAppDomainObjectTypeID(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
+		AppID:      in.GetInfo().GetAppID(),
+		Domain:     kycmgrconst.ServiceName,
+		ObjectType: constant.ReviewObjectKyc,
+		ObjectID:   in.GetInfo().GetID(),
+	})
+	if err == nil {
+		for _, info := range review.Infos {
+			if info.State == reviewconst.StateApproved {
+				allowed = false
+			}
+			if info.State == reviewconst.StateWait {
+				reviewing = true
+			}
+		}
+	}
+
+	if !allowed {
+		return nil, xerrors.Errorf("not allowed update kyc")
+	}
+
+	resp, err := grpc2.UpdateKyc(ctx, &kycmgrpb.UpdateKycRequest{
+		Info: in.GetInfo(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail update kyc: %v", err)
+	}
+
+	if !reviewing {
+		_, err = grpc2.CreateReview(ctx, &reviewpb.CreateReviewRequest{
+			Info: &reviewpb.Review{
+				AppID:      in.GetInfo().GetAppID(),
+				Domain:     kycmgrconst.ServiceName,
+				ObjectType: constant.ReviewObjectKyc,
+				ObjectID:   resp.Info.ID,
+			},
+		})
+		if err != nil {
+			// TODO: rollback kyc database
+			return nil, xerrors.Errorf("fail create kyc review: %v", err)
+		}
+	}
+
+	return &npool.UpdateKycResponse{
 		Info: &npool.Kyc{
 			Kyc:   resp.Info,
 			State: reviewconst.StateWait,

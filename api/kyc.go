@@ -22,6 +22,15 @@ func (s *Server) CreateKyc(ctx context.Context, in *npool.CreateKycRequest) (*np
 	return resp, nil
 }
 
+func (s *Server) UpdateKyc(ctx context.Context, in *npool.UpdateKycRequest) (*npool.UpdateKycResponse, error) {
+	resp, err := mw.Update(ctx, in)
+	if err != nil {
+		logger.Sugar().Errorf("update kyc error: %w", err)
+		return &npool.UpdateKycResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return resp, nil
+}
+
 func (s *Server) GetKycByAppUser(ctx context.Context, in *npool.GetKycByAppUserRequest) (*npool.GetKycByAppUserResponse, error) {
 	resp, err := mw.GetByAppUser(ctx, in)
 	if err != nil {
