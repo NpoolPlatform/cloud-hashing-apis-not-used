@@ -58,6 +58,7 @@ func GetByAppUser(ctx context.Context, in *npool.GetKycByAppUserRequest) (*npool
 
 	review, err := grpc2.GetReviewsByAppDomainObjectTypeID(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
 		AppID:      in.GetAppID(),
+		Domain:     kycmgrconst.ServiceName,
 		ObjectType: constant.ReviewObjectKyc,
 		ObjectID:   resp.Info.ID,
 	})
