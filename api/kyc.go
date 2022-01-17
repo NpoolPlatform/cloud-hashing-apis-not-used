@@ -13,6 +13,15 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+func (s *Server) CreateKyc(ctx context.Context, in *npool.CreateKycRequest) (*npool.CreateKycResponse, error) {
+	resp, err := mw.Create(ctx, in)
+	if err != nil {
+		logger.Sugar().Errorf("create kyc error: %w", err)
+		return &npool.CreateKycResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return resp, nil
+}
+
 func (s *Server) GetKycByAppUser(ctx context.Context, in *npool.GetKycByAppUserRequest) (*npool.GetKycByAppUserResponse, error) {
 	resp, err := mw.GetByAppUser(ctx, in)
 	if err != nil {

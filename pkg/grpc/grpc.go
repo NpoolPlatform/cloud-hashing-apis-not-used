@@ -600,3 +600,18 @@ func GetKycByUserID(ctx context.Context, in *kycmgrpb.GetKycByUserIDRequest) (*k
 
 	return cli.GetKycByUserID(ctx, in)
 }
+
+func CreateKyc(ctx context.Context, in *kycmgrpb.CreateKycRequest) (*kycmgrpb.CreateKycResponse, error) {
+	conn, err := grpc2.GetGRPCConn(kycmgrconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get kyc connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := kycmgrpb.NewKycManagementClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.CreateKyc(ctx, in)
+}
