@@ -8,7 +8,6 @@ import (
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
 	goodsconst "github.com/NpoolPlatform/cloud-hashing-goods/pkg/message/const"
-	commonpb "github.com/NpoolPlatform/message/npool"
 	goodspb "github.com/NpoolPlatform/message/npool/cloud-hashing-goods"
 	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
 	reviewpb "github.com/NpoolPlatform/message/npool/review-service"
@@ -57,10 +56,7 @@ func constructGood(
 
 func GetAll(ctx context.Context, in *npool.GetGoodsRequest) (*npool.GetGoodsResponse, error) {
 	goodsResp, err := grpc2.GetGoodsDetail(ctx, &goodspb.GetGoodsDetailRequest{
-		PageInfo: &commonpb.PageInfo{
-			PageIndex: in.GetPageInfo().GetPageIndex(),
-			PageSize:  in.GetPageInfo().GetPageSize(),
-		},
+		PageInfo: in.GetPageInfo(),
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get goods info: %v", err)

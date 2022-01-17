@@ -17,14 +17,10 @@ import (
 )
 
 func Create(ctx context.Context, in *npool.CreateKycRequest) (*npool.CreateKycResponse, error) {
+	// TODO: get my kyc info firstly
+
 	resp, err := grpc2.CreateKyc(ctx, &kycmgrpb.CreateKycRequest{
-		AppID:               in.GetInfo().GetAppID(),
-		UserID:              in.GetInfo().GetUserID(),
-		CardType:            in.GetInfo().GetCardType(),
-		CardID:              in.GetInfo().GetCardID(),
-		FrontCardImg:        in.GetInfo().GetFrontCardImg(),
-		BackCardImg:         in.GetInfo().GetBackCardImg(),
-		UserHandlingCardImg: in.GetInfo().GetUserHandlingCardImg(),
+		Info: in.GetInfo(),
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail create kyc: %v", err)
