@@ -53,6 +53,10 @@ spec:
             backend:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
+          - path: /api/cloud-hashing-apis-v2/v1/get/kyc/by/user
+            backend:
+              serviceName: cloud-hashing-apis-v2
+              servicePort: 50140
     - host: api.xpool.top
       http: *http_appid_userid_rules
     - host: www.npool.top
