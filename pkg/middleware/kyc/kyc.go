@@ -70,6 +70,8 @@ func GetByAppUser(ctx context.Context, in *npool.GetKycByAppUserRequest) (*npool
 	}
 
 	reviewState := reviewconst.StateRejected
+	reviewMessage := ""
+	messageTime := uint32(0)
 
 	for _, info := range review.Infos {
 		if info.State == reviewconst.StateWait {
@@ -85,10 +87,22 @@ func GetByAppUser(ctx context.Context, in *npool.GetKycByAppUserRequest) (*npool
 		}
 	}
 
+	if reviewState == reviewconst.StateRejected {
+		for _, info := range review.Infos {
+			if info.State == reviewconst.StateRejected {
+				if messageTime < info.CreateAt {
+					reviewMessage = info.Message
+					messageTime = info.CreateAt
+				}
+			}
+		}
+	}
+
 	return &npool.GetKycByAppUserResponse{
 		Info: &npool.Kyc{
-			Kyc:   resp.Info,
-			State: reviewState,
+			Kyc:     resp.Info,
+			State:   reviewState,
+			Message: reviewMessage,
 		},
 	}, nil
 }
