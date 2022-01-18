@@ -47,7 +47,7 @@ func GetKycReviews(ctx context.Context, in *npool.GetKycReviewsRequest) (*npool.
 			UserID: kyc.Infos[0].UserID,
 		})
 		if err != nil {
-			logger.Sugar().Errorf("fail get user info for %v: %v", kyc.Infos[0].UserID, err)
+			logger.Sugar().Errorf("fail get user %v info for %v: %v", kyc.Infos[0].UserID, info.ObjectID, err)
 			continue
 		}
 
