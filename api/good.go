@@ -18,7 +18,7 @@ import (
 func (s *Server) GetGoods(ctx context.Context, in *npool.GetGoodsRequest) (*npool.GetGoodsResponse, error) {
 	resp, err := good.GetAll(ctx, in)
 	if err != nil {
-		logger.Sugar().Errorf("get good all error: %w", err)
+		logger.Sugar().Errorf("get good all error: %v", err)
 		return &npool.GetGoodsResponse{}, status.Error(codes.Internal, err.Error())
 	}
 	return resp, nil
@@ -27,7 +27,7 @@ func (s *Server) GetGoods(ctx context.Context, in *npool.GetGoodsRequest) (*npoo
 func (s *Server) CreateGood(ctx context.Context, in *npool.CreateGoodRequest) (*npool.CreateGoodResponse, error) {
 	resp, err := good.Create(ctx, in)
 	if err != nil {
-		logger.Sugar().Errorf("create good error: %w", err)
+		logger.Sugar().Errorf("create good error: %v", err)
 		return &npool.CreateGoodResponse{}, status.Error(codes.Internal, err.Error())
 	}
 	return resp, nil
@@ -36,7 +36,7 @@ func (s *Server) CreateGood(ctx context.Context, in *npool.CreateGoodRequest) (*
 func (s *Server) GetGood(ctx context.Context, in *npool.GetGoodRequest) (*npool.GetGoodResponse, error) {
 	resp, err := good.Get(ctx, in)
 	if err != nil {
-		logger.Sugar().Errorf("get good error: %w", err)
+		logger.Sugar().Errorf("get good error: %v", err)
 		return &npool.GetGoodResponse{}, status.Error(codes.Internal, err.Error())
 	}
 	return resp, nil
