@@ -11,6 +11,8 @@ import (
 	msgsrv "github.com/NpoolPlatform/cloud-hashing-apis/pkg/message/server"
 	userupdater "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/user"
 
+	apimgrcli "github.com/NpoolPlatform/api-manager/pkg/client"
+
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
@@ -57,7 +59,14 @@ func rpcRegister(server grpc.ServiceRegistrar) error {
 }
 
 func rpcGatewayRegister(mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) error {
-	return api.RegisterGateway(mux, endpoint, opts)
+	err := api.RegisterGateway(mux, endpoint, opts)
+	if err != nil {
+		return err
+	}
+
+	apimgrcli.Register(mux)
+
+	return nil
 }
 
 func msgSender() {
