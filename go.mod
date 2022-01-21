@@ -3,8 +3,8 @@ module github.com/NpoolPlatform/cloud-hashing-apis
 go 1.16
 
 require (
-	entgo.io/ent v0.9.1
-	github.com/NpoolPlatform/api-manager v0.0.0-20220121040940-39133249c02e
+	entgo.io/ent v0.10.0
+	github.com/NpoolPlatform/api-manager v0.0.0-20220121044105-965c28acb16b
 	github.com/NpoolPlatform/application-management v0.0.0-20211228043636-766772748ce7
 	github.com/NpoolPlatform/cloud-hashing-billing v0.0.0-20220113120914-cff59ad0a7f5
 	github.com/NpoolPlatform/cloud-hashing-goods v0.0.0-20220113121137-c2b65b514bad
@@ -21,7 +21,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.2
 	github.com/streadway/amqp v1.0.0
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1-0.20210427113832-6241f9ab9942
 	github.com/urfave/cli/v2 v2.3.0
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 	google.golang.org/grpc v1.43.0
