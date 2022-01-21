@@ -55,6 +55,9 @@ var runCmd = &cli.Command{
 
 func rpcRegister(server grpc.ServiceRegistrar) error {
 	api.Register(server)
+
+	apimgrcli.RegisterGRPC(server)
+
 	return nil
 }
 
