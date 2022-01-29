@@ -1,24 +1,24 @@
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: cloud-hashing-apis-v2-appid-userid-ingress
+  name: cloud-hashing-apis-v2-traefik-app-user-ingress
   namespace: kube-system
   annotations:
-    k8s.kuboard.cn/displayName: cloud-hashing-apis-v2-appid-userid
-    k8s.kuboard.cn/workload: cloud-hashing-apis-v2-appid-userid
+    k8s.kuboard.cn/displayName: cloud-hashing-apis-v2-traefik-app-user
+    k8s.kuboard.cn/workload: cloud-hashing-apis-v2-traefik-app-user
     kubernetes.io/ingress.class: "traefik-internet"
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
     traefik.ingress.kubernetes.io/router.middlewares: kube-system-strip-cloud-hashing-apis-v2-prefix@kubernetescrd,
+                                                      kube-system-common-headers@kubernetescrd,
                                                       kube-system-headers-appid-to-body@kubernetescrd,
                                                       kube-system-headers-userid-to-body@kubernetescrd,
-                                                      kube-system-common-headers@kubernetescrd
+                                                      kube-system-headers-app-login-token-to-body@kubernetescrd,
+                                                      kube-system-app-user-role-rbac-auth@kubernetescrd
 
 spec:
-  tls:
-    - secretName: procyon-vip-tls
   rules:
     - host: api.npool.top
-      http: &http_appid_userid_rules
+      http: &http_rules
         paths:
           - path: /api/cloud-hashing-apis-v2/v1/get/good
             backend:
@@ -68,38 +68,31 @@ spec:
             backend:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
+    - host: api.procyon.vip
+      http: *http_rules
     - host: api.xpool.top
-      http: *http_appid_userid_rules
-    - host: www.npool.top
-      http: *http_appid_userid_rules
-    - host: www.xpool.top
-      http: *http_appid_userid_rules
-    - host: www.procyon.vip
-      http: *http_appid_userid_rules
-    - host: procyon.vip
-      http: *http_appid_userid_rules
-    - host: dashboard.xpool.top
-      http: *http_appid_userid_rules
+      http: *http_rules
 
 ---
 
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: cloud-hashing-apis-v2-appid-ingress
+  name: cloud-hashing-apis-v2-traefik-app-ingress
   namespace: kube-system
   annotations:
-    k8s.kuboard.cn/displayName: cloud-hashing-apis-v2-appid
-    k8s.kuboard.cn/workload: cloud-hashing-apis-v2-appid
+    k8s.kuboard.cn/displayName: cloud-hashing-apis-v2-traefik-app
+    k8s.kuboard.cn/workload: cloud-hashing-apis-v2-traefik-app
     kubernetes.io/ingress.class: "traefik-internet"
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
     traefik.ingress.kubernetes.io/router.middlewares: kube-system-strip-cloud-hashing-apis-v2-prefix@kubernetescrd,
+                                                      kube-system-common-headers@kubernetescrd,
                                                       kube-system-headers-appid-to-body@kubernetescrd,
-                                                      kube-system-common-headers@kubernetescrd
+                                                      kube-system-headers-userid-to-body@kubernetescrd,
+                                                      kube-system-headers-app-login-token-to-body@kubernetescrd,
+                                                      kube-system-app-user-role-rbac-auth@kubernetescrd
 
 spec:
-  tls:
-    - secretName: procyon-vip-tls
   rules:
     - host: api.npool.top
       http: &http_appid_rules
@@ -120,28 +113,7 @@ spec:
             backend:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
+    - host: api.procyon.vip
+      http: *http_rules
     - host: api.xpool.top
-      http: *http_appid_rules
-    - host: www.npool.top
-      http: *http_appid_rules
-    - host: www.xpool.top
-      http: *http_appid_rules
-    - host: www.procyon.vip
-      http: *http_appid_rules
-    - host: procyon.vip
-      http: *http_appid_rules
-    - host: dashboard.xpool.top
-      http: *http_appid_rules
-
-
----
-
-apiVersion: traefik.containo.us/v1alpha1
-kind: Middleware
-metadata:
-  name: strip-cloud-hashing-apis-v2-prefix
-  namespace: kube-system
-spec:
-  stripPrefix:
-    prefixes:
-      - /api/cloud-hashing-apis-v2
+      http: *http_rules
