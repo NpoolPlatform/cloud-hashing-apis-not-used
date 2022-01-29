@@ -95,7 +95,7 @@ metadata:
 spec:
   rules:
     - host: api.npool.top
-      http: &http_appid_rules
+      http: &http_rules
         paths:
           - path: /api/cloud-hashing-apis-v2/v1/get/goods
             backend:
