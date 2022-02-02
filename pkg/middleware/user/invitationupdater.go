@@ -13,9 +13,9 @@ import (
 	order "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/order"
 
 	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
+	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
 	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
-	usermgrpb "github.com/NpoolPlatform/message/npool/user"
 
 	"golang.org/x/xerrors"
 )
@@ -174,7 +174,7 @@ func getInvitationUserInfo( //nolint
 	error) {
 	ctx := context.Background()
 
-	inviteeResp, err := grpc2.GetUser(ctx, &usermgrpb.GetUserRequest{
+	inviteeResp, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
 		AppID:  appID,
 		UserID: inviteeID,
 	})
@@ -184,7 +184,7 @@ func getInvitationUserInfo( //nolint
 
 	resp1, err := grpc2.GetUserInvitationCodeByAppUser(ctx, &inspirepb.GetUserInvitationCodeByAppUserRequest{
 		AppID:  appID,
-		UserID: inviteeResp.Info.UserID,
+		UserID: inviteeResp.Info.User.ID,
 	})
 	if err != nil {
 		return nil, myGoods, myCoins, xerrors.Errorf("fail get user invitation code: %v", err)
@@ -194,7 +194,7 @@ func getInvitationUserInfo( //nolint
 
 	resp2, goods, coins, err := order.GetOrdersShortDetailByAppUser(ctx, &npool.GetOrdersByAppUserRequest{
 		AppID:  appID,
-		UserID: inviteeResp.Info.UserID,
+		UserID: inviteeResp.Info.User.ID,
 	}, myGoods, myCoins)
 	if err != nil {
 		return nil, myGoods, myCoins, xerrors.Errorf("fail get orders detail by app user: %v", err)
@@ -228,10 +228,10 @@ func getInvitationUserInfo( //nolint
 	}
 
 	return &npool.InvitationUserInfo{
-		UserID:       inviteeResp.Info.UserID,
-		Username:     inviteeResp.Info.Username,
-		Avatar:       inviteeResp.Info.Avatar,
-		EmailAddress: inviteeResp.Info.EmailAddress,
+		UserID:       inviteeResp.Info.User.ID,
+		Username:     inviteeResp.Info.Extra.Username,
+		Avatar:       inviteeResp.Info.Extra.Avatar,
+		EmailAddress: inviteeResp.Info.User.EmailAddress,
 		Kol:          kol,
 		MySummarys:   summarys,
 	}, myGoods, myCoins, nil
@@ -240,7 +240,7 @@ func getInvitationUserInfo( //nolint
 func getInvitations(appID, reqInviterID string, directOnly bool) (map[string]*npool.Invitation, *npool.InvitationUserInfo, error) { //nolint
 	ctx := context.Background()
 
-	_, err := grpc2.GetUser(ctx, &usermgrpb.GetUserRequest{
+	_, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
 		AppID:  appID,
 		UserID: reqInviterID,
 	})

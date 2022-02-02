@@ -10,9 +10,9 @@ import (
 
 	goodsconst "github.com/NpoolPlatform/cloud-hashing-goods/pkg/message/const"
 	kycconst "github.com/NpoolPlatform/kyc-management/pkg/message/const"
+	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
 	kycmgrpb "github.com/NpoolPlatform/message/npool/kyc"
 	reviewpb "github.com/NpoolPlatform/message/npool/review-service"
-	usermgrpb "github.com/NpoolPlatform/message/npool/user"
 
 	"golang.org/x/xerrors"
 )
@@ -42,7 +42,7 @@ func GetKycReviews(ctx context.Context, in *npool.GetKycReviewsRequest) (*npool.
 			continue
 		}
 
-		user, err := grpc2.GetUser(ctx, &usermgrpb.GetUserRequest{
+		user, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
 			AppID:  in.GetAppID(),
 			UserID: kyc.Infos[0].UserID,
 		})

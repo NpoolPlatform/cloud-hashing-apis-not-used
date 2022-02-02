@@ -27,11 +27,8 @@ import (
 	inspireconst "github.com/NpoolPlatform/cloud-hashing-inspire/pkg/message/const" //nolint
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
 
-	usermgrpb "github.com/NpoolPlatform/message/npool/user"
-	usermgrconst "github.com/NpoolPlatform/user-management/pkg/message/const" //nolint
-
-	appmgrconst "github.com/NpoolPlatform/application-management/pkg/message/const" //nolint
-	appmgrpb "github.com/NpoolPlatform/message/npool/application"
+	appusermgrconst "github.com/NpoolPlatform/appuser-manager/pkg/message/const" //nolint
+	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
 
 	kycmgrconst "github.com/NpoolPlatform/kyc-management/pkg/message/const" //nolint
 	kycmgrpb "github.com/NpoolPlatform/message/npool/kyc"
@@ -460,51 +457,66 @@ func GetBalance(ctx context.Context, in *sphinxproxypb.GetBalanceRequest) (*sphi
 
 //---------------------------------------------------------------------------------------------------------------------------
 
-func Signup(ctx context.Context, in *usermgrpb.SignupRequest) (*usermgrpb.SignupResponse, error) {
-	conn, err := grpc2.GetGRPCConn(usermgrconst.ServiceName, grpc2.GRPCTAG)
+func Signup(ctx context.Context, in *appusermgrpb.CreateAppUserWithSecretRequest) (*appusermgrpb.CreateAppUserWithSecretResponse, error) {
+	conn, err := grpc2.GetGRPCConn(appusermgrconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
-		return nil, xerrors.Errorf("fail get usermgr connection: %v", err)
+		return nil, xerrors.Errorf("fail get app user manager connection: %v", err)
 	}
 	defer conn.Close()
 
-	cli := usermgrpb.NewUserClient(conn)
+	cli := appusermgrpb.NewAppUserManagerClient(conn)
 
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.SignUp(ctx, in)
+	return cli.CreateAppUserWithSecret(ctx, in)
 }
 
-func GetUser(ctx context.Context, in *usermgrpb.GetUserRequest) (*usermgrpb.GetUserResponse, error) {
-	conn, err := grpc2.GetGRPCConn(usermgrconst.ServiceName, grpc2.GRPCTAG)
+func GetAppUserByAppUser(ctx context.Context, in *appusermgrpb.GetAppUserByAppUserRequest) (*appusermgrpb.GetAppUserByAppUserResponse, error) {
+	conn, err := grpc2.GetGRPCConn(appusermgrconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
-		return nil, xerrors.Errorf("fail get usermgr connection: %v", err)
+		return nil, xerrors.Errorf("fail get app user manager connection: %v", err)
 	}
 	defer conn.Close()
 
-	cli := usermgrpb.NewUserClient(conn)
+	cli := appusermgrpb.NewAppUserManagerClient(conn)
 
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetUser(ctx, in)
+	return cli.GetAppUserByAppUser(ctx, in)
+}
+
+func GetAppUserInfoByAppUser(ctx context.Context, in *appusermgrpb.GetAppUserInfoByAppUserRequest) (*appusermgrpb.GetAppUserInfoByAppUserResponse, error) {
+	conn, err := grpc2.GetGRPCConn(appusermgrconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app user manager connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := appusermgrpb.NewAppUserManagerClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetAppUserInfoByAppUser(ctx, in)
 }
 
 //---------------------------------------------------------------------------------------------------------------------------
 
-func GetApp(ctx context.Context, in *appmgrpb.GetApplicationRequest) (*appmgrpb.GetApplicationResponse, error) {
-	conn, err := grpc2.GetGRPCConn(appmgrconst.ServiceName, grpc2.GRPCTAG)
+func GetApp(ctx context.Context, in *appusermgrpb.GetAppInfoRequest) (*appusermgrpb.GetAppInfoResponse, error) {
+	conn, err := grpc2.GetGRPCConn(appusermgrconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
-		return nil, xerrors.Errorf("fail get appmgr connection: %v", err)
+		return nil, xerrors.Errorf("fail get app user manager connection: %v", err)
 	}
 	defer conn.Close()
 
-	cli := appmgrpb.NewApplicationManagementClient(conn)
+	cli := appusermgrpb.NewAppUserManagerClient(conn)
 
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetApplication(ctx, in)
+	return cli.GetAppInfo(ctx, in)
 }
 
 //---------------------------------------------------------------------------------------------------------------------------
