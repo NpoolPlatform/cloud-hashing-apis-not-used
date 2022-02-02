@@ -33,6 +33,9 @@ import (
 	kycmgrconst "github.com/NpoolPlatform/kyc-management/pkg/message/const" //nolint
 	kycmgrpb "github.com/NpoolPlatform/message/npool/kyc"
 
+	thirdgwpb "github.com/NpoolPlatform/message/npool/thirdgateway"
+	thirdgwconst "github.com/NpoolPlatform/third-gateway/pkg/message/const"
+
 	"golang.org/x/xerrors"
 )
 
@@ -641,4 +644,36 @@ func UpdateKyc(ctx context.Context, in *kycmgrpb.UpdateKycRequest) (*kycmgrpb.Up
 	defer cancel()
 
 	return cli.UpdateKyc(ctx, in)
+}
+
+//---------------------------------------------------------------------------------------------------------------------------
+
+func VerifyEmailCode(ctx context.Context, in *thirdgwpb.VerifyEmailCodeRequest) (*thirdgwpb.VerifyEmailCodeResponse, error) {
+	conn, err := grpc2.GetGRPCConn(thirdgwconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get third gateway connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := thirdgwpb.NewThirdGatewayClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.VerifyEmailCode(ctx, in)
+}
+
+func VerifySMSCode(ctx context.Context, in *thirdgwpb.VerifySMSCodeRequest) (*thirdgwpb.VerifySMSCodeResponse, error) {
+	conn, err := grpc2.GetGRPCConn(thirdgwconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get third gateway connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := thirdgwpb.NewThirdGatewayClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.VerifySMSCode(ctx, in)
 }

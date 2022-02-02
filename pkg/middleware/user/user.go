@@ -7,8 +7,11 @@ import (
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 
+	appusermgrconst "github.com/NpoolPlatform/appuser-manager/pkg/const"
 	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
+	thirdgwpb "github.com/NpoolPlatform/message/npool/thirdgateway"
+	thirdgwconst "github.com/NpoolPlatform/third-gateway/pkg/const"
 
 	"golang.org/x/xerrors"
 )
@@ -53,13 +56,37 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 		}
 	}
 
-	// TODO: verify code here in.GetVerificationCode()
+	emailAddr := ""
+	phoneNO := ""
+
+	if in.GetAccountType() == appusermgrconst.SignupByMobile {
+		phoneNO = in.GetAccount()
+		_, err = grpc2.VerifySMSCode(ctx, &thirdgwpb.VerifySMSCodeRequest{
+			AppID:   in.GetAppID(),
+			PhoneNO: phoneNO,
+			UsedFor: thirdgwconst.UsedForSignup,
+			Code:    in.GetVerificationCode(),
+		})
+	} else if in.GetAccountType() == appusermgrconst.SignupByEmail {
+		emailAddr = in.GetAccount()
+		_, err = grpc2.VerifyEmailCode(ctx, &thirdgwpb.VerifyEmailCodeRequest{
+			AppID:        in.GetAppID(),
+			EmailAddress: emailAddr,
+			UsedFor:      thirdgwconst.UsedForSignup,
+			Code:         in.GetVerificationCode(),
+		})
+	} else {
+		return nil, xerrors.Errorf("invalid signup method")
+	}
+	if err != nil {
+		return nil, xerrors.Errorf("fail verify signup code: %v", err)
+	}
 
 	signupResp, err := grpc2.Signup(ctx, &appusermgrpb.CreateAppUserWithSecretRequest{
 		User: &appusermgrpb.AppUser{
 			AppID:        in.GetAppID(),
-			EmailAddress: in.GetEmailAddress(),
-			PhoneNO:      in.GetPhoneNumber(),
+			EmailAddress: emailAddr,
+			PhoneNO:      phoneNO,
 		},
 		Secret: &appusermgrpb.AppUserSecret{
 			AppID:        in.GetAppID(),

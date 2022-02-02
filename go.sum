@@ -94,6 +94,7 @@ github.com/Masterminds/vcs v1.13.0/go.mod h1:N09YCmOQr6RLxC6UNHzuVwAdodYbbnycGHS
 github.com/NpoolPlatform/api-manager v0.0.0-20220121051827-18c807c114dc h1:JFUaqvVcJqunJeaIIZ2MkaCYTZe4ZpJzdWPK4C86kJk=
 github.com/NpoolPlatform/api-manager v0.0.0-20220121051827-18c807c114dc/go.mod h1:ubnvHuhc0o6drhdYrT+nM5DXZW/yEesObWky6oRsHoQ=
 github.com/NpoolPlatform/application-management v0.0.0-20211228043636-766772748ce7/go.mod h1:xLlxtCGadiwq2HqbtxbeH0a5b+SkvGWda1SO3F3d02I=
+github.com/NpoolPlatform/appuser-manager v0.0.0-20220129103404-3f7941df7148/go.mod h1:nxXkzxeBSfyzJ3GGAT4iLhjFVlsCLDmLx6SaKLa0yy4=
 github.com/NpoolPlatform/appuser-manager v0.0.0-20220130150437-b5e6a0a8897e h1:p1jOyqoC3sPnEDbHk47Xj+aIQasLzQ1Xp0+EvyHOT7Y=
 github.com/NpoolPlatform/appuser-manager v0.0.0-20220130150437-b5e6a0a8897e/go.mod h1:h+IMSAxQm1fqwjm9DOjlzyVCofRkWOiSJ1eaMx9OeRs=
 github.com/NpoolPlatform/cloud-hashing-billing v0.0.0-20211120094336-58e1a1ffa8be/go.mod h1:Wac+5GHUeq3l6vdCViBd9dUcSk5F3L5wO87pkSsCYuE=
@@ -111,8 +112,9 @@ github.com/NpoolPlatform/go-service-framework v0.0.0-20211102122901-b687a4bf9b14
 github.com/NpoolPlatform/go-service-framework v0.0.0-20211124111341-7f1b2f908552/go.mod h1:6OR9IRTWXpkr7Igky6a7zbnDG2o5Vmx9zuIzNJ3M9xs=
 github.com/NpoolPlatform/go-service-framework v0.0.0-20211207121121-adb2402676f0/go.mod h1:6OR9IRTWXpkr7Igky6a7zbnDG2o5Vmx9zuIzNJ3M9xs=
 github.com/NpoolPlatform/go-service-framework v0.0.0-20211222114515-4928e6cf3f1f/go.mod h1:kR7v9OYmi38GLucJoVUOxLYiA3xtLp5TY/fWqrR6WRw=
-github.com/NpoolPlatform/go-service-framework v0.0.0-20220120091626-4e8035637592 h1:fsYAxdFmjSWMW+uoSmXC7YcG9QGdqiC/P1cnvCt1XTo=
 github.com/NpoolPlatform/go-service-framework v0.0.0-20220120091626-4e8035637592/go.mod h1:JqrktA7gNQe/Uprnr6DCs5UCFpheCZ30lDd0OkyRtC4=
+github.com/NpoolPlatform/go-service-framework v0.0.0-20220127101433-3def4e496433 h1:tvETQ3Kp4BDitT0VLN0dHhbQ70/9mSSHwSISsF/pPxw=
+github.com/NpoolPlatform/go-service-framework v0.0.0-20220127101433-3def4e496433/go.mod h1:G5SKpcIWWkyxeNtgI8c0iY8py6DY2xHZFGKPJpTEon0=
 github.com/NpoolPlatform/kyc-management v0.0.0-20220113122339-4bef8bdcbc5c h1:lFxAyaVu+fLwe0Fe/LrttIXhx76I3QPRfv5ebPp8t9I=
 github.com/NpoolPlatform/kyc-management v0.0.0-20220113122339-4bef8bdcbc5c/go.mod h1:fP5E+Zcm8amcDctFborm4kE/6lFNK3fU622HzRXasWI=
 github.com/NpoolPlatform/message v0.0.0-20211205171224-cc5aef287e1a/go.mod h1:1sfQHL02lIkzK1ObQRbNi0UAkSZWcBw/rsK5hn9Perg=
@@ -125,9 +127,11 @@ github.com/NpoolPlatform/message v0.0.0-20220113121702-4b1c67be285b/go.mod h1:zv
 github.com/NpoolPlatform/message v0.0.0-20220115121506-39a2f2fb7042/go.mod h1:zv/FSNmmW0Og/XKErnXrRuLzLeTDMxymEImhjNp/V/w=
 github.com/NpoolPlatform/message v0.0.0-20220120075427-38182760a780/go.mod h1:tnsf7zHQ5Mv2uG0ezOwCfm/bxluiRW10DeuIl4SjG4Y=
 github.com/NpoolPlatform/message v0.0.0-20220121040326-31d316062cdc/go.mod h1:tnsf7zHQ5Mv2uG0ezOwCfm/bxluiRW10DeuIl4SjG4Y=
+github.com/NpoolPlatform/message v0.0.0-20220126154557-410153a86b92/go.mod h1:tnsf7zHQ5Mv2uG0ezOwCfm/bxluiRW10DeuIl4SjG4Y=
 github.com/NpoolPlatform/message v0.0.0-20220130110303-bf4930aa8ceb/go.mod h1:3Wmbn7w0S4h2t/qDr/WYepO3VBKlRAxDGdxsPA9bqQ0=
-github.com/NpoolPlatform/message v0.0.0-20220202152748-c52bae6c2d75 h1:eKzSVcMJXWU98YFcdrkM73y+yUEBEddCn7XYfeh5TO4=
-github.com/NpoolPlatform/message v0.0.0-20220202152748-c52bae6c2d75/go.mod h1:3Wmbn7w0S4h2t/qDr/WYepO3VBKlRAxDGdxsPA9bqQ0=
+github.com/NpoolPlatform/message v0.0.0-20220202102939-f87362743667/go.mod h1:3Wmbn7w0S4h2t/qDr/WYepO3VBKlRAxDGdxsPA9bqQ0=
+github.com/NpoolPlatform/message v0.0.0-20220202153540-68e492d92434 h1:VlXb/56p8byEBLQHvfH2j8fb+kqQn6D80/A65OGhoUo=
+github.com/NpoolPlatform/message v0.0.0-20220202153540-68e492d92434/go.mod h1:3Wmbn7w0S4h2t/qDr/WYepO3VBKlRAxDGdxsPA9bqQ0=
 github.com/NpoolPlatform/review-service v0.0.0-20220116072628-5d40d102eb24 h1:fgzTJu+BSDh6bdXsgo1isH2iW4wB3m8KxwuWbwF/pbk=
 github.com/NpoolPlatform/review-service v0.0.0-20220116072628-5d40d102eb24/go.mod h1:TyQanUDw927lZ0AZ0rO6Z0g4GOdQqv54aQHnuZCz11c=
 github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211206035652-888de6e20996/go.mod h1:w203lHGAaRvZqEMLxJI8wBxAoVvE3RHMU3jtwN/AdgE=
@@ -136,6 +140,8 @@ github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211208035009-5ad2768d2290/go.m
 github.com/NpoolPlatform/sphinx-proxy v0.0.0-20211209140052-de1778e36e36/go.mod h1:VwKb8MFR8zJ7sULoVan/YRluZFDds2uJpinP4kQv9tY=
 github.com/NpoolPlatform/sphinx-proxy v0.0.0-20211210102925-d9b8abe11021 h1:mPb8LHo1/IsZwiC5JOG86F3nJg++djHce6a4JpFiQp8=
 github.com/NpoolPlatform/sphinx-proxy v0.0.0-20211210102925-d9b8abe11021/go.mod h1:F71IllVw8JLp1+ZB/watah/urT4+aePIqZs0bH8cJso=
+github.com/NpoolPlatform/third-gateway v0.0.0-20220202135610-d8235fd55a4c h1:bmoOl/eW7m2EUXC5ULo9tp3W4SE/L6mbOGsdvoq3w7E=
+github.com/NpoolPlatform/third-gateway v0.0.0-20220202135610-d8235fd55a4c/go.mod h1:jgVmZVUMmQPj5jqPt6ogf+MKo5bbmPjvMGOivwleyuE=
 github.com/OneOfOne/xxhash v1.2.2 h1:KMrpdQIwFcEqXDklaen+P1axHaj9BSKzvpUUfnHldSE=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/PuerkitoBio/purell v1.1.1/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbtSwDGJws/X0=
