@@ -30,7 +30,7 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 		return nil, xerrors.Errorf("fail get app")
 	}
 
-	if appResp.Info.Ctrl.InvitationCodeMust {
+	if appResp.Info.Ctrl != nil && appResp.Info.Ctrl.InvitationCodeMust {
 		if invitationCode == "" {
 			return nil, xerrors.Errorf("invitation code is must")
 		}
@@ -45,7 +45,7 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 		}
 
 		if getByCodeResp.Info == nil {
-			if appResp.Info.Ctrl.InvitationCodeMust {
+			if appResp.Info.Ctrl != nil && appResp.Info.Ctrl.InvitationCodeMust {
 				return nil, xerrors.Errorf("fail get invitation code")
 			}
 		} else {
