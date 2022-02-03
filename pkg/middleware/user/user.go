@@ -140,3 +140,66 @@ func GetMyDirectInvitations(ctx context.Context, in *npool.GetMyDirectInvitation
 		Infos:  invitations,
 	}, nil
 }
+
+func UpdatePassword(ctx context.Context, in *npool.UpdatePasswordRequest) (*npool.UpdatePasswordResponse, error) {
+	var err error
+	emailAddr := ""
+	phoneNO := ""
+
+	if in.GetAccountType() == appusermgrconst.SignupByMobile {
+		phoneNO = in.GetAccount()
+		_, err = grpc2.VerifySMSCode(ctx, &thirdgwpb.VerifySMSCodeRequest{
+			AppID:   in.GetAppID(),
+			PhoneNO: phoneNO,
+			UsedFor: thirdgwconst.UsedForSignup,
+			Code:    in.GetVerificationCode(),
+		})
+	} else if in.GetAccountType() == appusermgrconst.SignupByEmail {
+		emailAddr = in.GetAccount()
+		_, err = grpc2.VerifyEmailCode(ctx, &thirdgwpb.VerifyEmailCodeRequest{
+			AppID:        in.GetAppID(),
+			EmailAddress: emailAddr,
+			UsedFor:      thirdgwconst.UsedForSignup,
+			Code:         in.GetVerificationCode(),
+		})
+	} else {
+		return nil, xerrors.Errorf("invalid signup method")
+	}
+	if err != nil {
+		return nil, xerrors.Errorf("fail verify signup code: %v", err)
+	}
+
+	resp, err := grpc2.GetAppUserByAppAccount(ctx, &appusermgrpb.GetAppUserByAppAccountRequest{
+		AppID:   in.GetAppID(),
+		Account: in.GetAccount(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app user by app account: %v", err)
+	}
+	if resp.Info == nil {
+		return nil, xerrors.Errorf("fail get app user by app account")
+	}
+
+	resp1, err := grpc2.GetAppUserSecretByAppUser(ctx, &appusermgrpb.GetAppUserSecretByAppUserRequest{
+		AppID:  in.GetAppID(),
+		UserID: resp.Info.ID,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app user secret: %v", err)
+	}
+	if resp1.Info == nil {
+		return nil, xerrors.Errorf("fail get app user secret")
+	}
+
+	resp1.Info.PasswordHash = in.GetPasswordHash()
+	resp2, err := grpc2.UpdateAppUserSecret(ctx, &appusermgrpb.UpdateAppUserSecretRequest{
+		Info: resp1.Info,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail update app user secret: %v", err)
+	}
+
+	return &npool.UpdatePasswordResponse{
+		Info: resp2.Info,
+	}, nil
+}

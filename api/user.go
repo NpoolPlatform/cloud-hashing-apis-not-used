@@ -41,3 +41,12 @@ func (s *Server) GetMyDirectInvitations(ctx context.Context, in *npool.GetMyDire
 	}
 	return resp, nil
 }
+
+func (s *Server) UpdatePassword(ctx context.Context, in *npool.UpdatePasswordRequest) (*npool.UpdatePasswordResponse, error) {
+	resp, err := user.UpdatePassword(ctx, in)
+	if err != nil {
+		logger.Sugar().Errorf("update password error: %w", err)
+		return &npool.UpdatePasswordResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return resp, nil
+}
