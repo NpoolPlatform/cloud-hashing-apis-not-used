@@ -17,6 +17,17 @@ import (
 )
 
 func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse, error) { //nolint
+	resp, err := grpc2.GetAppUserByAppAccount(ctx, &appusermgrpb.GetAppUserByAppAccountRequest{
+		AppID:   in.GetAppID(),
+		Account: in.GetAccount(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app user by app account: %v", err)
+	}
+	if resp.Info != nil {
+		return nil, xerrors.Errorf("fail check app user")
+	}
+
 	invitationCode := in.GetInvitationCode()
 	inviterID := ""
 
