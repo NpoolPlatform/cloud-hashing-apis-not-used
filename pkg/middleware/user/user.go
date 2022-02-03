@@ -181,6 +181,8 @@ func UpdatePasswordByAppUser(ctx context.Context, in *npool.UpdatePasswordByAppU
 	}
 
 	resp.Info.PasswordHash = in.GetPasswordHash()
+	resp.Info.Salt = ""
+
 	resp1, err := grpc2.UpdateAppUserSecret(ctx, &appusermgrpb.UpdateAppUserSecretRequest{
 		Info: resp.Info,
 	})
