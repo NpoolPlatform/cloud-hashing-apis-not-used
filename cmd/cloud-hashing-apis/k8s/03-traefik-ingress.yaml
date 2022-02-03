@@ -68,6 +68,10 @@ spec:
             backend:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
+          - path: /api/cloud-hashing-apis-v2/v1/update/password/by/app/user
+            backend:
+              serviceName: cloud-hashing-apis-v2
+              servicePort: 50140
     - host: api.procyon.vip
       http: *http_rules
     - host: api.xpool.top
@@ -106,6 +110,10 @@ spec:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
           - path: /api/cloud-hashing-apis-v2/v1/signup
+            backend:
+              serviceName: cloud-hashing-apis-v2
+              servicePort: 50140
+          - path: /api/cloud-hashing-apis-v2/v1/update/password
             backend:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
