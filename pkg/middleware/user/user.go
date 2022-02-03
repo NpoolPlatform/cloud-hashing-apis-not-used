@@ -141,7 +141,7 @@ func GetMyDirectInvitations(ctx context.Context, in *npool.GetMyDirectInvitation
 	}, nil
 }
 
-func UpdatePasswordByAppUser(ctx context.Context, in *npool.UpdatePasswordByAppUserRequest) (*npool.UpdatePasswordByAppUserResponse, error) {
+func UpdatePasswordByAppUser(ctx context.Context, in *npool.UpdatePasswordByAppUserRequest, checkOldPassword bool) (*npool.UpdatePasswordByAppUserResponse, error) {
 	var err error
 	emailAddr := ""
 	phoneNO := ""
@@ -180,6 +180,17 @@ func UpdatePasswordByAppUser(ctx context.Context, in *npool.UpdatePasswordByAppU
 		return nil, xerrors.Errorf("fail get app user secret")
 	}
 
+	if checkOldPassword {
+		_, err = grpc2.VerifyAppUserByAppAccountPassword(ctx, &appusermgrpb.VerifyAppUserByAppAccountPasswordRequest{
+			AppID:        in.GetAppID(),
+			Account:      in.GetAccount(),
+			PasswordHash: in.GetOldPasswordHash(),
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail verify username or password: %v", err)
+		}
+	}
+
 	resp.Info.PasswordHash = in.GetPasswordHash()
 	resp.Info.Salt = ""
 
@@ -214,7 +225,7 @@ func UpdatePassword(ctx context.Context, in *npool.UpdatePasswordRequest) (*npoo
 		AccountType:      in.GetAccountType(),
 		PasswordHash:     in.GetPasswordHash(),
 		VerificationCode: in.GetVerificationCode(),
-	})
+	}, false)
 	if err != nil {
 		return nil, xerrors.Errorf("fail update password: %v", err)
 	}
