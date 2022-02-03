@@ -141,7 +141,7 @@ func GetMyDirectInvitations(ctx context.Context, in *npool.GetMyDirectInvitation
 	}, nil
 }
 
-func UpdatePassword(ctx context.Context, in *npool.UpdatePasswordRequest) (*npool.UpdatePasswordResponse, error) {
+func UpdatePasswordByAppUser(ctx context.Context, in *npool.UpdatePasswordByAppUserRequest) (*npool.UpdatePasswordByAppUserResponse, error) {
 	var err error
 	emailAddr := ""
 	phoneNO := ""
@@ -169,6 +169,31 @@ func UpdatePassword(ctx context.Context, in *npool.UpdatePasswordRequest) (*npoo
 		return nil, xerrors.Errorf("fail verify signup code: %v", err)
 	}
 
+	resp, err := grpc2.GetAppUserSecretByAppUser(ctx, &appusermgrpb.GetAppUserSecretByAppUserRequest{
+		AppID:  in.GetAppID(),
+		UserID: in.GetUserID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app user secret: %v", err)
+	}
+	if resp.Info == nil {
+		return nil, xerrors.Errorf("fail get app user secret")
+	}
+
+	resp.Info.PasswordHash = in.GetPasswordHash()
+	resp1, err := grpc2.UpdateAppUserSecret(ctx, &appusermgrpb.UpdateAppUserSecretRequest{
+		Info: resp.Info,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail update app user secret: %v", err)
+	}
+
+	return &npool.UpdatePasswordByAppUserResponse{
+		Info: resp1.Info,
+	}, nil
+}
+
+func UpdatePassword(ctx context.Context, in *npool.UpdatePasswordRequest) (*npool.UpdatePasswordResponse, error) {
 	resp, err := grpc2.GetAppUserByAppAccount(ctx, &appusermgrpb.GetAppUserByAppAccountRequest{
 		AppID:   in.GetAppID(),
 		Account: in.GetAccount(),
@@ -180,26 +205,19 @@ func UpdatePassword(ctx context.Context, in *npool.UpdatePasswordRequest) (*npoo
 		return nil, xerrors.Errorf("fail get app user by app account")
 	}
 
-	resp1, err := grpc2.GetAppUserSecretByAppUser(ctx, &appusermgrpb.GetAppUserSecretByAppUserRequest{
-		AppID:  in.GetAppID(),
-		UserID: resp.Info.ID,
+	resp1, err := UpdatePasswordByAppUser(ctx, &npool.UpdatePasswordByAppUserRequest{
+		AppID:            in.GetAppID(),
+		UserID:           resp.Info.ID,
+		Account:          in.GetAccount(),
+		AccountType:      in.GetAccountType(),
+		PasswordHash:     in.GetPasswordHash(),
+		VerificationCode: in.GetVerificationCode(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get app user secret: %v", err)
-	}
-	if resp1.Info == nil {
-		return nil, xerrors.Errorf("fail get app user secret")
-	}
-
-	resp1.Info.PasswordHash = in.GetPasswordHash()
-	resp2, err := grpc2.UpdateAppUserSecret(ctx, &appusermgrpb.UpdateAppUserSecretRequest{
-		Info: resp1.Info,
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail update app user secret: %v", err)
+		return nil, xerrors.Errorf("fail update password: %v", err)
 	}
 
 	return &npool.UpdatePasswordResponse{
-		Info: resp2.Info,
+		Info: resp1.Info,
 	}, nil
 }

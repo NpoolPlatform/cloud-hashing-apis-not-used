@@ -50,3 +50,12 @@ func (s *Server) UpdatePassword(ctx context.Context, in *npool.UpdatePasswordReq
 	}
 	return resp, nil
 }
+
+func (s *Server) UpdatePasswordByAppUser(ctx context.Context, in *npool.UpdatePasswordByAppUserRequest) (*npool.UpdatePasswordByAppUserResponse, error) {
+	resp, err := user.UpdatePasswordByAppUser(ctx, in)
+	if err != nil {
+		logger.Sugar().Errorf("update password by app user error: %w", err)
+		return &npool.UpdatePasswordByAppUserResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return resp, nil
+}
