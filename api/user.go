@@ -59,3 +59,21 @@ func (s *Server) UpdatePasswordByAppUser(ctx context.Context, in *npool.UpdatePa
 	}
 	return resp, nil
 }
+
+func (s *Server) UpdateEmailAddress(ctx context.Context, in *npool.UpdateEmailAddressRequest) (*npool.UpdateEmailAddressResponse, error) {
+	resp, err := user.UpdateEmailAddress(ctx, in)
+	if err != nil {
+		logger.Sugar().Errorf("update email address error: %w", err)
+		return &npool.UpdateEmailAddressResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return resp, nil
+}
+
+func (s *Server) UpdatePhoneNO(ctx context.Context, in *npool.UpdatePhoneNORequest) (*npool.UpdatePhoneNOResponse, error) {
+	resp, err := user.UpdatePhoneNO(ctx, in)
+	if err != nil {
+		logger.Sugar().Errorf("update phone NO error: %w", err)
+		return &npool.UpdatePhoneNOResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return resp, nil
+}

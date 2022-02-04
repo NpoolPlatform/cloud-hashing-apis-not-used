@@ -505,6 +505,21 @@ func GetAppUserByAppUser(ctx context.Context, in *appusermgrpb.GetAppUserByAppUs
 	return cli.GetAppUserByAppUser(ctx, in)
 }
 
+func UpdateAppUser(ctx context.Context, in *appusermgrpb.UpdateAppUserRequest) (*appusermgrpb.UpdateAppUserResponse, error) {
+	conn, err := grpc2.GetGRPCConn(appusermgrconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app user manager connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := appusermgrpb.NewAppUserManagerClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.UpdateAppUser(ctx, in)
+}
+
 func GetAppUserByAppAccount(ctx context.Context, in *appusermgrpb.GetAppUserByAppAccountRequest) (*appusermgrpb.GetAppUserByAppAccountResponse, error) {
 	conn, err := grpc2.GetGRPCConn(appusermgrconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
