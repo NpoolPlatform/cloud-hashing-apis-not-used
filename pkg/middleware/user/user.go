@@ -162,7 +162,7 @@ func UpdatePasswordByAppUser(ctx context.Context, in *npool.UpdatePasswordByAppU
 		_, err = grpc2.VerifySMSCode(ctx, &thirdgwpb.VerifySMSCodeRequest{
 			AppID:   in.GetAppID(),
 			PhoneNO: phoneNO,
-			UsedFor: thirdgwconst.UsedForSignup,
+			UsedFor: thirdgwconst.UsedForUpdate,
 			Code:    in.GetVerificationCode(),
 		})
 	} else if in.GetAccountType() == appusermgrconst.SignupByEmail {
@@ -170,7 +170,7 @@ func UpdatePasswordByAppUser(ctx context.Context, in *npool.UpdatePasswordByAppU
 		_, err = grpc2.VerifyEmailCode(ctx, &thirdgwpb.VerifyEmailCodeRequest{
 			AppID:        in.GetAppID(),
 			EmailAddress: emailAddr,
-			UsedFor:      thirdgwconst.UsedForSignup,
+			UsedFor:      thirdgwconst.UsedForUpdate,
 			Code:         in.GetVerificationCode(),
 		})
 	} else {
