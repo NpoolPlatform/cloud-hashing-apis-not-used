@@ -247,6 +247,17 @@ func UpdatePassword(ctx context.Context, in *npool.UpdatePasswordRequest) (*npoo
 }
 
 func UpdateEmailAddress(ctx context.Context, in *npool.UpdateEmailAddressRequest) (*npool.UpdateEmailAddressResponse, error) { //nolint
+	old, err := grpc2.GetAppUserByAppAccount(ctx, &appusermgrpb.GetAppUserByAppAccountRequest{
+		AppID:   in.GetAppID(),
+		Account: in.GetNewEmailAddress(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app user by app account: %v", err)
+	}
+	if old.Info != nil {
+		return nil, xerrors.Errorf("email address already used")
+	}
+
 	resp, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
 		AppID:  in.GetAppID(),
 		UserID: in.GetUserID(),
@@ -311,6 +322,16 @@ func UpdateEmailAddress(ctx context.Context, in *npool.UpdateEmailAddressRequest
 }
 
 func UpdatePhoneNO(ctx context.Context, in *npool.UpdatePhoneNORequest) (*npool.UpdatePhoneNOResponse, error) { //nolint
+	old, err := grpc2.GetAppUserByAppAccount(ctx, &appusermgrpb.GetAppUserByAppAccountRequest{
+		AppID:   in.GetAppID(),
+		Account: in.GetNewPhoneNO(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app user by app account: %v", err)
+	}
+	if old.Info != nil {
+		return nil, xerrors.Errorf("email address already used")
+	}
 	resp, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
 		AppID:  in.GetAppID(),
 		UserID: in.GetUserID(),
