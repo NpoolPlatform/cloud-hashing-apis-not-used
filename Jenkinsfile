@@ -298,7 +298,6 @@ pipeline {
 
     stage('Use currency environment') {
       when {
-        expression { CURRENCY_REQUEST_PROXY != '' }
         expression { DEPLOY_TARGET == 'true' }
       }
       steps {
