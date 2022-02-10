@@ -293,10 +293,10 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 		return nil, xerrors.Errorf("fail get order good info: %v", err)
 	}
 
-	// Validate app id
-	// Validate user id
-	// Validate coupon id
-	// Validate fee ids
+	// Validate app id: done by gateway
+	// Validate user id: done by gateway
+	// TODO: Validate coupon id
+	// TODO: Validate fee ids
 
 	start := (uint32(time.Now().Unix()) + 24*60*60) / 24 / 60 / 60 * 24 * 60 * 60
 	end := start + uint32(goodInfo.Info.Good.DurationDays)*24*60*60
@@ -331,7 +331,7 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 	}, nil
 }
 
-func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest) (*npool.CreateOrderPaymentResponse, error) {
+func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest) (*npool.CreateOrderPaymentResponse, error) { //nolint
 	myOrder, err := GetOrder(ctx, &npool.GetOrderRequest{
 		ID: in.GetOrderID(),
 	})
