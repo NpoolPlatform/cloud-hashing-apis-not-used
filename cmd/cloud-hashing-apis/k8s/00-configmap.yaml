@@ -4,4 +4,4 @@ metadata:
   name: currency-proxy-environment
   namespace: kube-system
 data:
-  environment.currency_proxy: ""
+  environment.currency_proxy:
