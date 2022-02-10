@@ -3,6 +3,7 @@ package order
 import (
 	"context"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
@@ -377,7 +378,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		amountUSD -= myOrder.Info.FixAmountCoupon.Coupon.Denomination
 	}
 
-	amountTarget := amountUSD / paymentCoinCurrency
+	amountTarget := math.Ceil(amountUSD*10000/paymentCoinCurrency) / 10000
 
 	// Check if idle address is available
 	idle := false
