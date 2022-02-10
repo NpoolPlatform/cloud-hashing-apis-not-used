@@ -8,6 +8,7 @@ import (
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
+	currencymw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/currency"
 	gooddetail "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/good" //nolint
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
@@ -16,6 +17,8 @@ import (
 	orderpb "github.com/NpoolPlatform/message/npool/cloud-hashing-order"
 	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
 	sphinxproxypb "github.com/NpoolPlatform/message/npool/sphinxproxy"
+
+	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
 
 	"github.com/google/uuid"
 
@@ -38,6 +41,7 @@ func constructOrder(
 		FixAmountCoupon:      coupon,
 		DiscountCoupon:       discountCoupon,
 		UserSpecialReduction: userSpecial,
+		PaymentDeadline:      info.CreateAt + orderconst.TimeoutSeconds,
 	}
 }
 
@@ -340,33 +344,40 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		}, nil
 	}
 
-	// Caculate amount
-	amount := float64(myOrder.Info.Order.Units) * myOrder.Info.Good.Good.Price
-
-	// TODO: process exchange ratio here
-
-	// TODO: All should validate duration days
-	// User discount info
-	if myOrder.Info.DiscountCoupon != nil {
-		amount *= float64(100 - myOrder.Info.DiscountCoupon.Discount.Discount)
-		amount /= float64(100)
-	}
-	// Extra reduction
-	if myOrder.Info.UserSpecialReduction != nil {
-		amount -= myOrder.Info.UserSpecialReduction.Amount
-	}
-	// Coupon amount
-	if myOrder.Info.FixAmountCoupon != nil {
-		amount -= myOrder.Info.FixAmountCoupon.Coupon.Denomination
+	paymentDeadline := time.Unix(int64(myOrder.Info.PaymentDeadline), 0)
+	if time.Now().After(paymentDeadline) {
+		return nil, xerrors.Errorf("order expired")
 	}
 
-	// Validate payment coin info id
 	coinInfo, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
 		ID: in.GetPaymentCoinTypeID(),
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("invalid coin info id: %v", err)
 	}
+
+	if coinInfo.Info.PreSale {
+		return nil, xerrors.Errorf("cannot use presale coin as payment coin")
+	}
+
+	paymentCoinCurrency, err := currencymw.USDPrice(ctx, coinInfo.Info.Name)
+	if err != nil {
+		return nil, xerrors.Errorf("cannot get usd currency for payment coin: %v", err)
+	}
+
+	amountUSD := float64(myOrder.Info.Order.Units) * myOrder.Info.Good.Good.Price
+	if myOrder.Info.DiscountCoupon != nil {
+		amountUSD *= float64(100 - myOrder.Info.DiscountCoupon.Discount.Discount)
+		amountUSD /= float64(100)
+	}
+	if myOrder.Info.UserSpecialReduction != nil {
+		amountUSD -= myOrder.Info.UserSpecialReduction.Amount
+	}
+	if myOrder.Info.FixAmountCoupon != nil {
+		amountUSD -= myOrder.Info.FixAmountCoupon.Coupon.Denomination
+	}
+
+	amountTarget := amountUSD / paymentCoinCurrency
 
 	// Check if idle address is available
 	idle := false
@@ -400,6 +411,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		return nil, xerrors.Errorf("fail create billing account: %v", err)
 	}
 
+	// TODO: get unlocked account and lock it
 	balanceAmount := float64(0)
 
 	if !idle && !coinInfo.Info.PreSale {
@@ -416,11 +428,12 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	// Generate payment
 	myPayment, err := grpc2.CreatePayment(ctx, &orderpb.CreatePaymentRequest{
 		Info: &orderpb.Payment{
-			OrderID:     myOrder.Info.Order.ID,
-			AccountID:   account.Info.ID,
-			StartAmount: balanceAmount,
-			Amount:      amount,
-			CoinInfoID:  in.GetPaymentCoinTypeID(),
+			OrderID:         myOrder.Info.Order.ID,
+			AccountID:       account.Info.ID,
+			StartAmount:     balanceAmount,
+			Amount:          amountTarget,
+			CoinUSDCurrency: paymentCoinCurrency,
+			CoinInfoID:      in.GetPaymentCoinTypeID(),
 		},
 	})
 	if err != nil {
