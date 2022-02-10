@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/go-resty/resty/v2"
 
@@ -19,7 +20,7 @@ func USDPrice(ctx context.Context, coinName string) (float64, error) {
 	coin := strings.ToLower(coinName)
 
 	url := fmt.Sprintf("%v%v?ids=%v&vs_currencies=usd", coinGeckoAPI, "/simple/price", coin)
-	resp, err := resty.New().R().Get(url)
+	resp, err := resty.New().SetTimeout(5 * time.Second).R().Get(url)
 	if err != nil {
 		return 0, xerrors.Errorf("fail get currency: %v", err)
 	}
