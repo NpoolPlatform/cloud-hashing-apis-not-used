@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -19,8 +20,16 @@ const (
 func USDPrice(ctx context.Context, coinName string) (float64, error) {
 	coin := strings.ToLower(coinName)
 
+	socksProxy := os.Getenv("ENV_CURRENCY_REQUEST_PROXY")
 	url := fmt.Sprintf("%v%v?ids=%v&vs_currencies=usd", coinGeckoAPI, "/simple/price", coin)
-	resp, err := resty.New().SetTimeout(5 * time.Second).R().Get(url)
+
+	cli := resty.New()
+	cli = cli.SetTimeout(5 * time.Second)
+	if socksProxy != "" {
+		cli = cli.SetProxy(socksProxy)
+	}
+
+	resp, err := cli.R().Get(url)
 	if err != nil {
 		return 0, xerrors.Errorf("fail get currency: %v", err)
 	}
@@ -29,6 +38,8 @@ func USDPrice(ctx context.Context, coinName string) (float64, error) {
 	if err != nil {
 		return 0, xerrors.Errorf("fail parse currency: %v", err)
 	}
+
+	fmt.Printf("req %v -> %v", url, resp)
 
 	priceMap, ok := respMap[coin]
 	if !ok {
