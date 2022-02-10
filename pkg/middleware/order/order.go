@@ -334,16 +334,23 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	if err != nil {
 		return nil, xerrors.Errorf("fail get order: %v", err)
 	}
+	if myOrder.Info.Order.Payment != nil {
+		return &npool.CreateOrderPaymentResponse{
+			Info: myOrder.Info,
+		}, nil
+	}
 
 	// Caculate amount
 	amount := float64(myOrder.Info.Order.Units) * myOrder.Info.Good.Good.Price
+
+	// TODO: process exchange ratio here
 
 	// TODO: All should validate duration days
 	// User discount info
 	if myOrder.Info.DiscountCoupon != nil {
 		amount *= float64(100 - myOrder.Info.DiscountCoupon.Discount.Discount)
+		amount /= float64(100)
 	}
-	amount /= float64(100)
 	// Extra reduction
 	if myOrder.Info.UserSpecialReduction != nil {
 		amount -= myOrder.Info.UserSpecialReduction.Amount
