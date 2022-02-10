@@ -17,8 +17,18 @@ const (
 	coinGeckoAPI = "https://api.coingecko.com/api/v3"
 )
 
+func mapCoin(coinName string) string {
+	coinMap := map[string]string{
+		"fil": "filecoin",
+	}
+	if coin, ok := coinMap[coinName]; ok {
+		return coin
+	}
+	return coinName
+}
+
 func USDPrice(ctx context.Context, coinName string) (float64, error) {
-	coin := strings.ToLower(coinName)
+	coin := mapCoin(strings.ToLower(coinName))
 
 	socksProxy := os.Getenv("ENV_CURRENCY_REQUEST_PROXY")
 	url := fmt.Sprintf("%v%v?ids=%v&vs_currencies=usd", coinGeckoAPI, "/simple/price", coin)
