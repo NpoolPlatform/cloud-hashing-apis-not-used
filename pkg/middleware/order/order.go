@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+	redis2 "github.com/NpoolPlatform/go-service-framework/pkg/redis"
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	currencymw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/currency"
@@ -19,6 +20,7 @@ import (
 	sphinxproxypb "github.com/NpoolPlatform/message/npool/sphinxproxy"
 
 	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
+	paymentwatcher "github.com/NpoolPlatform/cloud-hashing-order/pkg/middleware/payment-watcher"
 
 	"github.com/google/uuid"
 
@@ -332,7 +334,51 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 }
 
 func peekIdlePaymentAccount(ctx context.Context, order *npool.Order, paymentCoinInfo *coininfopb.CoinInfo) (*billingpb.CoinAccountInfo, error) {
-	return nil, xerrors.Errorf("NOT IMPLEMENTED")
+	resp, err := grpc2.GetIdleGoodPaymentsByGood(ctx, &billingpb.GetIdleGoodPaymentsByGoodRequest{
+		GoodID: order.Good.Good.ID,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get idle good payments: %v", err)
+	}
+
+	var paymentAccount *billingpb.GoodPayment
+	var lockKey string
+
+	for _, info := range resp.Infos {
+		lockKey = paymentwatcher.AccountLockKey(info.ID)
+		err = redis2.TryLock(lockKey, orderconst.TimeoutSeconds*2)
+		if err != nil {
+			continue
+		}
+
+		paymentAccount = info
+		break
+	}
+
+	if paymentAccount == nil {
+		return nil, xerrors.Errorf("cannot fina suitable payment account")
+	}
+
+	paymentAccount.Idle = false
+	_, err = grpc2.UpdateGoodPayment(ctx, &billingpb.UpdateGoodPaymentRequest{
+		Info: paymentAccount,
+	})
+	if err != nil {
+		xerr := redis2.Unlock(lockKey)
+		if xerr != nil {
+			logger.Sugar().Errorf("cannot unlock %v: %v", lockKey, xerr)
+		}
+		return nil, xerrors.Errorf("fail update good payment: %v", err)
+	}
+
+	resp1, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
+		ID: paymentAccount.AccountID,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get account: %v", err)
+	}
+
+	return resp1.Info, nil
 }
 
 func createNewPaymentAccount(ctx context.Context, order *npool.Order, paymentCoinInfo *coininfopb.CoinInfo) (*billingpb.CoinAccountInfo, error) {

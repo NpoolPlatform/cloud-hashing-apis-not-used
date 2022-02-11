@@ -107,15 +107,16 @@ github.com/NpoolPlatform/cloud-hashing-goods v0.0.0-20220113121137-c2b65b514bad/
 github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20211224023242-bd6da3111653/go.mod h1:VBiNGga8uFzy0Pt3Epzx4Dg7RxzM0Y4lzsr+9a7icU8=
 github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220113121537-8e8b6c8966da h1:RFdagE4zp13i/QcBRaJBNkgTVgJu+Ayxh7MjL7dTLIw=
 github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220113121537-8e8b6c8966da/go.mod h1:V7mN9Aqh/O0uu8AFPoUzJ5Q6RyInXKssb1Y06fw+9LA=
-github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220210044951-4507732fb423 h1:7BDGoQ81abFkB1qldRbQ33pfmf59QlT+mvw8+s7sHX4=
-github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220210044951-4507732fb423/go.mod h1:4KhQ5FKLR69HUy/2E7lZ0UmTv7YNFsQSXjiloaPDugc=
+github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220211122558-5a3c2a8e48aa h1:VDcP/HYeH9QSZWHB/NX1T9zA+Yh6Fxl7ptNlIYagA+Y=
+github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220211122558-5a3c2a8e48aa/go.mod h1:4KhQ5FKLR69HUy/2E7lZ0UmTv7YNFsQSXjiloaPDugc=
 github.com/NpoolPlatform/go-service-framework v0.0.0-20211102122901-b687a4bf9b14/go.mod h1:9B4zcsKebNSneTZdMiGo0KXRPxiCSiebSVTXXtA8cqM=
 github.com/NpoolPlatform/go-service-framework v0.0.0-20211124111341-7f1b2f908552/go.mod h1:6OR9IRTWXpkr7Igky6a7zbnDG2o5Vmx9zuIzNJ3M9xs=
 github.com/NpoolPlatform/go-service-framework v0.0.0-20211207121121-adb2402676f0/go.mod h1:6OR9IRTWXpkr7Igky6a7zbnDG2o5Vmx9zuIzNJ3M9xs=
 github.com/NpoolPlatform/go-service-framework v0.0.0-20211222114515-4928e6cf3f1f/go.mod h1:kR7v9OYmi38GLucJoVUOxLYiA3xtLp5TY/fWqrR6WRw=
 github.com/NpoolPlatform/go-service-framework v0.0.0-20220120091626-4e8035637592/go.mod h1:JqrktA7gNQe/Uprnr6DCs5UCFpheCZ30lDd0OkyRtC4=
-github.com/NpoolPlatform/go-service-framework v0.0.0-20220127101433-3def4e496433 h1:tvETQ3Kp4BDitT0VLN0dHhbQ70/9mSSHwSISsF/pPxw=
 github.com/NpoolPlatform/go-service-framework v0.0.0-20220127101433-3def4e496433/go.mod h1:G5SKpcIWWkyxeNtgI8c0iY8py6DY2xHZFGKPJpTEon0=
+github.com/NpoolPlatform/go-service-framework v0.0.0-20220211051615-b2300d03022a h1:Vsn5yOXuzOGxJtEZ09O65iWe+F0+conu0prdv9ANXU4=
+github.com/NpoolPlatform/go-service-framework v0.0.0-20220211051615-b2300d03022a/go.mod h1:G5SKpcIWWkyxeNtgI8c0iY8py6DY2xHZFGKPJpTEon0=
 github.com/NpoolPlatform/kyc-management v0.0.0-20220113122339-4bef8bdcbc5c h1:lFxAyaVu+fLwe0Fe/LrttIXhx76I3QPRfv5ebPp8t9I=
 github.com/NpoolPlatform/kyc-management v0.0.0-20220113122339-4bef8bdcbc5c/go.mod h1:fP5E+Zcm8amcDctFborm4kE/6lFNK3fU622HzRXasWI=
 github.com/NpoolPlatform/message v0.0.0-20211205171224-cc5aef287e1a/go.mod h1:1sfQHL02lIkzK1ObQRbNi0UAkSZWcBw/rsK5hn9Perg=
@@ -1674,6 +1675,7 @@ github.com/sercand/kuberesolver v2.4.0+incompatible/go.mod h1:lWF3GL0xptCB/vCiJP
 github.com/sergi/go-diff v1.0.0 h1:Kpca3qRNrduNnOQeazBd0ysaKrUJiIuISHxogkT9RPQ=
 github.com/sergi/go-diff v1.0.0/go.mod h1:0CfEIISq7TuYL3j771MWULgwwjU+GofnZX9QAmXWZgo=
 github.com/shirou/gopsutil v2.18.12+incompatible/go.mod h1:5b4v6he4MtMOwMlS0TUMTu2PcXUg8+E1lC7eC3UO/RA=
+github.com/shopspring/decimal v1.3.1 h1:2Usl1nmF/WZucqkFZhnfFYxxxu8LG21F6nPQBE5gKV8=
 github.com/shopspring/decimal v1.3.1/go.mod h1:DKyhrW/HYNuLGql+MJL6WCR6knT2jwCFRcu2hWCYk4o=
 github.com/shurcooL/component v0.0.0-20170202220835-f88ec8f54cc4/go.mod h1:XhFIlyj5a1fBNx5aJTbKoIq0mNaPvOagO+HjB3EtxrY=
 github.com/shurcooL/events v0.0.0-20181021180414-410e4ca65f48/go.mod h1:5u70Mqkb5O5cxEA8nxTsgrgLehJeAw6Oc4Ab1c/P1HM=

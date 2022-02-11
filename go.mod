@@ -9,8 +9,8 @@ require (
 	github.com/NpoolPlatform/cloud-hashing-billing v0.0.0-20220211112041-cb90970f6df1
 	github.com/NpoolPlatform/cloud-hashing-goods v0.0.0-20220113121137-c2b65b514bad
 	github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220113121537-8e8b6c8966da
-	github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220210044951-4507732fb423
-	github.com/NpoolPlatform/go-service-framework v0.0.0-20220127101433-3def4e496433
+	github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220211122558-5a3c2a8e48aa
+	github.com/NpoolPlatform/go-service-framework v0.0.0-20220211051615-b2300d03022a
 	github.com/NpoolPlatform/kyc-management v0.0.0-20220113122339-4bef8bdcbc5c
 	github.com/NpoolPlatform/message v0.0.0-20220211111719-fcdd2da891ec
 	github.com/NpoolPlatform/review-service v0.0.0-20220116072628-5d40d102eb24
