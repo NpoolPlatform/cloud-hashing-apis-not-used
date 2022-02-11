@@ -2,7 +2,6 @@ package order
 
 import (
 	"context"
-	"fmt"
 	"math"
 	"time"
 
@@ -350,18 +349,18 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		return nil, xerrors.Errorf("order expired")
 	}
 
-	coinInfo, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
+	paymentCoinInfo, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
 		ID: in.GetPaymentCoinTypeID(),
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("invalid coin info id: %v", err)
 	}
 
-	if coinInfo.Info.PreSale {
+	if paymentCoinInfo.Info.PreSale {
 		return nil, xerrors.Errorf("cannot use presale coin as payment coin")
 	}
 
-	paymentCoinCurrency, err := currencymw.USDPrice(ctx, coinInfo.Info.Name)
+	paymentCoinCurrency, err := currencymw.USDPrice(ctx, paymentCoinInfo.Info.Name)
 	if err != nil {
 		return nil, xerrors.Errorf("cannot get usd currency for payment coin: %v", err)
 	}
@@ -380,51 +379,39 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 
 	amountTarget := math.Ceil(amountUSD*10000/paymentCoinCurrency) / 10000
 
-	// Check if idle address is available
-	idle := false
+	// TODO: Check if idle address is available with lock
 	var coinAddress string
 
-	if coinInfo.Info.PreSale {
-		coinAddress = fmt.Sprintf("placeholder-%v", uuid.New())
-	} else {
-		// Generate transaction address
-		address, err := grpc2.CreateCoinAddress(ctx, &sphinxproxypb.CreateWalletRequest{
-			Name: coinInfo.Info.Name,
-		})
-		if err != nil {
-			return nil, xerrors.Errorf("fail create wallet address: %v", err)
-		}
-		coinAddress = address.Info.Address
+	// TODO: if no available idle address, generate transaction address
+	address, err := grpc2.CreateCoinAddress(ctx, &sphinxproxypb.CreateWalletRequest{
+		Name: paymentCoinInfo.Info.Name,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail create wallet address: %v", err)
 	}
+	coinAddress = address.Info.Address
 
 	// Create billing account
 	account, err := grpc2.CreateBillingAccount(ctx, &billingpb.CreateCoinAccountRequest{
 		Info: &billingpb.CoinAccountInfo{
-			CoinTypeID:  in.GetPaymentCoinTypeID(),
-			Address:     coinAddress,
-			GeneratedBy: "platform",
-			UsedFor:     "paying",
-			AppID:       myOrder.Info.Order.AppID,
-			UserID:      myOrder.Info.Order.UserID,
+			CoinTypeID: in.GetPaymentCoinTypeID(),
+			Address:    coinAddress,
 		},
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail create billing account: %v", err)
 	}
 
+	// TODO: create good payment, and lock it
 	// TODO: get unlocked account and lock it
-	balanceAmount := float64(0)
-
-	if !idle && !coinInfo.Info.PreSale {
-		balance, err := grpc2.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
-			Name:    coinInfo.Info.Name,
-			Address: coinAddress,
-		})
-		if err != nil {
-			return nil, xerrors.Errorf("fail get wallet balance: %v", err)
-		}
-		balanceAmount = balance.Info.Balance
+	balance, err := grpc2.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
+		Name:    paymentCoinInfo.Info.Name,
+		Address: coinAddress,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get wallet balance: %v", err)
 	}
+	balanceAmount := balance.Info.Balance
 
 	// Generate payment
 	myPayment, err := grpc2.CreatePayment(ctx, &orderpb.CreatePaymentRequest{
