@@ -441,6 +441,21 @@ func GetIdleGoodPaymentsByGoodPaymentCoin(ctx context.Context, in *billingpb.Get
 	return cli.GetIdleGoodPaymentsByGoodPaymentCoin(ctx, in)
 }
 
+func CreateGoodPayment(ctx context.Context, in *billingpb.CreateGoodPaymentRequest) (*billingpb.CreateGoodPaymentResponse, error) {
+	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get billing connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := billingpb.NewCloudHashingBillingClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.CreateGoodPayment(ctx, in)
+}
+
 func UpdateGoodPayment(ctx context.Context, in *billingpb.UpdateGoodPaymentRequest) (*billingpb.UpdateGoodPaymentResponse, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {

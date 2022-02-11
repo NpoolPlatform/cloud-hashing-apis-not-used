@@ -357,7 +357,7 @@ func peekIdlePaymentAccount(ctx context.Context, order *npool.Order, paymentCoin
 	}
 
 	if paymentAccount == nil {
-		return nil, xerrors.Errorf("cannot fina suitable payment account")
+		return nil, xerrors.Errorf("cannot find suitable payment account")
 	}
 
 	paymentAccount.Idle = false
@@ -393,7 +393,7 @@ func createNewPaymentAccount(ctx context.Context, order *npool.Order, paymentCoi
 			return nil, xerrors.Errorf("fail create wallet address: %v", err)
 		}
 
-		_, err = grpc2.CreateBillingAccount(ctx, &billingpb.CreateCoinAccountRequest{
+		account, err := grpc2.CreateBillingAccount(ctx, &billingpb.CreateCoinAccountRequest{
 			Info: &billingpb.CoinAccountInfo{
 				CoinTypeID: paymentCoinInfo.ID,
 				Address:    address.Info.Address,
@@ -401,6 +401,17 @@ func createNewPaymentAccount(ctx context.Context, order *npool.Order, paymentCoi
 		})
 		if err != nil {
 			return nil, xerrors.Errorf("fail create billing account: %v", err)
+		}
+
+		_, err = grpc2.CreateGoodPayment(ctx, &billingpb.CreateGoodPaymentRequest{
+			Info: &billingpb.GoodPayment{
+				GoodID:            order.Good.Good.ID,
+				PaymentCoinTypeID: paymentCoinInfo.ID,
+				AccountID:         account.Info.ID,
+			},
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail create good payment: %v", err)
 		}
 
 		successCreated++
@@ -469,6 +480,8 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	if err != nil {
 		return nil, xerrors.Errorf("cannot get valid payment account: %v", err)
 	}
+
+	return nil, nil
 
 	balance, err := grpc2.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
 		Name:    paymentCoinInfo.Info.Name,
