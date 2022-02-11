@@ -21,6 +21,19 @@ func (s *Server) GetKycReviews(ctx context.Context, in *npool.GetKycReviewsReque
 	return resp, nil
 }
 
+func (s *Server) GetKycReviewsByApp(ctx context.Context, in *npool.GetKycReviewsByAppRequest) (*npool.GetKycReviewsByAppResponse, error) {
+	resp, err := mw.GetKycReviews(ctx, &npool.GetKycReviewsRequest{
+		AppID: in.GetAppID(),
+	})
+	if err != nil {
+		logger.Sugar().Errorf("get kyc reviews by app error: %v", err)
+		return &npool.GetKycReviewsByAppResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return &npool.GetKycReviewsByAppResponse{
+		Infos: resp.Infos,
+	}, nil
+}
+
 func (s *Server) GetKycReviewsByOtherApp(ctx context.Context, in *npool.GetKycReviewsByOtherAppRequest) (*npool.GetKycReviewsByOtherAppResponse, error) {
 	resp, err := mw.GetKycReviews(ctx, &npool.GetKycReviewsRequest{
 		AppID: in.GetTargetAppID(),
