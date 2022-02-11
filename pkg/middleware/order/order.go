@@ -331,6 +331,41 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 	}, nil
 }
 
+func peekIdlePaymentAccount(ctx context.Context, order *npool.Order, paymentCoinInfo *coininfopb.CoinInfo) (*billingpb.CoinAccountInfo, error) {
+	return nil, xerrors.Errorf("NOT IMPLEMENTED")
+}
+
+func createNewPaymentAccount(ctx context.Context, order *npool.Order, paymentCoinInfo *coininfopb.CoinInfo) (*billingpb.CoinAccountInfo, error) {
+	successCreated := 0
+
+	for i := 0; i < 5; i++ {
+		address, err := grpc2.CreateCoinAddress(ctx, &sphinxproxypb.CreateWalletRequest{
+			Name: paymentCoinInfo.Name,
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail create wallet address: %v", err)
+		}
+
+		_, err = grpc2.CreateBillingAccount(ctx, &billingpb.CreateCoinAccountRequest{
+			Info: &billingpb.CoinAccountInfo{
+				CoinTypeID: paymentCoinInfo.ID,
+				Address:    address.Info.Address,
+			},
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail create billing account: %v", err)
+		}
+
+		successCreated += 1
+	}
+
+	if successCreated > 0 {
+		return peekIdlePaymentAccount(ctx, order, paymentCoinInfo)
+	}
+
+	return nil, xerrors.Errorf("SHOULD NOT BE HERE")
+}
+
 func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest) (*npool.CreateOrderPaymentResponse, error) { //nolint
 	myOrder, err := GetOrder(ctx, &npool.GetOrderRequest{
 		ID: in.GetOrderID(),
@@ -380,33 +415,17 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	amountTarget := math.Ceil(amountUSD*10000/paymentCoinCurrency) / 10000
 
 	// TODO: Check if idle address is available with lock
-	var coinAddress string
-
-	// TODO: if no available idle address, generate transaction address
-	address, err := grpc2.CreateCoinAddress(ctx, &sphinxproxypb.CreateWalletRequest{
-		Name: paymentCoinInfo.Info.Name,
-	})
+	paymentAccount, err := peekIdlePaymentAccount(ctx, myOrder.Info, paymentCoinInfo.Info)
 	if err != nil {
-		return nil, xerrors.Errorf("fail create wallet address: %v", err)
+		paymentAccount, err = createNewPaymentAccount(ctx, myOrder.Info, paymentCoinInfo.Info)
 	}
-	coinAddress = address.Info.Address
-
-	// Create billing account
-	account, err := grpc2.CreateBillingAccount(ctx, &billingpb.CreateCoinAccountRequest{
-		Info: &billingpb.CoinAccountInfo{
-			CoinTypeID: in.GetPaymentCoinTypeID(),
-			Address:    coinAddress,
-		},
-	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail create billing account: %v", err)
+		return nil, xerrors.Errorf("cannot get valid payment account: %v", err)
 	}
 
-	// TODO: create good payment, and lock it
-	// TODO: get unlocked account and lock it
 	balance, err := grpc2.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
 		Name:    paymentCoinInfo.Info.Name,
-		Address: coinAddress,
+		Address: paymentAccount.Address,
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get wallet balance: %v", err)
@@ -417,7 +436,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	myPayment, err := grpc2.CreatePayment(ctx, &orderpb.CreatePaymentRequest{
 		Info: &orderpb.Payment{
 			OrderID:         myOrder.Info.Order.ID,
-			AccountID:       account.Info.ID,
+			AccountID:       paymentAccount.ID,
 			StartAmount:     balanceAmount,
 			Amount:          amountTarget,
 			CoinUSDCurrency: paymentCoinCurrency,
