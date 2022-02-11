@@ -481,8 +481,6 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		return nil, xerrors.Errorf("cannot get valid payment account: %v", err)
 	}
 
-	return nil, nil
-
 	balance, err := grpc2.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
 		Name:    paymentCoinInfo.Info.Name,
 		Address: paymentAccount.Address,

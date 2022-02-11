@@ -49,8 +49,6 @@ func USDPrice(ctx context.Context, coinName string) (float64, error) {
 		return 0, xerrors.Errorf("fail parse currency: %v", err)
 	}
 
-	fmt.Printf("req %v -> %v", url, resp)
-
 	priceMap, ok := respMap[coin]
 	if !ok {
 		return 0, xerrors.Errorf("fail get currency")
