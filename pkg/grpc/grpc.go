@@ -426,7 +426,7 @@ func GetBillingAccount(ctx context.Context, in *billingpb.GetCoinAccountRequest)
 	return cli.GetCoinAccount(ctx, in)
 }
 
-func GetIdleGoodPaymentsByGood(ctx context.Context, in *billingpb.GetIdleGoodPaymentsByGoodRequest) (*billingpb.GetIdleGoodPaymentsByGoodResponse, error) {
+func GetIdleGoodPaymentsByGoodPaymentCoin(ctx context.Context, in *billingpb.GetIdleGoodPaymentsByGoodPaymentCoinRequest) (*billingpb.GetIdleGoodPaymentsByGoodPaymentCoinResponse, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get billing connection: %v", err)
@@ -438,7 +438,7 @@ func GetIdleGoodPaymentsByGood(ctx context.Context, in *billingpb.GetIdleGoodPay
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetIdleGoodPaymentsByGood(ctx, in)
+	return cli.GetIdleGoodPaymentsByGoodPaymentCoin(ctx, in)
 }
 
 func UpdateGoodPayment(ctx context.Context, in *billingpb.UpdateGoodPaymentRequest) (*billingpb.UpdateGoodPaymentResponse, error) {

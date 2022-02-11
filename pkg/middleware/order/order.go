@@ -334,8 +334,9 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 }
 
 func peekIdlePaymentAccount(ctx context.Context, order *npool.Order, paymentCoinInfo *coininfopb.CoinInfo) (*billingpb.CoinAccountInfo, error) {
-	resp, err := grpc2.GetIdleGoodPaymentsByGood(ctx, &billingpb.GetIdleGoodPaymentsByGoodRequest{
-		GoodID: order.Good.Good.ID,
+	resp, err := grpc2.GetIdleGoodPaymentsByGoodPaymentCoin(ctx, &billingpb.GetIdleGoodPaymentsByGoodPaymentCoinRequest{
+		GoodID:            order.Good.Good.ID,
+		PaymentCoinTypeID: paymentCoinInfo.ID,
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get idle good payments: %v", err)
@@ -402,7 +403,7 @@ func createNewPaymentAccount(ctx context.Context, order *npool.Order, paymentCoi
 			return nil, xerrors.Errorf("fail create billing account: %v", err)
 		}
 
-		successCreated += 1
+		successCreated++
 	}
 
 	if successCreated > 0 {
