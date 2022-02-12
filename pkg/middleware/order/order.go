@@ -376,6 +376,10 @@ func peekIdlePaymentAccount(ctx context.Context, order *npool.Order, paymentCoin
 		ID: paymentAccount.AccountID,
 	})
 	if err != nil {
+		xerr := redis2.Unlock(lockKey)
+		if xerr != nil {
+			logger.Sugar().Errorf("cannot unlock %v: %v", lockKey, xerr)
+		}
 		return nil, xerrors.Errorf("fail get account: %v", err)
 	}
 
@@ -395,8 +399,9 @@ func createNewPaymentAccount(ctx context.Context, order *npool.Order, paymentCoi
 
 		account, err := grpc2.CreateBillingAccount(ctx, &billingpb.CreateCoinAccountRequest{
 			Info: &billingpb.CoinAccountInfo{
-				CoinTypeID: paymentCoinInfo.ID,
-				Address:    address.Info.Address,
+				CoinTypeID:             paymentCoinInfo.ID,
+				Address:                address.Info.Address,
+				PlatformHoldPrivateKey: true,
 			},
 		})
 		if err != nil {
