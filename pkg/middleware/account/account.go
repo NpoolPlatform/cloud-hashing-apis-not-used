@@ -58,6 +58,14 @@ func CreateUserCoinAccount(ctx context.Context, in *npool.CreateUserCoinAccountR
 		return nil, xerrors.Errorf("invalid coin info id")
 	}
 
+	_, err = grpc2.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
+		Name:    coinInfo.Info.Name,
+		Address: in.GetInfo().Address,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get wallet balance: %v", err)
+	}
+
 	info := in.GetInfo()
 	info.PlatformHoldPrivateKey = false
 
