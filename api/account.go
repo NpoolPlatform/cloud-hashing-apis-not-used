@@ -23,3 +23,12 @@ func (s *Server) CreatePlatformCoinAccount(ctx context.Context, in *npool.Create
 	}
 	return resp, nil
 }
+
+func (s *Server) CreateUserCoinAccount(ctx context.Context, in *npool.CreateUserCoinAccountRequest) (*npool.CreateUserCoinAccountResponse, error) {
+	resp, err := account.CreateUserCoinAccount(ctx, in)
+	if err != nil {
+		logger.Sugar().Errorf("create user coin account error: %w", err)
+		return &npool.CreateUserCoinAccountResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return resp, nil
+}

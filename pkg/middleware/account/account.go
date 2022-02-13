@@ -46,3 +46,29 @@ func CreatePlatformCoinAccount(ctx context.Context, in *npool.CreatePlatformCoin
 		Info: account.Info,
 	}, nil
 }
+
+func CreateUserCoinAccount(ctx context.Context, in *npool.CreateUserCoinAccountRequest) (*npool.CreateUserCoinAccountResponse, error) {
+	coinInfo, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
+		ID: in.GetInfo().GetCoinTypeID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("invalid coin info id: %v", err)
+	}
+	if coinInfo.Info == nil {
+		return nil, xerrors.Errorf("invalid coin info id")
+	}
+
+	info := in.GetInfo()
+	info.PlatformHoldPrivateKey = false
+
+	account, err := grpc2.CreateBillingAccount(ctx, &billingpb.CreateCoinAccountRequest{
+		Info: info,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail create billing account: %v", err)
+	}
+
+	return &npool.CreateUserCoinAccountResponse{
+		Info: account.Info,
+	}, nil
+}
