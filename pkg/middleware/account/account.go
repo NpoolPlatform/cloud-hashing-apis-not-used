@@ -60,7 +60,7 @@ func CreateUserCoinAccount(ctx context.Context, in *npool.CreateUserCoinAccountR
 
 	_, err = grpc2.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
 		Name:    coinInfo.Info.Name,
-		Address: in.GetInfo().Address,
+		Address: in.GetInfo().GetAddress(),
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get wallet balance: %v", err)
