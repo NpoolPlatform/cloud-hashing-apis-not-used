@@ -218,6 +218,27 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		return nil, xerrors.Errorf("fail get object")
 	}
 
+	account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
+		ID: resp1.Info.WithdrawToAccountID,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get account info: %v", err)
+	}
+	if account.Info == nil {
+		return nil, xerrors.Errorf("fail get account info")
+	}
+
+	withdrawAccount, err := grpc2.GetUserWithdrawByAccount(ctx, &billingpb.GetUserWithdrawByAccountRequest{
+		AccountID: resp1.Info.WithdrawToAccountID,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get withdraw account")
+	}
+
+	if withdrawAccount.Info.AppID != resp1.Info.AppID || withdrawAccount.Info.UserID != resp1.Info.UserID {
+		return nil, xerrors.Errorf("invalid account")
+	}
+
 	_, err = grpc2.GetAppUserByAppUser(ctx, &appusermgrpb.GetAppUserByAppUserRequest{
 		AppID:  resp1.Info.AppID,
 		UserID: resp1.Info.UserID,
@@ -229,7 +250,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		return nil, xerrors.Errorf("fail get app user")
 	}
 
-	if resp1.Info.AppID != in.GetReview().GetAppID() || resp1.Info.UserID != resp1.Info.UserID {
+	if resp1.Info.AppID != in.GetReview().GetAppID() {
 		return nil, xerrors.Errorf("invalid request")
 	}
 
