@@ -218,6 +218,11 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		return nil, xerrors.Errorf("fail get object")
 	}
 
+	invalidID := uuid.UUID{}.String()
+	if resp1.Info.PlatformTransactionID != invalidID {
+		return nil, xerrors.Errorf("withdraw already processed")
+	}
+
 	account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
 		ID: resp1.Info.WithdrawToAccountID,
 	})
