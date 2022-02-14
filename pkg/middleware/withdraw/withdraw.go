@@ -356,6 +356,64 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 	}, nil
 }
 
-func GetByAppUser(ctx context.Context, in *npool.GetUserWithdrawsByAppUserRequest) (*npool.GetUserWithdrawsByAppUserResponse, error) {
-	return nil, nil
+func GetByAppUser(ctx context.Context, in *npool.GetUserWithdrawsByAppUserRequest) (*npool.GetUserWithdrawsByAppUserResponse, error) { //nolint
+	resp, err := grpc2.GetUserWithdrawItemsByAppUser(ctx, &billingpb.GetUserWithdrawItemsByAppUserRequest{
+		AppID:  in.GetAppID(),
+		UserID: in.GetUserID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get user withdraw items: %v", err)
+	}
+
+	withdraws := []*npool.UserWithdraw{}
+	for _, info := range resp.Infos {
+		_review, err := grpc2.GetReviewsByAppDomainObjectTypeID(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
+			AppID:      info.AppID,
+			Domain:     billingconst.ServiceName,
+			ObjectType: constant.ReviewObjectWithdraw,
+			ObjectID:   info.ID,
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail get review: %v", err)
+		}
+
+		reviewState := reviewconst.StateRejected
+		reviewMessage := ""
+		messageTime := uint32(0)
+
+		for _, info := range _review.Infos {
+			if info.State == reviewconst.StateWait {
+				reviewState = reviewconst.StateWait
+				break
+			}
+		}
+
+		for _, info := range _review.Infos {
+			if info.State == reviewconst.StateApproved {
+				reviewState = reviewconst.StateApproved
+				break
+			}
+		}
+
+		if reviewState == reviewconst.StateRejected {
+			for _, info := range _review.Infos {
+				if info.State == reviewconst.StateRejected {
+					if messageTime < info.CreateAt {
+						reviewMessage = info.Message
+						messageTime = info.CreateAt
+					}
+				}
+			}
+		}
+
+		withdraws = append(withdraws, &npool.UserWithdraw{
+			Withdraw: info,
+			State:    reviewState,
+			Message:  reviewMessage,
+		})
+	}
+
+	return &npool.GetUserWithdrawsByAppUserResponse{
+		Infos: withdraws,
+	}, nil
 }
