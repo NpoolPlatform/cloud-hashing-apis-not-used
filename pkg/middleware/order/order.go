@@ -361,6 +361,8 @@ func peekIdlePaymentAccount(ctx context.Context, order *npool.Order, paymentCoin
 	}
 
 	paymentAccount.Idle = false
+	paymentAccount.OccupiedBy = "paying"
+
 	_, err = grpc2.UpdateGoodPayment(ctx, &billingpb.UpdateGoodPaymentRequest{
 		Info: paymentAccount,
 	})
