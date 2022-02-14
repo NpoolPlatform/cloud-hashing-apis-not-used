@@ -486,6 +486,36 @@ func CreateUserWithdrawItem(ctx context.Context, in *billingpb.CreateUserWithdra
 	return cli.CreateUserWithdrawItem(ctx, in)
 }
 
+func UpdateUserWithdrawItem(ctx context.Context, in *billingpb.UpdateUserWithdrawItemRequest) (*billingpb.UpdateUserWithdrawItemResponse, error) {
+	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get billing connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := billingpb.NewCloudHashingBillingClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.UpdateUserWithdrawItem(ctx, in)
+}
+
+func GetUserWithdrawItem(ctx context.Context, in *billingpb.GetUserWithdrawItemRequest) (*billingpb.GetUserWithdrawItemResponse, error) {
+	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get billing connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := billingpb.NewCloudHashingBillingClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetUserWithdrawItem(ctx, in)
+}
+
 func GetAppWithdrawSettingByAppCoin(ctx context.Context, in *billingpb.GetAppWithdrawSettingByAppCoinRequest) (*billingpb.GetAppWithdrawSettingByAppCoinResponse, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
@@ -777,6 +807,21 @@ func UpdateReview(ctx context.Context, in *reviewpb.UpdateReviewRequest) (*revie
 	defer cancel()
 
 	return cli.UpdateReview(ctx, in)
+}
+
+func GetReview(ctx context.Context, in *reviewpb.GetReviewRequest) (*reviewpb.GetReviewResponse, error) {
+	conn, err := grpc2.GetGRPCConn(reviewconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get review connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := reviewpb.NewReviewServiceClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetReview(ctx, in)
 }
 
 func GetReviewsByAppDomainObjectTypeID(ctx context.Context, in *reviewpb.GetReviewsByAppDomainObjectTypeIDRequest) (*reviewpb.GetReviewsByAppDomainObjectTypeIDResponse, error) {
