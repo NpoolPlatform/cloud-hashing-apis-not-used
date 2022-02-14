@@ -55,3 +55,38 @@ func (s *Server) GetGoodReviews(ctx context.Context, in *npool.GetGoodReviewsReq
 	}
 	return resp, nil
 }
+
+func (s *Server) GetWithdrawReviews(ctx context.Context, in *npool.GetWithdrawReviewsRequest) (*npool.GetWithdrawReviewsResponse, error) {
+	resp, err := mw.GetWithdrawReviews(ctx, in)
+	if err != nil {
+		logger.Sugar().Errorf("get kyc reviews error: %v", err)
+		return &npool.GetWithdrawReviewsResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return resp, nil
+}
+
+func (s *Server) GetWithdrawReviewsByApp(ctx context.Context, in *npool.GetWithdrawReviewsByAppRequest) (*npool.GetWithdrawReviewsByAppResponse, error) {
+	resp, err := mw.GetWithdrawReviews(ctx, &npool.GetWithdrawReviewsRequest{
+		AppID: in.GetAppID(),
+	})
+	if err != nil {
+		logger.Sugar().Errorf("get kyc reviews by app error: %v", err)
+		return &npool.GetWithdrawReviewsByAppResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return &npool.GetWithdrawReviewsByAppResponse{
+		Infos: resp.Infos,
+	}, nil
+}
+
+func (s *Server) GetWithdrawReviewsByOtherApp(ctx context.Context, in *npool.GetWithdrawReviewsByOtherAppRequest) (*npool.GetWithdrawReviewsByOtherAppResponse, error) {
+	resp, err := mw.GetWithdrawReviews(ctx, &npool.GetWithdrawReviewsRequest{
+		AppID: in.GetTargetAppID(),
+	})
+	if err != nil {
+		logger.Sugar().Errorf("get kyc reviews by other app error: %v", err)
+		return &npool.GetWithdrawReviewsByOtherAppResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return &npool.GetWithdrawReviewsByOtherAppResponse{
+		Infos: resp.Infos,
+	}, nil
+}
