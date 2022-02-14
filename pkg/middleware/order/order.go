@@ -9,8 +9,8 @@ import (
 	redis2 "github.com/NpoolPlatform/go-service-framework/pkg/redis"
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
-	currencymw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/currency"
 	gooddetail "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/good" //nolint
+	currency "github.com/NpoolPlatform/cloud-hashing-staker/pkg/middleware/currency"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
 	billingpb "github.com/NpoolPlatform/message/npool/cloud-hashing-billing"
@@ -20,7 +20,7 @@ import (
 	sphinxproxypb "github.com/NpoolPlatform/message/npool/sphinxproxy"
 
 	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
-	paymentwatcher "github.com/NpoolPlatform/cloud-hashing-order/pkg/middleware/payment-watcher"
+	paymentwatcher "github.com/NpoolPlatform/cloud-hashing-staker/pkg/middleware/payment-watcher"
 
 	"github.com/google/uuid"
 
@@ -458,7 +458,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		return nil, xerrors.Errorf("cannot use presale coin as payment coin")
 	}
 
-	paymentCoinCurrency, err := currencymw.USDPrice(ctx, paymentCoinInfo.Info.Name)
+	paymentCoinCurrency, err := currency.USDPrice(ctx, paymentCoinInfo.Info.Name)
 	if err != nil {
 		return nil, xerrors.Errorf("cannot get usd currency for payment coin: %v", err)
 	}
