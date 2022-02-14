@@ -471,6 +471,96 @@ func UpdateGoodPayment(ctx context.Context, in *billingpb.UpdateGoodPaymentReque
 	return cli.UpdateGoodPayment(ctx, in)
 }
 
+func CreateUserWithdrawItem(ctx context.Context, in *billingpb.CreateUserWithdrawItemRequest) (*billingpb.CreateUserWithdrawItemResponse, error) {
+	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get billing connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := billingpb.NewCloudHashingBillingClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.CreateUserWithdrawItem(ctx, in)
+}
+
+func GetAppWithdrawSettingByAppCoin(ctx context.Context, in *billingpb.GetAppWithdrawSettingByAppCoinRequest) (*billingpb.GetAppWithdrawSettingByAppCoinResponse, error) {
+	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get billing connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := billingpb.NewCloudHashingBillingClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetAppWithdrawSettingByAppCoin(ctx, in)
+}
+
+func GetPlatformSetting(ctx context.Context, in *billingpb.GetPlatformSettingRequest) (*billingpb.GetPlatformSettingResponse, error) {
+	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get billing connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := billingpb.NewCloudHashingBillingClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetPlatformSetting(ctx, in)
+}
+
+func GetUserWithdrawByAccount(ctx context.Context, in *billingpb.GetUserWithdrawByAccountRequest) (*billingpb.GetUserWithdrawByAccountResponse, error) {
+	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get billing connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := billingpb.NewCloudHashingBillingClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetUserWithdrawByAccount(ctx, in)
+}
+
+func GetCoinSettingByCoin(ctx context.Context, in *billingpb.GetCoinSettingByCoinRequest) (*billingpb.GetCoinSettingByCoinResponse, error) {
+	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get billing connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := billingpb.NewCloudHashingBillingClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetCoinSettingByCoin(ctx, in)
+}
+
+func CreateCoinAccountTransaction(ctx context.Context, in *billingpb.CreateCoinAccountTransactionRequest) (*billingpb.CreateCoinAccountTransactionResponse, error) {
+	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get billing connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := billingpb.NewCloudHashingBillingClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.CreateCoinAccountTransaction(ctx, in)
+}
+
 //---------------------------------------------------------------------------------------------------------------------------
 
 func CreateCoinAddress(ctx context.Context, in *sphinxproxypb.CreateWalletRequest) (*sphinxproxypb.CreateWalletResponse, error) {
@@ -672,6 +762,21 @@ func CreateReview(ctx context.Context, in *reviewpb.CreateReviewRequest) (*revie
 	defer cancel()
 
 	return cli.CreateReview(ctx, in)
+}
+
+func UpdateReview(ctx context.Context, in *reviewpb.UpdateReviewRequest) (*reviewpb.UpdateReviewResponse, error) {
+	conn, err := grpc2.GetGRPCConn(reviewconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get review connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := reviewpb.NewReviewServiceClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.UpdateReview(ctx, in)
 }
 
 func GetReviewsByAppDomainObjectTypeID(ctx context.Context, in *reviewpb.GetReviewsByAppDomainObjectTypeIDRequest) (*reviewpb.GetReviewsByAppDomainObjectTypeIDResponse, error) {
