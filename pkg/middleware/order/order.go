@@ -301,6 +301,10 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 	// TODO: Validate fee ids
 
 	start := (uint32(time.Now().Unix()) + 24*60*60) / 24 / 60 / 60 * 24 * 60 * 60
+	if start < goodInfo.Info.Good.StartAt {
+		start = goodInfo.Info.Good.StartAt
+	}
+
 	end := start + uint32(goodInfo.Info.Good.DurationDays)*24*60*60
 
 	// Generate order
