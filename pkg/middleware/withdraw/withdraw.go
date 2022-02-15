@@ -6,6 +6,7 @@ import (
 	"time"
 
 	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/const"
+	review "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/review"
 	currency "github.com/NpoolPlatform/cloud-hashing-staker/pkg/middleware/currency"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
@@ -56,6 +57,19 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 	}
 
 	if withdrawAccount.Info.AppID != in.GetInfo().GetAppID() || withdrawAccount.Info.UserID != in.GetInfo().GetUserID() {
+		return nil, xerrors.Errorf("invalid account")
+	}
+
+	reviewState, _, err := review.GetReviewState(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
+		AppID:      in.GetInfo().GetAppID(),
+		Domain:     billingconst.ServiceName,
+		ObjectType: constant.ReviewObjectUserWithdrawAddress,
+		ObjectID:   withdrawAccount.Info.ID,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get review: %v", err)
+	}
+	if reviewState != reviewconst.StateApproved {
 		return nil, xerrors.Errorf("invalid account")
 	}
 
@@ -139,7 +153,7 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 		return nil, xerrors.Errorf("fail create user withdraw item review: %v", err)
 	}
 
-	reviewState := reviewconst.StateWait
+	reviewState = reviewconst.StateWait
 
 	if autoReview {
 		resp1, err := grpc2.CreateCoinAccountTransaction(ctx, &billingpb.CreateCoinAccountTransactionRequest{
@@ -244,6 +258,19 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		return nil, xerrors.Errorf("invalid account")
 	}
 
+	reviewState, _, err := review.GetReviewState(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
+		AppID:      in.GetReview().GetAppID(),
+		Domain:     billingconst.ServiceName,
+		ObjectType: constant.ReviewObjectUserWithdrawAddress,
+		ObjectID:   withdrawAccount.Info.ID,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get review: %v", err)
+	}
+	if reviewState != reviewconst.StateApproved {
+		return nil, xerrors.Errorf("invalid account")
+	}
+
 	_, err = grpc2.GetAppUserByAppUser(ctx, &appusermgrpb.GetAppUserByAppUserRequest{
 		AppID:  resp1.Info.AppID,
 		UserID: resp1.Info.UserID,
@@ -263,7 +290,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		return nil, xerrors.Errorf("already reviewed")
 	}
 
-	reviewState := resp.Info.State
+	reviewState = resp.Info.State
 
 	resp.Info.State = in.GetReview().GetState()
 	_, err = grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{

@@ -13,6 +13,8 @@
 -----------
 ### 功能
 - [ ] BFF层的API服务
+- [ ] Common review interface
+- [ ] Add all update api in apis to check app-user-id authorization
 
 ### 命令
 * make init ```初始化仓库，创建go.mod```

@@ -15,6 +15,7 @@ import (
 	billingpb "github.com/NpoolPlatform/message/npool/cloud-hashing-billing"
 	kycmgrpb "github.com/NpoolPlatform/message/npool/kyc"
 	reviewpb "github.com/NpoolPlatform/message/npool/review-service"
+	reviewconst "github.com/NpoolPlatform/review-service/pkg/const"
 
 	"golang.org/x/xerrors"
 )
@@ -128,4 +129,42 @@ func GetWithdrawReviews(ctx context.Context, in *npool.GetWithdrawReviewsRequest
 	return &npool.GetWithdrawReviewsResponse{
 		Infos: reviews,
 	}, nil
+}
+
+func GetReviewState(ctx context.Context, in *reviewpb.GetReviewsByAppDomainObjectTypeIDRequest) (string, string, error) {
+	_review, err := grpc2.GetReviewsByAppDomainObjectTypeID(ctx, in)
+	if err != nil {
+		return "", "", xerrors.Errorf("fail get review: %v", err)
+	}
+
+	reviewState := reviewconst.StateRejected
+	reviewMessage := ""
+	messageTime := uint32(0)
+
+	for _, info := range _review.Infos {
+		if info.State == reviewconst.StateWait {
+			reviewState = reviewconst.StateWait
+			break
+		}
+	}
+
+	for _, info := range _review.Infos {
+		if info.State == reviewconst.StateApproved {
+			reviewState = reviewconst.StateApproved
+			break
+		}
+	}
+
+	if reviewState == reviewconst.StateRejected {
+		for _, info := range _review.Infos {
+			if info.State == reviewconst.StateRejected {
+				if messageTime < info.CreateAt {
+					reviewMessage = info.Message
+					messageTime = info.CreateAt
+				}
+			}
+		}
+	}
+
+	return reviewState, reviewMessage, nil
 }

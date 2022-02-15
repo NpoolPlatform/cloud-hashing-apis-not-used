@@ -486,6 +486,21 @@ func CreateUserWithdrawItem(ctx context.Context, in *billingpb.CreateUserWithdra
 	return cli.CreateUserWithdrawItem(ctx, in)
 }
 
+func CreateUserWithdraw(ctx context.Context, in *billingpb.CreateUserWithdrawRequest) (*billingpb.CreateUserWithdrawResponse, error) {
+	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get billing connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := billingpb.NewCloudHashingBillingClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.CreateUserWithdraw(ctx, in)
+}
+
 func UpdateUserWithdrawItem(ctx context.Context, in *billingpb.UpdateUserWithdrawItemRequest) (*billingpb.UpdateUserWithdrawItemResponse, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
@@ -574,6 +589,21 @@ func GetUserWithdrawByAccount(ctx context.Context, in *billingpb.GetUserWithdraw
 	defer cancel()
 
 	return cli.GetUserWithdrawByAccount(ctx, in)
+}
+
+func GetUserWithdrawsByAppUser(ctx context.Context, in *billingpb.GetUserWithdrawsByAppUserRequest) (*billingpb.GetUserWithdrawsByAppUserResponse, error) {
+	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get billing connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := billingpb.NewCloudHashingBillingClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetUserWithdrawsByAppUser(ctx, in)
 }
 
 func GetCoinSettingByCoin(ctx context.Context, in *billingpb.GetCoinSettingByCoinRequest) (*billingpb.GetCoinSettingByCoinResponse, error) {

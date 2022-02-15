@@ -1,7 +1,8 @@
 package constant
 
 const (
-	ReviewObjectGood     = "good"
-	ReviewObjectKyc      = "kyc"
-	ReviewObjectWithdraw = "withdraw"
+	ReviewObjectGood                = "good"
+	ReviewObjectKyc                 = "kyc"
+	ReviewObjectWithdraw            = "withdraw"
+	ReviewObjectUserWithdrawAddress = "user-withdraw-address"
 )
