@@ -4,6 +4,7 @@ import (
 	"context"
 
 	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/const"
+	review "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/review"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
 	kycmgrconst "github.com/NpoolPlatform/kyc-management/pkg/message/const"
@@ -49,14 +50,14 @@ func Update(ctx context.Context, in *npool.UpdateKycRequest) (*npool.UpdateKycRe
 	allowed := true
 	reviewing := false
 
-	review, err := grpc2.GetReviewsByAppDomainObjectTypeID(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
+	_review, err := grpc2.GetReviewsByAppDomainObjectTypeID(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
 		AppID:      in.GetInfo().GetAppID(),
 		Domain:     kycmgrconst.ServiceName,
 		ObjectType: constant.ReviewObjectKyc,
 		ObjectID:   in.GetInfo().GetID(),
 	})
 	if err == nil {
-		for _, info := range review.Infos {
+		for _, info := range _review.Infos {
 			if info.State == reviewconst.StateApproved {
 				allowed = false
 			}
@@ -109,46 +110,14 @@ func GetByAppUser(ctx context.Context, in *npool.GetKycByAppUserRequest) (*npool
 		return nil, xerrors.Errorf("fail get kyc: %v", err)
 	}
 
-	review, err := grpc2.GetReviewsByAppDomainObjectTypeID(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
+	reviewState, reviewMessage, err := review.GetReviewState(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
 		AppID:      in.GetAppID(),
 		Domain:     kycmgrconst.ServiceName,
 		ObjectType: constant.ReviewObjectKyc,
 		ObjectID:   resp.Info.ID,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get kyc review for %v: %v", resp.Info.ID, err)
-	}
-	if len(review.Infos) == 0 {
-		return nil, xerrors.Errorf("empty kyc review for %v", resp.Info.ID)
-	}
-
-	reviewState := reviewconst.StateRejected
-	reviewMessage := ""
-	messageTime := uint32(0)
-
-	for _, info := range review.Infos {
-		if info.State == reviewconst.StateWait {
-			reviewState = reviewconst.StateWait
-			break
-		}
-	}
-
-	for _, info := range review.Infos {
-		if info.State == reviewconst.StateApproved {
-			reviewState = reviewconst.StateApproved
-			break
-		}
-	}
-
-	if reviewState == reviewconst.StateRejected {
-		for _, info := range review.Infos {
-			if info.State == reviewconst.StateRejected {
-				if messageTime < info.CreateAt {
-					reviewMessage = info.Message
-					messageTime = info.CreateAt
-				}
-			}
-		}
+		return nil, xerrors.Errorf("fail get review state: %v", err)
 	}
 
 	return &npool.GetKycByAppUserResponse{

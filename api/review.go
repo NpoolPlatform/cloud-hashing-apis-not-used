@@ -90,3 +90,15 @@ func (s *Server) GetWithdrawReviewsByOtherApp(ctx context.Context, in *npool.Get
 		Infos: resp.Infos,
 	}, nil
 }
+
+func (s *Server) GetWithdrawAddressReviews(ctx context.Context, in *npool.GetWithdrawAddressReviewsRequest) (*npool.GetWithdrawAddressReviewsResponse, error) {
+	return nil, nil
+}
+
+func (s *Server) GetWithdrawAddressReviewsByApp(ctx context.Context, in *npool.GetWithdrawAddressReviewsByAppRequest) (*npool.GetWithdrawAddressReviewsByAppResponse, error) {
+	return nil, nil
+}
+
+func (s *Server) GetWithdrawAddressReviewsByOtherApp(ctx context.Context, in *npool.GetWithdrawAddressReviewsByOtherAppRequest) (*npool.GetWithdrawAddressReviewsByOtherAppResponse, error) {
+	return nil, nil
+}

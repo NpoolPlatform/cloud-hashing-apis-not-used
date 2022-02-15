@@ -394,43 +394,14 @@ func GetByAppUser(ctx context.Context, in *npool.GetUserWithdrawsByAppUserReques
 
 	withdraws := []*npool.UserWithdraw{}
 	for _, info := range resp.Infos {
-		_review, err := grpc2.GetReviewsByAppDomainObjectTypeID(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
+		reviewState, reviewMessage, err := review.GetReviewState(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
 			AppID:      info.AppID,
 			Domain:     billingconst.ServiceName,
 			ObjectType: constant.ReviewObjectWithdraw,
 			ObjectID:   info.ID,
 		})
 		if err != nil {
-			return nil, xerrors.Errorf("fail get review: %v", err)
-		}
-
-		reviewState := reviewconst.StateRejected
-		reviewMessage := ""
-		messageTime := uint32(0)
-
-		for _, info := range _review.Infos {
-			if info.State == reviewconst.StateWait {
-				reviewState = reviewconst.StateWait
-				break
-			}
-		}
-
-		for _, info := range _review.Infos {
-			if info.State == reviewconst.StateApproved {
-				reviewState = reviewconst.StateApproved
-				break
-			}
-		}
-
-		if reviewState == reviewconst.StateRejected {
-			for _, info := range _review.Infos {
-				if info.State == reviewconst.StateRejected {
-					if messageTime < info.CreateAt {
-						reviewMessage = info.Message
-						messageTime = info.CreateAt
-					}
-				}
-			}
+			return nil, xerrors.Errorf("fail get review state: %v", err)
 		}
 
 		withdraws = append(withdraws, &npool.UserWithdraw{
