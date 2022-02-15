@@ -131,7 +131,7 @@ func GetWithdrawReviews(ctx context.Context, in *npool.GetWithdrawReviewsRequest
 	}, nil
 }
 
-func GetReviewState(ctx context.Context, in *reviewpb.GetReviewsByAppDomainObjectTypeIDRequest) (string, string, error) {
+func GetReviewState(ctx context.Context, in *reviewpb.GetReviewsByAppDomainObjectTypeIDRequest) (string, string, error) { //nolint
 	_review, err := grpc2.GetReviewsByAppDomainObjectTypeID(ctx, in)
 	if err != nil {
 		return "", "", xerrors.Errorf("fail get review: %v", err)

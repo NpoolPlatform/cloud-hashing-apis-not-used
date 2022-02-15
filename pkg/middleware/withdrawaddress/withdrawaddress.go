@@ -28,7 +28,7 @@ func Set(ctx context.Context, in *npool.SetWithdrawAddressRequest) (*npool.SetWi
 		return nil, xerrors.Errorf("fail get app user: %v", err)
 	}
 
-	account, err := account.CreateUserCoinAccount(ctx, &npool.CreateUserCoinAccountRequest{
+	_account, err := account.CreateUserCoinAccount(ctx, &npool.CreateUserCoinAccountRequest{
 		Info: &billingpb.CoinAccountInfo{
 			CoinTypeID:             in.GetCoinTypeID(),
 			Address:                in.GetAddress(),
@@ -44,7 +44,7 @@ func Set(ctx context.Context, in *npool.SetWithdrawAddressRequest) (*npool.SetWi
 			AppID:      in.GetAppID(),
 			UserID:     in.GetUserID(),
 			CoinTypeID: in.GetCoinTypeID(),
-			AccountID:  account.Info.ID,
+			AccountID:  _account.Info.ID,
 			Name:       in.GetName(),
 			Message:    in.GetMessage(),
 		},
@@ -68,7 +68,7 @@ func Set(ctx context.Context, in *npool.SetWithdrawAddressRequest) (*npool.SetWi
 	return &npool.SetWithdrawAddressResponse{
 		Info: &npool.WithdrawAddress{
 			Address: address.Info,
-			Account: account.Info,
+			Account: _account.Info,
 			State:   reviewconst.StateWait,
 		},
 	}, nil
@@ -94,7 +94,7 @@ func GetByAppUser(ctx context.Context, in *npool.GetWithdrawAddressesByAppUserRe
 	addresses := []*npool.WithdrawAddress{}
 
 	for _, info := range resp.Infos {
-		account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
+		_account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
 			ID: info.AccountID,
 		})
 		if err != nil {
@@ -113,7 +113,7 @@ func GetByAppUser(ctx context.Context, in *npool.GetWithdrawAddressesByAppUserRe
 
 		addresses = append(addresses, &npool.WithdrawAddress{
 			Address: info,
-			Account: account.Info,
+			Account: _account.Info,
 			State:   reviewState,
 			Message: reviewMessage,
 		})

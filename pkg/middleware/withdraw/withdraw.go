@@ -139,7 +139,7 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 		autoReview = false
 	}
 
-	review, err := grpc2.CreateReview(ctx, &reviewpb.CreateReviewRequest{
+	_review, err := grpc2.CreateReview(ctx, &reviewpb.CreateReviewRequest{
 		Info: &reviewpb.Review{
 			AppID:      in.GetInfo().GetAppID(),
 			Domain:     billingconst.ServiceName,
@@ -180,9 +180,9 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 			return nil, xerrors.Errorf("fail update user withdraw item: %v", err)
 		}
 
-		review.Info.State = reviewconst.StateApproved
+		_review.Info.State = reviewconst.StateApproved
 		_, err = grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{
-			Info: review.Info,
+			Info: _review.Info,
 		})
 		if err != nil {
 			return nil, xerrors.Errorf("fail update review state: %v", err)
