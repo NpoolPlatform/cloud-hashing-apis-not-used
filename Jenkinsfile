@@ -327,7 +327,7 @@ pipeline {
           tag=`git describe --tags $revlist`
           git reset --hard
           git checkout $tag
-          sed -i "s/cloud-hashing-apis:latest/cloud-hashing-apis:$tag/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml
+          sed -i "s/cloud-hashing-apis-v2:latest/cloud-hashing-apis-v2:$tag/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml
           sed -i "s/uhub.service.ucloud.cn/$DOCKER_REGISTRY/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml
           TAG=$tag make deploy-to-k8s-cluster
         '''.stripIndent())
@@ -350,7 +350,7 @@ pipeline {
           tag=$major.$minor.$patch
           git reset --hard
           git checkout $tag
-          sed -i "s/cloud-hashing-apis:latest/cloud-hashing-apis:$tag/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml
+          sed -i "s/cloud-hashing-apis-v2:latest/cloud-hashing-apis-v2:$tag/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml
           sed -i "s/uhub.service.ucloud.cn/$DOCKER_REGISTRY/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml
           TAG=$tag make deploy-to-k8s-cluster
         '''.stripIndent())
