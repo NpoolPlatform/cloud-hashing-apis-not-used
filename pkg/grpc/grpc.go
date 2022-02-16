@@ -992,3 +992,18 @@ func VerifySMSCode(ctx context.Context, in *thirdgwpb.VerifySMSCodeRequest) (*th
 
 	return cli.VerifySMSCode(ctx, in)
 }
+
+func VerifyGoogleAuthentication(ctx context.Context, in *thirdgwpb.VerifyGoogleAuthenticationRequest) (*thirdgwpb.VerifyGoogleAuthenticationResponse, error) {
+	conn, err := grpc2.GetGRPCConn(thirdgwconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get third gateway connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := thirdgwpb.NewThirdGatewayClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.VerifyGoogleAuthentication(ctx, in)
+}

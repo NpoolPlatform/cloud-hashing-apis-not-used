@@ -13,11 +13,11 @@ require (
 	github.com/NpoolPlatform/cloud-hashing-staker v0.0.0-20220214050218-567efaad1cb3
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20220211051615-b2300d03022a
 	github.com/NpoolPlatform/kyc-management v0.0.0-20220113122339-4bef8bdcbc5c
-	github.com/NpoolPlatform/message v0.0.0-20220215091532-c424ccb1c147
+	github.com/NpoolPlatform/message v0.0.0-20220216134757-a55935a1f1d9
 	github.com/NpoolPlatform/review-service v0.0.0-20220214135408-eb1dbe09de65
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211208035009-5ad2768d2290
 	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20211210102925-d9b8abe11021
-	github.com/NpoolPlatform/third-gateway v0.0.0-20220204065515-e8e92a3fce48
+	github.com/NpoolPlatform/third-gateway v0.0.0-20220216133542-09e8b6e291cf
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.2
