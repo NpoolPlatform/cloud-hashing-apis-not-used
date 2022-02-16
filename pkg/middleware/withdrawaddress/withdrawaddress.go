@@ -12,7 +12,9 @@ import (
 	billingconst "github.com/NpoolPlatform/cloud-hashing-billing/pkg/message/const"
 	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
 	billingpb "github.com/NpoolPlatform/message/npool/cloud-hashing-billing"
+	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
 	reviewpb "github.com/NpoolPlatform/message/npool/review-service"
+	sphinxproxypb "github.com/NpoolPlatform/message/npool/sphinxproxy"
 	thirdgwpb "github.com/NpoolPlatform/message/npool/thirdgateway"
 	reviewconst "github.com/NpoolPlatform/review-service/pkg/const"
 	thirdgwconst "github.com/NpoolPlatform/third-gateway/pkg/const"
@@ -66,6 +68,24 @@ func Set(ctx context.Context, in *npool.SetWithdrawAddressRequest) (*npool.SetWi
 	}
 	if err != nil {
 		return nil, xerrors.Errorf("fail verify signup code: %v", err)
+	}
+
+	coin, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
+		ID: in.GetCoinTypeID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get coin info: %v", err)
+	}
+	if coin.Info == nil {
+		return nil, xerrors.Errorf("fail get coin info")
+	}
+
+	_, err = grpc2.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
+		Name:    coin.Info.Name,
+		Address: in.GetAddress(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get wallet balance: %v", err)
 	}
 
 	_account, err := account.CreateUserCoinAccount(ctx, &npool.CreateUserCoinAccountRequest{
