@@ -99,6 +99,7 @@ func Set(ctx context.Context, in *npool.SetWithdrawAddressRequest) (*npool.SetWi
 		return nil, xerrors.Errorf("fail create account: %v", err)
 	}
 
+	// TODO: rollback create user coin account
 	address, err := grpc2.CreateUserWithdraw(ctx, &billingpb.CreateUserWithdrawRequest{
 		Info: &billingpb.UserWithdraw{
 			AppID:      in.GetAppID(),
