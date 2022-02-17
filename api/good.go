@@ -24,6 +24,15 @@ func (s *Server) GetGoods(ctx context.Context, in *npool.GetGoodsRequest) (*npoo
 	return resp, nil
 }
 
+func (s *Server) GetGoodsByApp(ctx context.Context, in *npool.GetGoodsByAppRequest) (*npool.GetGoodsByAppResponse, error) {
+	resp, err := good.GetByApp(ctx, in)
+	if err != nil {
+		logger.Sugar().Errorf("get good all error: %v", err)
+		return &npool.GetGoodsByAppResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return resp, nil
+}
+
 func (s *Server) CreateGood(ctx context.Context, in *npool.CreateGoodRequest) (*npool.CreateGoodResponse, error) {
 	resp, err := good.Create(ctx, in)
 	if err != nil {

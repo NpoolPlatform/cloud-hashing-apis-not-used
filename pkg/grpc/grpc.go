@@ -88,6 +88,21 @@ func GetGoodsDetail(ctx context.Context, in *goodspb.GetGoodsDetailRequest) (*go
 	return cli.GetGoodsDetail(ctx, in)
 }
 
+func GetGoodsDetailByApp(ctx context.Context, in *goodspb.GetGoodsDetailByAppRequest) (*goodspb.GetGoodsDetailByAppResponse, error) {
+	conn, err := grpc2.GetGRPCConn(goodsconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get goods connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := goodspb.NewCloudHashingGoodsClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetGoodsDetailByApp(ctx, in)
+}
+
 func GetGoodDetail(ctx context.Context, in *goodspb.GetGoodDetailRequest) (*goodspb.GetGoodDetailResponse, error) {
 	conn, err := grpc2.GetGRPCConn(goodsconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {

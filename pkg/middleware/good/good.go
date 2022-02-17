@@ -201,3 +201,43 @@ func GetRecommendsByApp(ctx context.Context, in *npool.GetRecommendGoodsByAppReq
 		Infos: details,
 	}, nil
 }
+
+func GetByApp(ctx context.Context, in *npool.GetGoodsByAppRequest) (*npool.GetGoodsByAppResponse, error) {
+	goodsResp, err := grpc2.GetGoodsDetailByApp(ctx, &goodspb.GetGoodsDetailByAppRequest{
+		AppID:    in.GetAppID(),
+		PageInfo: in.GetPageInfo(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get goods info: %v", err)
+	}
+
+	coininfoResp, err := grpc2.GetCoinInfos(ctx, &coininfopb.GetCoinInfosRequest{})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get coin infos: %v", err)
+	}
+
+	details := []*npool.Good{}
+	for _, info := range goodsResp.Infos {
+		review, err := grpc2.GetReviewsByAppDomainObjectTypeID(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
+			AppID:      uuid.UUID{}.String(),
+			Domain:     goodsconst.ServiceName,
+			ObjectType: constant.ReviewObjectGood,
+			ObjectID:   info.Good.ID,
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail get reviews by app domain object type id: %v", err)
+		}
+
+		detail, err := constructGood(info, coininfoResp.Infos, review.Infos)
+		if err != nil {
+			logger.Sugar().Errorf("fail to get coin info %v: %v", info.Good.CoinInfoID, err)
+			continue
+		}
+
+		details = append(details, detail)
+	}
+
+	return &npool.GetGoodsByAppResponse{
+		Infos: details,
+	}, nil
+}
