@@ -131,6 +131,60 @@ func GetWithdrawReviews(ctx context.Context, in *npool.GetWithdrawReviewsRequest
 	}, nil
 }
 
+func GetWithdrawAddressReviews(ctx context.Context, in *npool.GetWithdrawAddressReviewsRequest) (*npool.GetWithdrawAddressReviewsResponse, error) {
+	resp, err := grpc2.GetReviewsByAppDomain(ctx, &reviewpb.GetReviewsByAppDomainRequest{
+		AppID:  in.GetAppID(),
+		Domain: billingconst.ServiceName,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get withdraw reviews: %v", err)
+	}
+
+	reviews := []*npool.WithdrawAddressReview{}
+	for _, info := range resp.Infos {
+		address, err := grpc2.GetUserWithdraw(ctx, &billingpb.GetUserWithdrawRequest{
+			ID: info.ObjectID,
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail get user withdraw info for %v: %v", info.ID, err)
+		}
+		if address.Info == nil {
+			logger.Sugar().Warnf("fail get user withdraw info for %v", info.ObjectID)
+			continue
+		}
+
+		account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
+			ID: address.Info.AccountID,
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail get account: %v", err)
+		}
+		if account.Info == nil {
+			return nil, xerrors.Errorf("fail get account")
+		}
+
+		user, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
+			AppID:  in.GetAppID(),
+			UserID: address.Info.UserID,
+		})
+		if err != nil {
+			logger.Sugar().Errorf("fail get user %v info for %v: %v", address.Info.UserID, info.ObjectID, err)
+			continue
+		}
+
+		reviews = append(reviews, &npool.WithdrawAddressReview{
+			Review:  info,
+			User:    user.Info,
+			Address: address.Info,
+			Account: account.Info,
+		})
+	}
+
+	return &npool.GetWithdrawAddressReviewsResponse{
+		Infos: reviews,
+	}, nil
+}
+
 func GetReviewState(ctx context.Context, in *reviewpb.GetReviewsByAppDomainObjectTypeIDRequest) (string, string, error) { //nolint
 	_review, err := grpc2.GetReviewsByAppDomainObjectTypeID(ctx, in)
 	if err != nil {
