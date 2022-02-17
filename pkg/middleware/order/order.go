@@ -301,11 +301,11 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 	// TODO: Validate fee ids
 
 	start := (uint32(time.Now().Unix()) + 24*60*60) / 24 / 60 / 60 * 24 * 60 * 60
-	if start < goodInfo.Info.Good.StartAt {
-		start = goodInfo.Info.Good.StartAt
+	if start < goodInfo.Info.Good.Good.StartAt {
+		start = goodInfo.Info.Good.Good.StartAt
 	}
 
-	end := start + uint32(goodInfo.Info.Good.DurationDays)*24*60*60
+	end := start + uint32(goodInfo.Info.Good.Good.DurationDays)*24*60*60
 
 	// Generate order
 	myOrder, err := grpc2.CreateOrder(ctx, &orderpb.CreateOrderRequest{
@@ -339,7 +339,7 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 
 func peekIdlePaymentAccount(ctx context.Context, order *npool.Order, paymentCoinInfo *coininfopb.CoinInfo) (*billingpb.CoinAccountInfo, error) {
 	resp, err := grpc2.GetIdleGoodPaymentsByGoodPaymentCoin(ctx, &billingpb.GetIdleGoodPaymentsByGoodPaymentCoinRequest{
-		GoodID:            order.Good.Good.ID,
+		GoodID:            order.Good.Good.Good.ID,
 		PaymentCoinTypeID: paymentCoinInfo.ID,
 	})
 	if err != nil {
@@ -416,7 +416,7 @@ func createNewPaymentAccount(ctx context.Context, order *npool.Order, paymentCoi
 
 		_, err = grpc2.CreateGoodPayment(ctx, &billingpb.CreateGoodPaymentRequest{
 			Info: &billingpb.GoodPayment{
-				GoodID:            order.Good.Good.ID,
+				GoodID:            order.Good.Good.Good.ID,
 				PaymentCoinTypeID: paymentCoinInfo.ID,
 				AccountID:         account.Info.ID,
 			},
@@ -469,7 +469,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		return nil, xerrors.Errorf("cannot get usd currency for payment coin: %v", err)
 	}
 
-	amountUSD := float64(myOrder.Info.Order.Units) * myOrder.Info.Good.Good.Price
+	amountUSD := float64(myOrder.Info.Order.Units) * myOrder.Info.Good.Good.Good.Price
 	if myOrder.Info.DiscountCoupon != nil {
 		amountUSD *= float64(100 - myOrder.Info.DiscountCoupon.Discount.Discount)
 		amountUSD /= float64(100)

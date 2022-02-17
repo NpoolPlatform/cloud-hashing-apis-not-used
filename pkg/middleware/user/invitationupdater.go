@@ -212,14 +212,14 @@ func getInvitationUserInfo( //nolint
 			continue
 		}
 
-		if _, ok := summarys[orderInfo.Good.Good.CoinInfoID]; !ok {
-			summarys[orderInfo.Good.Good.CoinInfoID] = &npool.InvitationSummary{}
+		if _, ok := summarys[orderInfo.Good.Good.Good.CoinInfoID]; !ok {
+			summarys[orderInfo.Good.Good.Good.CoinInfoID] = &npool.InvitationSummary{}
 		}
 
-		summary := summarys[orderInfo.Good.Good.CoinInfoID]
+		summary := summarys[orderInfo.Good.Good.Good.CoinInfoID]
 		summary.Units += orderInfo.Order.Units
 		summary.Amount += orderInfo.Order.Payment.Amount
-		summarys[orderInfo.Good.Good.CoinInfoID] = summary
+		summarys[orderInfo.Good.Good.Good.CoinInfoID] = summary
 	}
 
 	kol := false
