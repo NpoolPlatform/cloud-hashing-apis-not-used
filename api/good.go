@@ -51,7 +51,7 @@ func (s *Server) GetGood(ctx context.Context, in *npool.GetGoodRequest) (*npool.
 	return resp, nil
 }
 
-func GetRecommendGoodsByApp(ctx context.Context, in *npool.GetRecommendGoodsByAppRequest) (*npool.GetRecommendGoodsByAppResponse, error) {
+func (s *Server) GetRecommendGoodsByApp(ctx context.Context, in *npool.GetRecommendGoodsByAppRequest) (*npool.GetRecommendGoodsByAppResponse, error) {
 	resp, err := good.GetRecommendsByApp(ctx, in)
 	if err != nil {
 		logger.Sugar().Errorf("get recommend good by app error: %v", err)
