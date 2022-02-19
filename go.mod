@@ -17,7 +17,7 @@ require (
 	github.com/NpoolPlatform/review-service v0.0.0-20220214135408-eb1dbe09de65
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211208035009-5ad2768d2290
 	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20211210102925-d9b8abe11021
-	github.com/NpoolPlatform/third-gateway v0.0.0-20220216133542-09e8b6e291cf
+	github.com/NpoolPlatform/third-gateway v0.0.0-20220219070124-c33f2a2e4b2b
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.2

@@ -50,7 +50,7 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 		_, err = grpc2.VerifySMSCode(ctx, &thirdgwpb.VerifySMSCodeRequest{
 			AppID:   in.GetInfo().GetAppID(),
 			PhoneNO: phoneNO,
-			UsedFor: thirdgwconst.UsedForSetWithdrawAddress,
+			UsedFor: thirdgwconst.UsedForWithdraw,
 			Code:    in.GetVerificationCode(),
 		})
 	} else if in.GetAccountType() == appusermgrconst.SignupByEmail {
@@ -63,7 +63,7 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 		_, err = grpc2.VerifyEmailCode(ctx, &thirdgwpb.VerifyEmailCodeRequest{
 			AppID:        in.GetInfo().GetAppID(),
 			EmailAddress: emailAddr,
-			UsedFor:      thirdgwconst.UsedForSetWithdrawAddress,
+			UsedFor:      thirdgwconst.UsedForWithdraw,
 			Code:         in.GetVerificationCode(),
 		})
 	} else {
