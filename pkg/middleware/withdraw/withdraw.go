@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+
 	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/const"
 	review "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/review"
 	currency "github.com/NpoolPlatform/cloud-hashing-staker/pkg/middleware/currency"
@@ -125,7 +127,11 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 	if err != nil {
 		return nil, xerrors.Errorf("lock withdraw fail: %v", err)
 	}
-	defer redis2.Unlock(lockKey)
+	defer func() {
+		if err := redis2.Unlock(lockKey); err != nil {
+			logger.Sugar().Errorf("unlock withdraw fail: %v", err)
+		}
+	}()
 
 	incoming := 0.0
 	outcoming := 0.0
