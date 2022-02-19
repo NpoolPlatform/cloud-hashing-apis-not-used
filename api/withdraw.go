@@ -39,7 +39,9 @@ func (s *Server) UpdateUserWithdrawReviewForOtherAppUser(ctx context.Context, in
 	info.AppID = in.GetTargetAppID()
 
 	resp, err := withdraw.Update(ctx, &npool.UpdateUserWithdrawReviewRequest{
-		Info: info,
+		AppID:  in.GetAppID(),
+		UserID: in.GetUserID(),
+		Info:   info,
 	})
 	if err != nil {
 		logger.Sugar().Errorf("update user withdraw error: %v", err)
