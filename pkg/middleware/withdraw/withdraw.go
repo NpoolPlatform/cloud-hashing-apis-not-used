@@ -333,6 +333,10 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*npool.UpdateUserWithdrawReviewResponse, error) { //nolint
 	// TODO: check permission of reviewer
 
+	if in.GetUserID() != in.GetInfo().GetReviewerID() {
+		return nil, xerrors.Errorf("mismatch reviewer id")
+	}
+
 	user, err := grpc2.GetAppUserByAppUser(ctx, &appusermgrpb.GetAppUserByAppUserRequest{
 		AppID:  in.GetAppID(),
 		UserID: in.GetUserID(),
