@@ -352,6 +352,9 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 	if resp.Info == nil {
 		return nil, xerrors.Errorf("fail get review")
 	}
+	if resp.Info.State == reviewconst.StateApproved {
+		return nil, xerrors.Errorf("already approved")
+	}
 
 	resp1, err := grpc2.GetUserWithdrawItem(ctx, &billingpb.GetUserWithdrawItemRequest{
 		ID: resp.Info.ObjectID,
