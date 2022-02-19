@@ -34,6 +34,22 @@ func (s *Server) UpdateUserWithdrawReview(ctx context.Context, in *npool.UpdateU
 	return resp, nil
 }
 
+func (s *Server) UpdateUserWithdrawReviewForOtherAppUser(ctx context.Context, in *npool.UpdateUserWithdrawReviewForOtherAppUserRequest) (*npool.UpdateUserWithdrawReviewForOtherAppUserResponse, error) {
+	info := in.GetInfo()
+	info.AppID = in.GetTargetAppID()
+
+	resp, err := withdraw.Update(ctx, &npool.UpdateUserWithdrawReviewRequest{
+		Info: info,
+	})
+	if err != nil {
+		logger.Sugar().Errorf("update user withdraw error: %v", err)
+		return &npool.UpdateUserWithdrawReviewForOtherAppUserResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return &npool.UpdateUserWithdrawReviewForOtherAppUserResponse{
+		Info: resp.Info,
+	}, nil
+}
+
 func (s *Server) GetUserWithdrawsByAppUser(ctx context.Context, in *npool.GetUserWithdrawsByAppUserRequest) (*npool.GetUserWithdrawsByAppUserResponse, error) {
 	resp, err := withdraw.GetByAppUser(ctx, in)
 	if err != nil {

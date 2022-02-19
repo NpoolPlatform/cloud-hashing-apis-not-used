@@ -330,8 +330,9 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 	}, nil
 }
 
-// This API should not convert app id and user id in header to body and body.Info
 func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*npool.UpdateUserWithdrawReviewResponse, error) { //nolint
+	// TODO: check permission of reviewer
+
 	user, err := grpc2.GetAppUserByAppUser(ctx, &appusermgrpb.GetAppUserByAppUserRequest{
 		AppID:  in.GetAppID(),
 		UserID: in.GetUserID(),
@@ -344,7 +345,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 	}
 
 	resp, err := grpc2.GetReview(ctx, &reviewpb.GetReviewRequest{
-		ID: in.GetReview().GetID(),
+		ID: in.GetInfo().GetID(),
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get review: %v", err)
@@ -393,7 +394,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 	}
 
 	reviewState, _, err := review.GetReviewState(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
-		AppID:      in.GetReview().GetAppID(),
+		AppID:      in.GetInfo().GetAppID(),
 		Domain:     billingconst.ServiceName,
 		ObjectType: constant.ReviewObjectUserWithdrawAddress,
 		ObjectID:   withdrawAccount.Info.ID,
@@ -416,7 +417,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		return nil, xerrors.Errorf("fail get app user")
 	}
 
-	if resp1.Info.AppID != in.GetReview().GetAppID() {
+	if resp1.Info.AppID != in.GetInfo().GetAppID() {
 		return nil, xerrors.Errorf("invalid request")
 	}
 
@@ -426,7 +427,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 
 	reviewState = resp.Info.State
 
-	resp.Info.State = in.GetReview().GetState()
+	resp.Info.State = in.GetInfo().GetState()
 	_, err = grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{
 		Info: resp.Info,
 	})
@@ -434,7 +435,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		return nil, xerrors.Errorf("fail update review state: %v", err)
 	}
 
-	if in.GetReview().GetState() == reviewconst.StateApproved {
+	if in.GetInfo().GetState() == reviewconst.StateApproved {
 		coinsetting, err := grpc2.GetCoinSettingByCoin(ctx, &billingpb.GetCoinSettingByCoinRequest{
 			CoinTypeID: resp1.Info.CoinTypeID,
 		})
