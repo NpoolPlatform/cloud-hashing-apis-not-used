@@ -334,7 +334,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 	// TODO: check permission of reviewer
 
 	if in.GetUserID() != in.GetInfo().GetReviewerID() {
-		return nil, xerrors.Errorf("mismatch reviewer id")
+		return nil, xerrors.Errorf("mismatch reviewer id %v != %v", in.GetUserID(), in.GetInfo().GetReviewerID())
 	}
 
 	user, err := grpc2.GetAppUserByAppUser(ctx, &appusermgrpb.GetAppUserByAppUserRequest{
