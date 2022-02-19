@@ -67,7 +67,7 @@ func Set(ctx context.Context, in *npool.SetWithdrawAddressRequest) (*npool.SetWi
 		})
 	}
 	if err != nil {
-		return nil, xerrors.Errorf("fail verify signup code: %v", err)
+		return nil, xerrors.Errorf("fail verify code: %v", err)
 	}
 
 	coin, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
