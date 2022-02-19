@@ -105,7 +105,7 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 	}
 
 	if withdrawAccount.Info.AppID != in.GetInfo().GetAppID() || withdrawAccount.Info.UserID != in.GetInfo().GetUserID() {
-		return nil, xerrors.Errorf("invalid account")
+		return nil, xerrors.Errorf("acount is not belong to user")
 	}
 
 	reviewState, _, err := review.GetReviewState(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
@@ -118,7 +118,7 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 		return nil, xerrors.Errorf("fail get review: %v", err)
 	}
 	if reviewState != reviewconst.StateApproved {
-		return nil, xerrors.Errorf("invalid account")
+		return nil, xerrors.Errorf("invalid account: not approved")
 	}
 
 	autoReviewCoinAmount := 0
