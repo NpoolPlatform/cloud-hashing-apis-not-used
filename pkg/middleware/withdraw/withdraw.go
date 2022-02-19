@@ -213,7 +213,7 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 				CoinTypeID:         in.GetInfo().GetCoinTypeID(),
 				Amount:             in.GetInfo().GetAmount(),
 				Message:            fmt.Sprintf("user withdraw at %v", time.Now()),
-				ChainTransactionID: uuid.New().String(),
+				ChainTransactionID: "",
 			},
 		})
 		if err != nil {
@@ -397,7 +397,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 				CoinTypeID:         resp1.Info.CoinTypeID,
 				Amount:             resp1.Info.Amount,
 				Message:            fmt.Sprintf("user withdraw at %v", time.Now()),
-				ChainTransactionID: uuid.New().String(),
+				ChainTransactionID: "",
 			},
 		})
 		if err != nil {
