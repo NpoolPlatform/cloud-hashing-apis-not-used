@@ -576,6 +576,21 @@ func GetUserWithdrawItemsByAppUser(ctx context.Context, in *billingpb.GetUserWit
 	return cli.GetUserWithdrawItemsByAppUser(ctx, in)
 }
 
+func GetUserBenefitsByAppUserCoin(ctx context.Context, in *billingpb.GetUserBenefitsByAppUserCoinRequest) (*billingpb.GetUserBenefitsByAppUserCoinResponse, error) {
+	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get billing connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := billingpb.NewCloudHashingBillingClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetUserBenefitsByAppUserCoin(ctx, in)
+}
+
 func GetAppWithdrawSettingByAppCoin(ctx context.Context, in *billingpb.GetAppWithdrawSettingByAppCoinRequest) (*billingpb.GetAppWithdrawSettingByAppCoinResponse, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
@@ -636,6 +651,21 @@ func GetUserWithdrawsByAppUser(ctx context.Context, in *billingpb.GetUserWithdra
 	return cli.GetUserWithdrawsByAppUser(ctx, in)
 }
 
+func GetUserWithdrawsByAppUserCoin(ctx context.Context, in *billingpb.GetUserWithdrawsByAppUserCoinRequest) (*billingpb.GetUserWithdrawsByAppUserCoinResponse, error) {
+	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get billing connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := billingpb.NewCloudHashingBillingClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetUserWithdrawsByAppUserCoin(ctx, in)
+}
+
 func GetCoinSettingByCoin(ctx context.Context, in *billingpb.GetCoinSettingByCoinRequest) (*billingpb.GetCoinSettingByCoinResponse, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
@@ -664,6 +694,21 @@ func CreateCoinAccountTransaction(ctx context.Context, in *billingpb.CreateCoinA
 	defer cancel()
 
 	return cli.CreateCoinAccountTransaction(ctx, in)
+}
+
+func GetCoinAccountTransactionsByAppUserCoin(ctx context.Context, in *billingpb.GetCoinAccountTransactionsByAppUserCoinRequest) (*billingpb.GetCoinAccountTransactionsByAppUserCoinResponse, error) {
+	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get billing connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := billingpb.NewCloudHashingBillingClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetCoinAccountTransactionsByAppUserCoin(ctx, in)
 }
 
 //---------------------------------------------------------------------------------------------------------------------------

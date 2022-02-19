@@ -8,9 +8,11 @@ import (
 	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/const"
 	review "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/review"
 	currency "github.com/NpoolPlatform/cloud-hashing-staker/pkg/middleware/currency"
+	redis2 "github.com/NpoolPlatform/go-service-framework/pkg/redis"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
 	appusermgrconst "github.com/NpoolPlatform/appuser-manager/pkg/const"
+	billingstate "github.com/NpoolPlatform/cloud-hashing-billing/pkg/const"
 	billingconst "github.com/NpoolPlatform/cloud-hashing-billing/pkg/message/const"
 	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
 	billingpb "github.com/NpoolPlatform/message/npool/cloud-hashing-billing"
@@ -86,6 +88,80 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 	if coin.Info == nil {
 		return nil, xerrors.Errorf("fail get coin info")
 	}
+	if coin.Info.PreSale {
+		return nil, xerrors.Errorf("cannot withdraw presale coin")
+	}
+
+	// TODO: check user benefit and user withdraw: balance = user benefit - user done withdraw - user wait withdraw
+	benefits, err := grpc2.GetUserBenefitsByAppUserCoin(ctx, &billingpb.GetUserBenefitsByAppUserCoinRequest{
+		AppID:      in.GetInfo().GetAppID(),
+		UserID:     in.GetInfo().GetUserID(),
+		CoinTypeID: in.GetInfo().GetCoinTypeID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get user benefits: %v", err)
+	}
+
+	withdrawAddrs, err := grpc2.GetUserWithdrawsByAppUserCoin(ctx, &billingpb.GetUserWithdrawsByAppUserCoinRequest{
+		AppID:      in.GetInfo().GetAppID(),
+		UserID:     in.GetInfo().GetUserID(),
+		CoinTypeID: in.GetInfo().GetCoinTypeID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get user withdraws: %v", err)
+	}
+
+	txs, err := grpc2.GetCoinAccountTransactionsByAppUserCoin(ctx, &billingpb.GetCoinAccountTransactionsByAppUserCoinRequest{
+		AppID:      in.GetInfo().GetAppID(),
+		UserID:     in.GetInfo().GetUserID(),
+		CoinTypeID: in.GetInfo().GetCoinTypeID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get account transactions: %v", err)
+	}
+
+	lockKey := fmt.Sprintf("withdraw:%v:%v", in.GetInfo().GetAppID(), in.GetInfo().GetUserID())
+	err = redis2.TryLock(fmt.Sprintf("withdraw:%v:%v", in.GetInfo().GetAppID(), in.GetInfo().GetUserID()), 10*time.Minute)
+	if err != nil {
+		return nil, xerrors.Errorf("lock withdraw fail: %v", err)
+	}
+	defer redis2.Unlock(lockKey)
+
+	incoming := 0.0
+	outcoming := 0.0
+	for _, info := range benefits.Infos {
+		incoming += info.Amount
+	}
+	for _, info := range txs.Infos {
+		withdraw := false
+		for _, addr := range withdrawAddrs.Infos {
+			if addr.AccountID == info.ToAddressID {
+				withdraw = true
+				break
+			}
+		}
+
+		if !withdraw {
+			continue
+		}
+
+		if info.State == billingstate.CoinTransactionStateFail ||
+			info.State == billingstate.CoinTransactionStateRejected {
+			continue
+		}
+
+		outcoming += info.Amount
+	}
+
+	if incoming < outcoming {
+		return nil, xerrors.Errorf("invalid billing input")
+	}
+	if incoming-outcoming < in.GetInfo().GetAmount() {
+		return nil, xerrors.Errorf("not sufficient funds")
+	}
+
+	// TODO: check waiting transaction: only one wait transaction is allowed
+	// TODO: check reviewing withdraw: only one reviewing withdraw is allowed
 
 	account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
 		ID: in.GetInfo().GetWithdrawToAccountID(),
@@ -201,6 +277,7 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 		return nil, xerrors.Errorf("fail create user withdraw item review: %v", err)
 	}
 
+	// TODO: check 24 hours total withdraw amount: if overflow, goto review
 	reviewState = reviewconst.StateWait
 
 	if autoReview {
