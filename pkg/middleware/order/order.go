@@ -504,6 +504,9 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	// Generate payment
 	myPayment, err := grpc2.CreatePayment(ctx, &orderpb.CreatePaymentRequest{
 		Info: &orderpb.Payment{
+			AppID:           myOrder.Info.Order.AppID,
+			UserID:          myOrder.Info.Order.UserID,
+			GoodID:          myOrder.Info.Order.GoodID,
 			OrderID:         myOrder.Info.Order.ID,
 			AccountID:       paymentAccount.ID,
 			StartAmount:     balanceAmount,
