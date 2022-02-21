@@ -336,7 +336,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		return nil, xerrors.Errorf("mismatch reviewer id")
 	}
 
-	user, err := grpc2.GetAppUserByAppUser(ctx, &appusermgrpb.GetAppUserByAppUserRequest{
+	user, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
 		AppID:  in.GetAppID(),
 		UserID: in.GetUserID(),
 	})
@@ -529,8 +529,6 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		return nil, xerrors.Errorf("already reviewed")
 	}
 
-	reviewState = resp.Info.State
-
 	if in.GetInfo().GetState() == reviewconst.StateApproved {
 		account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
 			ID: coinsetting.Info.UserOnlineAccountID,
@@ -573,12 +571,10 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		if err != nil {
 			return nil, xerrors.Errorf("fail update review state: %v", err)
 		}
-
-		reviewState = reviewconst.StateApproved
 	}
 
 	resp.Info.State = in.GetInfo().GetState()
-	_, err = grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{
+	resp2, err := grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{
 		Info: resp.Info,
 	})
 	if err != nil {
@@ -586,9 +582,10 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 	}
 
 	return &npool.UpdateUserWithdrawReviewResponse{
-		Info: &npool.UserWithdraw{
+		Info: &npool.WithdrawReview{
 			Withdraw: resp1.Info,
-			State:    reviewState,
+			Review:   resp2.Info,
+			User:     user.Info,
 		},
 	}, nil
 }
