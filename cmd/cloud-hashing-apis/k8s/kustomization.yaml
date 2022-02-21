@@ -2,6 +2,7 @@ commonLabels:
   # app: cloud-hashing-apis
 
 resources:
+- 00-configmap.yaml
 - 01-cloud-hashing-apis.yaml
 - 02-strip-prefix.yaml
 - 03-traefik-ingress.yaml
