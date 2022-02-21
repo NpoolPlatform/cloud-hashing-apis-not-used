@@ -94,7 +94,17 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 		return nil, xerrors.Errorf("cannot withdraw presale coin")
 	}
 
-	// TODO: check user benefit and user withdraw: balance = user benefit - user done withdraw - user wait withdraw
+	lockKey := fmt.Sprintf("withdraw:%v:%v", in.GetInfo().GetAppID(), in.GetInfo().GetUserID())
+	err = redis2.TryLock(fmt.Sprintf("withdraw:%v:%v", in.GetInfo().GetAppID(), in.GetInfo().GetUserID()), 10*time.Minute)
+	if err != nil {
+		return nil, xerrors.Errorf("lock withdraw fail: %v", err)
+	}
+	defer func() {
+		if err := redis2.Unlock(lockKey); err != nil {
+			logger.Sugar().Errorf("unlock withdraw fail: %v", err)
+		}
+	}()
+
 	benefits, err := grpc2.GetUserBenefitsByAppUserCoin(ctx, &billingpb.GetUserBenefitsByAppUserCoinRequest{
 		AppID:      in.GetInfo().GetAppID(),
 		UserID:     in.GetInfo().GetUserID(),
@@ -121,17 +131,6 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 	if err != nil {
 		return nil, xerrors.Errorf("fail get account transactions: %v", err)
 	}
-
-	lockKey := fmt.Sprintf("withdraw:%v:%v", in.GetInfo().GetAppID(), in.GetInfo().GetUserID())
-	err = redis2.TryLock(fmt.Sprintf("withdraw:%v:%v", in.GetInfo().GetAppID(), in.GetInfo().GetUserID()), 10*time.Minute)
-	if err != nil {
-		return nil, xerrors.Errorf("lock withdraw fail: %v", err)
-	}
-	defer func() {
-		if err := redis2.Unlock(lockKey); err != nil {
-			logger.Sugar().Errorf("unlock withdraw fail: %v", err)
-		}
-	}()
 
 	incoming := 0.0
 	outcoming := 0.0
@@ -376,7 +375,106 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		return nil, xerrors.Errorf("withdraw already processed")
 	}
 
+	coinsetting, err := grpc2.GetCoinSettingByCoin(ctx, &billingpb.GetCoinSettingByCoinRequest{
+		CoinTypeID: resp1.Info.CoinTypeID,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get coin setting: %v", err)
+	}
+
 	account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
+		ID: coinsetting.Info.UserOnlineAccountID,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get account info: %v", err)
+	}
+	if account.Info == nil {
+		return nil, xerrors.Errorf("fail get account info")
+	}
+
+	benefits, err := grpc2.GetUserBenefitsByAppUserCoin(ctx, &billingpb.GetUserBenefitsByAppUserCoinRequest{
+		AppID:      resp1.Info.AppID,
+		UserID:     resp1.Info.UserID,
+		CoinTypeID: resp1.Info.CoinTypeID,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get user benefits: %v", err)
+	}
+
+	withdrawAddrs, err := grpc2.GetUserWithdrawsByAppUserCoin(ctx, &billingpb.GetUserWithdrawsByAppUserCoinRequest{
+		AppID:      resp1.Info.AppID,
+		UserID:     resp1.Info.UserID,
+		CoinTypeID: resp1.Info.CoinTypeID,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get user withdraws: %v", err)
+	}
+
+	txs, err := grpc2.GetCoinAccountTransactionsByAppUserCoin(ctx, &billingpb.GetCoinAccountTransactionsByAppUserCoinRequest{
+		AppID:      resp1.Info.AppID,
+		UserID:     resp1.Info.UserID,
+		CoinTypeID: resp1.Info.CoinTypeID,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get account transactions: %v", err)
+	}
+
+	incoming := 0.0
+	outcoming := 0.0
+	for _, info := range benefits.Infos {
+		incoming += info.Amount
+	}
+	for _, info := range txs.Infos {
+		withdraw := false
+		for _, addr := range withdrawAddrs.Infos {
+			if addr.AccountID == info.ToAddressID {
+				withdraw = true
+				break
+			}
+		}
+
+		if !withdraw {
+			continue
+		}
+
+		if info.State == billingstate.CoinTransactionStateFail ||
+			info.State == billingstate.CoinTransactionStateRejected {
+			continue
+		}
+
+		outcoming += info.Amount
+	}
+
+	if incoming < outcoming {
+		return nil, xerrors.Errorf("invalid billing input")
+	}
+	if incoming-outcoming < resp1.Info.Amount {
+		return nil, xerrors.Errorf("not sufficient funds")
+	}
+
+	coin, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
+		ID: resp1.Info.CoinTypeID,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get coin info: %v", err)
+	}
+	if coin.Info == nil {
+		return nil, xerrors.Errorf("fail get coin info")
+	}
+
+	balance, err := grpc2.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
+		Name:    coin.Info.Name,
+		Address: account.Info.Address,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get wallet balance: %v", err)
+	}
+
+	if balance.Info.Balance < resp1.Info.Amount+coin.Info.ReservedAmount {
+		return nil, xerrors.Errorf("no sufficient funds")
+	}
+
+	account, err = grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
 		ID: resp1.Info.WithdrawToAccountID,
 	})
 	if err != nil {
@@ -440,13 +538,6 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 	}
 
 	if in.GetInfo().GetState() == reviewconst.StateApproved {
-		coinsetting, err := grpc2.GetCoinSettingByCoin(ctx, &billingpb.GetCoinSettingByCoinRequest{
-			CoinTypeID: resp1.Info.CoinTypeID,
-		})
-		if err != nil {
-			return nil, xerrors.Errorf("fail get coin setting: %v", err)
-		}
-
 		account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
 			ID: coinsetting.Info.UserOnlineAccountID,
 		})
@@ -455,16 +546,6 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		}
 		if account.Info == nil {
 			return nil, xerrors.Errorf("fail get account info")
-		}
-
-		coin, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
-			ID: resp1.Info.CoinTypeID,
-		})
-		if err != nil {
-			return nil, xerrors.Errorf("fail get coin info: %v", err)
-		}
-		if coin.Info == nil {
-			return nil, xerrors.Errorf("fail get coin info")
 		}
 
 		balance, err := grpc2.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
