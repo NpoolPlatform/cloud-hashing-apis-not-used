@@ -392,6 +392,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		return nil, xerrors.Errorf("fail get account info")
 	}
 
+	// TODO: here should hold withdraw lock
 	benefits, err := grpc2.GetUserBenefitsByAppUserCoin(ctx, &billingpb.GetUserBenefitsByAppUserCoinRequest{
 		AppID:      resp1.Info.AppID,
 		UserID:     resp1.Info.UserID,
@@ -462,6 +463,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		return nil, xerrors.Errorf("fail get coin info")
 	}
 
+	// TODO: here should hold transfer lock
 	balance, err := grpc2.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
 		Name:    coin.Info.Name,
 		Address: account.Info.Address,
@@ -471,7 +473,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 	}
 
 	if balance.Info.Balance < resp1.Info.Amount+coin.Info.ReservedAmount {
-		return nil, xerrors.Errorf("no sufficient funds")
+		return nil, xerrors.Errorf("not sufficient funds")
 	}
 
 	account, err = grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
@@ -538,18 +540,6 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		}
 		if account.Info == nil {
 			return nil, xerrors.Errorf("fail get account info")
-		}
-
-		balance, err := grpc2.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
-			Name:    coin.Info.Name,
-			Address: account.Info.Address,
-		})
-		if err != nil {
-			return nil, xerrors.Errorf("fail get wallet balance: %v", err)
-		}
-
-		if balance.Info.Balance < resp1.Info.Amount {
-			return nil, xerrors.Errorf("insufficient funds")
 		}
 
 		resp2, err := grpc2.CreateCoinAccountTransaction(ctx, &billingpb.CreateCoinAccountTransactionRequest{
