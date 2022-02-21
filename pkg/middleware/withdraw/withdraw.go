@@ -529,14 +529,6 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 
 	reviewState = resp.Info.State
 
-	resp.Info.State = in.GetInfo().GetState()
-	_, err = grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{
-		Info: resp.Info,
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail update review state: %v", err)
-	}
-
 	if in.GetInfo().GetState() == reviewconst.StateApproved {
 		account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
 			ID: coinsetting.Info.UserOnlineAccountID,
@@ -593,6 +585,14 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		}
 
 		reviewState = reviewconst.StateApproved
+	}
+
+	resp.Info.State = in.GetInfo().GetState()
+	_, err = grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{
+		Info: resp.Info,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail update review state: %v", err)
 	}
 
 	return &npool.UpdateUserWithdrawReviewResponse{
