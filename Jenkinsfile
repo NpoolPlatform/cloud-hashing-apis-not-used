@@ -302,6 +302,7 @@ pipeline {
       }
       steps {
         sh 'sed -i "s#currency_proxy: \\\"\\\"#currency_proxy: \\\"$CURRENCY_REQUEST_PROXY\\\"#g" cmd/cloud-hashing-apis/k8s/00-configmap.yaml'
+        sh 'grep $CURRENCY_REQUEST_PROXY cmd/cloud-hashing-apis/k8s/00-configmap.yaml'
       }
     }
 
