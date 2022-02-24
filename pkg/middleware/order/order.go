@@ -28,6 +28,10 @@ import (
 	"golang.org/x/xerrors"
 )
 
+const (
+	secondsInDay = 24 * 60 * 60
+)
+
 func constructOrder(
 	info *orderpb.OrderDetail,
 	goodInfo *npool.Good,
@@ -383,12 +387,12 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 	// Validate coupon id: done in expandOrder
 	// TODO: Validate fee ids
 
-	start := (uint32(time.Now().Unix()) + 24*60*60) / 24 / 60 / 60 * 24 * 60 * 60
+	start := (uint32(time.Now().Unix()) + secondsInDay) / secondsInDay * secondsInDay
 	if start < goodInfo.Info.Good.Good.StartAt {
 		start = goodInfo.Info.Good.Good.StartAt
 	}
 
-	end := start + uint32(goodInfo.Info.Good.Good.DurationDays)*24*60*60
+	end := start + uint32(goodInfo.Info.Good.Good.DurationDays)*secondsInDay
 	promotionID := uuid.UUID{}.String()
 
 	resp, err := grpc2.GetAppGoodPromotionByAppGoodTimestamp(ctx, &goodspb.GetAppGoodPromotionByAppGoodTimestampRequest{
@@ -576,14 +580,23 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 
 	amountUSD := float64(myOrder.Info.Order.Order.Units) * goodPrice
 	if myOrder.Info.DiscountCoupon != nil {
-		amountUSD *= float64(100 - myOrder.Info.DiscountCoupon.Discount.Discount)
-		amountUSD /= float64(100)
+		discount := myOrder.Info.DiscountCoupon.Discount
+		if discount.Start < uint32(time.Now().Unix()) && uint32(time.Now().Unix()) < discount.Start+uint32(discount.DurationDays)*secondsInDay {
+			amountUSD *= float64(100 - myOrder.Info.DiscountCoupon.Discount.Discount)
+			amountUSD /= float64(100)
+		}
 	}
 	if myOrder.Info.UserSpecialReduction != nil {
-		amountUSD -= myOrder.Info.UserSpecialReduction.Amount
+		userSpecial := myOrder.Info.UserSpecialReduction
+		if userSpecial.Start < uint32(time.Now().Unix()) && uint32(time.Now().Unix()) < userSpecial.Start+uint32(userSpecial.DurationDays)*secondsInDay {
+			amountUSD -= myOrder.Info.UserSpecialReduction.Amount
+		}
 	}
 	if myOrder.Info.FixAmountCoupon != nil {
-		amountUSD -= myOrder.Info.FixAmountCoupon.Coupon.Denomination
+		coupon := myOrder.Info.FixAmountCoupon.Coupon
+		if coupon.Start < uint32(time.Now().Unix()) && uint32(time.Now().Unix()) < coupon.Start+uint32(coupon.DurationDays)*secondsInDay {
+			amountUSD -= myOrder.Info.FixAmountCoupon.Coupon.Denomination
+		}
 	}
 
 	if amountUSD < 0 {
