@@ -104,6 +104,10 @@ spec:
             backend:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
+          - path: /api/cloud-hashing-apis-v2/v1/get/coupons
+            backend:
+              serviceName: cloud-hashing-apis-v2
+              servicePort: 50140
     - host: api.procyon.vip
       http: *http_rules
     - host: api.xpool.top
