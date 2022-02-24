@@ -133,6 +133,36 @@ func GetRecommendGoodsByApp(ctx context.Context, in *goodspb.GetRecommendGoodsBy
 	return cli.GetRecommendGoodsByApp(ctx, in)
 }
 
+func GetAppGoodByAppGood(ctx context.Context, in *goodspb.GetAppGoodByAppGoodRequest) (*goodspb.GetAppGoodByAppGoodResponse, error) {
+	conn, err := grpc2.GetGRPCConn(goodsconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get goods connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := goodspb.NewCloudHashingGoodsClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetAppGoodByAppGood(ctx, in)
+}
+
+func GetAppGoodPromotionByAppGoodTimestamp(ctx context.Context, in *goodspb.GetAppGoodPromotionByAppGoodTimestampRequest) (*goodspb.GetAppGoodPromotionByAppGoodTimestampResponse, error) {
+	conn, err := grpc2.GetGRPCConn(goodsconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get goods connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := goodspb.NewCloudHashingGoodsClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetAppGoodPromotionByAppGoodTimestamp(ctx, in)
+}
+
 //---------------------------------------------------------------------------------------------------------------------------
 
 func GetCoinInfos(ctx context.Context, in *coininfopb.GetCoinInfosRequest) (*coininfopb.GetCoinInfosResponse, error) {

@@ -14,6 +14,7 @@ import (
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
 	billingpb "github.com/NpoolPlatform/message/npool/cloud-hashing-billing"
+	goodspb "github.com/NpoolPlatform/message/npool/cloud-hashing-goods"
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
 	orderpb "github.com/NpoolPlatform/message/npool/cloud-hashing-order"
 	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
@@ -34,7 +35,10 @@ func constructOrder(
 	paymentCoinInfo *coininfopb.CoinInfo,
 	account *billingpb.CoinAccountInfo,
 	discountCoupon *inspirepb.CouponAllocatedDetail,
-	userSpecial *inspirepb.UserSpecialReduction) *npool.Order {
+	userSpecial *inspirepb.UserSpecialReduction,
+	appGood *goodspb.AppGoodInfo,
+	promotion *goodspb.AppGoodPromotion,
+) *npool.Order {
 	return &npool.Order{
 		Order:                info,
 		PayToAccount:         account,
@@ -43,6 +47,8 @@ func constructOrder(
 		FixAmountCoupon:      coupon,
 		DiscountCoupon:       discountCoupon,
 		UserSpecialReduction: userSpecial,
+		AppGood:              appGood,
+		Promotion:            promotion,
 		PaymentDeadline:      info.Order.CreateAt + orderconst.TimeoutSeconds,
 	}
 }
@@ -189,6 +195,31 @@ func expandOrder( //nolint
 		goodInfo = resp.Info
 	}
 
+	var appGood *goodspb.AppGoodInfo
+	appGoodResp, err := grpc2.GetAppGoodByAppGood(ctx, &goodspb.GetAppGoodByAppGoodRequest{
+		AppID:  info.Order.GetAppID(),
+		GoodID: info.Order.GetGoodID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app good: %v", err)
+	}
+	if appGoodResp.Info != nil {
+		appGood = appGoodResp.Info
+	}
+
+	var promotion *goodspb.AppGoodPromotion
+	promotionResp, err := grpc2.GetAppGoodPromotionByAppGoodTimestamp(ctx, &goodspb.GetAppGoodPromotionByAppGoodTimestampRequest{
+		AppID:     info.Order.GetAppID(),
+		GoodID:    info.Order.GetGoodID(),
+		Timestamp: uint32(time.Now().Unix()),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get promotion: %v", err)
+	}
+	if promotionResp.Info != nil {
+		promotion = promotionResp.Info
+	}
+
 	return constructOrder(
 		info,
 		goodInfo,
@@ -196,7 +227,10 @@ func expandOrder( //nolint
 		paymentCoinInfo,
 		accountInfo,
 		discountCoupon,
-		userSpecialReduction), nil
+		userSpecialReduction,
+		appGood,
+		promotion,
+	), nil
 }
 
 func GetOrder(ctx context.Context, in *npool.GetOrderRequest) (*npool.GetOrderResponse, error) {
@@ -345,7 +379,7 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 
 	// Validate app id: done by gateway
 	// Validate user id: done by gateway
-	// TODO: Validate coupon id
+	// Validate coupon id: done in expandOrder
 	// TODO: Validate fee ids
 
 	start := (uint32(time.Now().Unix()) + 24*60*60) / 24 / 60 / 60 * 24 * 60 * 60
