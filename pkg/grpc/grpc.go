@@ -394,6 +394,21 @@ func GetCouponAllocated(ctx context.Context, in *inspirepb.GetCouponAllocatedDet
 	return cli.GetCouponAllocatedDetail(ctx, in)
 }
 
+func GetCouponsAllocatedByAppUser(ctx context.Context, in *inspirepb.GetCouponsAllocatedDetailByAppUserRequest) (*inspirepb.GetCouponsAllocatedDetailByAppUserResponse, error) {
+	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := inspirepb.NewCloudHashingInspireClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetCouponsAllocatedDetailByAppUser(ctx, in)
+}
+
 func GetUserSpecialReduction(ctx context.Context, in *inspirepb.GetUserSpecialReductionRequest) (*inspirepb.GetUserSpecialReductionResponse, error) {
 	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
@@ -407,6 +422,21 @@ func GetUserSpecialReduction(ctx context.Context, in *inspirepb.GetUserSpecialRe
 	defer cancel()
 
 	return cli.GetUserSpecialReduction(ctx, in)
+}
+
+func GetUserSpecialReductionsByAppUser(ctx context.Context, in *inspirepb.GetUserSpecialReductionsByAppUserRequest) (*inspirepb.GetUserSpecialReductionsByAppUserResponse, error) {
+	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := inspirepb.NewCloudHashingInspireClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetUserSpecialReductionsByAppUser(ctx, in)
 }
 
 func GetUserInvitationCodeByCode(ctx context.Context, in *inspirepb.GetUserInvitationCodeByCodeRequest) (*inspirepb.GetUserInvitationCodeByCodeResponse, error) {
