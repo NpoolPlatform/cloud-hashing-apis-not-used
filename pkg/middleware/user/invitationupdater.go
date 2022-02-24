@@ -217,7 +217,7 @@ func getInvitationUserInfo( //nolint
 		}
 
 		summary := summarys[orderInfo.Good.Good.Good.CoinInfoID]
-		summary.Units += orderInfo.Order.Units
+		summary.Units += orderInfo.Order.Order.Units
 		summary.Amount += orderInfo.Order.Payment.Amount
 		summarys[orderInfo.Good.Good.Good.CoinInfoID] = summary
 	}
