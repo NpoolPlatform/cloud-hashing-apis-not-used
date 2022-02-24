@@ -586,6 +586,10 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		amountUSD -= myOrder.Info.FixAmountCoupon.Coupon.Denomination
 	}
 
+	if amountUSD < 0 {
+		amountUSD = 0
+	}
+
 	amountTarget := math.Ceil(amountUSD*10000/paymentCoinCurrency) / 10000
 
 	// TODO: Check if idle address is available with lock
