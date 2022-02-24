@@ -163,6 +163,21 @@ func GetAppGoodPromotionByAppGoodTimestamp(ctx context.Context, in *goodspb.GetA
 	return cli.GetAppGoodPromotionByAppGoodTimestamp(ctx, in)
 }
 
+func GetAppGoodPromotion(ctx context.Context, in *goodspb.GetAppGoodPromotionRequest) (*goodspb.GetAppGoodPromotionResponse, error) {
+	conn, err := grpc2.GetGRPCConn(goodsconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get goods connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := goodspb.NewCloudHashingGoodsClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetAppGoodPromotion(ctx, in)
+}
+
 //---------------------------------------------------------------------------------------------------------------------------
 
 func GetCoinInfos(ctx context.Context, in *coininfopb.GetCoinInfosRequest) (*coininfopb.GetCoinInfosResponse, error) {

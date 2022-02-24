@@ -208,15 +208,16 @@ func expandOrder( //nolint
 	}
 
 	var promotion *goodspb.AppGoodPromotion
-	promotionResp, err := grpc2.GetAppGoodPromotionByAppGoodTimestamp(ctx, &goodspb.GetAppGoodPromotionByAppGoodTimestampRequest{
-		AppID:     info.Order.GetAppID(),
-		GoodID:    info.Order.GetGoodID(),
-		Timestamp: uint32(time.Now().Unix()),
+	promotionResp, err := grpc2.GetAppGoodPromotion(ctx, &goodspb.GetAppGoodPromotionRequest{
+		ID: info.Order.PromotionID,
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get promotion: %v", err)
 	}
 	if promotionResp.Info != nil {
+		if info.Order.GetAppID() != promotionResp.Info.AppID || info.Order.GetGoodID() != promotionResp.Info.GoodID {
+			return nil, xerrors.Errorf("invalid promotion")
+		}
 		promotion = promotionResp.Info
 	}
 
@@ -388,6 +389,19 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 	}
 
 	end := start + uint32(goodInfo.Info.Good.Good.DurationDays)*24*60*60
+	promotionID := uuid.UUID{}.String()
+
+	resp, err := grpc2.GetAppGoodPromotionByAppGoodTimestamp(ctx, &goodspb.GetAppGoodPromotionByAppGoodTimestampRequest{
+		AppID:     in.GetAppID(),
+		GoodID:    in.GetGoodID(),
+		Timestamp: uint32(time.Now().Unix()),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get promotion: %v", err)
+	}
+	if resp.Info != nil {
+		promotionID = resp.Info.ID
+	}
 
 	// Generate order
 	myOrder, err := grpc2.CreateOrder(ctx, &orderpb.CreateOrderRequest{
@@ -401,6 +415,7 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 			CouponID:               in.GetCouponID(),
 			DiscountCouponID:       in.GetDiscountCouponID(),
 			UserSpecialReductionID: in.GetUserSpecialReductionID(),
+			PromotionID:            promotionID,
 		},
 	})
 	if err != nil {
@@ -551,7 +566,15 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		return nil, xerrors.Errorf("cannot get usd currency for payment coin: %v", err)
 	}
 
-	amountUSD := float64(myOrder.Info.Order.Order.Units) * myOrder.Info.Good.Good.Good.Price
+	goodPrice := myOrder.Info.Good.Good.Good.Price
+	if myOrder.Info.AppGood != nil {
+		goodPrice = myOrder.Info.AppGood.Price
+	}
+	if myOrder.Info.Promotion != nil {
+		goodPrice = myOrder.Info.Promotion.Price
+	}
+
+	amountUSD := float64(myOrder.Info.Order.Order.Units) * goodPrice
 	if myOrder.Info.DiscountCoupon != nil {
 		amountUSD *= float64(100 - myOrder.Info.DiscountCoupon.Discount.Discount)
 		amountUSD /= float64(100)
