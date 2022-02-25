@@ -7,7 +7,7 @@ require (
 	github.com/NpoolPlatform/api-manager v0.0.0-20220205130236-69d286e72dba
 	github.com/NpoolPlatform/appuser-manager v0.0.0-20220216022603-bd16c0985e33
 	github.com/NpoolPlatform/cloud-hashing-billing v0.0.0-20220214123916-517341a90b77
-	github.com/NpoolPlatform/cloud-hashing-goods v0.0.0-20220224053549-7b30ca7c2e28
+	github.com/NpoolPlatform/cloud-hashing-goods v0.0.0-20220224054721-2d44a8f75bf1
 	github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220224025352-b4d29cbbeebc
 	github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220224033011-d4a4d2f54501
 	github.com/NpoolPlatform/cloud-hashing-staker v0.0.0-20220214050218-567efaad1cb3
