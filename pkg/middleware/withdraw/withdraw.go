@@ -81,15 +81,10 @@ func withdrawOutcoming(ctx context.Context, appID, userID, coinTypeID, withdrawT
 	return outcoming, nil
 }
 
-func commissionWithdrawable(ctx context.Context, appID, userID, withdrawType string, amount float64) (bool, error) {
-	myCommission, err := usermw.GetCommission(appID, userID)
-	if err != nil {
-		return false, xerrors.Errorf("fail get total amount: %v", err)
-	}
-
+func commissionCoinTypeID(ctx context.Context) (string, error) {
 	commissionCoins, err := grpc2.GetCommissionCoinSettings(ctx, &inspirepb.GetCommissionCoinSettingsRequest{})
 	if err != nil {
-		return false, xerrors.Errorf("fail get commission coins: %v", err)
+		return "", xerrors.Errorf("fail get commission coins: %v", err)
 	}
 
 	invalidUUID := uuid.UUID{}.String()
@@ -100,7 +95,21 @@ func commissionWithdrawable(ctx context.Context, appID, userID, withdrawType str
 		}
 	}
 	if coinTypeID == invalidUUID {
-		return false, xerrors.Errorf("fail get using commission coin")
+		return "", xerrors.Errorf("fail get using commission coin")
+	}
+
+	return coinTypeID, nil
+}
+
+func commissionWithdrawable(ctx context.Context, appID, userID, withdrawType string, amount float64) (bool, error) {
+	myCommission, err := usermw.GetCommission(appID, userID)
+	if err != nil {
+		return false, xerrors.Errorf("fail get total amount: %v", err)
+	}
+
+	coinTypeID, err := commissionCoinTypeID(ctx)
+	if err != nil {
+		return false, xerrors.Errorf("fail get coin type id: %v", err)
 	}
 
 	outcoming, err := withdrawOutcoming(ctx, appID, userID, coinTypeID, withdrawType)
@@ -238,11 +247,19 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 		return nil, xerrors.Errorf("fail lock withdraw review: %v", err)
 	}
 
+	coinTypeID := in.GetInfo().GetCoinTypeID()
+	if in.GetInfo().GetWithdrawType() == billingstate.WithdrawTypeCommission {
+		coinTypeID, err = commissionCoinTypeID(ctx)
+		if err != nil {
+			return nil, xerrors.Errorf("fail get coin type id: %v", err)
+		}
+	}
+
 	if ok, err := withdrawable(
 		ctx,
 		in.GetInfo().GetAppID(),
 		in.GetInfo().GetUserID(),
-		in.GetInfo().GetCoinTypeID(),
+		coinTypeID,
 		in.GetInfo().GetWithdrawType(),
 		in.GetInfo().GetAmount(),
 	); !ok || err != nil {
@@ -287,7 +304,7 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 
 	setting, err := grpc2.GetAppWithdrawSettingByAppCoin(ctx, &billingpb.GetAppWithdrawSettingByAppCoinRequest{
 		AppID:      in.GetInfo().GetAppID(),
-		CoinTypeID: in.GetInfo().GetCoinTypeID(),
+		CoinTypeID: coinTypeID,
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get app withdraw setting: %v", err)
@@ -307,7 +324,7 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 	}
 
 	coinsetting, err := grpc2.GetCoinSettingByCoin(ctx, &billingpb.GetCoinSettingByCoinRequest{
-		CoinTypeID: in.GetInfo().GetCoinTypeID(),
+		CoinTypeID: coinTypeID,
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get coin setting: %v", err)
@@ -377,7 +394,7 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 				UserID:             in.GetInfo().GetUserID(),
 				FromAddressID:      coinsetting.Info.UserOnlineAccountID,
 				ToAddressID:        in.GetInfo().GetWithdrawToAccountID(),
-				CoinTypeID:         in.GetInfo().GetCoinTypeID(),
+				CoinTypeID:         coinTypeID,
 				Amount:             in.GetInfo().GetAmount(),
 				Message:            fmt.Sprintf("user withdraw at %v", time.Now()),
 				ChainTransactionID: "",
