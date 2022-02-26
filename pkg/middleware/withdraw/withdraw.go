@@ -31,6 +31,71 @@ import (
 	"golang.org/x/xerrors"
 )
 
+func withdrawable(ctx context.Context, appID, userID, coinTypeID string, amount float64) (bool, error) {
+	benefits, err := grpc2.GetUserBenefitsByAppUserCoin(ctx, &billingpb.GetUserBenefitsByAppUserCoinRequest{
+		AppID:      appID,
+		UserID:     userID,
+		CoinTypeID: coinTypeID,
+	})
+	if err != nil {
+		return false, xerrors.Errorf("fail get user benefits: %v", err)
+	}
+
+	withdrawAddrs, err := grpc2.GetUserWithdrawsByAppUserCoin(ctx, &billingpb.GetUserWithdrawsByAppUserCoinRequest{
+		AppID:      appID,
+		UserID:     userID,
+		CoinTypeID: coinTypeID,
+	})
+	if err != nil {
+		return false, xerrors.Errorf("fail get user withdraws: %v", err)
+	}
+
+	txs, err := grpc2.GetCoinAccountTransactionsByAppUserCoin(ctx, &billingpb.GetCoinAccountTransactionsByAppUserCoinRequest{
+		AppID:      appID,
+		UserID:     userID,
+		CoinTypeID: coinTypeID,
+	})
+	if err != nil {
+		return false, xerrors.Errorf("fail get account transactions: %v", err)
+	}
+
+	incoming := 0.0
+	outcoming := 0.0
+	for _, info := range benefits.Infos {
+		incoming += info.Amount
+	}
+	for _, info := range txs.Infos {
+		withdraw := false
+		for _, addr := range withdrawAddrs.Infos {
+			if addr.AccountID == info.ToAddressID {
+				withdraw = true
+				break
+			}
+		}
+
+		if !withdraw {
+			continue
+		}
+
+		if info.State == billingstate.CoinTransactionStateFail ||
+			info.State == billingstate.CoinTransactionStateRejected {
+			continue
+		}
+
+		outcoming += info.Amount
+	}
+
+	if incoming < outcoming {
+		return false, xerrors.Errorf("invalid billing input")
+	}
+	if incoming-outcoming < amount {
+		return false, xerrors.Errorf("not sufficient funds")
+	}
+
+	return true, nil
+
+}
+
 func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.SubmitUserWithdrawResponse, error) { //nolint
 	if in.GetInfo().GetAmount() <= 0 {
 		return nil, xerrors.Errorf("invalid amount")
@@ -111,65 +176,14 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 		return nil, xerrors.Errorf("fail lock withdraw review: %v", err)
 	}
 
-	benefits, err := grpc2.GetUserBenefitsByAppUserCoin(ctx, &billingpb.GetUserBenefitsByAppUserCoinRequest{
-		AppID:      in.GetInfo().GetAppID(),
-		UserID:     in.GetInfo().GetUserID(),
-		CoinTypeID: in.GetInfo().GetCoinTypeID(),
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail get user benefits: %v", err)
-	}
-
-	withdrawAddrs, err := grpc2.GetUserWithdrawsByAppUserCoin(ctx, &billingpb.GetUserWithdrawsByAppUserCoinRequest{
-		AppID:      in.GetInfo().GetAppID(),
-		UserID:     in.GetInfo().GetUserID(),
-		CoinTypeID: in.GetInfo().GetCoinTypeID(),
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail get user withdraws: %v", err)
-	}
-
-	// TODO: add commission withdraw
-	txs, err := grpc2.GetCoinAccountTransactionsByAppUserCoin(ctx, &billingpb.GetCoinAccountTransactionsByAppUserCoinRequest{
-		AppID:      in.GetInfo().GetAppID(),
-		UserID:     in.GetInfo().GetUserID(),
-		CoinTypeID: in.GetInfo().GetCoinTypeID(),
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail get account transactions: %v", err)
-	}
-
-	incoming := 0.0
-	outcoming := 0.0
-	for _, info := range benefits.Infos {
-		incoming += info.Amount
-	}
-	for _, info := range txs.Infos {
-		withdraw := false
-		for _, addr := range withdrawAddrs.Infos {
-			if addr.AccountID == info.ToAddressID {
-				withdraw = true
-				break
-			}
-		}
-
-		if !withdraw {
-			continue
-		}
-
-		if info.State == billingstate.CoinTransactionStateFail ||
-			info.State == billingstate.CoinTransactionStateRejected {
-			continue
-		}
-
-		outcoming += info.Amount
-	}
-
-	if incoming < outcoming {
-		return nil, xerrors.Errorf("invalid billing input")
-	}
-	if incoming-outcoming < in.GetInfo().GetAmount() {
-		return nil, xerrors.Errorf("not sufficient funds")
+	if ok, err := withdrawable(
+		ctx,
+		in.GetInfo().GetAppID(),
+		in.GetInfo().GetUserID(),
+		in.GetInfo().GetCoinTypeID(),
+		in.GetInfo().GetAmount(),
+	); !ok || err != nil {
+		return nil, xerrors.Errorf("user not withdrawable: %v", err)
 	}
 
 	account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
@@ -400,65 +414,14 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		return nil, xerrors.Errorf("fail get account info")
 	}
 
-	// TODO: here should hold withdraw lock
-	benefits, err := grpc2.GetUserBenefitsByAppUserCoin(ctx, &billingpb.GetUserBenefitsByAppUserCoinRequest{
-		AppID:      resp1.Info.AppID,
-		UserID:     resp1.Info.UserID,
-		CoinTypeID: resp1.Info.CoinTypeID,
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail get user benefits: %v", err)
-	}
-
-	withdrawAddrs, err := grpc2.GetUserWithdrawsByAppUserCoin(ctx, &billingpb.GetUserWithdrawsByAppUserCoinRequest{
-		AppID:      resp1.Info.AppID,
-		UserID:     resp1.Info.UserID,
-		CoinTypeID: resp1.Info.CoinTypeID,
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail get user withdraws: %v", err)
-	}
-
-	txs, err := grpc2.GetCoinAccountTransactionsByAppUserCoin(ctx, &billingpb.GetCoinAccountTransactionsByAppUserCoinRequest{
-		AppID:      resp1.Info.AppID,
-		UserID:     resp1.Info.UserID,
-		CoinTypeID: resp1.Info.CoinTypeID,
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail get account transactions: %v", err)
-	}
-
-	incoming := 0.0
-	outcoming := 0.0
-	for _, info := range benefits.Infos {
-		incoming += info.Amount
-	}
-	for _, info := range txs.Infos {
-		withdraw := false
-		for _, addr := range withdrawAddrs.Infos {
-			if addr.AccountID == info.ToAddressID {
-				withdraw = true
-				break
-			}
-		}
-
-		if !withdraw {
-			continue
-		}
-
-		if info.State == billingstate.CoinTransactionStateFail ||
-			info.State == billingstate.CoinTransactionStateRejected {
-			continue
-		}
-
-		outcoming += info.Amount
-	}
-
-	if incoming < outcoming {
-		return nil, xerrors.Errorf("invalid billing input")
-	}
-	if incoming-outcoming < resp1.Info.Amount {
-		return nil, xerrors.Errorf("not sufficient funds")
+	if ok, err := withdrawable(
+		ctx,
+		resp1.Info.AppID,
+		resp1.Info.UserID,
+		resp1.Info.CoinTypeID,
+		resp1.Info.Amount,
+	); !ok || err != nil {
+		return nil, xerrors.Errorf("user not withdrawable: %v", err)
 	}
 
 	coin, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
