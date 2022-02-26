@@ -129,6 +129,25 @@ func Run() {
 	}
 }
 
+func GetCommission(appID, userID string) (float64, error) {
+	mutex.Lock()
+	invitations := appInvitations[appID][userID]
+	mutex.Unlock()
+
+	if len(invitations) > 0 {
+		// TODO: get commission setting by app id and user id
+		// TODO: caculate summary
+		return 0, xerrors.Errorf("NOT IMPLEMENTED")
+	}
+
+	_, _, err := getInvitations(appID, userID, false)
+	if err != nil {
+		return 0, xerrors.Errorf("fail get invitations: %v", err)
+	}
+
+	return 0, nil
+}
+
 func getFullInvitations(appID, inviterID string) (map[string]*npool.Invitation, *npool.InvitationUserInfo, error) {
 	mutex.Lock()
 	invitations := appInvitations[appID][inviterID]

@@ -8,6 +8,8 @@ import (
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
 	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/const"
+	usermw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/user"
+
 	review "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/review"
 	currency "github.com/NpoolPlatform/cloud-hashing-staker/pkg/middleware/currency"
 	redis2 "github.com/NpoolPlatform/go-service-framework/pkg/redis"
@@ -18,6 +20,7 @@ import (
 	billingconst "github.com/NpoolPlatform/cloud-hashing-billing/pkg/message/const"
 	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
 	billingpb "github.com/NpoolPlatform/message/npool/cloud-hashing-billing"
+	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
 	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
 	reviewpb "github.com/NpoolPlatform/message/npool/review-service"
 	sphinxproxypb "github.com/NpoolPlatform/message/npool/sphinxproxy"
@@ -79,7 +82,40 @@ func withdrawOutcoming(ctx context.Context, appID, userID, coinTypeID, withdrawT
 }
 
 func commissionWithdrawable(ctx context.Context, appID, userID, withdrawType string, amount float64) (bool, error) {
-	return false, xerrors.Errorf("NOT IMPLEMENTED")
+	myCommission, err := usermw.GetCommission(appID, userID)
+	if err != nil {
+		return false, xerrors.Errorf("fail get total amount: %v", err)
+	}
+
+	commissionCoins, err := grpc2.GetCommissionCoinSettings(ctx, &inspirepb.GetCommissionCoinSettingsRequest{})
+	if err != nil {
+		return false, xerrors.Errorf("fail get commission coins: %v", err)
+	}
+
+	invalidUUID := uuid.UUID{}.String()
+	coinTypeID := invalidUUID
+	for _, info := range commissionCoins.Infos {
+		if info.Using {
+			coinTypeID = info.ID
+		}
+	}
+	if coinTypeID == invalidUUID {
+		return false, xerrors.Errorf("fail get using commission coin")
+	}
+
+	outcoming, err := withdrawOutcoming(ctx, appID, userID, coinTypeID, withdrawType)
+	if err != nil {
+		return false, xerrors.Errorf("fail get withdraw outcoming: %v", err)
+	}
+
+	if myCommission < outcoming {
+		return false, xerrors.Errorf("invalid billing input")
+	}
+	if myCommission < amount {
+		return false, xerrors.Errorf("not sufficient funds")
+	}
+
+	return true, nil
 }
 
 func benefitWithdrawable(ctx context.Context, appID, userID, coinTypeID, withdrawType string, amount float64) (bool, error) {
