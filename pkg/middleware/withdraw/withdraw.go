@@ -95,7 +95,7 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 	}
 
 	lockKey := fmt.Sprintf("withdraw:%v:%v", in.GetInfo().GetAppID(), in.GetInfo().GetUserID())
-	err = redis2.TryLock(fmt.Sprintf("withdraw:%v:%v", in.GetInfo().GetAppID(), in.GetInfo().GetUserID()), 10*time.Minute)
+	err = redis2.TryLock(lockKey, 10*time.Minute)
 	if err != nil {
 		return nil, xerrors.Errorf("lock withdraw fail: %v", err)
 	}
@@ -104,6 +104,12 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 			logger.Sugar().Errorf("unlock withdraw fail: %v", err)
 		}
 	}()
+
+	reviewLockKey := fmt.Sprintf("withdraw-review:%v:%v", in.GetInfo().GetAppID(), in.GetInfo().GetUserID())
+	err = redis2.TryLock(reviewLockKey, 0)
+	if err != nil {
+		return nil, xerrors.Errorf("fail lock withdraw review: %v", err)
+	}
 
 	benefits, err := grpc2.GetUserBenefitsByAppUserCoin(ctx, &billingpb.GetUserBenefitsByAppUserCoinRequest{
 		AppID:      in.GetInfo().GetAppID(),
@@ -123,6 +129,7 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 		return nil, xerrors.Errorf("fail get user withdraws: %v", err)
 	}
 
+	// TODO: add commission withdraw
 	txs, err := grpc2.GetCoinAccountTransactionsByAppUserCoin(ctx, &billingpb.GetCoinAccountTransactionsByAppUserCoinRequest{
 		AppID:      in.GetInfo().GetAppID(),
 		UserID:     in.GetInfo().GetUserID(),
@@ -164,9 +171,6 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 	if incoming-outcoming < in.GetInfo().GetAmount() {
 		return nil, xerrors.Errorf("not sufficient funds")
 	}
-
-	// TODO: check waiting transaction: only one wait transaction is allowed
-	// TODO: check reviewing withdraw: only one reviewing withdraw is allowed
 
 	account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
 		ID: in.GetInfo().GetWithdrawToAccountID(),
@@ -286,6 +290,10 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 	reviewState = reviewconst.StateWait
 
 	if autoReview {
+		if err := redis2.Unlock(reviewLockKey); err != nil {
+			logger.Sugar().Errorf("unlock withdraw review fail: %v", err)
+		}
+
 		resp1, err := grpc2.CreateCoinAccountTransaction(ctx, &billingpb.CreateCoinAccountTransactionRequest{
 			Info: &billingpb.CoinAccountTransaction{
 				AppID:              in.GetInfo().GetAppID(),
@@ -507,6 +515,12 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		return nil, xerrors.Errorf("fail get review: %v", err)
 	}
 	if reviewState != reviewconst.StateApproved {
+		reviewLockKey := fmt.Sprintf("withdraw-review:%v:%v", resp1.Info.AppID, resp1.Info.UserID)
+		err = redis2.Unlock(reviewLockKey)
+		if err != nil {
+			return nil, xerrors.Errorf("fail unlock withdraw review: %v", err)
+		}
+
 		return nil, xerrors.Errorf("invalid account")
 	}
 
@@ -526,6 +540,12 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 	}
 
 	if resp.Info.State != reviewconst.StateWait {
+		reviewLockKey := fmt.Sprintf("withdraw-review:%v:%v", resp1.Info.AppID, resp1.Info.UserID)
+		err = redis2.Unlock(reviewLockKey)
+		if err != nil {
+			return nil, xerrors.Errorf("fail unlock withdraw review: %v", err)
+		}
+
 		return nil, xerrors.Errorf("already reviewed")
 	}
 
@@ -579,6 +599,12 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail update review state: %v", err)
+	}
+
+	reviewLockKey := fmt.Sprintf("withdraw-review:%v:%v", resp1.Info.AppID, resp1.Info.UserID)
+	err = redis2.Unlock(reviewLockKey)
+	if err != nil {
+		return nil, xerrors.Errorf("fail unlock withdraw review: %v", err)
 	}
 
 	return &npool.UpdateUserWithdrawReviewResponse{
