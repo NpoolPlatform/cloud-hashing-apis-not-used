@@ -666,6 +666,21 @@ func GetUserWithdrawItemsByAppUser(ctx context.Context, in *billingpb.GetUserWit
 	return cli.GetUserWithdrawItemsByAppUser(ctx, in)
 }
 
+func GetUserWithdrawItemsByAppUserCoinWithdrawType(ctx context.Context, in *billingpb.GetUserWithdrawItemsByAppUserCoinWithdrawTypeRequest) (*billingpb.GetUserWithdrawItemsByAppUserCoinWithdrawTypeResponse, error) {
+	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get billing connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := billingpb.NewCloudHashingBillingClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetUserWithdrawItemsByAppUserCoinWithdrawType(ctx, in)
+}
+
 func GetUserBenefitsByAppUserCoin(ctx context.Context, in *billingpb.GetUserBenefitsByAppUserCoinRequest) (*billingpb.GetUserBenefitsByAppUserCoinResponse, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {

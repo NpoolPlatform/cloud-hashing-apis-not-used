@@ -6,14 +6,14 @@ require (
 	entgo.io/ent v0.10.0
 	github.com/NpoolPlatform/api-manager v0.0.0-20220205130236-69d286e72dba
 	github.com/NpoolPlatform/appuser-manager v0.0.0-20220216022603-bd16c0985e33
-	github.com/NpoolPlatform/cloud-hashing-billing v0.0.0-20220214123916-517341a90b77
+	github.com/NpoolPlatform/cloud-hashing-billing v0.0.0-20220226151915-e974f3b88688
 	github.com/NpoolPlatform/cloud-hashing-goods v0.0.0-20220224054721-2d44a8f75bf1
 	github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220226095014-30594afa8c64
 	github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220224033011-d4a4d2f54501
 	github.com/NpoolPlatform/cloud-hashing-staker v0.0.0-20220214050218-567efaad1cb3
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20220211051615-b2300d03022a
 	github.com/NpoolPlatform/kyc-management v0.0.0-20220113122339-4bef8bdcbc5c
-	github.com/NpoolPlatform/message v0.0.0-20220226101307-f4bebff02746
+	github.com/NpoolPlatform/message v0.0.0-20220226151625-169ddcf45bf2
 	github.com/NpoolPlatform/review-service v0.0.0-20220214135408-eb1dbe09de65
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211208035009-5ad2768d2290
 	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20211210102925-d9b8abe11021

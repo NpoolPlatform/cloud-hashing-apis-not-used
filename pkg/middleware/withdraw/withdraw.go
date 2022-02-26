@@ -31,23 +31,15 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func withdrawable(ctx context.Context, appID, userID, coinTypeID string, amount float64) (bool, error) {
-	benefits, err := grpc2.GetUserBenefitsByAppUserCoin(ctx, &billingpb.GetUserBenefitsByAppUserCoinRequest{
-		AppID:      appID,
-		UserID:     userID,
-		CoinTypeID: coinTypeID,
+func withdrawOutcoming(ctx context.Context, appID, userID, coinTypeID, withdrawType string) (float64, error) {
+	withdraws, err := grpc2.GetUserWithdrawItemsByAppUserCoinWithdrawType(ctx, &billingpb.GetUserWithdrawItemsByAppUserCoinWithdrawTypeRequest{
+		AppID:        appID,
+		UserID:       userID,
+		CoinTypeID:   coinTypeID,
+		WithdrawType: withdrawType,
 	})
 	if err != nil {
-		return false, xerrors.Errorf("fail get user benefits: %v", err)
-	}
-
-	withdrawAddrs, err := grpc2.GetUserWithdrawsByAppUserCoin(ctx, &billingpb.GetUserWithdrawsByAppUserCoinRequest{
-		AppID:      appID,
-		UserID:     userID,
-		CoinTypeID: coinTypeID,
-	})
-	if err != nil {
-		return false, xerrors.Errorf("fail get user withdraws: %v", err)
+		return 0, xerrors.Errorf("fail get user withdraws: %v", err)
 	}
 
 	txs, err := grpc2.GetCoinAccountTransactionsByAppUserCoin(ctx, &billingpb.GetCoinAccountTransactionsByAppUserCoinRequest{
@@ -56,27 +48,22 @@ func withdrawable(ctx context.Context, appID, userID, coinTypeID string, amount 
 		CoinTypeID: coinTypeID,
 	})
 	if err != nil {
-		return false, xerrors.Errorf("fail get account transactions: %v", err)
+		return 0, xerrors.Errorf("fail get account transactions: %v", err)
 	}
 
-	incoming := 0.0
 	outcoming := 0.0
-	for _, info := range benefits.Infos {
-		incoming += info.Amount
-	}
-
-	// TODO: if coin type id is commission coin id, add commission
 
 	for _, info := range txs.Infos {
-		withdraw := false
-		for _, addr := range withdrawAddrs.Infos {
-			if addr.AccountID == info.ToAddressID {
-				withdraw = true
+		myWithdraw := false
+
+		for _, withdraw := range withdraws.Infos {
+			if withdraw.PlatformTransactionID == info.ID {
+				myWithdraw = true
 				break
 			}
 		}
 
-		if !withdraw {
+		if !myWithdraw {
 			continue
 		}
 
@@ -88,6 +75,33 @@ func withdrawable(ctx context.Context, appID, userID, coinTypeID string, amount 
 		outcoming += info.Amount
 	}
 
+	return outcoming, nil
+}
+
+func commissionWithdrawable(ctx context.Context, appID, userID, withdrawType string, amount float64) (bool, error) {
+	return false, xerrors.Errorf("NOT IMPLEMENTED")
+}
+
+func benefitWithdrawable(ctx context.Context, appID, userID, coinTypeID, withdrawType string, amount float64) (bool, error) {
+	benefits, err := grpc2.GetUserBenefitsByAppUserCoin(ctx, &billingpb.GetUserBenefitsByAppUserCoinRequest{
+		AppID:      appID,
+		UserID:     userID,
+		CoinTypeID: coinTypeID,
+	})
+	if err != nil {
+		return false, xerrors.Errorf("fail get user benefits: %v", err)
+	}
+
+	incoming := 0.0
+	for _, info := range benefits.Infos {
+		incoming += info.Amount
+	}
+
+	outcoming, err := withdrawOutcoming(ctx, appID, userID, coinTypeID, withdrawType)
+	if err != nil {
+		return false, xerrors.Errorf("fail get withdraw outcoming: %v", err)
+	}
+
 	if incoming < outcoming {
 		return false, xerrors.Errorf("invalid billing input")
 	}
@@ -96,6 +110,16 @@ func withdrawable(ctx context.Context, appID, userID, coinTypeID string, amount 
 	}
 
 	return true, nil
+}
+
+func withdrawable(ctx context.Context, appID, userID, coinTypeID, withdrawType string, amount float64) (bool, error) {
+	switch withdrawType {
+	case billingstate.WithdrawTypeBenefit:
+		return benefitWithdrawable(ctx, appID, userID, coinTypeID, withdrawType, amount)
+	case billingstate.WithdrawTypeCommission:
+		return commissionWithdrawable(ctx, appID, userID, withdrawType, amount)
+	}
+	return false, xerrors.Errorf("invalid withdraw type")
 }
 
 func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.SubmitUserWithdrawResponse, error) { //nolint
@@ -183,6 +207,7 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 		in.GetInfo().GetAppID(),
 		in.GetInfo().GetUserID(),
 		in.GetInfo().GetCoinTypeID(),
+		in.GetInfo().GetWithdrawType(),
 		in.GetInfo().GetAmount(),
 	); !ok || err != nil {
 		return nil, xerrors.Errorf("user not withdrawable: %v", err)
@@ -421,6 +446,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		resp1.Info.AppID,
 		resp1.Info.UserID,
 		resp1.Info.CoinTypeID,
+		resp1.Info.WithdrawType,
 		resp1.Info.Amount,
 	); !ok || err != nil {
 		return nil, xerrors.Errorf("user not withdrawable: %v", err)
