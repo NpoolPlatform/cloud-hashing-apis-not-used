@@ -515,12 +515,6 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		return nil, xerrors.Errorf("fail get review: %v", err)
 	}
 	if reviewState != reviewconst.StateApproved {
-		reviewLockKey := fmt.Sprintf("withdraw-review:%v:%v", resp1.Info.AppID, resp1.Info.UserID)
-		err = redis2.Unlock(reviewLockKey)
-		if err != nil {
-			return nil, xerrors.Errorf("fail unlock withdraw review: %v", err)
-		}
-
 		return nil, xerrors.Errorf("invalid account")
 	}
 
@@ -540,12 +534,6 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 	}
 
 	if resp.Info.State != reviewconst.StateWait {
-		reviewLockKey := fmt.Sprintf("withdraw-review:%v:%v", resp1.Info.AppID, resp1.Info.UserID)
-		err = redis2.Unlock(reviewLockKey)
-		if err != nil {
-			return nil, xerrors.Errorf("fail unlock withdraw review: %v", err)
-		}
-
 		return nil, xerrors.Errorf("already reviewed")
 	}
 
