@@ -64,6 +64,9 @@ func withdrawable(ctx context.Context, appID, userID, coinTypeID string, amount 
 	for _, info := range benefits.Infos {
 		incoming += info.Amount
 	}
+
+	// TODO: if coin type id is commission coin id, add commission
+
 	for _, info := range txs.Infos {
 		withdraw := false
 		for _, addr := range withdrawAddrs.Infos {
@@ -93,7 +96,6 @@ func withdrawable(ctx context.Context, appID, userID, coinTypeID string, amount 
 	}
 
 	return true, nil
-
 }
 
 func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.SubmitUserWithdrawResponse, error) { //nolint
