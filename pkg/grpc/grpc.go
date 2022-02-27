@@ -514,6 +514,96 @@ func GetCommissionCoinSettings(ctx context.Context, in *inspirepb.GetCommissionC
 	return cli.GetCommissionCoinSettings(ctx, in)
 }
 
+func GetAppCommissionSetting(ctx context.Context, in *inspirepb.GetAppCommissionSettingRequest) (*inspirepb.GetAppCommissionSettingResponse, error) {
+	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := inspirepb.NewCloudHashingInspireClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetAppCommissionSetting(ctx, in)
+}
+
+func GetAppCommissionSettingByApp(ctx context.Context, in *inspirepb.GetAppCommissionSettingByAppRequest) (*inspirepb.GetAppCommissionSettingByAppResponse, error) {
+	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := inspirepb.NewCloudHashingInspireClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetAppCommissionSettingByApp(ctx, in)
+}
+
+func GetAppPurchaseAmountSettingsByApp(ctx context.Context, in *inspirepb.GetAppPurchaseAmountSettingsByAppRequest) (*inspirepb.GetAppPurchaseAmountSettingsByAppResponse, error) {
+	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := inspirepb.NewCloudHashingInspireClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetAppPurchaseAmountSettingsByApp(ctx, in)
+}
+
+func GetAppUserPurchaseAmountSettingsByAppUser(ctx context.Context, in *inspirepb.GetAppUserPurchaseAmountSettingsByAppUserRequest) (*inspirepb.GetAppUserPurchaseAmountSettingsByAppUserResponse, error) {
+	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := inspirepb.NewCloudHashingInspireClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetAppUserPurchaseAmountSettingsByAppUser(ctx, in)
+}
+
+func GetAppInvitationSettingsByApp(ctx context.Context, in *inspirepb.GetAppInvitationSettingsByAppRequest) (*inspirepb.GetAppInvitationSettingsByAppResponse, error) {
+	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := inspirepb.NewCloudHashingInspireClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetAppInvitationSettingsByApp(ctx, in)
+}
+
+func GetAppUserInvitationSettingsByAppUser(ctx context.Context, in *inspirepb.GetAppUserInvitationSettingsByAppUserRequest) (*inspirepb.GetAppUserInvitationSettingsByAppUserResponse, error) {
+	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := inspirepb.NewCloudHashingInspireClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	return cli.GetAppUserInvitationSettingsByAppUser(ctx, in)
+}
+
 //---------------------------------------------------------------------------------------------------------------------------
 
 func CreateBillingAccount(ctx context.Context, in *billingpb.CreateCoinAccountRequest) (*billingpb.CreateCoinAccountResponse, error) {
