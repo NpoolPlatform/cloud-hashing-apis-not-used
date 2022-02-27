@@ -35,14 +35,30 @@ import (
 )
 
 func withdrawOutcoming(ctx context.Context, appID, userID, coinTypeID, withdrawType string) (float64, error) {
-	withdraws, err := grpc2.GetUserWithdrawItemsByAppUserCoinWithdrawType(ctx, &billingpb.GetUserWithdrawItemsByAppUserCoinWithdrawTypeRequest{
-		AppID:        appID,
-		UserID:       userID,
-		CoinTypeID:   coinTypeID,
-		WithdrawType: withdrawType,
-	})
-	if err != nil {
-		return 0, xerrors.Errorf("fail get user withdraws: %v", err)
+	withdraws := []*billingpb.UserWithdrawItem{}
+
+	switch withdrawType {
+	case billingstate.WithdrawTypeBenefit:
+		resp, err := grpc2.GetUserWithdrawItemsByAppUserCoinWithdrawType(ctx, &billingpb.GetUserWithdrawItemsByAppUserCoinWithdrawTypeRequest{
+			AppID:        appID,
+			UserID:       userID,
+			CoinTypeID:   coinTypeID,
+			WithdrawType: withdrawType,
+		})
+		if err != nil {
+			return 0, xerrors.Errorf("fail get user withdraws: %v", err)
+		}
+		withdraws = resp.Infos
+	case billingstate.WithdrawTypeCommission:
+		resp, err := grpc2.GetUserWithdrawItemsByAppUserWithdrawType(ctx, &billingpb.GetUserWithdrawItemsByAppUserWithdrawTypeRequest{
+			AppID:        appID,
+			UserID:       userID,
+			WithdrawType: withdrawType,
+		})
+		if err != nil {
+			return 0, xerrors.Errorf("fail get user withdraws: %v", err)
+		}
+		withdraws = resp.Infos
 	}
 
 	txs, err := grpc2.GetCoinAccountTransactionsByAppUserCoin(ctx, &billingpb.GetCoinAccountTransactionsByAppUserCoinRequest{
@@ -59,7 +75,7 @@ func withdrawOutcoming(ctx context.Context, appID, userID, coinTypeID, withdrawT
 	for _, info := range txs.Infos {
 		myWithdraw := false
 
-		for _, withdraw := range withdraws.Infos {
+		for _, withdraw := range withdraws {
 			if withdraw.PlatformTransactionID == info.ID {
 				myWithdraw = true
 				break
