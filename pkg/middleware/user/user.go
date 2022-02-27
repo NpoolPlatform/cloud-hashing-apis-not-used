@@ -127,7 +127,7 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 }
 
 func GetMyInvitations(ctx context.Context, in *npool.GetMyInvitationsRequest) (*npool.GetMyInvitationsResponse, error) { //nolint
-	addWatcher(in.GetAppID(), in.GetUserID())
+	AddWatcher(in.GetAppID(), in.GetUserID())
 
 	invitations, userInfo, err := getFullInvitations(in.GetAppID(), in.GetUserID())
 	if err != nil {
@@ -140,7 +140,7 @@ func GetMyInvitations(ctx context.Context, in *npool.GetMyInvitationsRequest) (*
 }
 
 func GetMyDirectInvitations(ctx context.Context, in *npool.GetMyDirectInvitationsRequest) (*npool.GetMyDirectInvitationsResponse, error) { //nolint
-	addWatcher(in.GetAppID(), in.GetUserID())
+	AddWatcher(in.GetAppID(), in.GetUserID())
 
 	invitations, userInfo, err := getDirectInvitations(in.GetAppID(), in.GetUserID())
 	if err != nil {

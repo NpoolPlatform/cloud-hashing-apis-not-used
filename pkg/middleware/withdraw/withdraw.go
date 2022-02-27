@@ -118,6 +118,8 @@ func commissionCoinTypeID(ctx context.Context) (string, error) {
 }
 
 func commissionWithdrawable(ctx context.Context, appID, userID, withdrawType string, amount float64) (bool, error) {
+	usermw.AddWatcher(appID, userID)
+
 	myCommission, err := usermw.GetCommission(appID, userID)
 	if err != nil {
 		return false, xerrors.Errorf("fail get total amount: %v", err)

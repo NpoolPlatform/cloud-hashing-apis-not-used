@@ -29,7 +29,7 @@ var (
 	mutex                 = sync.Mutex{}
 )
 
-func addWatcher(appID, inviterID string) {
+func AddWatcher(appID, inviterID string) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
