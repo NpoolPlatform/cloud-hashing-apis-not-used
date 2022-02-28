@@ -245,9 +245,6 @@ func getInvitationUserInfo( //nolint
 	if err != nil {
 		return nil, myGoods, myCoins, xerrors.Errorf("fail get app commission setting: %v", err)
 	}
-	if appCommissionSetting.Info == nil {
-		return nil, myGoods, myCoins, nil
-	}
 
 	type amountSetting struct {
 		Amount  float64
@@ -259,83 +256,85 @@ func getInvitationUserInfo( //nolint
 	inviterSettings := []*amountSetting{}
 	inviteeSettings := []*amountSetting{}
 
-	if appCommissionSetting.Info.UniqueSetting {
-		appPurchaseAmountSettings, err := grpc2.GetAppPurchaseAmountSettingsByApp(ctx, &inspirepb.GetAppPurchaseAmountSettingsByAppRequest{
-			AppID: appID,
-		})
-		if err != nil {
-			return nil, myGoods, myCoins, xerrors.Errorf("fail get app purchase amount setting: %v", err)
-		}
-
-		sort.Slice(appPurchaseAmountSettings.Infos, func(i, j int) bool {
-			return appPurchaseAmountSettings.Infos[i].Amount < appPurchaseAmountSettings.Infos[j].Amount
-		})
-
-		for _, info := range appPurchaseAmountSettings.Infos {
-			inviterSettings = append(inviterSettings, &amountSetting{
-				Amount:  info.Amount,
-				Percent: info.Percent,
-				Start:   info.Start,
-				End:     info.End,
-			})
-		}
-	} else {
-		myInviterSettings, err := grpc2.GetAppUserPurchaseAmountSettingsByAppUser(ctx, &inspirepb.GetAppUserPurchaseAmountSettingsByAppUserRequest{
-			AppID:  appID,
-			UserID: inviterID,
-		})
-		if err != nil {
-			return nil, myGoods, myCoins, xerrors.Errorf("fail get app purchase amount setting: %v", err)
-		}
-
-		sort.Slice(myInviterSettings.Infos, func(i, j int) bool {
-			return myInviterSettings.Infos[i].Amount < myInviterSettings.Infos[j].Amount
-		})
-
-		if inviterID != inviteeID {
-			myInviteeSettings, err := grpc2.GetAppUserPurchaseAmountSettingsByAppUser(ctx, &inspirepb.GetAppUserPurchaseAmountSettingsByAppUserRequest{
-				AppID:  appID,
-				UserID: inviteeID,
+	if appCommissionSetting.Info == nil {
+		if appCommissionSetting.Info.UniqueSetting {
+			appPurchaseAmountSettings, err := grpc2.GetAppPurchaseAmountSettingsByApp(ctx, &inspirepb.GetAppPurchaseAmountSettingsByAppRequest{
+				AppID: appID,
 			})
 			if err != nil {
 				return nil, myGoods, myCoins, xerrors.Errorf("fail get app purchase amount setting: %v", err)
 			}
 
-			sort.Slice(myInviteeSettings.Infos, func(i, j int) bool {
-				return myInviteeSettings.Infos[i].Amount < myInviteeSettings.Infos[j].Amount
+			sort.Slice(appPurchaseAmountSettings.Infos, func(i, j int) bool {
+				return appPurchaseAmountSettings.Infos[i].Amount < appPurchaseAmountSettings.Infos[j].Amount
 			})
 
-			for _, info := range myInviterSettings.Infos {
-				found := false
-				for _, info1 := range myInviteeSettings.Infos {
-					if info1.Amount == info.Amount {
-						found = true
-						break
-					}
-				}
-
-				if !found {
-					return nil, myGoods, myCoins, xerrors.Errorf("different level of inviter and invitee")
-				}
-			}
-
-			for _, info := range myInviteeSettings.Infos {
-				inviteeSettings = append(inviteeSettings, &amountSetting{
+			for _, info := range appPurchaseAmountSettings.Infos {
+				inviterSettings = append(inviterSettings, &amountSetting{
 					Amount:  info.Amount,
 					Percent: info.Percent,
 					Start:   info.Start,
 					End:     info.End,
 				})
 			}
-		}
-
-		for _, info := range myInviterSettings.Infos {
-			inviterSettings = append(inviterSettings, &amountSetting{
-				Amount:  info.Amount,
-				Percent: info.Percent,
-				Start:   info.Start,
-				End:     info.End,
+		} else {
+			myInviterSettings, err := grpc2.GetAppUserPurchaseAmountSettingsByAppUser(ctx, &inspirepb.GetAppUserPurchaseAmountSettingsByAppUserRequest{
+				AppID:  appID,
+				UserID: inviterID,
 			})
+			if err != nil {
+				return nil, myGoods, myCoins, xerrors.Errorf("fail get app purchase amount setting: %v", err)
+			}
+
+			sort.Slice(myInviterSettings.Infos, func(i, j int) bool {
+				return myInviterSettings.Infos[i].Amount < myInviterSettings.Infos[j].Amount
+			})
+
+			if inviterID != inviteeID {
+				myInviteeSettings, err := grpc2.GetAppUserPurchaseAmountSettingsByAppUser(ctx, &inspirepb.GetAppUserPurchaseAmountSettingsByAppUserRequest{
+					AppID:  appID,
+					UserID: inviteeID,
+				})
+				if err != nil {
+					return nil, myGoods, myCoins, xerrors.Errorf("fail get app purchase amount setting: %v", err)
+				}
+
+				sort.Slice(myInviteeSettings.Infos, func(i, j int) bool {
+					return myInviteeSettings.Infos[i].Amount < myInviteeSettings.Infos[j].Amount
+				})
+
+				for _, info := range myInviterSettings.Infos {
+					found := false
+					for _, info1 := range myInviteeSettings.Infos {
+						if info1.Amount == info.Amount {
+							found = true
+							break
+						}
+					}
+
+					if !found {
+						return nil, myGoods, myCoins, xerrors.Errorf("different level of inviter and invitee")
+					}
+				}
+
+				for _, info := range myInviteeSettings.Infos {
+					inviteeSettings = append(inviteeSettings, &amountSetting{
+						Amount:  info.Amount,
+						Percent: info.Percent,
+						Start:   info.Start,
+						End:     info.End,
+					})
+				}
+			}
+
+			for _, info := range myInviterSettings.Infos {
+				inviterSettings = append(inviterSettings, &amountSetting{
+					Amount:  info.Amount,
+					Percent: info.Percent,
+					Start:   info.Start,
+					End:     info.End,
+				})
+			}
 		}
 	}
 
