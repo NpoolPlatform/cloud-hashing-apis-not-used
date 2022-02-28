@@ -131,6 +131,19 @@ func Run() {
 }
 
 func GetCommission(appID, userID string) (float64, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	appCommissionSetting, err := grpc2.GetAppCommissionSettingByApp(ctx, &inspirepb.GetAppCommissionSettingByAppRequest{
+		AppID: appID,
+	})
+	if err != nil {
+		return 0.0, xerrors.Errorf("fail get app commission setting: %v", err)
+	}
+	if appCommissionSetting.Info == nil {
+		return 0.0, nil
+	}
+
 	mutex.Lock()
 	invitations := appInvitations[appID][userID]
 	userInfo := appInviterUserInfos[appID][userID]
@@ -140,8 +153,10 @@ func GetCommission(appID, userID string) (float64, error) {
 	for _, summary := range userInfo.MySummarys {
 		myCommissionAmount += summary.Commission
 	}
-	for _, summary := range userInfo.Summarys {
-		myCommissionAmount += summary.Commission
+	if !appCommissionSetting.Info.UniqueSetting {
+		for _, summary := range userInfo.Summarys {
+			myCommissionAmount += summary.Commission
+		}
 	}
 
 	myInvitation, ok := invitations[userID]
@@ -150,14 +165,16 @@ func GetCommission(appID, userID string) (float64, error) {
 			for _, summary := range invitee.MySummarys {
 				myCommissionAmount += summary.Commission
 			}
-			for _, summary := range userInfo.Summarys {
-				myCommissionAmount += summary.Commission
+			if !appCommissionSetting.Info.UniqueSetting {
+				for _, summary := range userInfo.Summarys {
+					myCommissionAmount += summary.Commission
+				}
 			}
 		}
 		return myCommissionAmount, nil
 	}
 
-	_, _, err := getInvitations(appID, userID, false)
+	_, _, err = getInvitations(appID, userID, false)
 	if err != nil {
 		return 0, xerrors.Errorf("fail get invitations: %v", err)
 	}
