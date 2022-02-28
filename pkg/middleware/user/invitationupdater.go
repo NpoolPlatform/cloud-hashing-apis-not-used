@@ -416,10 +416,17 @@ func getInvitationUserInfo( //nolint
 		kol = true
 	}
 
+	username := ""
+	avatar := ""
+	if inviteeResp.Info.Extra != nil {
+		username = inviteeResp.Info.Extra.Username
+		avatar = inviteeResp.Info.Extra.Avatar
+	}
+
 	return &npool.InvitationUserInfo{
 		UserID:       inviteeResp.Info.User.ID,
-		Username:     inviteeResp.Info.Extra.Username,
-		Avatar:       inviteeResp.Info.Extra.Avatar,
+		Username:     username,
+		Avatar:       avatar,
 		EmailAddress: inviteeResp.Info.User.EmailAddress,
 		Kol:          kol,
 		MySummarys:   summarys,
