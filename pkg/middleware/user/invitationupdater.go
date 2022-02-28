@@ -375,7 +375,6 @@ func getInvitationUserInfo( //nolint
 					lastAmount = setting.Amount
 					lastPercent = setting.Percent
 					remainAmount -= setting.Amount
-					break
 				}
 			}
 		}
@@ -391,12 +390,11 @@ func getInvitationUserInfo( //nolint
 
 		if !appCommissionSetting.Info.UniqueSetting && inviterID != inviteeID {
 			for _, setting := range inviteeSettings {
-				if setting.Start <= orderInfo.Order.Payment.CreateAt && orderInfo.Order.Payment.CreateAt < setting.End {
+				if setting.Start <= orderInfo.Order.Payment.CreateAt && setting.End > orderInfo.Order.Payment.CreateAt {
 					subCommissionAmount += (setting.Amount - lastAmount) * float64(lastPercent) / 100.0
 					lastAmount = setting.Amount
 					lastPercent = setting.Percent
 					remainAmount -= setting.Amount
-					break
 				}
 			}
 		}
