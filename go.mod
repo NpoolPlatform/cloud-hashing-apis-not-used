@@ -13,7 +13,7 @@ require (
 	github.com/NpoolPlatform/cloud-hashing-staker v0.0.0-20220214050218-567efaad1cb3
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20220211051615-b2300d03022a
 	github.com/NpoolPlatform/kyc-management v0.0.0-20220113122339-4bef8bdcbc5c
-	github.com/NpoolPlatform/message v0.0.0-20220228033725-37407d71513c
+	github.com/NpoolPlatform/message v0.0.0-20220228090444-94a5ea191b6d
 	github.com/NpoolPlatform/review-service v0.0.0-20220214135408-eb1dbe09de65
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211208035009-5ad2768d2290
 	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20211210102925-d9b8abe11021
