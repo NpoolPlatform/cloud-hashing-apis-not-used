@@ -259,12 +259,6 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 		}
 	}()
 
-	reviewLockKey := fmt.Sprintf("withdraw-review:%v:%v", in.GetInfo().GetAppID(), in.GetInfo().GetUserID())
-	err = redis2.TryLock(reviewLockKey, 0)
-	if err != nil {
-		return nil, xerrors.Errorf("fail lock withdraw review: %v", err)
-	}
-
 	coinTypeID := in.GetInfo().GetCoinTypeID()
 	if in.GetInfo().GetWithdrawType() == billingstate.WithdrawTypeCommission {
 		coinTypeID, err = commissionCoinTypeID(ctx)
@@ -382,6 +376,12 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 	} else if float64(autoReviewCoinAmount) < in.GetInfo().GetAmount() {
 		reason = "large amount"
 		autoReview = false
+	}
+
+	reviewLockKey := fmt.Sprintf("withdraw-review:%v:%v", in.GetInfo().GetAppID(), in.GetInfo().GetUserID())
+	err = redis2.TryLock(reviewLockKey, 0)
+	if err != nil {
+		return nil, xerrors.Errorf("fail lock withdraw review: %v", err)
 	}
 
 	_review, err := grpc2.CreateReview(ctx, &reviewpb.CreateReviewRequest{
