@@ -256,7 +256,7 @@ func getInvitationUserInfo( //nolint
 	inviterSettings := []*amountSetting{}
 	inviteeSettings := []*amountSetting{}
 
-	if appCommissionSetting.Info == nil {
+	if appCommissionSetting.Info != nil {
 		if appCommissionSetting.Info.UniqueSetting {
 			appPurchaseAmountSettings, err := grpc2.GetAppPurchaseAmountSettingsByApp(ctx, &inspirepb.GetAppPurchaseAmountSettingsByAppRequest{
 				AppID: appID,
