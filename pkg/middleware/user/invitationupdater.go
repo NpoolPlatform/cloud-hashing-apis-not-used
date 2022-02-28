@@ -130,176 +130,34 @@ func Run() {
 	}
 }
 
-func getInviterCommission(ctx context.Context, appID, inviterID, inviteeID string, amount float64) (float64, error) { //nolint
-	appCommissionSetting, err := grpc2.GetAppCommissionSettingByApp(ctx, &inspirepb.GetAppCommissionSettingByAppRequest{
-		AppID: appID,
-	})
-	if err != nil {
-		return 0, xerrors.Errorf("fail get app commission setting: %v", err)
-	}
-	if appCommissionSetting.Info == nil {
-		return 0, nil
-	}
-
-	myCommissionAmount := 0.0
-	lastAmount := 0.0
-	lastPercent := uint32(0)
-	remainAmount := amount
-
-	if appCommissionSetting.Info.UniqueSetting { // Can only be single layer
-		appPurchaseAmountSettings, err := grpc2.GetAppPurchaseAmountSettingsByApp(ctx, &inspirepb.GetAppPurchaseAmountSettingsByAppRequest{
-			AppID: appID,
-		})
-		if err != nil {
-			return 0, xerrors.Errorf("fail get app purchase amount setting: %v", err)
-		}
-		if len(appPurchaseAmountSettings.Infos) == 0 {
-			return 0, nil
-		}
-
-		sort.Slice(appPurchaseAmountSettings.Infos, func(i, j int) bool {
-			return appPurchaseAmountSettings.Infos[i].Amount < appPurchaseAmountSettings.Infos[j].Amount
-		})
-
-		for _, info := range appPurchaseAmountSettings.Infos {
-			// TODO: support level commission
-			if info.End != 0 {
-				continue
-			}
-
-			if remainAmount <= 0 {
-				break
-			}
-
-			if info.Amount < amount {
-				myCommissionAmount += (info.Amount - lastAmount) * float64(lastPercent) / 100.0
-				remainAmount -= info.Amount
-				lastAmount = info.Amount
-				lastPercent = info.Percent
-			}
-		}
-	} else { // Could be multi layer
-		inviterSettings, err := grpc2.GetAppUserPurchaseAmountSettingsByAppUser(ctx, &inspirepb.GetAppUserPurchaseAmountSettingsByAppUserRequest{
-			AppID:  appID,
-			UserID: inviterID,
-		})
-		if err != nil {
-			return 0, xerrors.Errorf("fail get app purchase amount setting: %v", err)
-		}
-		if len(inviterSettings.Infos) == 0 {
-			return 0, nil
-		}
-
-		sort.Slice(inviterSettings.Infos, func(i, j int) bool {
-			return inviterSettings.Infos[i].Amount < inviterSettings.Infos[j].Amount
-		})
-
-		inviteeSettings, err := grpc2.GetAppUserPurchaseAmountSettingsByAppUser(ctx, &inspirepb.GetAppUserPurchaseAmountSettingsByAppUserRequest{
-			AppID:  appID,
-			UserID: inviteeID,
-		})
-		if err != nil {
-			return 0, xerrors.Errorf("fail get app purchase amount setting: %v", err)
-		}
-		if len(inviterSettings.Infos) == 0 {
-			return 0, nil
-		}
-
-		if inviterID == inviteeID {
-			inviteeSettings.Infos = []*inspirepb.AppUserPurchaseAmountSetting{}
-			for _, info := range inviterSettings.Infos {
-				inviteeSettings.Infos = append(inviteeSettings.Infos, &inspirepb.AppUserPurchaseAmountSetting{
-					AppID:   appID,
-					UserID:  inviterID,
-					Amount:  info.Amount,
-					Percent: 0,
-				})
-			}
-		}
-
-		sort.Slice(inviteeSettings.Infos, func(i, j int) bool {
-			return inviteeSettings.Infos[i].Amount < inviteeSettings.Infos[j].Amount
-		})
-
-		if len(inviterSettings.Infos) != len(inviteeSettings.Infos) {
-			return 0, xerrors.Errorf("invalid inviter and invitee settings")
-		}
-
-		for i, info := range inviterSettings.Infos {
-			if info.Amount != inviteeSettings.Infos[i].Amount {
-				return 0, xerrors.Errorf("different amount between inviter and invitee settings")
-			}
-			if info.Percent < inviteeSettings.Infos[i].Percent {
-				return 0, xerrors.Errorf("invitee cannot has more percent than inviter")
-			}
-		}
-
-		for i, info := range inviterSettings.Infos {
-			// TODO: support level commission
-			if info.End != 0 {
-				continue
-			}
-
-			if remainAmount <= 0 {
-				break
-			}
-
-			if info.Amount < amount {
-				myCommissionAmount += (info.Amount - lastAmount) * float64(lastPercent) / 100.0
-				remainAmount -= info.Amount
-				lastAmount = info.Amount
-				lastPercent = info.Percent - inviteeSettings.Infos[i].Percent
-			}
-		}
-	}
-
-	myCommissionAmount += remainAmount * float64(lastPercent) / 100.0
-
-	return myCommissionAmount, nil
-}
-
 func GetCommission(appID, userID string) (float64, error) {
 	mutex.Lock()
 	invitations := appInvitations[appID][userID]
 	userInfo := appInviterUserInfos[appID][userID]
 	mutex.Unlock()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
 	myCommissionAmount := 0.0
-
-	amount := 0.0
 	for _, summary := range userInfo.MySummarys {
-		amount += summary.Amount
+		myCommissionAmount += summary.Commission
 	}
-	amount, err := getInviterCommission(ctx, appID, userID, userID, amount)
-	if err != nil {
-		return 0, xerrors.Errorf("fail get inviter commission: %v", err)
+	for _, summary := range userInfo.Summarys {
+		myCommissionAmount += summary.Commission
 	}
-	myCommissionAmount += amount
 
 	myInvitation, ok := invitations[userID]
 	if ok {
 		for _, invitee := range myInvitation.Invitees {
-			amount := 0.0
 			for _, summary := range invitee.MySummarys {
-				amount += summary.Amount
+				myCommissionAmount += summary.Commission
 			}
-			for _, summary := range invitee.Summarys {
-				amount += summary.Amount
+			for _, summary := range userInfo.Summarys {
+				myCommissionAmount += summary.Commission
 			}
-
-			amount, err := getInviterCommission(ctx, appID, userID, invitee.UserID, amount)
-			if err != nil {
-				return 0, xerrors.Errorf("fail get inviter commission: %v", err)
-			}
-			myCommissionAmount += amount
 		}
 		return myCommissionAmount, nil
 	}
 
-	_, _, err = getInvitations(appID, userID, false)
+	_, _, err := getInvitations(appID, userID, false)
 	if err != nil {
 		return 0, xerrors.Errorf("fail get invitations: %v", err)
 	}
@@ -344,7 +202,7 @@ func getDirectInvitations(appID, inviterID string) (map[string]*npool.Invitation
 }
 
 func getInvitationUserInfo( //nolint
-	appID, inviteeID string,
+	appID, inviterID, inviteeID string,
 	myGoods map[string]*npool.Good,
 	myCoins map[string]*coininfopb.CoinInfo) (*npool.InvitationUserInfo,
 	map[string]*npool.Good,
@@ -381,6 +239,106 @@ func getInvitationUserInfo( //nolint
 	myGoods = goods
 	myCoins = coins
 
+	appCommissionSetting, err := grpc2.GetAppCommissionSettingByApp(ctx, &inspirepb.GetAppCommissionSettingByAppRequest{
+		AppID: appID,
+	})
+	if err != nil {
+		return nil, myGoods, myCoins, xerrors.Errorf("fail get app commission setting: %v", err)
+	}
+	if appCommissionSetting.Info == nil {
+		return nil, myGoods, myCoins, nil
+	}
+
+	type amountSetting struct {
+		Amount  float64
+		Percent uint32
+		Start   uint32
+		End     uint32
+	}
+
+	inviterSettings := []*amountSetting{}
+	inviteeSettings := []*amountSetting{}
+
+	if appCommissionSetting.Info.UniqueSetting {
+		appPurchaseAmountSettings, err := grpc2.GetAppPurchaseAmountSettingsByApp(ctx, &inspirepb.GetAppPurchaseAmountSettingsByAppRequest{
+			AppID: appID,
+		})
+		if err != nil {
+			return nil, myGoods, myCoins, xerrors.Errorf("fail get app purchase amount setting: %v", err)
+		}
+
+		sort.Slice(appPurchaseAmountSettings.Infos, func(i, j int) bool {
+			return appPurchaseAmountSettings.Infos[i].Amount < appPurchaseAmountSettings.Infos[j].Amount
+		})
+
+		for _, info := range appPurchaseAmountSettings.Infos {
+			inviterSettings = append(inviterSettings, &amountSetting{
+				Amount:  info.Amount,
+				Percent: info.Percent,
+				Start:   info.Start,
+				End:     info.End,
+			})
+		}
+	} else {
+		myInviterSettings, err := grpc2.GetAppUserPurchaseAmountSettingsByAppUser(ctx, &inspirepb.GetAppUserPurchaseAmountSettingsByAppUserRequest{
+			AppID:  appID,
+			UserID: inviterID,
+		})
+		if err != nil {
+			return nil, myGoods, myCoins, xerrors.Errorf("fail get app purchase amount setting: %v", err)
+		}
+
+		sort.Slice(myInviterSettings.Infos, func(i, j int) bool {
+			return myInviterSettings.Infos[i].Amount < myInviterSettings.Infos[j].Amount
+		})
+
+		if inviterID != inviteeID {
+			myInviteeSettings, err := grpc2.GetAppUserPurchaseAmountSettingsByAppUser(ctx, &inspirepb.GetAppUserPurchaseAmountSettingsByAppUserRequest{
+				AppID:  appID,
+				UserID: inviteeID,
+			})
+			if err != nil {
+				return nil, myGoods, myCoins, xerrors.Errorf("fail get app purchase amount setting: %v", err)
+			}
+
+			sort.Slice(myInviteeSettings.Infos, func(i, j int) bool {
+				return myInviteeSettings.Infos[i].Amount < myInviteeSettings.Infos[j].Amount
+			})
+
+			for _, info := range myInviterSettings.Infos {
+				found := false
+				for _, info1 := range myInviteeSettings.Infos {
+					if info1.Amount == info.Amount {
+						found = true
+						break
+					}
+				}
+
+				if !found {
+					return nil, myGoods, myCoins, xerrors.Errorf("different level of inviter and invitee")
+				}
+			}
+
+			for _, info := range myInviteeSettings.Infos {
+				inviteeSettings = append(inviteeSettings, &amountSetting{
+					Amount:  info.Amount,
+					Percent: info.Percent,
+					Start:   info.Start,
+					End:     info.End,
+				})
+			}
+		}
+
+		for _, info := range myInviterSettings.Infos {
+			inviterSettings = append(inviterSettings, &amountSetting{
+				Amount:  info.Amount,
+				Percent: info.Percent,
+				Start:   info.Start,
+				End:     info.End,
+			})
+		}
+	}
+
 	for _, orderInfo := range resp2.Infos {
 		if orderInfo.Order.Payment == nil {
 			continue
@@ -396,11 +354,61 @@ func getInvitationUserInfo( //nolint
 
 		summary := summarys[orderInfo.Good.Good.Good.CoinInfoID]
 		summary.Units += orderInfo.Order.Order.Units
-		amount := orderInfo.Order.Payment.Amount
+
+		usdAmount := orderInfo.Order.Payment.Amount
 		if orderInfo.Order.Payment.CoinUSDCurrency > 0 {
-			amount *= orderInfo.Order.Payment.CoinUSDCurrency
+			usdAmount *= orderInfo.Order.Payment.CoinUSDCurrency
 		}
-		summary.Amount += amount
+
+		commissionAmount := 0.0
+		lastAmount := 0.0
+		lastPercent := uint32(0)
+		remainAmount := usdAmount
+
+		for _, setting := range inviterSettings {
+			if remainAmount <= 0 {
+				break
+			}
+			if setting.Start <= orderInfo.Order.Payment.CreateAt && orderInfo.Order.Payment.CreateAt < setting.End {
+				if setting.Amount <= usdAmount {
+					commissionAmount += (setting.Amount - lastAmount) * float64(lastPercent) / 100.0
+					lastAmount = setting.Amount
+					lastPercent = setting.Percent
+					remainAmount -= setting.Amount
+					break
+				}
+			}
+		}
+
+		if remainAmount > 0 {
+			commissionAmount += remainAmount * float64(lastPercent) / 100.0
+		}
+
+		subCommissionAmount := 0.0
+		lastAmount = 0.0
+		lastPercent = 0
+		remainAmount = usdAmount
+
+		if !appCommissionSetting.Info.UniqueSetting && inviterID != inviteeID {
+			for _, setting := range inviteeSettings {
+				if setting.Start <= orderInfo.Order.Payment.CreateAt && orderInfo.Order.Payment.CreateAt < setting.End {
+					subCommissionAmount += (setting.Amount - lastAmount) * float64(lastPercent) / 100.0
+					lastAmount = setting.Amount
+					lastPercent = setting.Percent
+					remainAmount -= setting.Amount
+					break
+				}
+			}
+		}
+
+		summary.Amount += orderInfo.Order.Payment.Amount
+		myCommission := commissionAmount - subCommissionAmount
+		if myCommission < 0 {
+			return nil, myGoods, myCoins, xerrors.Errorf("invalid commission amount")
+		}
+
+		summary.Commission += myCommission
+
 		summarys[orderInfo.Good.Good.Good.CoinInfoID] = summary
 	}
 
@@ -440,7 +448,7 @@ func getInvitations(appID, reqInviterID string, directOnly bool) (map[string]*np
 	myCoins := map[string]*coininfopb.CoinInfo{}
 	myCounts := map[string]uint32{}
 
-	inviterUserInfo, goods, coins, err := getInvitationUserInfo(appID, reqInviterID, myGoods, myCoins)
+	inviterUserInfo, goods, coins, err := getInvitationUserInfo(appID, reqInviterID, reqInviterID, myGoods, myCoins)
 	if err != nil {
 		return nil, nil, xerrors.Errorf("fail get inviter %v user info: %v", reqInviterID, err)
 	}
@@ -479,7 +487,7 @@ func getInvitations(appID, reqInviterID string, directOnly bool) (map[string]*np
 					continue
 				}
 
-				userInfo, goods, coins, err := getInvitationUserInfo(appID, info.InviteeID, myGoods, myCoins)
+				userInfo, goods, coins, err := getInvitationUserInfo(appID, inviterID, info.InviteeID, myGoods, myCoins)
 				if err != nil {
 					logger.Sugar().Errorf("fail get invitation user info: %v", err)
 					continue
@@ -531,6 +539,7 @@ func getInvitations(appID, reqInviterID string, directOnly bool) (map[string]*np
 			}
 			mySummary := inviterUserInfo.Summarys[coinID]
 			mySummary.Units += summary.Units
+			mySummary.Commission += summary.Commission
 			mySummary.Amount += summary.Amount
 			inviterUserInfo.Summarys[coinID] = mySummary
 		}
@@ -575,6 +584,7 @@ func getInvitations(appID, reqInviterID string, directOnly bool) (map[string]*np
 						}
 						mySummary = inviterUserInfo.Summarys[coinID]
 						mySummary.Units += summary.Units
+						mySummary.Amount += summary.Amount
 						mySummary.Amount += summary.Amount
 						inviterUserInfo.Summarys[coinID] = mySummary
 					}
