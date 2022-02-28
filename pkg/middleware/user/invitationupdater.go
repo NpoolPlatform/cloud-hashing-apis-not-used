@@ -162,6 +162,11 @@ func getInviterCommission(ctx context.Context, appID, inviterID, inviteeID strin
 		})
 
 		for _, info := range appPurchaseAmountSettings.Infos {
+			// TODO: support level commission
+			if info.End != 0 {
+				continue
+			}
+
 			if remainAmount <= 0 {
 				break
 			}
@@ -230,6 +235,11 @@ func getInviterCommission(ctx context.Context, appID, inviterID, inviteeID strin
 		}
 
 		for i, info := range inviterSettings.Infos {
+			// TODO: support level commission
+			if info.End != 0 {
+				continue
+			}
+
 			if remainAmount <= 0 {
 				break
 			}
