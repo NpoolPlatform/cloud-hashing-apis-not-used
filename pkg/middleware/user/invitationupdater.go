@@ -400,7 +400,7 @@ func getInvitationUserInfo( //nolint
 			}
 		}
 
-		summary.Amount += orderInfo.Order.Payment.Amount
+		summary.Amount += usdAmount
 		myCommission := commissionAmount - subCommissionAmount
 		if myCommission < 0 {
 			return nil, myGoods, myCoins, xerrors.Errorf("invalid commission amount")
