@@ -34,7 +34,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func withdrawOutcoming(ctx context.Context, appID, userID, coinTypeID, withdrawType string) (float64, error) {
+func Outcoming(ctx context.Context, appID, userID, coinTypeID, withdrawType string) (float64, error) {
 	withdraws := []*billingpb.UserWithdrawItem{}
 
 	switch withdrawType {
@@ -97,7 +97,7 @@ func withdrawOutcoming(ctx context.Context, appID, userID, coinTypeID, withdrawT
 	return outcoming, nil
 }
 
-func commissionCoinTypeID(ctx context.Context) (string, error) {
+func CommissionCoinTypeID(ctx context.Context) (string, error) {
 	commissionCoins, err := grpc2.GetCommissionCoinSettings(ctx, &inspirepb.GetCommissionCoinSettingsRequest{})
 	if err != nil {
 		return "", xerrors.Errorf("fail get commission coins: %v", err)
@@ -125,12 +125,12 @@ func commissionWithdrawable(ctx context.Context, appID, userID, withdrawType str
 		return false, xerrors.Errorf("fail get total amount: %v", err)
 	}
 
-	coinTypeID, err := commissionCoinTypeID(ctx)
+	coinTypeID, err := CommissionCoinTypeID(ctx)
 	if err != nil {
 		return false, xerrors.Errorf("fail get coin type id: %v", err)
 	}
 
-	outcoming, err := withdrawOutcoming(ctx, appID, userID, coinTypeID, withdrawType)
+	outcoming, err := Outcoming(ctx, appID, userID, coinTypeID, withdrawType)
 	if err != nil {
 		return false, xerrors.Errorf("fail get withdraw outcoming: %v", err)
 	}
@@ -160,7 +160,7 @@ func benefitWithdrawable(ctx context.Context, appID, userID, coinTypeID, withdra
 		incoming += info.Amount
 	}
 
-	outcoming, err := withdrawOutcoming(ctx, appID, userID, coinTypeID, withdrawType)
+	outcoming, err := Outcoming(ctx, appID, userID, coinTypeID, withdrawType)
 	if err != nil {
 		return false, xerrors.Errorf("fail get withdraw outcoming: %v", err)
 	}
@@ -261,7 +261,7 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 
 	coinTypeID := in.GetInfo().GetCoinTypeID()
 	if in.GetInfo().GetWithdrawType() == billingstate.WithdrawTypeCommission {
-		coinTypeID, err = commissionCoinTypeID(ctx)
+		coinTypeID, err = CommissionCoinTypeID(ctx)
 		if err != nil {
 			return nil, xerrors.Errorf("fail get coin type id: %v", err)
 		}

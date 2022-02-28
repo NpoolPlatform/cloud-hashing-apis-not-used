@@ -77,16 +77,3 @@ func (s *Server) UpdatePhoneNO(ctx context.Context, in *npool.UpdatePhoneNOReque
 	}
 	return resp, nil
 }
-
-func (s *Server) GetCommissionByAppUser(ctx context.Context, in *npool.GetCommissionByAppUserRequest) (*npool.GetCommissionByAppUserResponse, error) {
-	amount, err := user.GetCommission(in.GetAppID(), in.GetUserID())
-	if err != nil {
-		logger.Sugar().Errorf("get commission error: %v", err)
-		return &npool.GetCommissionByAppUserResponse{}, status.Error(codes.Internal, err.Error())
-	}
-	return &npool.GetCommissionByAppUserResponse{
-		Info: &npool.Commission{
-			Amount: amount,
-		},
-	}, nil
-}
