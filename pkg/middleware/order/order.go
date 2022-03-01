@@ -604,6 +604,12 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	}
 
 	amountTarget := math.Ceil(amountUSD*10000/paymentCoinCurrency) / 10000
+	logger.Sugar().Infof("purchase %v goods with price %v amountUSD %v amount target %v currency %v",
+		myOrder.Info.Order.Order.Units,
+		goodPrice,
+		amountUSD,
+		amountTarget,
+		paymentCoinCurrency)
 
 	// TODO: Check if idle address is available with lock
 	paymentAccount, err := peekIdlePaymentAccount(ctx, myOrder.Info, paymentCoinInfo.Info)
