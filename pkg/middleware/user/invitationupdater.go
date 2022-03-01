@@ -131,31 +131,18 @@ func Run() {
 }
 
 func GetCommission(appID, userID string) (float64, error) {
-	/*
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
+	mutex.Lock()
+	invitations := appInvitations[appID][userID]
+	userInfo := appInviterUserInfos[appID][userID]
+	mutex.Unlock()
 
-		appCommissionSetting, err := grpc2.GetAppCommissionSettingByApp(ctx, &inspirepb.GetAppCommissionSettingByAppRequest{
-			AppID: appID,
-		})
-		if err != nil {
-			return 0.0, xerrors.Errorf("fail get app commission setting: %v", err)
-		}
-		if appCommissionSetting.Info == nil {
-			return 0.0, nil
-		}
-
-		mutex.Lock()
-		invitations := appInvitations[appID][userID]
-		userInfo := appInviterUserInfos[appID][userID]
-		mutex.Unlock()
-
-		myCommissionAmount := 0.0
-		_, _, err = getInvitations(appID, userID, false)
-		if err != nil {
-			return 0, xerrors.Errorf("fail get invitations: %v", err)
-		}
-	*/
+	if len(invitations) > 0 {
+		return userInfo.CommissionAmount, nil
+	}
+	_, _, err := getInvitations(appID, userID, false)
+	if err != nil {
+		return 0, xerrors.Errorf("fail get invitations: %v", err)
+	}
 
 	return 0, nil
 }
