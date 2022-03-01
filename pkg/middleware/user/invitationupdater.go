@@ -433,7 +433,11 @@ func getInvitationUserInfo( //nolint
 		kol = true
 	}
 
-	username := ""
+	username := inviteeResp.Info.User.EmailAddress
+	if username == "" {
+		username = inviteeResp.Info.User.PhoneNO
+	}
+
 	avatar := ""
 	if inviteeResp.Info.Extra != nil {
 		username = inviteeResp.Info.Extra.Username
