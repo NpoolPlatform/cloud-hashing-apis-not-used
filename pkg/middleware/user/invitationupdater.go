@@ -355,6 +355,11 @@ func getInvitationUserInfo( //nolint
 		}
 	}
 
+	kol := false
+	if resp1.Info != nil {
+		kol = true
+	}
+
 	for _, orderInfo := range resp2.Infos {
 		if orderInfo.Order.Payment == nil {
 			continue
@@ -407,7 +412,7 @@ func getInvitationUserInfo( //nolint
 		lastPercent = 0
 		remainAmount = usdAmount
 
-		if appCommissionSetting.Info != nil {
+		if appCommissionSetting.Info != nil && kol {
 			if !appCommissionSetting.Info.UniqueSetting && inviterID != inviteeID {
 				for _, setting := range inviteeSettings {
 					curPercent = setting.Percent
@@ -433,11 +438,6 @@ func getInvitationUserInfo( //nolint
 		summary.Commission += myCommission
 
 		summarys[orderInfo.Good.Good.Good.CoinInfoID] = summary
-	}
-
-	kol := false
-	if resp1.Info != nil {
-		kol = true
 	}
 
 	username := inviteeResp.Info.User.EmailAddress
