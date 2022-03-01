@@ -589,21 +589,6 @@ func GetAppInvitationSettingsByApp(ctx context.Context, in *inspirepb.GetAppInvi
 	return cli.GetAppInvitationSettingsByApp(ctx, in)
 }
 
-func GetAppUserInvitationSettingsByAppUser(ctx context.Context, in *inspirepb.GetAppUserInvitationSettingsByAppUserRequest) (*inspirepb.GetAppUserInvitationSettingsByAppUserResponse, error) {
-	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
-	if err != nil {
-		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
-	}
-	defer conn.Close()
-
-	cli := inspirepb.NewCloudHashingInspireClient(conn)
-
-	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
-	defer cancel()
-
-	return cli.GetAppUserInvitationSettingsByAppUser(ctx, in)
-}
-
 //---------------------------------------------------------------------------------------------------------------------------
 
 func CreateBillingAccount(ctx context.Context, in *billingpb.CreateCoinAccountRequest) (*billingpb.CreateCoinAccountResponse, error) {
