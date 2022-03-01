@@ -139,12 +139,13 @@ func GetCommission(appID, userID string) (float64, error) {
 	if len(invitations) > 0 {
 		return userInfo.CommissionAmount, nil
 	}
-	_, _, err := getInvitations(appID, userID, false)
+
+	_, userInfo, err := getInvitations(appID, userID, false)
 	if err != nil {
 		return 0, xerrors.Errorf("fail get invitations: %v", err)
 	}
 
-	return 0, nil
+	return userInfo.CommissionAmount, nil
 }
 
 func getFullInvitations(appID, inviterID string) (map[string]*npool.Invitation, *npool.InvitationUserInfo, error) {
@@ -304,8 +305,10 @@ func getInvitationUserInfo( //nolint
 		for i, commission := range commissions {
 			if commission.Start <= orderInfo.Order.Payment.CreateAt && orderInfo.Order.Payment.CreateAt < commission.End {
 				commissions[i].PayAmount += usdAmount
+				commissions[i].CreateAt = orderInfo.Order.Payment.CreateAt
 			} else if commission.Start <= orderInfo.Order.Payment.CreateAt && commission.End == 0 {
 				commissions[i].PayAmount += usdAmount
+				commissions[i].CreateAt = orderInfo.Order.Payment.CreateAt
 			}
 		}
 
@@ -460,7 +463,7 @@ func getInvitations(appID, reqInviterID string, directOnly bool) (map[string]*np
 				if comm.Amount != commission.Amount {
 					continue
 				}
-				if commission.Start <= comm.Start && commission.End > comm.End {
+				if comm.Start <= commission.CreateAt && (commission.CreateAt < comm.End || comm.End == 0) {
 					if comm.Percent <= commission.Percent {
 						continue
 					}
@@ -527,7 +530,7 @@ func getInvitations(appID, reqInviterID string, directOnly bool) (map[string]*np
 									continue
 								}
 
-								if comm.Start <= comm1.Start && comm.End > comm1.End {
+								if comm1.Start <= commission.CreateAt && (commission.CreateAt < comm1.End || comm1.End == 0) {
 									if comm1.Percent <= comm.Percent {
 										continue
 									}
