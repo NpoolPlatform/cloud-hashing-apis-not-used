@@ -503,6 +503,9 @@ func createNewPaymentAccount(ctx context.Context, order *npool.Order, paymentCoi
 		if err != nil {
 			return nil, xerrors.Errorf("fail create wallet address: %v", err)
 		}
+		if address.Info == nil || address.Info.Address == "" {
+			return nil, xerrors.Errorf("fail create wallet address for %v", paymentCoinInfo.Name)
+		}
 
 		account, err := grpc2.CreateBillingAccount(ctx, &billingpb.CreateCoinAccountRequest{
 			Info: &billingpb.CoinAccountInfo{
