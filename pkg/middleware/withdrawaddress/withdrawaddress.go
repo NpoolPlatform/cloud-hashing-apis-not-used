@@ -108,6 +108,7 @@ func Set(ctx context.Context, in *npool.SetWithdrawAddressRequest) (*npool.SetWi
 			AccountID:  _account.Info.ID,
 			Name:       in.GetName(),
 			Message:    in.GetMessage(),
+			Labels:     in.GetLabels(),
 		},
 	})
 	if err != nil {
