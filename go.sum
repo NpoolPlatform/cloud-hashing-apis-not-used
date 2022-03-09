@@ -131,7 +131,6 @@ github.com/NpoolPlatform/message v0.0.0-20220120075427-38182760a780/go.mod h1:tn
 github.com/NpoolPlatform/message v0.0.0-20220121040326-31d316062cdc/go.mod h1:tnsf7zHQ5Mv2uG0ezOwCfm/bxluiRW10DeuIl4SjG4Y=
 github.com/NpoolPlatform/message v0.0.0-20220126154557-410153a86b92/go.mod h1:tnsf7zHQ5Mv2uG0ezOwCfm/bxluiRW10DeuIl4SjG4Y=
 github.com/NpoolPlatform/message v0.0.0-20220210092619-65547799bb09/go.mod h1:r9cCQsBi8z8pljMAHa6sK6o2iXIG9tRpZ9idBxVpc44=
-github.com/NpoolPlatform/message v0.0.0-20220210124240-8ebf8f2384fc/go.mod h1:r9cCQsBi8z8pljMAHa6sK6o2iXIG9tRpZ9idBxVpc44=
 github.com/NpoolPlatform/message v0.0.0-20220211111719-fcdd2da891ec/go.mod h1:r9cCQsBi8z8pljMAHa6sK6o2iXIG9tRpZ9idBxVpc44=
 github.com/NpoolPlatform/message v0.0.0-20220214123742-b6016b615933/go.mod h1:r9cCQsBi8z8pljMAHa6sK6o2iXIG9tRpZ9idBxVpc44=
 github.com/NpoolPlatform/message v0.0.0-20220214135004-4df980907997/go.mod h1:r9cCQsBi8z8pljMAHa6sK6o2iXIG9tRpZ9idBxVpc44=
@@ -151,8 +150,8 @@ github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211208035009-5ad2768d2290/go.m
 github.com/NpoolPlatform/sphinx-proxy v0.0.0-20211209140052-de1778e36e36/go.mod h1:VwKb8MFR8zJ7sULoVan/YRluZFDds2uJpinP4kQv9tY=
 github.com/NpoolPlatform/sphinx-proxy v0.0.0-20211210102925-d9b8abe11021 h1:mPb8LHo1/IsZwiC5JOG86F3nJg++djHce6a4JpFiQp8=
 github.com/NpoolPlatform/sphinx-proxy v0.0.0-20211210102925-d9b8abe11021/go.mod h1:F71IllVw8JLp1+ZB/watah/urT4+aePIqZs0bH8cJso=
-github.com/NpoolPlatform/third-gateway v0.0.0-20220219070124-c33f2a2e4b2b h1:IDG4CrX5YHPSQP9dWsqhOy9i09v6ACAwzJ2J8iJzegw=
-github.com/NpoolPlatform/third-gateway v0.0.0-20220219070124-c33f2a2e4b2b/go.mod h1:IUd/xqukCwuxz/7T2zSuii747m+gqe4LZiUW5QRFdww=
+github.com/NpoolPlatform/third-gateway v0.0.0-20220309122642-8f924fb8efe5 h1:aqZn5BgaGEsfmOIGQk0dXJyrBh0p048aGsEddb4fxUo=
+github.com/NpoolPlatform/third-gateway v0.0.0-20220309122642-8f924fb8efe5/go.mod h1:4KI0eMWLkYpBRrCioSbs+ZRNGuESIe+RU3GM+G4Z6OI=
 github.com/OneOfOne/xxhash v1.2.2 h1:KMrpdQIwFcEqXDklaen+P1axHaj9BSKzvpUUfnHldSE=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/PuerkitoBio/purell v1.1.1/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbtSwDGJws/X0=

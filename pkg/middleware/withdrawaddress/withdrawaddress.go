@@ -6,16 +6,15 @@ import (
 	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/const"
 	account "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/account"
 	review "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/review"
+	verifymw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/verify"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
-	appusermgrconst "github.com/NpoolPlatform/appuser-manager/pkg/const"
 	billingconst "github.com/NpoolPlatform/cloud-hashing-billing/pkg/message/const"
 	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
 	billingpb "github.com/NpoolPlatform/message/npool/cloud-hashing-billing"
 	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
 	reviewpb "github.com/NpoolPlatform/message/npool/review-service"
 	sphinxproxypb "github.com/NpoolPlatform/message/npool/sphinxproxy"
-	thirdgwpb "github.com/NpoolPlatform/message/npool/thirdgateway"
 	reviewconst "github.com/NpoolPlatform/review-service/pkg/const"
 	thirdgwconst "github.com/NpoolPlatform/third-gateway/pkg/const"
 
@@ -25,47 +24,15 @@ import (
 )
 
 func Set(ctx context.Context, in *npool.SetWithdrawAddressRequest) (*npool.SetWithdrawAddressResponse, error) {
-	user, err := grpc2.GetAppUserByAppUser(ctx, &appusermgrpb.GetAppUserByAppUserRequest{
-		AppID:  in.GetAppID(),
-		UserID: in.GetUserID(),
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail get app user: %v", err)
-	}
-
-	if in.GetAccountType() == appusermgrconst.SignupByMobile {
-		phoneNO := in.GetAccount()
-
-		if user.Info.PhoneNO != phoneNO {
-			return nil, xerrors.Errorf("invalid mobile")
-		}
-
-		_, err = grpc2.VerifySMSCode(ctx, &thirdgwpb.VerifySMSCodeRequest{
-			AppID:   in.GetAppID(),
-			PhoneNO: phoneNO,
-			UsedFor: thirdgwconst.UsedForSetWithdrawAddress,
-			Code:    in.GetVerificationCode(),
-		})
-	} else if in.GetAccountType() == appusermgrconst.SignupByEmail {
-		emailAddr := in.GetAccount()
-
-		if user.Info.EmailAddress != emailAddr {
-			return nil, xerrors.Errorf("invalid email address")
-		}
-
-		_, err = grpc2.VerifyEmailCode(ctx, &thirdgwpb.VerifyEmailCodeRequest{
-			AppID:        in.GetAppID(),
-			EmailAddress: emailAddr,
-			UsedFor:      thirdgwconst.UsedForSetWithdrawAddress,
-			Code:         in.GetVerificationCode(),
-		})
-	} else {
-		_, err = grpc2.VerifyGoogleAuthentication(ctx, &thirdgwpb.VerifyGoogleAuthenticationRequest{
-			AppID:  in.GetAppID(),
-			UserID: in.GetUserID(),
-			Code:   in.GetVerificationCode(),
-		})
-	}
+	err := verifymw.VerifyCode(
+		ctx,
+		in.GetAppID(),
+		in.GetUserID(),
+		in.GetAccount(),
+		in.GetAccountType(),
+		in.GetVerificationCode(),
+		thirdgwconst.UsedForWithdraw,
+	)
 	if err != nil {
 		return nil, xerrors.Errorf("fail verify code: %v", err)
 	}
