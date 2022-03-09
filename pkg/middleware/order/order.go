@@ -567,6 +567,12 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	if paymentCoinInfo.Info.PreSale {
 		return nil, xerrors.Errorf("cannot use presale coin as payment coin")
 	}
+	if !paymentCoinInfo.Info.ForPay {
+		return nil, xerrors.Errorf("payment coin not for pay")
+	}
+	if paymentCoinInfo.Info.ENV != myOrder.Info.Good.Main.ENV {
+		return nil, xerrors.Errorf("payment coin env different from good coin env")
+	}
 
 	paymentCoinCurrency, err := currency.USDPrice(ctx, paymentCoinInfo.Info.Name)
 	if err != nil {
