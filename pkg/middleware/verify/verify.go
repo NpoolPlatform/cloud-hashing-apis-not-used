@@ -84,7 +84,7 @@ func verifyByGoogle(ctx context.Context, appID, userID, code string) (int32, err
 	return resp.Code, nil
 }
 
-func VerifyCode(ctx context.Context, appID, userID, account, accountType, code, usedFor string) error {
+func VerifyCode(ctx context.Context, appID, userID, account, accountType, code, usedFor string) error { //nolint
 	var verified int32
 	var err error
 
