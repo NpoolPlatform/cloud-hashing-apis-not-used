@@ -32,6 +32,7 @@ func Set(ctx context.Context, in *npool.SetWithdrawAddressRequest) (*npool.SetWi
 		in.GetAccountType(),
 		in.GetVerificationCode(),
 		thirdgwconst.UsedForWithdraw,
+		true,
 	)
 	if err != nil {
 		return nil, xerrors.Errorf("fail verify code: %v", err)

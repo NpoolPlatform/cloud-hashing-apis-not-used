@@ -197,6 +197,7 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 		in.GetAccountType(),
 		in.GetVerificationCode(),
 		thirdgwconst.UsedForWithdraw,
+		true,
 	)
 	if err != nil {
 		return nil, xerrors.Errorf("fail verify code: %v", err)

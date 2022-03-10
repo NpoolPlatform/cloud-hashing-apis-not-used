@@ -3,9 +3,9 @@ package user
 import (
 	"context"
 
-	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
-
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
+	verifymw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/verify"
+	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
 	appusermgrconst "github.com/NpoolPlatform/appuser-manager/pkg/const"
 	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
@@ -67,36 +67,33 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 		}
 	}
 
-	emailAddr := ""
+	err = verifymw.VerifyCode(
+		ctx,
+		in.GetAppID(),
+		"",
+		in.GetAccount(),
+		in.GetAccountType(),
+		in.GetVerificationCode(),
+		thirdgwconst.UsedForSignup,
+		false,
+	)
+	if err != nil {
+		return nil, xerrors.Errorf("fail verify code: %v", err)
+	}
+
+	emailAddress := ""
 	phoneNO := ""
 
 	if in.GetAccountType() == appusermgrconst.SignupByMobile {
 		phoneNO = in.GetAccount()
-		_, err = grpc2.VerifySMSCode(ctx, &thirdgwpb.VerifySMSCodeRequest{
-			AppID:   in.GetAppID(),
-			PhoneNO: phoneNO,
-			UsedFor: thirdgwconst.UsedForSignup,
-			Code:    in.GetVerificationCode(),
-		})
 	} else if in.GetAccountType() == appusermgrconst.SignupByEmail {
-		emailAddr = in.GetAccount()
-		_, err = grpc2.VerifyEmailCode(ctx, &thirdgwpb.VerifyEmailCodeRequest{
-			AppID:        in.GetAppID(),
-			EmailAddress: emailAddr,
-			UsedFor:      thirdgwconst.UsedForSignup,
-			Code:         in.GetVerificationCode(),
-		})
-	} else {
-		return nil, xerrors.Errorf("invalid signup method")
-	}
-	if err != nil {
-		return nil, xerrors.Errorf("fail verify signup code: %v", err)
+		emailAddress = in.GetAccount()
 	}
 
 	signupResp, err := grpc2.Signup(ctx, &appusermgrpb.CreateAppUserWithSecretRequest{
 		User: &appusermgrpb.AppUser{
 			AppID:        in.GetAppID(),
-			EmailAddress: emailAddr,
+			EmailAddress: emailAddress,
 			PhoneNO:      phoneNO,
 		},
 		Secret: &appusermgrpb.AppUserSecret{
@@ -154,30 +151,19 @@ func GetMyDirectInvitations(ctx context.Context, in *npool.GetMyDirectInvitation
 
 func UpdatePasswordByAppUser(ctx context.Context, in *npool.UpdatePasswordByAppUserRequest, checkOldPassword bool) (*npool.UpdatePasswordByAppUserResponse, error) {
 	var err error
-	emailAddr := ""
-	phoneNO := ""
 
-	if in.GetAccountType() == appusermgrconst.SignupByMobile {
-		phoneNO = in.GetAccount()
-		_, err = grpc2.VerifySMSCode(ctx, &thirdgwpb.VerifySMSCodeRequest{
-			AppID:   in.GetAppID(),
-			PhoneNO: phoneNO,
-			UsedFor: thirdgwconst.UsedForUpdate,
-			Code:    in.GetVerificationCode(),
-		})
-	} else if in.GetAccountType() == appusermgrconst.SignupByEmail {
-		emailAddr = in.GetAccount()
-		_, err = grpc2.VerifyEmailCode(ctx, &thirdgwpb.VerifyEmailCodeRequest{
-			AppID:        in.GetAppID(),
-			EmailAddress: emailAddr,
-			UsedFor:      thirdgwconst.UsedForUpdate,
-			Code:         in.GetVerificationCode(),
-		})
-	} else {
-		return nil, xerrors.Errorf("invalid signup method")
-	}
+	err = verifymw.VerifyCode(
+		ctx,
+		in.GetAppID(),
+		in.GetUserID(),
+		in.GetAccount(),
+		in.GetAccountType(),
+		in.GetVerificationCode(),
+		thirdgwconst.UsedForSignup,
+		true,
+	)
 	if err != nil {
-		return nil, xerrors.Errorf("fail verify signup code: %v", err)
+		return nil, xerrors.Errorf("fail verify code: %v", err)
 	}
 
 	resp, err := grpc2.GetAppUserSecretByAppUser(ctx, &appusermgrpb.GetAppUserSecretByAppUserRequest{
@@ -269,33 +255,20 @@ func UpdateEmailAddress(ctx context.Context, in *npool.UpdateEmailAddressRequest
 		return nil, xerrors.Errorf("fail get app user by app user")
 	}
 
-	if in.GetOldAccountType() == appusermgrconst.SignupByMobile {
-		if in.GetOldAccount() != resp.Info.User.PhoneNO {
-			return nil, xerrors.Errorf("invalid account info")
-		}
-		_, err = grpc2.VerifySMSCode(ctx, &thirdgwpb.VerifySMSCodeRequest{
-			AppID:   in.GetAppID(),
-			PhoneNO: in.GetOldAccount(),
-			UsedFor: thirdgwconst.UsedForUpdate,
-			Code:    in.GetOldVerificationCode(),
-		})
-	} else if in.GetOldAccountType() == appusermgrconst.SignupByEmail {
-		if in.GetOldAccount() != resp.Info.User.EmailAddress {
-			return nil, xerrors.Errorf("invalid account info")
-		}
-		_, err = grpc2.VerifyEmailCode(ctx, &thirdgwpb.VerifyEmailCodeRequest{
-			AppID:        in.GetAppID(),
-			EmailAddress: in.GetOldAccount(),
-			UsedFor:      thirdgwconst.UsedForUpdate,
-			Code:         in.GetOldVerificationCode(),
-		})
-	} else {
-		return nil, xerrors.Errorf("invalid account type")
-	}
-
+	err = verifymw.VerifyCode(
+		ctx,
+		in.GetAppID(),
+		in.GetUserID(),
+		in.GetOldAccount(),
+		in.GetOldAccountType(),
+		in.GetOldVerificationCode(),
+		thirdgwconst.UsedForSignup,
+		true,
+	)
 	if err != nil {
 		return nil, xerrors.Errorf("fail verify code: %v", err)
 	}
+
 	// TODO: check verify result code
 
 	_, err = grpc2.VerifyEmailCode(ctx, &thirdgwpb.VerifyEmailCodeRequest{
@@ -330,8 +303,9 @@ func UpdatePhoneNO(ctx context.Context, in *npool.UpdatePhoneNORequest) (*npool.
 		return nil, xerrors.Errorf("fail get app user by app account: %v", err)
 	}
 	if old.Info != nil {
-		return nil, xerrors.Errorf("email address already used")
+		return nil, xerrors.Errorf("phone NO already used")
 	}
+
 	resp, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
 		AppID:  in.GetAppID(),
 		UserID: in.GetUserID(),
@@ -343,36 +317,35 @@ func UpdatePhoneNO(ctx context.Context, in *npool.UpdatePhoneNORequest) (*npool.
 		return nil, xerrors.Errorf("fail get app user by app user")
 	}
 
+	err = verifymw.VerifyCode(
+		ctx,
+		in.GetAppID(),
+		in.GetUserID(),
+		in.GetOldAccount(),
+		in.GetOldAccountType(),
+		in.GetOldVerificationCode(),
+		thirdgwconst.UsedForSignup,
+		true,
+	)
+	if err != nil {
+		return nil, xerrors.Errorf("fail verify code: %v", err)
+	}
+
 	if in.GetOldAccountType() == appusermgrconst.SignupByMobile {
 		if in.GetOldAccount() != resp.Info.User.PhoneNO {
 			return nil, xerrors.Errorf("invalid account info")
 		}
-		_, err = grpc2.VerifySMSCode(ctx, &thirdgwpb.VerifySMSCodeRequest{
-			AppID:   in.GetAppID(),
-			PhoneNO: in.GetOldAccount(),
-			UsedFor: thirdgwconst.UsedForUpdate,
-			Code:    in.GetOldVerificationCode(),
-		})
 	} else if in.GetOldAccountType() == appusermgrconst.SignupByEmail {
 		if in.GetOldAccount() != resp.Info.User.EmailAddress {
 			return nil, xerrors.Errorf("invalid account info")
 		}
-		_, err = grpc2.VerifyEmailCode(ctx, &thirdgwpb.VerifyEmailCodeRequest{
-			AppID:        in.GetAppID(),
-			EmailAddress: in.GetOldAccount(),
-			UsedFor:      thirdgwconst.UsedForUpdate,
-			Code:         in.GetOldVerificationCode(),
-		})
 	} else {
 		return nil, xerrors.Errorf("invalid account type")
 	}
 
-	if err != nil {
-		return nil, xerrors.Errorf("fail verify code: %v", err)
-	}
 	// TODO: check verify result code
 
-	_, err = grpc2.VerifySMSCode(ctx, &thirdgwpb.VerifySMSCodeRequest{
+	resp1, err := grpc2.VerifySMSCode(ctx, &thirdgwpb.VerifySMSCodeRequest{
 		AppID:   in.GetAppID(),
 		PhoneNO: in.GetNewPhoneNO(),
 		UsedFor: thirdgwconst.UsedForUpdate,
@@ -380,6 +353,9 @@ func UpdatePhoneNO(ctx context.Context, in *npool.UpdatePhoneNORequest) (*npool.
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail verify code: %v", err)
+	}
+	if resp1.Code < 0 {
+		return nil, xerrors.Errorf("fail verify code")
 	}
 
 	resp.Info.User.PhoneNO = in.GetNewPhoneNO()
