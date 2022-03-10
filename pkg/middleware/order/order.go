@@ -386,6 +386,7 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 	// Validate user id: done by gateway
 	// Validate coupon id: done in expandOrder
 	// TODO: Validate fee ids
+	// TODO: check sold units and total
 
 	start := (uint32(time.Now().Unix()) + secondsInDay) / secondsInDay * secondsInDay
 	if start < goodInfo.Info.Good.Good.StartAt {
