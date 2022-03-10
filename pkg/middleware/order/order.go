@@ -2,6 +2,7 @@ package order
 
 import (
 	"context"
+	"fmt"
 	"math"
 	"time"
 
@@ -386,7 +387,29 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 	// Validate user id: done by gateway
 	// Validate coupon id: done in expandOrder
 	// TODO: Validate fee ids
-	// TODO: check sold units and total
+
+	lockKey := fmt.Sprintf("submit-order:%v", in.GetGoodID())
+	err = redis2.TryLock(lockKey, 0)
+	if err != nil {
+		return nil, xerrors.Errorf("fail lock good: %v", err)
+	}
+	defer func() {
+		err := redis2.Unlock(lockKey)
+		if err != nil {
+			logger.Sugar().Errorf("fail unlock good: %v", err)
+		}
+	}()
+
+	sold, err := grpc2.GetSoldByGood(ctx, &orderpb.GetSoldByGoodRequest{
+		GoodID: in.GetGoodID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get good sold: %v", err)
+	}
+
+	if sold.Sold >= uint32(goodInfo.Info.Good.Good.Total) {
+		return nil, xerrors.Errorf("good sold out")
+	}
 
 	start := (uint32(time.Now().Unix()) + secondsInDay) / secondsInDay * secondsInDay
 	if start < goodInfo.Info.Good.Good.StartAt {
