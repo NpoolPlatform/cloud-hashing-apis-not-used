@@ -378,6 +378,7 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 			Info: &billingpb.CoinAccountTransaction{
 				AppID:              in.GetInfo().GetAppID(),
 				UserID:             in.GetInfo().GetUserID(),
+				GoodID:             uuid.UUID{}.String(),
 				FromAddressID:      coinsetting.Info.UserOnlineAccountID,
 				ToAddressID:        in.GetInfo().GetWithdrawToAccountID(),
 				CoinTypeID:         coinTypeID,
@@ -582,6 +583,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 			Info: &billingpb.CoinAccountTransaction{
 				AppID:              resp1.Info.AppID,
 				UserID:             resp1.Info.UserID,
+				GoodID:             uuid.UUID{}.String(),
 				FromAddressID:      coinsetting.Info.UserOnlineAccountID,
 				ToAddressID:        resp1.Info.WithdrawToAccountID,
 				CoinTypeID:         resp1.Info.CoinTypeID,
