@@ -383,7 +383,7 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 		return nil, xerrors.Errorf("fail get order good info: %v", err)
 	}
 
-	if in.GetUnits() > goodInfo.Info.Good.Good.Total {
+	if in.GetUnits() > uint32(goodInfo.Info.Good.Good.Total) {
 		return nil, xerrors.Errorf("invalid units")
 	}
 
