@@ -383,6 +383,10 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 		return nil, xerrors.Errorf("fail get order good info: %v", err)
 	}
 
+	if in.GetUnits() > goodInfo.Info.Good.Good.Total {
+		return nil, xerrors.Errorf("invalid units")
+	}
+
 	// Validate app id: done by gateway
 	// Validate user id: done by gateway
 	// Validate coupon id: done in expandOrder
