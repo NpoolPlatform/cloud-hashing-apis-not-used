@@ -376,6 +376,20 @@ func GetOrdersByGood(ctx context.Context, in *npool.GetOrdersByGoodRequest) (*np
 }
 
 func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.SubmitOrderResponse, error) {
+	appGood, err := grpc2.GetAppGoodByAppGood(ctx, &goodspb.GetAppGoodByAppGoodRequest{
+		AppID:  in.GetAppID(),
+		GoodID: in.GetGoodID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app good: %v", err)
+	}
+	if appGood.Info == nil {
+		return nil, xerrors.Errorf("fail get app good")
+	}
+	if !appGood.Info.Online {
+		return nil, xerrors.Errorf("good offline by app")
+	}
+
 	goodInfo, err := gooddetail.Get(ctx, &npool.GetGoodRequest{
 		ID: in.GetGoodID(),
 	})
