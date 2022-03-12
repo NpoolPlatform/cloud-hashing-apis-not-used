@@ -422,7 +422,8 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 	}()
 
 	sold, err := grpc2.GetSoldByGood(ctx, &orderpb.GetSoldByGoodRequest{
-		GoodID: in.GetGoodID(),
+		GoodID:       in.GetGoodID(),
+		DurationDays: uint32(goodInfo.Info.Good.Good.DurationDays),
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get good sold: %v", err)
