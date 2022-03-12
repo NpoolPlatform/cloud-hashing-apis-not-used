@@ -533,7 +533,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 	}
 
 	if withdrawAccount.Info.AppID != resp1.Info.AppID || withdrawAccount.Info.UserID != resp1.Info.UserID {
-		return nil, xerrors.Errorf("invalid account")
+		return nil, xerrors.Errorf("invalid account: mismatch app user")
 	}
 
 	reviewState, _, err := review.GetReviewState(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
@@ -546,7 +546,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		return nil, xerrors.Errorf("fail get review: %v", err)
 	}
 	if reviewState != reviewconst.StateApproved {
-		return nil, xerrors.Errorf("invalid account")
+		return nil, xerrors.Errorf("invalid account: invalid review state")
 	}
 
 	_, err = grpc2.GetAppUserByAppUser(ctx, &appusermgrpb.GetAppUserByAppUserRequest{
