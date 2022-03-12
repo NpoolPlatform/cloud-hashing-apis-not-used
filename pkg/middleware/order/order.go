@@ -389,6 +389,9 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 	if !appGood.Info.Online {
 		return nil, xerrors.Errorf("good offline by app")
 	}
+	if appGood.Info.Price <= 0 {
+		return nil, xerrors.Errorf("good price invalid")
+	}
 
 	goodInfo, err := gooddetail.Get(ctx, &npool.GetGoodRequest{
 		ID: in.GetGoodID(),
