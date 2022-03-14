@@ -40,7 +40,7 @@ import (
 )
 
 const (
-	grpcTimeout = 5 * time.Second
+	grpcTimeout = 60 * time.Second
 )
 
 func CreateGood(ctx context.Context, in *goodspb.CreateGoodRequest) (*goodspb.CreateGoodResponse, error) {
