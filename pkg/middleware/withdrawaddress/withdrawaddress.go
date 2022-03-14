@@ -31,7 +31,7 @@ func Set(ctx context.Context, in *npool.SetWithdrawAddressRequest) (*npool.SetWi
 		in.GetAccount(),
 		in.GetAccountType(),
 		in.GetVerificationCode(),
-		thirdgwconst.UsedForWithdraw,
+		thirdgwconst.UsedForSetWithdrawAddress,
 		true,
 	)
 	if err != nil {
