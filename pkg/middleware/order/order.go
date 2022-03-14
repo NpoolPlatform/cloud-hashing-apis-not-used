@@ -432,6 +432,9 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 	if sold.Sold >= uint32(goodInfo.Info.Good.Good.Total) {
 		return nil, xerrors.Errorf("good sold out")
 	}
+	if in.GetUnits() > uint32(goodInfo.Info.Good.Good.Total)-sold.Sold {
+		return nil, xerrors.Errorf("good units not enough")
+	}
 
 	start := (uint32(time.Now().Unix()) + secondsInDay) / secondsInDay * secondsInDay
 	if start < goodInfo.Info.Good.Good.StartAt {
