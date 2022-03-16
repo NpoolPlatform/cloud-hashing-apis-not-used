@@ -283,7 +283,7 @@ func getInvitationUserInfo( //nolint
 
 	if !kol {
 		commissions = []*npool.CommissionAmount{
-			&npool.CommissionAmount{
+			{
 				Amount:  0,
 				Percent: 0,
 				Start:   0,
