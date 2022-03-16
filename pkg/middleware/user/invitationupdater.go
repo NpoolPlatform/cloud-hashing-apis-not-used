@@ -491,6 +491,7 @@ func getInvitations(appID, reqInviterID string, directOnly bool) (map[string]*np
 						continue
 					}
 					inviterUserInfo.CommissionAmount += commission.PayAmount * float64(comm.Percent-commission.Percent) / 100.0
+					invitee.CommissionAmount += commission.PayAmount * float64(commission.Percent) / 100.0
 					logger.Sugar().Infof("invitee %v commission %v percent %v commission %v",
 						invitee, comm.PayAmount, commission.Percent, inviterUserInfo.CommissionAmount)
 					break
