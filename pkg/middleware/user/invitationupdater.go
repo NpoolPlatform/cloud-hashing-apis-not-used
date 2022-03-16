@@ -441,6 +441,12 @@ func getInvitations(appID, reqInviterID string, directOnly bool) (map[string]*np
 		inviterUserInfo.Summarys = map[string]*npool.InvitationSummary{}
 	}
 
+	for _, comm := range inviterUserInfo.MyCommissions {
+		inviterUserInfo.CommissionAmount += comm.PayAmount * float64(comm.Percent) / 100.0
+		logger.Sugar().Infof("my own commission %v percent %v commission %v",
+			comm.PayAmount, comm.Percent, inviterUserInfo.CommissionAmount)
+	}
+
 	for _, invitee := range invitation.Invitees {
 		curInviteeIDs := []string{invitee.UserID}
 		foundInvitees := map[string]struct{}{}
@@ -456,12 +462,6 @@ func getInvitations(appID, reqInviterID string, directOnly bool) (map[string]*np
 			mySummary.Units += summary.Units
 			mySummary.Amount += summary.Amount
 			inviterUserInfo.Summarys[coinID] = mySummary
-		}
-
-		for _, comm := range inviterUserInfo.MyCommissions {
-			inviterUserInfo.CommissionAmount += comm.PayAmount * float64(comm.Percent) / 100.0
-			logger.Sugar().Infof("my own commission %v percent %v commission %v",
-				comm.PayAmount, comm.Percent, inviterUserInfo.CommissionAmount)
 		}
 
 		for _, commission := range invitee.MyCommissions {
