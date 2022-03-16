@@ -159,7 +159,7 @@ func UpdatePasswordByAppUser(ctx context.Context, in *npool.UpdatePasswordByAppU
 		in.GetAccount(),
 		in.GetAccountType(),
 		in.GetVerificationCode(),
-		thirdgwconst.UsedForSignup,
+		thirdgwconst.UsedForUpdate,
 		true,
 	)
 	if err != nil {
