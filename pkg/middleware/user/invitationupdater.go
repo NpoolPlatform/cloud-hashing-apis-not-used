@@ -281,6 +281,17 @@ func getInvitationUserInfo( //nolint
 		kol = true
 	}
 
+	if !kol {
+		commissions = []*npool.CommissionAmount{
+			&npool.CommissionAmount{
+				Amount:  0,
+				Percent: 0,
+				Start:   0,
+				End:     0,
+			},
+		}
+	}
+
 	for orderIndex, orderInfo := range resp2.Infos {
 		if orderInfo.Order.Payment == nil {
 			continue
@@ -303,12 +314,19 @@ func getInvitationUserInfo( //nolint
 		}
 
 		for i, commission := range commissions {
-			if commission.Start <= orderInfo.Order.Payment.CreateAt && orderInfo.Order.Payment.CreateAt < commission.End {
-				commissions[i].PayAmount += usdAmount
-				commissions[i].CreateAt = orderInfo.Order.Payment.CreateAt
-				logger.Sugar().Infof("app %v user %v order %v | %v commission %v commission %v container %v",
-					orderInfo.Order.Order.AppID, orderInfo.Order.Order.UserID, orderInfo.Order.Order.ID, orderIndex, usdAmount, i, commission)
-			} else if commission.Start <= orderInfo.Order.Payment.CreateAt && commission.End == 0 {
+			if kol {
+				if commission.Start <= orderInfo.Order.Payment.CreateAt && orderInfo.Order.Payment.CreateAt < commission.End {
+					commissions[i].PayAmount += usdAmount
+					commissions[i].CreateAt = orderInfo.Order.Payment.CreateAt
+					logger.Sugar().Infof("app %v user %v order %v | %v commission %v commission %v container %v",
+						orderInfo.Order.Order.AppID, orderInfo.Order.Order.UserID, orderInfo.Order.Order.ID, orderIndex, usdAmount, i, commission)
+				} else if commission.Start <= orderInfo.Order.Payment.CreateAt && commission.End == 0 {
+					commissions[i].PayAmount += usdAmount
+					commissions[i].CreateAt = orderInfo.Order.Payment.CreateAt
+					logger.Sugar().Infof("app %v user %v order %v | %v commission %v commission %v container %v",
+						orderInfo.Order.Order.AppID, orderInfo.Order.Order.UserID, orderInfo.Order.Order.ID, orderIndex, usdAmount, i, commission)
+				}
+			} else {
 				commissions[i].PayAmount += usdAmount
 				commissions[i].CreateAt = orderInfo.Order.Payment.CreateAt
 				logger.Sugar().Infof("app %v user %v order %v | %v commission %v commission %v container %v",
@@ -470,7 +488,7 @@ func getInvitations(appID, reqInviterID string, directOnly bool) (map[string]*np
 
 		for _, commission := range invitee.MyCommissions {
 			for _, comm := range inviterUserInfo.MyCommissions {
-				if comm.Amount != commission.Amount {
+				if comm.Amount != commission.Amount && commission.Percent > 0 {
 					continue
 				}
 				if comm.Start <= commission.CreateAt && (commission.CreateAt < comm.End || comm.End == 0) {
@@ -480,6 +498,7 @@ func getInvitations(appID, reqInviterID string, directOnly bool) (map[string]*np
 					inviterUserInfo.CommissionAmount += commission.PayAmount * float64(comm.Percent-commission.Percent) / 100.0
 					logger.Sugar().Infof("invitee commission %v percent %v commission %v",
 						comm.PayAmount, commission.Percent, inviterUserInfo.CommissionAmount)
+					break
 				}
 			}
 		}
