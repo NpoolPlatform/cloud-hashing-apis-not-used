@@ -331,6 +331,8 @@ func getInvitationUserInfo( //nolint
 		avatar = inviteeResp.Info.Extra.Avatar
 	}
 
+	logger.Sugar().Infof("app %v user %v commission %v summary %v", appID, inviteeID, commissions, summarys)
+
 	return &npool.InvitationUserInfo{
 		UserID:        inviteeResp.Info.User.ID,
 		Username:      username,
