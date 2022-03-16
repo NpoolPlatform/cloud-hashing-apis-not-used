@@ -498,6 +498,8 @@ func getInvitations(appID, reqInviterID string, directOnly bool) (map[string]*np
 			}
 		}
 
+		logger.Sugar().Infof("invitations %v", invitations)
+
 		for goon {
 			goon = false
 
