@@ -464,6 +464,8 @@ func getInvitations(appID, reqInviterID string, directOnly bool) (map[string]*np
 			inviterUserInfo.Summarys[coinID] = mySummary
 		}
 
+		logger.Sugar().Infof("invitee %v commissions", invitee)
+
 		for _, commission := range invitee.MyCommissions {
 			for _, comm := range inviterUserInfo.MyCommissions {
 				if comm.Amount != commission.Amount {
