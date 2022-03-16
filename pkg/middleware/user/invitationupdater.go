@@ -304,13 +304,13 @@ func getInvitationUserInfo( //nolint
 
 		for i, commission := range commissions {
 			if commission.Start <= orderInfo.Order.Payment.CreateAt && orderInfo.Order.Payment.CreateAt < commission.End {
-				logger.Sugar().Infof("app %v user %v order %v commission %v commission container %v",
-					orderInfo.Order.Order.AppID, orderInfo.Order.Order.UserID, orderInfo.Order.Order.ID, usdAmount, commission)
+				logger.Sugar().Infof("app %v user %v order %v commission %v commission %v container %v",
+					orderInfo.Order.Order.AppID, orderInfo.Order.Order.UserID, orderInfo.Order.Order.ID, usdAmount, i, commission)
 				commissions[i].PayAmount += usdAmount
 				commissions[i].CreateAt = orderInfo.Order.Payment.CreateAt
 			} else if commission.Start <= orderInfo.Order.Payment.CreateAt && commission.End == 0 {
-				logger.Sugar().Infof("app %v user %v order %v commission %v commission container %v",
-					orderInfo.Order.Order.AppID, orderInfo.Order.Order.UserID, orderInfo.Order.Order.ID, usdAmount, commission)
+				logger.Sugar().Infof("app %v user %v order %v commission %v commission %v container %v",
+					orderInfo.Order.Order.AppID, orderInfo.Order.Order.UserID, orderInfo.Order.Order.ID, usdAmount, i, commission)
 				commissions[i].PayAmount += usdAmount
 				commissions[i].CreateAt = orderInfo.Order.Payment.CreateAt
 			}
