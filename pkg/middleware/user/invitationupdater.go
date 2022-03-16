@@ -282,14 +282,7 @@ func getInvitationUserInfo( //nolint
 	}
 
 	if !kol {
-		commissions = []*npool.CommissionAmount{
-			{
-				Amount:  0,
-				Percent: 0,
-				Start:   0,
-				End:     0,
-			},
-		}
+		commissions = []*npool.CommissionAmount{}
 	}
 
 	for orderIndex, orderInfo := range resp2.Infos {
@@ -313,8 +306,8 @@ func getInvitationUserInfo( //nolint
 			usdAmount *= orderInfo.Order.Payment.CoinUSDCurrency
 		}
 
-		for i, commission := range commissions {
-			if kol {
+		if kol {
+			for i, commission := range commissions {
 				if commission.Start <= orderInfo.Order.Payment.CreateAt && orderInfo.Order.Payment.CreateAt < commission.End {
 					commissions[i].PayAmount += usdAmount
 					commissions[i].CreateAt = orderInfo.Order.Payment.CreateAt
@@ -326,12 +319,14 @@ func getInvitationUserInfo( //nolint
 					logger.Sugar().Infof("app %v user %v order %v | %v commission %v commission %v container %v",
 						orderInfo.Order.Order.AppID, orderInfo.Order.Order.UserID, orderInfo.Order.Order.ID, orderIndex, usdAmount, i, commission)
 				}
-			} else {
-				commissions[i].PayAmount += usdAmount
-				commissions[i].CreateAt = orderInfo.Order.Payment.CreateAt
-				logger.Sugar().Infof("app %v user %v order %v | %v commission %v commission %v container %v",
-					orderInfo.Order.Order.AppID, orderInfo.Order.Order.UserID, orderInfo.Order.Order.ID, orderIndex, usdAmount, i, commission)
 			}
+		} else {
+			logger.Sugar().Infof("app %v user %v order %v | %v commission %v",
+				orderInfo.Order.Order.AppID, orderInfo.Order.Order.UserID, orderInfo.Order.Order.ID, orderIndex, usdAmount)
+			commissions = append(commissions, &npool.CommissionAmount{
+				PayAmount: usdAmount,
+				CreateAt:  orderInfo.Order.Payment.CreateAt,
+			})
 		}
 
 		summary.Amount += usdAmount
