@@ -261,7 +261,7 @@ func GetOrder(ctx context.Context, in *npool.GetOrderRequest) (*npool.GetOrderRe
 }
 
 func GetOrdersByAppUser(ctx context.Context, in *npool.GetOrdersByAppUserRequest) (*npool.GetOrdersByAppUserResponse, error) {
-	ordersDetail, err := grpc2.GetOrdersDetailByAppUser(ctx, &orderpb.GetOrdersDetailByAppUserRequest{
+	orders, err := grpc2.GetOrdersDetailByAppUser(ctx, &orderpb.GetOrdersDetailByAppUserRequest{
 		AppID:  in.GetAppID(),
 		UserID: in.GetUserID(),
 	})
@@ -273,7 +273,7 @@ func GetOrdersByAppUser(ctx context.Context, in *npool.GetOrdersByAppUserRequest
 	goods := map[string]*npool.Good{}
 	coins := map[string]*coininfopb.CoinInfo{}
 
-	for _, info := range ordersDetail.Infos {
+	for _, info := range orders {
 		detail, err := expandOrder(ctx, info, false, goods, coins)
 		if err != nil {
 			logger.Sugar().Warnf("cannot expand order detail: %v", err)

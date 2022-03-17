@@ -257,7 +257,7 @@ func GetOrderDetail(ctx context.Context, in *orderpb.GetOrderDetailRequest) (*or
 	return cli.GetOrderDetail(ctx, in)
 }
 
-func GetOrdersDetailByAppUser(ctx context.Context, in *orderpb.GetOrdersDetailByAppUserRequest) (*orderpb.GetOrdersDetailByAppUserResponse, error) {
+func GetOrdersDetailByAppUser(ctx context.Context, in *orderpb.GetOrdersDetailByAppUserRequest) ([]*orderpb.OrderDetail, error) {
 	conn, err := grpc2.GetGRPCConn(orderconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get order connection: %v", err)
@@ -269,7 +269,12 @@ func GetOrdersDetailByAppUser(ctx context.Context, in *orderpb.GetOrdersDetailBy
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetOrdersDetailByAppUser(ctx, in)
+	resp, err := cli.GetOrdersDetailByAppUser(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get orders: %v", err)
+	}
+
+	return resp.Infos, nil
 }
 
 func GetOrdersShortDetailByAppUser(ctx context.Context, in *orderpb.GetOrdersShortDetailByAppUserRequest) (*orderpb.GetOrdersShortDetailByAppUserResponse, error) {
