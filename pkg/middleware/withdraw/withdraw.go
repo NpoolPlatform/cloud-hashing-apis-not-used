@@ -8,7 +8,7 @@ import (
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
 	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/const"
-	usermw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/user"
+	referralmw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral"
 	verifymw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/verify"
 
 	review "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/review"
@@ -117,9 +117,9 @@ func CommissionCoinTypeID(ctx context.Context) (string, error) {
 }
 
 func commissionWithdrawable(ctx context.Context, appID, userID, withdrawType string, amount float64) (bool, error) {
-	usermw.AddWatcher(appID, userID)
+	referralmw.AddWatcher(appID, userID)
 
-	myCommission, err := usermw.GetCommission(appID, userID)
+	myCommission, err := referralmw.GetCommission(appID, userID)
 	if err != nil {
 		return false, xerrors.Errorf("fail get total amount: %v", err)
 	}

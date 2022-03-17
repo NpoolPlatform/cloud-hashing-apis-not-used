@@ -1,4 +1,4 @@
-package user
+package referral
 
 import (
 	"context"
@@ -253,7 +253,7 @@ func getInvitationUserInfo( //nolint
 				})
 			}
 		} else {
-			myInviteeSettings, err := grpc2.GetAppUserPurchaseAmountSettingsByAppUser(ctx, &inspirepb.GetAppUserPurchaseAmountSettingsByAppUserRequest{
+			myInviteeSettings, err := grpc2.GetAppPurchaseAmountSettingsByAppUser(ctx, &inspirepb.GetAppPurchaseAmountSettingsByAppUserRequest{
 				AppID:  appID,
 				UserID: inviteeID,
 			})

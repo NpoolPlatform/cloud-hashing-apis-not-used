@@ -574,7 +574,7 @@ func GetAppPurchaseAmountSettingsByApp(ctx context.Context, in *inspirepb.GetApp
 	return cli.GetAppPurchaseAmountSettingsByApp(ctx, in)
 }
 
-func GetAppUserPurchaseAmountSettingsByAppUser(ctx context.Context, in *inspirepb.GetAppUserPurchaseAmountSettingsByAppUserRequest) (*inspirepb.GetAppUserPurchaseAmountSettingsByAppUserResponse, error) {
+func GetAppPurchaseAmountSettingsByAppUser(ctx context.Context, in *inspirepb.GetAppPurchaseAmountSettingsByAppUserRequest) (*inspirepb.GetAppPurchaseAmountSettingsByAppUserResponse, error) {
 	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
@@ -586,7 +586,7 @@ func GetAppUserPurchaseAmountSettingsByAppUser(ctx context.Context, in *inspirep
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetAppUserPurchaseAmountSettingsByAppUser(ctx, in)
+	return cli.GetAppPurchaseAmountSettingsByAppUser(ctx, in)
 }
 
 func GetAppInvitationSettingsByApp(ctx context.Context, in *inspirepb.GetAppInvitationSettingsByAppRequest) (*inspirepb.GetAppInvitationSettingsByAppResponse, error) {
