@@ -1030,7 +1030,7 @@ func VerifyAppUserByAppAccountPassword(ctx context.Context, in *appusermgrpb.Ver
 	return cli.VerifyAppUserByAppAccountPassword(ctx, in)
 }
 
-func GetAppUserByAppUser(ctx context.Context, in *appusermgrpb.GetAppUserByAppUserRequest) (*appusermgrpb.GetAppUserByAppUserResponse, error) {
+func GetAppUserByAppUser(ctx context.Context, in *appusermgrpb.GetAppUserByAppUserRequest) (*appusermgrpb.AppUser, error) {
 	conn, err := grpc2.GetGRPCConn(appusermgrconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get app user manager connection: %v", err)
@@ -1042,7 +1042,32 @@ func GetAppUserByAppUser(ctx context.Context, in *appusermgrpb.GetAppUserByAppUs
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetAppUserByAppUser(ctx, in)
+	resp, err := cli.GetAppUserByAppUser(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app user: %v", err)
+	}
+
+	return resp.Info, nil
+}
+
+func GetAppUserExtraByAppUser(ctx context.Context, in *appusermgrpb.GetAppUserExtraByAppUserRequest) (*appusermgrpb.AppUserExtra, error) {
+	conn, err := grpc2.GetGRPCConn(appusermgrconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app user manager connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := appusermgrpb.NewAppUserManagerClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	resp, err := cli.GetAppUserExtraByAppUser(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app user extra: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
 func UpdateAppUser(ctx context.Context, in *appusermgrpb.UpdateAppUserRequest) (*appusermgrpb.UpdateAppUserResponse, error) {

@@ -67,11 +67,11 @@ func VerifyCode(ctx context.Context, appID, userID, account, accountType, code, 
 
 		switch accountType {
 		case appusermgrconst.SignupByMobile:
-			if user.Info.PhoneNO != account {
+			if user.PhoneNO != account {
 				return xerrors.Errorf("invalid mobile")
 			}
 		case appusermgrconst.SignupByEmail:
-			if user.Info.EmailAddress != account {
+			if user.EmailAddress != account {
 				return xerrors.Errorf("invalid email")
 			}
 		}
