@@ -5,21 +5,12 @@ import (
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
-	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
+	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
 	"golang.org/x/xerrors"
 )
 
-type Referral struct {
-	User         *appusermgrpb.AppUser
-	Extra        *appusermgrpb.AppUserExtra
-	Invitation   *inspirepb.RegistrationInvitation
-	USDAmount    float64
-	SubUSDAmount float64
-	Kol          bool
-}
-
-func getReferral(ctx context.Context, appID, userID string) (*Referral, error) {
+func getReferral(ctx context.Context, appID, userID string) (*npool.Referral, error) {
 	user, err := grpc2.GetAppUserByAppUser(ctx, &appusermgrpb.GetAppUserByAppUserRequest{
 		AppID:  appID,
 		UserID: userID,
@@ -59,7 +50,7 @@ func getReferral(ctx context.Context, appID, userID string) (*Referral, error) {
 		return nil, xerrors.Errorf("fail get invitees: %v", err)
 	}
 
-	return &Referral{
+	return &npool.Referral{
 		User:         user,
 		Extra:        extra,
 		Invitation:   inviter,
@@ -69,13 +60,13 @@ func getReferral(ctx context.Context, appID, userID string) (*Referral, error) {
 	}, nil
 }
 
-func getReferrals(ctx context.Context, appID, userID string) ([]*Referral, error) {
+func getReferrals(ctx context.Context, appID, userID string) ([]*npool.Referral, error) {
 	invitees, err := getInvitees(ctx, appID, userID)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get invitees: %v", err)
 	}
 
-	referrals := []*Referral{}
+	referrals := []*npool.Referral{}
 
 	for _, iv := range invitees {
 		referral, err := getReferral(ctx, iv.AppID, iv.InviteeID)
