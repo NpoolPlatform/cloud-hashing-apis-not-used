@@ -298,7 +298,7 @@ func UpdatePhoneNO(ctx context.Context, in *npool.UpdatePhoneNORequest) (*npool.
 		in.GetOldAccount(),
 		in.GetOldAccountType(),
 		in.GetOldVerificationCode(),
-		thirdgwconst.UsedForSignup,
+		thirdgwconst.UsedForUpdate,
 		true,
 	)
 	if err != nil {
