@@ -499,7 +499,7 @@ func CreateRegistrationInvitation(ctx context.Context, in *inspirepb.CreateRegis
 	return cli.CreateRegistrationInvitation(ctx, in)
 }
 
-func GetRegistrationInvitationsByAppInviter(ctx context.Context, in *inspirepb.GetRegistrationInvitationsByAppInviterRequest) (*inspirepb.GetRegistrationInvitationsByAppInviterResponse, error) {
+func GetRegistrationInvitationsByAppInviter(ctx context.Context, in *inspirepb.GetRegistrationInvitationsByAppInviterRequest) ([]*inspirepb.RegistrationInvitation, error) {
 	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
@@ -511,7 +511,32 @@ func GetRegistrationInvitationsByAppInviter(ctx context.Context, in *inspirepb.G
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetRegistrationInvitationsByAppInviter(ctx, in)
+	resp, err := cli.GetRegistrationInvitationsByAppInviter(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get registration invitations: %v", err)
+	}
+
+	return resp.Infos, err
+}
+
+func GetRegistrationInvitationByAppInvitee(ctx context.Context, in *inspirepb.GetRegistrationInvitationByAppInviteeRequest) (*inspirepb.RegistrationInvitation, error) {
+	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := inspirepb.NewCloudHashingInspireClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	resp, err := cli.GetRegistrationInvitationByAppInvitee(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get registration invitation: %v", err)
+	}
+
+	return resp.Info, err
 }
 
 func GetCommissionCoinSettings(ctx context.Context, in *inspirepb.GetCommissionCoinSettingsRequest) (*inspirepb.GetCommissionCoinSettingsResponse, error) {

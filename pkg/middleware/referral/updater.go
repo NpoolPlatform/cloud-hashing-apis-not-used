@@ -398,7 +398,7 @@ func getInvitations(appID, reqInviterID string, directOnly bool) (map[string]*np
 
 			inviters[inviterID] = struct{}{}
 
-			resp, err := grpc2.GetRegistrationInvitationsByAppInviter(ctx, &inspirepb.GetRegistrationInvitationsByAppInviterRequest{
+			invitees, err := grpc2.GetRegistrationInvitationsByAppInviter(ctx, &inspirepb.GetRegistrationInvitationsByAppInviterRequest{
 				AppID:     appID,
 				InviterID: inviterID,
 			})
@@ -407,10 +407,10 @@ func getInvitations(appID, reqInviterID string, directOnly bool) (map[string]*np
 				continue
 			}
 
-			myCounts[inviterID] = uint32(len(resp.Infos))
+			myCounts[inviterID] = uint32(len(invitees))
 
-			for i, info := range resp.Infos {
-				logger.Sugar().Infof("%v of %v layer %v user %v invited count %v", i, len(resp.Infos), layer, inviterID, myCounts[inviterID])
+			for i, info := range invitees {
+				logger.Sugar().Infof("%v of %v layer %v user %v invited count %v", i, len(invitees), layer, inviterID, myCounts[inviterID])
 
 				if info.AppID != appID || info.InviterID != inviterID {
 					logger.Sugar().Errorf("invalid inviter id or app id")
