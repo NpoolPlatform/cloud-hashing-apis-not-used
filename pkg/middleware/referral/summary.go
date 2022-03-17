@@ -78,3 +78,22 @@ func getReferrals(ctx context.Context, appID, userID string) ([]*npool.Referral,
 
 	return referrals, nil
 }
+
+func getLayeredReferrals(ctx context.Context, appID, userID string) ([]*npool.Referral, error) {
+	invitees, err := getLayeredInvitees(ctx, appID, userID)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get invitees: %v", err)
+	}
+
+	referrals := []*npool.Referral{}
+
+	for _, iv := range invitees {
+		referral, err := getReferral(ctx, iv.AppID, iv.InviteeID)
+		if err != nil {
+			return nil, xerrors.Errorf("fail get referral: %v", err)
+		}
+		referrals = append(referrals, referral)
+	}
+
+	return referrals, nil
+}
