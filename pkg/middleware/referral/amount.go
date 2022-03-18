@@ -2,15 +2,29 @@ package referral
 
 import (
 	"context"
+	"fmt"
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
+	cache "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/cache"
 	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
 	orderpb "github.com/NpoolPlatform/message/npool/cloud-hashing-order"
 
 	"golang.org/x/xerrors"
 )
 
+const (
+	cacheUSDAmount          = "referral:usd:amount"
+	cacheSubUSDAmount       = "referral:sub:usd:amount"
+	cachePeriodUSDAmount    = "referral:period:usd:amount"
+	cachePeriodSubUSDAmount = "referral:period:sub:usd:amount"
+)
+
 func getUSDAmount(ctx context.Context, appID, userID string) (float64, error) {
+	amount := cache.GetEntry(cacheKey(appID, userID, cacheUSDAmount))
+	if amount != nil {
+		return *(amount.(*float64)), nil
+	}
+
 	// TODO: let database to sum orders amount
 	orders, err := grpc2.GetOrdersDetailByAppUser(ctx, &orderpb.GetOrdersDetailByAppUserRequest{
 		AppID:  appID,
@@ -27,6 +41,8 @@ func getUSDAmount(ctx context.Context, appID, userID string) (float64, error) {
 		}
 		totalAmount += order.Payment.Amount * order.Payment.CoinUSDCurrency
 	}
+
+	cache.AddEntry(cacheKey(appID, userID, cacheUSDAmount), &totalAmount)
 
 	return totalAmount, nil
 }
@@ -50,6 +66,12 @@ func getSubUSDAmount(ctx context.Context, appID, userID string) (float64, error)
 }
 
 func getPeriodUSDAmount(ctx context.Context, appID, userID string, start, end uint32) (float64, error) {
+	key := fmt.Sprintf("%v:%v:%v", cacheKey(appID, userID, cachePeriodUSDAmount), start, end)
+	amount := cache.GetEntry(key)
+	if amount != nil {
+		return *(amount.(*float64)), nil
+	}
+
 	orders, err := grpc2.GetOrdersDetailByAppUser(ctx, &orderpb.GetOrdersDetailByAppUserRequest{
 		AppID:  appID,
 		UserID: userID,
@@ -68,6 +90,8 @@ func getPeriodUSDAmount(ctx context.Context, appID, userID string, start, end ui
 		}
 		totalAmount += order.Payment.Amount * order.Payment.CoinUSDCurrency
 	}
+
+	cache.AddEntry(key, &totalAmount)
 
 	return totalAmount, nil
 }
