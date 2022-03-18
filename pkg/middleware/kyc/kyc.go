@@ -132,7 +132,6 @@ func GetByAppUser(ctx context.Context, in *npool.GetKycByAppUserRequest) (*npool
 }
 
 func UpdateKycReview(ctx context.Context, in *npool.UpdateKycReviewRequest) (*npool.UpdateKycReviewResponse, error) {
-
 	reviewInfo := in.GetReview().GetInfo()
 	reviewResp, err := grpc2.GetReview(ctx, &reviewpb.GetReviewRequest{
 		ID: reviewInfo.GetID(),
@@ -144,7 +143,9 @@ func UpdateKycReview(ctx context.Context, in *npool.UpdateKycReviewRequest) (*np
 	resp, err := grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{
 		Info: reviewInfo,
 	})
-
+	if err != nil {
+		return nil, err
+	}
 	if reviewResp.GetInfo().GetState() == reviewconst.StateWait && reviewInfo.GetState() == reviewconst.StateApproved {
 		_, err := grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
 			Info: &notificationpbpb.UserNotification{
