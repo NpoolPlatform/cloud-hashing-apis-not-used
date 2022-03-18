@@ -257,7 +257,7 @@ func GetOrderDetail(ctx context.Context, in *orderpb.GetOrderDetailRequest) (*or
 	return cli.GetOrderDetail(ctx, in)
 }
 
-func GetOrdersDetailByAppUser(ctx context.Context, in *orderpb.GetOrdersDetailByAppUserRequest) (*orderpb.GetOrdersDetailByAppUserResponse, error) {
+func GetOrdersDetailByAppUser(ctx context.Context, in *orderpb.GetOrdersDetailByAppUserRequest) ([]*orderpb.OrderDetail, error) {
 	conn, err := grpc2.GetGRPCConn(orderconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get order connection: %v", err)
@@ -269,7 +269,12 @@ func GetOrdersDetailByAppUser(ctx context.Context, in *orderpb.GetOrdersDetailBy
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetOrdersDetailByAppUser(ctx, in)
+	resp, err := cli.GetOrdersDetailByAppUser(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get orders: %v", err)
+	}
+
+	return resp.Infos, nil
 }
 
 func GetOrdersShortDetailByAppUser(ctx context.Context, in *orderpb.GetOrdersShortDetailByAppUserRequest) (*orderpb.GetOrdersShortDetailByAppUserResponse, error) {
@@ -499,7 +504,7 @@ func CreateRegistrationInvitation(ctx context.Context, in *inspirepb.CreateRegis
 	return cli.CreateRegistrationInvitation(ctx, in)
 }
 
-func GetRegistrationInvitationsByAppInviter(ctx context.Context, in *inspirepb.GetRegistrationInvitationsByAppInviterRequest) (*inspirepb.GetRegistrationInvitationsByAppInviterResponse, error) {
+func GetRegistrationInvitationsByAppInviter(ctx context.Context, in *inspirepb.GetRegistrationInvitationsByAppInviterRequest) ([]*inspirepb.RegistrationInvitation, error) {
 	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
@@ -511,7 +516,32 @@ func GetRegistrationInvitationsByAppInviter(ctx context.Context, in *inspirepb.G
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetRegistrationInvitationsByAppInviter(ctx, in)
+	resp, err := cli.GetRegistrationInvitationsByAppInviter(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get registration invitations: %v", err)
+	}
+
+	return resp.Infos, err
+}
+
+func GetRegistrationInvitationByAppInvitee(ctx context.Context, in *inspirepb.GetRegistrationInvitationByAppInviteeRequest) (*inspirepb.RegistrationInvitation, error) {
+	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := inspirepb.NewCloudHashingInspireClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	resp, err := cli.GetRegistrationInvitationByAppInvitee(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get registration invitation: %v", err)
+	}
+
+	return resp.Info, err
 }
 
 func GetCommissionCoinSettings(ctx context.Context, in *inspirepb.GetCommissionCoinSettingsRequest) (*inspirepb.GetCommissionCoinSettingsResponse, error) {
@@ -1000,7 +1030,7 @@ func VerifyAppUserByAppAccountPassword(ctx context.Context, in *appusermgrpb.Ver
 	return cli.VerifyAppUserByAppAccountPassword(ctx, in)
 }
 
-func GetAppUserByAppUser(ctx context.Context, in *appusermgrpb.GetAppUserByAppUserRequest) (*appusermgrpb.GetAppUserByAppUserResponse, error) {
+func GetAppUserByAppUser(ctx context.Context, in *appusermgrpb.GetAppUserByAppUserRequest) (*appusermgrpb.AppUser, error) {
 	conn, err := grpc2.GetGRPCConn(appusermgrconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get app user manager connection: %v", err)
@@ -1012,7 +1042,32 @@ func GetAppUserByAppUser(ctx context.Context, in *appusermgrpb.GetAppUserByAppUs
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetAppUserByAppUser(ctx, in)
+	resp, err := cli.GetAppUserByAppUser(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app user: %v", err)
+	}
+
+	return resp.Info, nil
+}
+
+func GetAppUserExtraByAppUser(ctx context.Context, in *appusermgrpb.GetAppUserExtraByAppUserRequest) (*appusermgrpb.AppUserExtra, error) {
+	conn, err := grpc2.GetGRPCConn(appusermgrconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app user manager connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := appusermgrpb.NewAppUserManagerClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	resp, err := cli.GetAppUserExtraByAppUser(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app user extra: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
 func UpdateAppUser(ctx context.Context, in *appusermgrpb.UpdateAppUserRequest) (*appusermgrpb.UpdateAppUserResponse, error) {
