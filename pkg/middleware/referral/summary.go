@@ -98,6 +98,7 @@ func getReferral(ctx context.Context, appID, userID string) (*npool.Referral, er
 		USDAmount:    amount,
 		SubUSDAmount: subAmount,
 		Kol:          len(invitees) > 0,
+		InvitedCount: uint32(len(invitees)),
 	}, nil
 }
 
