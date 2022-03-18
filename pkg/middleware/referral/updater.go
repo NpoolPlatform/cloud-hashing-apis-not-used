@@ -231,8 +231,8 @@ func getInvitationUserInfo( //nolint
 
 	commissions := []*npool.CommissionAmount{}
 
-	if appCommissionSetting.Info != nil {
-		if appCommissionSetting.Info.UniqueSetting {
+	if appCommissionSetting != nil {
+		if appCommissionSetting.UniqueSetting {
 			appPurchaseAmountSettings, err := grpc2.GetAppPurchaseAmountSettingsByApp(ctx, &inspirepb.GetAppPurchaseAmountSettingsByAppRequest{
 				AppID: appID,
 			})

@@ -544,7 +544,7 @@ func GetRegistrationInvitationByAppInvitee(ctx context.Context, in *inspirepb.Ge
 	return resp.Info, err
 }
 
-func GetCommissionCoinSettings(ctx context.Context, in *inspirepb.GetCommissionCoinSettingsRequest) (*inspirepb.GetCommissionCoinSettingsResponse, error) {
+func GetCommissionCoinSettings(ctx context.Context, in *inspirepb.GetCommissionCoinSettingsRequest) ([]*inspirepb.CommissionCoinSetting, error) {
 	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
@@ -556,7 +556,12 @@ func GetCommissionCoinSettings(ctx context.Context, in *inspirepb.GetCommissionC
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetCommissionCoinSettings(ctx, in)
+	resp, err := cli.GetCommissionCoinSettings(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get commission coin settings: %v", err)
+	}
+
+	return resp.Infos, nil
 }
 
 func GetAppCommissionSetting(ctx context.Context, in *inspirepb.GetAppCommissionSettingRequest) (*inspirepb.GetAppCommissionSettingResponse, error) {
@@ -574,7 +579,7 @@ func GetAppCommissionSetting(ctx context.Context, in *inspirepb.GetAppCommission
 	return cli.GetAppCommissionSetting(ctx, in)
 }
 
-func GetAppCommissionSettingByApp(ctx context.Context, in *inspirepb.GetAppCommissionSettingByAppRequest) (*inspirepb.GetAppCommissionSettingByAppResponse, error) {
+func GetAppCommissionSettingByApp(ctx context.Context, in *inspirepb.GetAppCommissionSettingByAppRequest) (*inspirepb.AppCommissionSetting, error) {
 	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
@@ -586,7 +591,12 @@ func GetAppCommissionSettingByApp(ctx context.Context, in *inspirepb.GetAppCommi
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetAppCommissionSettingByApp(ctx, in)
+	resp, err := cli.GetAppCommissionSettingByApp(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app commission setting: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
 func GetAppPurchaseAmountSettingsByApp(ctx context.Context, in *inspirepb.GetAppPurchaseAmountSettingsByAppRequest) (*inspirepb.GetAppPurchaseAmountSettingsByAppResponse, error) {

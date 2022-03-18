@@ -104,7 +104,7 @@ func CommissionCoinTypeID(ctx context.Context) (string, error) {
 
 	invalidUUID := uuid.UUID{}.String()
 	coinTypeID := invalidUUID
-	for _, info := range commissionCoins.Infos {
+	for _, info := range commissionCoins {
 		if info.Using {
 			coinTypeID = info.ID
 		}
