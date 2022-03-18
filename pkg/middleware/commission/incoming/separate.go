@@ -3,6 +3,8 @@ package incoming
 import (
 	"context"
 
+	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+
 	commissionsetting "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/commission/setting"
 	"github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral"
 	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
@@ -18,6 +20,7 @@ func getRebate(ctx context.Context, appID, userID string) (float64, error) {
 	}
 
 	totalAmount := 0.0
+	logger.Sugar().Infof("settings %v", settings)
 
 	for _, setting := range settings {
 		amount, err := referral.GetPeriodUSDAmount(ctx, appID, userID, setting.Start, setting.End)
@@ -25,6 +28,8 @@ func getRebate(ctx context.Context, appID, userID string) (float64, error) {
 			return 0, xerrors.Errorf("fail get period usd amount: %v", err)
 		}
 		totalAmount += amount * float64(setting.Percent) / 100.0
+
+		logger.Sugar().Infof("commission %v %v amount %v %v %v", appID, userID, totalAmount, amount, setting.Percent)
 	}
 
 	return totalAmount, nil
@@ -56,11 +61,11 @@ func getOrderParentRebate(ctx context.Context, order *orderpb.OrderDetail) (floa
 	}
 	parentPercent := int(setting.Percent)
 
+	childPercent := 0
 	setting = commissionsetting.GetAmountSettingByTimestamp(childs, order.Order.CreateAt)
-	if setting == nil {
-		return 0, nil
+	if setting != nil {
+		childPercent = int(setting.Percent)
 	}
-	childPercent := int(setting.Percent)
 
 	if parentPercent < childPercent {
 		return 0, nil
@@ -68,6 +73,9 @@ func getOrderParentRebate(ctx context.Context, order *orderpb.OrderDetail) (floa
 
 	orderAmount := order.Payment.Amount * order.Payment.CoinUSDCurrency
 	parentAmount := orderAmount * float64(parentPercent) / 100.0
+
+	logger.Sugar().Infof("parent commission %v %v amount %v %v %v",
+		order.Order.AppID, order.Order.UserID, orderAmount, parentAmount, parentPercent)
 
 	return parentAmount, nil
 }

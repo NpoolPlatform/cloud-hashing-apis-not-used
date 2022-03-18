@@ -75,6 +75,7 @@ func GetPeriodUSDAmount(ctx context.Context, appID, userID string, start, end ui
 		if order.Payment == nil || order.Payment.State != orderconst.PaymentStateDone {
 			continue
 		}
+
 		if order.Order.CreateAt < start || (order.Order.CreateAt >= end && end > 0) {
 			continue
 		}
