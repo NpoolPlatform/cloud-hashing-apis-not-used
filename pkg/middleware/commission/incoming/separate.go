@@ -8,6 +8,7 @@ import (
 	commissionsetting "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/commission/setting"
 	"github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral"
 	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
+	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
 	orderpb "github.com/NpoolPlatform/message/npool/cloud-hashing-order"
 
 	"golang.org/x/xerrors"
@@ -20,7 +21,6 @@ func getRebate(ctx context.Context, appID, userID string) (float64, error) {
 	}
 
 	totalAmount := 0.0
-	logger.Sugar().Infof("settings %v", settings)
 
 	for _, setting := range settings {
 		amount, err := referral.GetPeriodUSDAmount(ctx, appID, userID, setting.Start, setting.End)
@@ -28,109 +28,89 @@ func getRebate(ctx context.Context, appID, userID string) (float64, error) {
 			return 0, xerrors.Errorf("fail get period usd amount: %v", err)
 		}
 		totalAmount += amount * float64(setting.Percent) / 100.0
-
-		logger.Sugar().Infof("commission %v %v amount %v %v %v", appID, userID, totalAmount, amount, setting.Percent)
 	}
 
 	return totalAmount, nil
 }
 
-func getOrderParentRebate(ctx context.Context, order *orderpb.OrderDetail) (float64, error) {
-	inviter, err := referral.GetInviter(ctx, order.Order.AppID, order.Order.UserID)
-	if err != nil {
-		return 0, xerrors.Errorf("fail get inviter: %v", err)
-	}
-
-	parents, err := commissionsetting.GetAmountSettingsByAppUser(ctx, inviter.AppID, inviter.InviterID)
-	if err != nil {
-		return 0, xerrors.Errorf("fail get parent settings: %v", err)
-	}
-
-	childs, err := commissionsetting.GetAmountSettingsByAppUser(ctx, inviter.AppID, inviter.InviteeID)
-	if err != nil {
-		return 0, xerrors.Errorf("fail get child settings: %v", err)
-	}
-
+func getOrderParentRebate(ctx context.Context, order *orderpb.OrderDetail, roots, nexts []*inspirepb.AppPurchaseAmountSetting) (float64, error) {
 	if order.Payment == nil || order.Payment.State != orderconst.PaymentStateDone {
 		return 0, nil
 	}
 
-	setting := commissionsetting.GetAmountSettingByTimestamp(parents, order.Order.CreateAt)
+	setting := commissionsetting.GetAmountSettingByTimestamp(roots, order.Order.CreateAt)
 	if setting == nil {
 		return 0, nil
 	}
-	parentPercent := int(setting.Percent)
+	rootPercent := int(setting.Percent)
 
-	childPercent := 0
-	setting = commissionsetting.GetAmountSettingByTimestamp(childs, order.Order.CreateAt)
+	nextPercent := 0
+	setting = commissionsetting.GetAmountSettingByTimestamp(nexts, order.Order.CreateAt)
 	if setting != nil {
-		childPercent = int(setting.Percent)
+		nextPercent = int(setting.Percent)
 	}
 
-	if parentPercent < childPercent {
+	if rootPercent < nextPercent {
 		return 0, nil
 	}
 
 	orderAmount := order.Payment.Amount * order.Payment.CoinUSDCurrency
-	parentAmount := orderAmount * float64(parentPercent) / 100.0
+	rootAmount := orderAmount * float64(rootPercent-nextPercent) / 100.0
 
-	logger.Sugar().Infof("parent commission %v %v amount %v %v %v",
-		order.Order.AppID, order.Order.UserID, orderAmount, parentAmount, parentPercent)
+	logger.Sugar().Infof("order %v | %v root %v | %v next %v user %v",
+		order.Order.ID, orderAmount, rootAmount, rootPercent, nextPercent, order.Order.UserID)
 
-	return parentAmount, nil
+	return rootAmount, nil
 }
 
-func getPeriodRebate(ctx context.Context, appID, userID string) (float64, error) {
+func getPeriodRebate(ctx context.Context, appID, userID string, roots, nexts []*inspirepb.AppPurchaseAmountSetting) (float64, error) {
 	orders, err := referral.GetOrders(ctx, appID, userID)
 	if err != nil {
 		return 0, xerrors.Errorf("fail get orders: %v", err)
 	}
 
-	totalParentAmount := 0.0
+	totalRootAmount := 0.0
 
 	for _, order := range orders {
-		parentAmount, err := getOrderParentRebate(ctx, order)
+		rootAmount, err := getOrderParentRebate(ctx, order, roots, nexts)
 		if err != nil {
 			return 0, xerrors.Errorf("fail get order rebate: %v", err)
 		}
 
-		totalParentAmount += parentAmount
+		totalRootAmount += rootAmount
 	}
 
-	return totalParentAmount, nil
+	return totalRootAmount, nil
 }
 
 func getIncomings(ctx context.Context, appID, userID string) (float64, error) {
+	roots, err := commissionsetting.GetAmountSettingsByAppUser(ctx, appID, userID)
+	if err != nil {
+		return 0, xerrors.Errorf("fail get amount settings: %v", err)
+	}
+
 	invitees, err := referral.GetLayeredInvitees(ctx, appID, userID)
 	if err != nil {
 		return 0, xerrors.Errorf("fail get layered invitees: %v", err)
 	}
 
-	rebates := map[string]float64{}
+	totalRootAmount := 0.0
 
 	for _, iv := range invitees {
-		amount, err := getPeriodRebate(ctx, iv.AppID, iv.InviteeID)
+		nexts, err := commissionsetting.GetAmountSettingsByAppUser(ctx, iv.AppID, iv.InviteeID)
+		if err != nil {
+			return 0, xerrors.Errorf("fail get amount settings: %v", err)
+		}
+
+		rootAmount, err := getPeriodRebate(ctx, iv.AppID, iv.InviteeID, roots, nexts)
 		if err != nil {
 			return 0, xerrors.Errorf("fail get rebate: %v", err)
 		}
 
-		rbAmount := rebates[iv.InviteeID]
-		rbAmount += amount
-
-		rebates[iv.InviteeID] = rbAmount
+		totalRootAmount += rootAmount
 	}
 
-	ivs, err := referral.GetInvitees(ctx, appID, userID)
-	if err != nil {
-		return 0, xerrors.Errorf("fail get invitees: %v", err)
-	}
-
-	totalAmount := 0.0
-	for _, iv := range ivs {
-		totalAmount += rebates[iv.InviteeID]
-	}
-
-	return totalAmount, nil
+	return totalRootAmount, nil
 }
 
 func GetSeparateIncoming(ctx context.Context, appID, userID string) (float64, error) {
