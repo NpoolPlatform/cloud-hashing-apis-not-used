@@ -28,6 +28,8 @@ func getRebate(ctx context.Context, appID, userID string) (float64, error) {
 			return 0, xerrors.Errorf("fail get period usd amount: %v", err)
 		}
 		totalAmount += amount * float64(setting.Percent) / 100.0
+
+		logger.Sugar().Infof("amount %v percent %v user %v", amount, setting.Percent, userID)
 	}
 
 	return totalAmount, nil
@@ -57,8 +59,9 @@ func getOrderParentRebate(ctx context.Context, order *orderpb.OrderDetail, roots
 	orderAmount := order.Payment.Amount * order.Payment.CoinUSDCurrency
 	rootAmount := orderAmount * float64(rootPercent-nextPercent) / 100.0
 
-	logger.Sugar().Infof("order %v | %v root %v | %v next %v user %v",
-		order.Order.ID, orderAmount, rootAmount, rootPercent, nextPercent, order.Order.UserID)
+	logger.Sugar().Infof("sub order %v | %v root %v | %v next %v user %v",
+		order.Order.ID, orderAmount, rootAmount, rootPercent, nextPercent,
+		order.Order.UserID)
 
 	return rootAmount, nil
 }
