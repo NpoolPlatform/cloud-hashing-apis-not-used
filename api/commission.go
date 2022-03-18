@@ -10,7 +10,7 @@ import (
 	billingstate "github.com/NpoolPlatform/cloud-hashing-billing/pkg/const"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
-	referral "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral"
+	commission "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/commission"
 	withdraw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/withdraw"
 
 	"google.golang.org/grpc/codes"
@@ -18,9 +18,7 @@ import (
 )
 
 func (s *Server) GetCommissionByAppUser(ctx context.Context, in *npool.GetCommissionByAppUserRequest) (*npool.GetCommissionByAppUserResponse, error) {
-	referral.AddWatcher(in.GetAppID(), in.GetUserID())
-
-	amount, err := referral.GetCommission(in.GetAppID(), in.GetUserID())
+	amount, err := commission.GetCommission(ctx, in.GetAppID(), in.GetUserID())
 	if err != nil {
 		logger.Sugar().Errorf("get commission error: %v", err)
 		return &npool.GetCommissionByAppUserResponse{}, status.Error(codes.Internal, err.Error())

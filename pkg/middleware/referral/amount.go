@@ -4,10 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	cache "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/cache"
 	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
-	orderpb "github.com/NpoolPlatform/message/npool/cloud-hashing-order"
 
 	"golang.org/x/xerrors"
 )
@@ -18,16 +16,13 @@ const (
 )
 
 func getUSDAmount(ctx context.Context, appID, userID string) (float64, error) {
-	amount := cache.GetEntry(cacheKey(appID, userID, cacheUSDAmount))
+	amount := cache.GetEntry(CacheKey(appID, userID, cacheUSDAmount))
 	if amount != nil {
 		return *(amount.(*float64)), nil
 	}
 
 	// TODO: let database to sum orders amount
-	orders, err := grpc2.GetOrdersDetailByAppUser(ctx, &orderpb.GetOrdersDetailByAppUserRequest{
-		AppID:  appID,
-		UserID: userID,
-	})
+	orders, err := GetOrders(ctx, appID, userID)
 	if err != nil {
 		return 0, xerrors.Errorf("fail get orders: %v", err)
 	}
@@ -40,13 +35,13 @@ func getUSDAmount(ctx context.Context, appID, userID string) (float64, error) {
 		totalAmount += order.Payment.Amount * order.Payment.CoinUSDCurrency
 	}
 
-	cache.AddEntry(cacheKey(appID, userID, cacheUSDAmount), &totalAmount)
+	cache.AddEntry(CacheKey(appID, userID, cacheUSDAmount), &totalAmount)
 
 	return totalAmount, nil
 }
 
 func getSubUSDAmount(ctx context.Context, appID, userID string) (float64, error) {
-	invitees, err := getLayeredInvitees(ctx, appID, userID)
+	invitees, err := GetLayeredInvitees(ctx, appID, userID)
 	if err != nil {
 		return 0, xerrors.Errorf("fail get invitees: %v", err)
 	}
@@ -63,17 +58,14 @@ func getSubUSDAmount(ctx context.Context, appID, userID string) (float64, error)
 	return totalAmount, nil
 }
 
-func getPeriodUSDAmount(ctx context.Context, appID, userID string, start, end uint32) (float64, error) { //nolint
-	key := fmt.Sprintf("%v:%v:%v", cacheKey(appID, userID, cachePeriodUSDAmount), start, end)
+func GetPeriodUSDAmount(ctx context.Context, appID, userID string, start, end uint32) (float64, error) {
+	key := fmt.Sprintf("%v:%v:%v", CacheKey(appID, userID, cachePeriodUSDAmount), start, end)
 	amount := cache.GetEntry(key)
 	if amount != nil {
 		return *(amount.(*float64)), nil
 	}
 
-	orders, err := grpc2.GetOrdersDetailByAppUser(ctx, &orderpb.GetOrdersDetailByAppUserRequest{
-		AppID:  appID,
-		UserID: userID,
-	})
+	orders, err := GetOrders(ctx, appID, userID)
 	if err != nil {
 		return 0, xerrors.Errorf("fail get orders: %v", err)
 	}
@@ -83,7 +75,7 @@ func getPeriodUSDAmount(ctx context.Context, appID, userID string, start, end ui
 		if order.Payment == nil || order.Payment.State != orderconst.PaymentStateDone {
 			continue
 		}
-		if order.Order.CreateAt < start || order.Order.CreateAt >= end {
+		if order.Order.CreateAt < start || (order.Order.CreateAt >= end && end > 0) {
 			continue
 		}
 		totalAmount += order.Payment.Amount * order.Payment.CoinUSDCurrency
@@ -95,14 +87,14 @@ func getPeriodUSDAmount(ctx context.Context, appID, userID string, start, end ui
 }
 
 func getPeriodSubUSDAmount(ctx context.Context, appID, userID string, start, end uint32) (float64, error) { //nolint
-	invitees, err := getLayeredInvitees(ctx, appID, userID)
+	invitees, err := GetLayeredInvitees(ctx, appID, userID)
 	if err != nil {
 		return 0, xerrors.Errorf("fail get invitees: %v", err)
 	}
 
 	totalAmount := 0.0
 	for _, iv := range invitees {
-		amount, err := getPeriodUSDAmount(ctx, iv.AppID, iv.InviteeID, start, end)
+		amount, err := GetPeriodUSDAmount(ctx, iv.AppID, iv.InviteeID, start, end)
 		if err != nil {
 			return 0, xerrors.Errorf("fail get usd amount: %v", err)
 		}

@@ -17,7 +17,7 @@ const (
 )
 
 func getReferralUser(ctx context.Context, appID, userID string) (*appusermgrpb.AppUser, error) {
-	user := cache.GetEntry(cacheKey(appID, userID, cacheReferralUser))
+	user := cache.GetEntry(CacheKey(appID, userID, cacheReferralUser))
 	if user != nil {
 		return user.(*appusermgrpb.AppUser), nil
 	}
@@ -33,13 +33,13 @@ func getReferralUser(ctx context.Context, appID, userID string) (*appusermgrpb.A
 		return nil, xerrors.Errorf("invalid app user")
 	}
 
-	cache.AddEntry(cacheKey(appID, userID, cacheReferralUser), user)
+	cache.AddEntry(CacheKey(appID, userID, cacheReferralUser), user)
 
 	return user.(*appusermgrpb.AppUser), nil
 }
 
 func getReferralExtra(ctx context.Context, appID, userID string) (*appusermgrpb.AppUserExtra, error) {
-	extra := cache.GetEntry(cacheKey(appID, userID, cacheReferralExtra))
+	extra := cache.GetEntry(CacheKey(appID, userID, cacheReferralExtra))
 	if extra != nil {
 		return extra.(*appusermgrpb.AppUserExtra), nil
 	}
@@ -52,7 +52,7 @@ func getReferralExtra(ctx context.Context, appID, userID string) (*appusermgrpb.
 		return nil, xerrors.Errorf("fail get app user extra: %v", err)
 	}
 
-	cache.AddEntry(cacheKey(appID, userID, cacheReferralExtra), extra)
+	cache.AddEntry(CacheKey(appID, userID, cacheReferralExtra), extra)
 
 	return extra.(*appusermgrpb.AppUserExtra), nil
 }
@@ -71,7 +71,7 @@ func getReferral(ctx context.Context, appID, userID string) (*npool.Referral, er
 		return nil, xerrors.Errorf("fail get referral extra: %v", err)
 	}
 
-	inviter, err := getInviter(ctx, appID, userID)
+	inviter, err := GetInviter(ctx, appID, userID)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get inviter: %v", err)
 	}
@@ -86,7 +86,7 @@ func getReferral(ctx context.Context, appID, userID string) (*npool.Referral, er
 		return nil, xerrors.Errorf("fail get sub usd amount: %v", err)
 	}
 
-	invitees, err := getInvitees(ctx, appID, userID)
+	invitees, err := GetInvitees(ctx, appID, userID)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get invitees: %v", err)
 	}
@@ -98,11 +98,12 @@ func getReferral(ctx context.Context, appID, userID string) (*npool.Referral, er
 		USDAmount:    amount,
 		SubUSDAmount: subAmount,
 		Kol:          len(invitees) > 0,
+		InvitedCount: uint32(len(invitees)),
 	}, nil
 }
 
 func getReferrals(ctx context.Context, appID, userID string) ([]*npool.Referral, error) {
-	invitees, err := getInvitees(ctx, appID, userID)
+	invitees, err := GetInvitees(ctx, appID, userID)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get invitees: %v", err)
 	}
@@ -121,7 +122,7 @@ func getReferrals(ctx context.Context, appID, userID string) ([]*npool.Referral,
 }
 
 func getLayeredReferrals(ctx context.Context, appID, userID string) ([]*npool.Referral, error) {
-	invitees, err := getLayeredInvitees(ctx, appID, userID)
+	invitees, err := GetLayeredInvitees(ctx, appID, userID)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get invitees: %v", err)
 	}

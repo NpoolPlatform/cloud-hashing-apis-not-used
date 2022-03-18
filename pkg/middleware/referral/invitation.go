@@ -10,10 +10,10 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func getInvitees(ctx context.Context, appID, userID string) ([]*inspirepb.RegistrationInvitation, error) {
+func GetInvitees(ctx context.Context, appID, userID string) ([]*inspirepb.RegistrationInvitation, error) {
 	cacheFor := "invitees"
 
-	invitees := cache.GetEntry(cacheKey(appID, userID, cacheFor))
+	invitees := cache.GetEntry(CacheKey(appID, userID, cacheFor))
 	if invitees != nil {
 		return invitees.([]*inspirepb.RegistrationInvitation), nil
 	}
@@ -26,14 +26,14 @@ func getInvitees(ctx context.Context, appID, userID string) ([]*inspirepb.Regist
 		return nil, xerrors.Errorf("fail get invitations: %v", err)
 	}
 
-	cache.AddEntry(cacheKey(appID, userID, cacheFor), invitees)
+	cache.AddEntry(CacheKey(appID, userID, cacheFor), invitees)
 	return invitees.([]*inspirepb.RegistrationInvitation), nil
 }
 
-func getInviter(ctx context.Context, appID, userID string) (*inspirepb.RegistrationInvitation, error) {
+func GetInviter(ctx context.Context, appID, userID string) (*inspirepb.RegistrationInvitation, error) {
 	cacheFor := "inviter"
 
-	inviter := cache.GetEntry(cacheKey(appID, userID, cacheFor))
+	inviter := cache.GetEntry(CacheKey(appID, userID, cacheFor))
 	if inviter != nil {
 		return inviter.(*inspirepb.RegistrationInvitation), nil
 	}
@@ -46,7 +46,7 @@ func getInviter(ctx context.Context, appID, userID string) (*inspirepb.Registrat
 		return nil, xerrors.Errorf("fail get inviter: %v", err)
 	}
 
-	cache.AddEntry(cacheKey(appID, userID, cacheFor), inviter)
+	cache.AddEntry(CacheKey(appID, userID, cacheFor), inviter)
 	return inviter.(*inspirepb.RegistrationInvitation), nil
 }
 
@@ -54,7 +54,7 @@ func getNextLayerInvitees(ctx context.Context, curLayer []*inspirepb.Registratio
 	invitees := []*inspirepb.RegistrationInvitation{}
 
 	for _, iv := range curLayer {
-		ivs, err := getInvitees(ctx, iv.AppID, iv.InviteeID)
+		ivs, err := GetInvitees(ctx, iv.AppID, iv.InviteeID)
 		if err != nil {
 			return nil, xerrors.Errorf("fail get invitees: %v", err)
 		}
@@ -64,8 +64,8 @@ func getNextLayerInvitees(ctx context.Context, curLayer []*inspirepb.Registratio
 	return invitees, nil
 }
 
-func getLayeredInvitees(ctx context.Context, appID, userID string) ([]*inspirepb.RegistrationInvitation, error) {
-	invitees, err := getInvitees(ctx, appID, userID)
+func GetLayeredInvitees(ctx context.Context, appID, userID string) ([]*inspirepb.RegistrationInvitation, error) {
+	invitees, err := GetInvitees(ctx, appID, userID)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get invitees: %v", err)
 	}
