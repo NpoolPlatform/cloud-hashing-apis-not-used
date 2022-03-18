@@ -35,14 +35,14 @@ func getRebate(ctx context.Context, appID, userID string) (float64, error) {
 	return totalAmount, nil
 }
 
-func getOrderParentRebate(ctx context.Context, order *orderpb.OrderDetail, roots, nexts []*inspirepb.AppPurchaseAmountSetting) (float64, error) {
+func getOrderParentRebate(_ context.Context, order *orderpb.OrderDetail, roots, nexts []*inspirepb.AppPurchaseAmountSetting) float64 {
 	if order.Payment == nil || order.Payment.State != orderconst.PaymentStateDone {
-		return 0, nil
+		return 0
 	}
 
 	setting := commissionsetting.GetAmountSettingByTimestamp(roots, order.Order.CreateAt)
 	if setting == nil {
-		return 0, nil
+		return 0
 	}
 	rootPercent := int(setting.Percent)
 
@@ -53,7 +53,7 @@ func getOrderParentRebate(ctx context.Context, order *orderpb.OrderDetail, roots
 	}
 
 	if rootPercent < nextPercent {
-		return 0, nil
+		return 0
 	}
 
 	orderAmount := order.Payment.Amount * order.Payment.CoinUSDCurrency
@@ -63,7 +63,7 @@ func getOrderParentRebate(ctx context.Context, order *orderpb.OrderDetail, roots
 		order.Order.ID, orderAmount, rootAmount, rootPercent, nextPercent,
 		order.Order.UserID)
 
-	return rootAmount, nil
+	return rootAmount
 }
 
 func getPeriodRebate(ctx context.Context, appID, userID string, roots, nexts []*inspirepb.AppPurchaseAmountSetting) (float64, error) {
@@ -75,12 +75,7 @@ func getPeriodRebate(ctx context.Context, appID, userID string, roots, nexts []*
 	totalRootAmount := 0.0
 
 	for _, order := range orders {
-		rootAmount, err := getOrderParentRebate(ctx, order, roots, nexts)
-		if err != nil {
-			return 0, xerrors.Errorf("fail get order rebate: %v", err)
-		}
-
-		totalRootAmount += rootAmount
+		totalRootAmount += getOrderParentRebate(ctx, order, roots, nexts)
 	}
 
 	return totalRootAmount, nil
