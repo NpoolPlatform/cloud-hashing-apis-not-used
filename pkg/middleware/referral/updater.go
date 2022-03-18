@@ -261,11 +261,11 @@ func getInvitationUserInfo( //nolint
 				return nil, myGoods, myCoins, xerrors.Errorf("fail get app purchase amount setting: %v", err)
 			}
 
-			sort.Slice(myInviteeSettings.Infos, func(i, j int) bool {
-				return myInviteeSettings.Infos[i].Amount < myInviteeSettings.Infos[j].Amount
+			sort.Slice(myInviteeSettings, func(i, j int) bool {
+				return myInviteeSettings[i].Amount < myInviteeSettings[j].Amount
 			})
 
-			for _, info := range myInviteeSettings.Infos {
+			for _, info := range myInviteeSettings {
 				commissions = append(commissions, &npool.CommissionAmount{
 					Amount:  info.Amount,
 					Percent: info.Percent,

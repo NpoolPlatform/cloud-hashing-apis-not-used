@@ -16,13 +16,13 @@ const (
 )
 
 func getUSDAmount(ctx context.Context, appID, userID string) (float64, error) {
-	amount := cache.GetEntry(cacheKey(appID, userID, cacheUSDAmount))
+	amount := cache.GetEntry(CacheKey(appID, userID, cacheUSDAmount))
 	if amount != nil {
 		return *(amount.(*float64)), nil
 	}
 
 	// TODO: let database to sum orders amount
-	orders, err := getOrders(ctx, appID, userID)
+	orders, err := GetOrders(ctx, appID, userID)
 	if err != nil {
 		return 0, xerrors.Errorf("fail get orders: %v", err)
 	}
@@ -35,13 +35,13 @@ func getUSDAmount(ctx context.Context, appID, userID string) (float64, error) {
 		totalAmount += order.Payment.Amount * order.Payment.CoinUSDCurrency
 	}
 
-	cache.AddEntry(cacheKey(appID, userID, cacheUSDAmount), &totalAmount)
+	cache.AddEntry(CacheKey(appID, userID, cacheUSDAmount), &totalAmount)
 
 	return totalAmount, nil
 }
 
 func getSubUSDAmount(ctx context.Context, appID, userID string) (float64, error) {
-	invitees, err := getLayeredInvitees(ctx, appID, userID)
+	invitees, err := GetLayeredInvitees(ctx, appID, userID)
 	if err != nil {
 		return 0, xerrors.Errorf("fail get invitees: %v", err)
 	}
@@ -59,13 +59,13 @@ func getSubUSDAmount(ctx context.Context, appID, userID string) (float64, error)
 }
 
 func GetPeriodUSDAmount(ctx context.Context, appID, userID string, start, end uint32) (float64, error) {
-	key := fmt.Sprintf("%v:%v:%v", cacheKey(appID, userID, cachePeriodUSDAmount), start, end)
+	key := fmt.Sprintf("%v:%v:%v", CacheKey(appID, userID, cachePeriodUSDAmount), start, end)
 	amount := cache.GetEntry(key)
 	if amount != nil {
 		return *(amount.(*float64)), nil
 	}
 
-	orders, err := getOrders(ctx, appID, userID)
+	orders, err := GetOrders(ctx, appID, userID)
 	if err != nil {
 		return 0, xerrors.Errorf("fail get orders: %v", err)
 	}
@@ -87,7 +87,7 @@ func GetPeriodUSDAmount(ctx context.Context, appID, userID string, start, end ui
 }
 
 func getPeriodSubUSDAmount(ctx context.Context, appID, userID string, start, end uint32) (float64, error) { //nolint
-	invitees, err := getLayeredInvitees(ctx, appID, userID)
+	invitees, err := GetLayeredInvitees(ctx, appID, userID)
 	if err != nil {
 		return 0, xerrors.Errorf("fail get invitees: %v", err)
 	}

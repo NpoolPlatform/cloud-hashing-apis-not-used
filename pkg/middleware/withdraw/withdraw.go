@@ -8,6 +8,7 @@ import (
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
 	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/const"
+	commissionsettingmw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/commission/setting"
 	referralmw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral"
 	verifymw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/verify"
 
@@ -20,7 +21,6 @@ import (
 	billingconst "github.com/NpoolPlatform/cloud-hashing-billing/pkg/message/const"
 	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
 	billingpb "github.com/NpoolPlatform/message/npool/cloud-hashing-billing"
-	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
 	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
 	reviewpb "github.com/NpoolPlatform/message/npool/review-service"
 	sphinxproxypb "github.com/NpoolPlatform/message/npool/sphinxproxy"
@@ -97,23 +97,12 @@ func Outcoming(ctx context.Context, appID, userID, coinTypeID, withdrawType stri
 }
 
 func CommissionCoinTypeID(ctx context.Context) (string, error) {
-	commissionCoins, err := grpc2.GetCommissionCoinSettings(ctx, &inspirepb.GetCommissionCoinSettingsRequest{})
+	coin, err := commissionsettingmw.GetUsingCoin(ctx)
 	if err != nil {
-		return "", xerrors.Errorf("fail get commission coins: %v", err)
+		return "", xerrors.Errorf("fail get using coin: %v", err)
 	}
 
-	invalidUUID := uuid.UUID{}.String()
-	coinTypeID := invalidUUID
-	for _, info := range commissionCoins {
-		if info.Using {
-			coinTypeID = info.ID
-		}
-	}
-	if coinTypeID == invalidUUID {
-		return "", xerrors.Errorf("fail get using commission coin")
-	}
-
-	return coinTypeID, nil
+	return coin.CoinTypeID, nil
 }
 
 func commissionWithdrawable(ctx context.Context, appID, userID, withdrawType string, amount float64) (bool, error) {

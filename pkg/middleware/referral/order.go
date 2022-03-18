@@ -12,8 +12,8 @@ import (
 
 const cacheOrders = "referral:orders"
 
-func getOrders(ctx context.Context, appID, userID string) ([]*orderpb.OrderDetail, error) {
-	myOrders := cache.GetEntry(cacheKey(appID, userID, cacheOrders))
+func GetOrders(ctx context.Context, appID, userID string) ([]*orderpb.OrderDetail, error) {
+	myOrders := cache.GetEntry(CacheKey(appID, userID, cacheOrders))
 	if myOrders != nil {
 		return myOrders.([]*orderpb.OrderDetail), nil
 	}
@@ -27,7 +27,7 @@ func getOrders(ctx context.Context, appID, userID string) ([]*orderpb.OrderDetai
 		return nil, xerrors.Errorf("fail get orders: %v", err)
 	}
 
-	cache.AddEntry(cacheKey(appID, userID, cacheOrders), orders)
+	cache.AddEntry(CacheKey(appID, userID, cacheOrders), orders)
 
 	return orders, nil
 }

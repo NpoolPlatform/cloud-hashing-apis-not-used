@@ -1,4 +1,4 @@
-package commission
+package setting
 
 import (
 	"context"
@@ -6,16 +6,32 @@ import (
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	cache "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/cache"
+	referral "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral"
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
 
 	"golang.org/x/xerrors"
 )
 
 func getCoins(ctx context.Context) ([]*inspirepb.CommissionCoinSetting, error) {
-	return grpc2.GetCommissionCoinSettings(ctx, &inspirepb.GetCommissionCoinSettings{})
+	return grpc2.GetCommissionCoinSettings(ctx, &inspirepb.GetCommissionCoinSettingsRequest{})
 }
 
-func uniqueSetting(ctx context.Context, appID string) (bool, error) {
+func GetUsingCoin(ctx context.Context) (*inspirepb.CommissionCoinSetting, error) {
+	coins, err := getCoins(ctx)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get coins: %v", err)
+	}
+
+	for _, coin := range coins {
+		if coin.Using {
+			return coin, nil
+		}
+	}
+
+	return nil, xerrors.Errorf("no using coin")
+}
+
+func UniqueSetting(ctx context.Context, appID string) (bool, error) {
 	setting, err := grpc2.GetAppCommissionSettingByApp(ctx, &inspirepb.GetAppCommissionSettingByAppRequest{
 		AppID: appID,
 	})
@@ -26,16 +42,16 @@ func uniqueSetting(ctx context.Context, appID string) (bool, error) {
 	return setting.UniqueSetting, nil
 }
 
-func getAmountSettingsByApp(ctx context.Context, appID string) (*inspirepb.AppPurchaseAmountSetting, error) {
+func getAmountSettingsByApp(ctx context.Context, appID string) (*inspirepb.AppPurchaseAmountSetting, error) { //nolint
 	// TODO: for unique app commission setting
 	return nil, nil
 }
 
-func getAmountSettingsByAppUser(ctx context.Context, appID, userID string) ([]*inspirepb.AppPurchaseAmountSetting, error) {
+func GetAmountSettingsByAppUser(ctx context.Context, appID, userID string) ([]*inspirepb.AppPurchaseAmountSetting, error) {
 	cacheFor := "purchase:amount:settings"
 
-	mySettings := cache.GetEntry(cacheKey(appID, userID, cacheFor))
-	if settings != nil {
+	mySettings := cache.GetEntry(referral.CacheKey(appID, userID, cacheFor))
+	if mySettings != nil {
 		return mySettings.([]*inspirepb.AppPurchaseAmountSetting), nil
 	}
 
@@ -47,11 +63,11 @@ func getAmountSettingsByAppUser(ctx context.Context, appID, userID string) ([]*i
 		return nil, xerrors.Errorf("fail get app purchase amount setting: %v", err)
 	}
 
-	sort.Slice(settings, func(i, j) {
+	sort.Slice(settings, func(i, j int) bool {
 		return settings[i].Start < settings[j].Start
 	})
 
-	lastSetting := *inspirepb.AppPurchaseAmountSetting
+	var lastSetting *inspirepb.AppPurchaseAmountSetting
 	for _, setting := range settings {
 		if lastSetting == nil {
 			continue
@@ -61,13 +77,12 @@ func getAmountSettingsByAppUser(ctx context.Context, appID, userID string) ([]*i
 		}
 	}
 
-	cache.AddEntry(cacheKey(appID, userID, cacheFor), settings)
+	cache.AddEntry(referral.CacheKey(appID, userID, cacheFor), settings)
 
 	return settings, nil
 }
 
-func getAmountSettingByTimestamp(settings []*inspirepb.AppPurchaseAmountSetting, timestamp uint32) *inspirepb.AppPurchaseAmountSetting {
-	var setting *inspirepb.AppPurchaseAmountSetting
+func GetAmountSettingByTimestamp(settings []*inspirepb.AppPurchaseAmountSetting, timestamp uint32) *inspirepb.AppPurchaseAmountSetting {
 	for _, s := range settings {
 		if s.Start <= timestamp && (timestamp < s.End || s.End == 0) {
 			return s
