@@ -29,7 +29,7 @@ func getReferralUser(ctx context.Context, appID, userID string) (*appusermgrpb.A
 	if err != nil {
 		return nil, xerrors.Errorf("fail get app user: %v", err)
 	}
-	if user == nil {
+	if user.(*appusermgrpb.AppUser) == nil {
 		return nil, xerrors.Errorf("invalid app user")
 	}
 

@@ -12,8 +12,10 @@ type entry struct {
 	value    interface{}
 }
 
-var entries = map[string]*entry{}
-var lock sync.Mutex
+var (
+	entries = map[string]*entry{}
+	lock    sync.Mutex
+)
 
 func AddEntry(key string, value interface{}) {
 	lock.Lock()

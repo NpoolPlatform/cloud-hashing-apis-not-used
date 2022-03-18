@@ -13,10 +13,8 @@ import (
 )
 
 const (
-	cacheUSDAmount          = "referral:usd:amount"
-	cacheSubUSDAmount       = "referral:sub:usd:amount"
-	cachePeriodUSDAmount    = "referral:period:usd:amount"
-	cachePeriodSubUSDAmount = "referral:period:sub:usd:amount"
+	cacheUSDAmount       = "referral:usd:amount"
+	cachePeriodUSDAmount = "referral:period:usd:amount"
 )
 
 func getUSDAmount(ctx context.Context, appID, userID string) (float64, error) {
@@ -65,7 +63,7 @@ func getSubUSDAmount(ctx context.Context, appID, userID string) (float64, error)
 	return totalAmount, nil
 }
 
-func getPeriodUSDAmount(ctx context.Context, appID, userID string, start, end uint32) (float64, error) {
+func getPeriodUSDAmount(ctx context.Context, appID, userID string, start, end uint32) (float64, error) { //nolint
 	key := fmt.Sprintf("%v:%v:%v", cacheKey(appID, userID, cachePeriodUSDAmount), start, end)
 	amount := cache.GetEntry(key)
 	if amount != nil {
@@ -96,7 +94,7 @@ func getPeriodUSDAmount(ctx context.Context, appID, userID string, start, end ui
 	return totalAmount, nil
 }
 
-func getPeriodSubUSDAmount(ctx context.Context, appID, userID string, start, end uint32) (float64, error) {
+func getPeriodSubUSDAmount(ctx context.Context, appID, userID string, start, end uint32) (float64, error) { //nolint
 	invitees, err := getLayeredInvitees(ctx, appID, userID)
 	if err != nil {
 		return 0, xerrors.Errorf("fail get invitees: %v", err)
