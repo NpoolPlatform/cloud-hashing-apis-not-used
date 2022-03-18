@@ -10,7 +10,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func getInvitees(ctx context.Context, appID, userID string) ([]*inspirepb.RegistrationInvitation, error) {
+func GetInvitees(ctx context.Context, appID, userID string) ([]*inspirepb.RegistrationInvitation, error) {
 	cacheFor := "invitees"
 
 	invitees := cache.GetEntry(cacheKey(appID, userID, cacheFor))
@@ -54,7 +54,7 @@ func getNextLayerInvitees(ctx context.Context, curLayer []*inspirepb.Registratio
 	invitees := []*inspirepb.RegistrationInvitation{}
 
 	for _, iv := range curLayer {
-		ivs, err := getInvitees(ctx, iv.AppID, iv.InviteeID)
+		ivs, err := GetInvitees(ctx, iv.AppID, iv.InviteeID)
 		if err != nil {
 			return nil, xerrors.Errorf("fail get invitees: %v", err)
 		}
@@ -65,7 +65,7 @@ func getNextLayerInvitees(ctx context.Context, curLayer []*inspirepb.Registratio
 }
 
 func getLayeredInvitees(ctx context.Context, appID, userID string) ([]*inspirepb.RegistrationInvitation, error) {
-	invitees, err := getInvitees(ctx, appID, userID)
+	invitees, err := GetInvitees(ctx, appID, userID)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get invitees: %v", err)
 	}
