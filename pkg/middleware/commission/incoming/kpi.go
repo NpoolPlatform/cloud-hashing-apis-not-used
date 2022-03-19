@@ -51,7 +51,7 @@ func getAmount(ctx context.Context, appID, userID string) (float64, error) {
 			continue
 		}
 
-		if i == 0 {
+		if i == 0 && setting.Amount == 0 {
 			lastAmount = setting.Amount
 			lastPercent = setting.Percent
 			continue
@@ -74,7 +74,7 @@ func getAmount(ctx context.Context, appID, userID string) (float64, error) {
 
 		lastAmount = setting.Amount
 		lastPercent = setting.Percent
-		remainAmount -= setting.Amount
+		remainAmount = totalAmount - setting.Amount
 	}
 
 	levelAmount += remainAmount * float64(lastPercent) / 100.0
