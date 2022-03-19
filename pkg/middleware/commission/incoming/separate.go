@@ -23,6 +23,10 @@ func getRebate(ctx context.Context, appID, userID string) (float64, error) {
 	totalAmount := 0.0
 
 	for _, setting := range settings {
+		if setting.Amount > 0 {
+			continue
+		}
+
 		amount, err := referral.GetPeriodUSDAmount(ctx, appID, userID, setting.Start, setting.End)
 		if err != nil {
 			return 0, xerrors.Errorf("fail get period usd amount: %v", err)

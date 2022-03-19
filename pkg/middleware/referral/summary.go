@@ -76,12 +76,12 @@ func getReferral(ctx context.Context, appID, userID string) (*npool.Referral, er
 		return nil, xerrors.Errorf("fail get inviter: %v", err)
 	}
 
-	amount, err := getUSDAmount(ctx, appID, userID)
+	amount, err := GetUSDAmount(ctx, appID, userID)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get usd amount: %v", err)
 	}
 
-	subAmount, err := getSubUSDAmount(ctx, appID, userID)
+	subAmount, err := GetSubUSDAmount(ctx, appID, userID)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get sub usd amount: %v", err)
 	}

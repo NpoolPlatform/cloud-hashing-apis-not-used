@@ -42,6 +42,17 @@ func UniqueSetting(ctx context.Context, appID string) (bool, error) {
 	return setting.UniqueSetting, nil
 }
 
+func KPISetting(ctx context.Context, appID string) (bool, error) {
+	setting, err := grpc2.GetAppCommissionSettingByApp(ctx, &inspirepb.GetAppCommissionSettingByAppRequest{
+		AppID: appID,
+	})
+	if err != nil {
+		return false, xerrors.Errorf("fail get app commission setting")
+	}
+
+	return setting.KPISetting, nil
+}
+
 func getAmountSettingsByApp(ctx context.Context, appID string) (*inspirepb.AppPurchaseAmountSetting, error) { //nolint
 	// TODO: for unique app commission setting
 	return nil, nil
@@ -66,6 +77,9 @@ func GetAmountSettingsByAppUser(ctx context.Context, appID, userID string) ([]*i
 	sort.Slice(settings, func(i, j int) bool {
 		return settings[i].Start < settings[j].Start
 	})
+	sort.Slice(settings, func(i, j int) bool {
+		return settings[i].Amount < settings[j].Amount
+	})
 
 	var lastSetting *inspirepb.AppPurchaseAmountSetting
 	for _, setting := range settings {
@@ -84,6 +98,9 @@ func GetAmountSettingsByAppUser(ctx context.Context, appID, userID string) ([]*i
 
 func GetAmountSettingByTimestamp(settings []*inspirepb.AppPurchaseAmountSetting, timestamp uint32) *inspirepb.AppPurchaseAmountSetting {
 	for _, s := range settings {
+		if s.Amount > 0 {
+			continue
+		}
 		if s.Start <= timestamp && (timestamp < s.End || s.End == 0) {
 			return s
 		}

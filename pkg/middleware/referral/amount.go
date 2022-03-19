@@ -15,7 +15,7 @@ const (
 	cachePeriodUSDAmount = "referral:period:usd:amount"
 )
 
-func getUSDAmount(ctx context.Context, appID, userID string) (float64, error) {
+func GetUSDAmount(ctx context.Context, appID, userID string) (float64, error) {
 	amount := cache.GetEntry(CacheKey(appID, userID, cacheUSDAmount))
 	if amount != nil {
 		return *(amount.(*float64)), nil
@@ -40,7 +40,7 @@ func getUSDAmount(ctx context.Context, appID, userID string) (float64, error) {
 	return totalAmount, nil
 }
 
-func getSubUSDAmount(ctx context.Context, appID, userID string) (float64, error) {
+func GetSubUSDAmount(ctx context.Context, appID, userID string) (float64, error) {
 	invitees, err := GetLayeredInvitees(ctx, appID, userID)
 	if err != nil {
 		return 0, xerrors.Errorf("fail get invitees: %v", err)
@@ -48,7 +48,7 @@ func getSubUSDAmount(ctx context.Context, appID, userID string) (float64, error)
 
 	totalAmount := 0.0
 	for _, iv := range invitees {
-		amount, err := getUSDAmount(ctx, iv.AppID, iv.InviteeID)
+		amount, err := GetUSDAmount(ctx, iv.AppID, iv.InviteeID)
 		if err != nil {
 			return 0, xerrors.Errorf("fail get usd amount: %v", err)
 		}
@@ -87,7 +87,7 @@ func GetPeriodUSDAmount(ctx context.Context, appID, userID string, start, end ui
 	return totalAmount, nil
 }
 
-func getPeriodSubUSDAmount(ctx context.Context, appID, userID string, start, end uint32) (float64, error) { //nolint
+func GetPeriodSubUSDAmount(ctx context.Context, appID, userID string, start, end uint32) (float64, error) {
 	invitees, err := GetLayeredInvitees(ctx, appID, userID)
 	if err != nil {
 		return 0, xerrors.Errorf("fail get invitees: %v", err)
