@@ -27,7 +27,7 @@ func GetOrders(ctx context.Context, appID, userID string) ([]*npool.Order, error
 		return nil, xerrors.Errorf("fail get orders: %v", err)
 	}
 
-	cache.AddEntry(CacheKey(appID, userID, cacheOrders), orders)
+	cache.AddEntry(CacheKey(appID, userID, cacheOrders), orders.Infos)
 
 	return orders.Infos, nil
 }
