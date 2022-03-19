@@ -37,7 +37,7 @@ func (s *Server) GetCommissionByAppUser(ctx context.Context, in *npool.GetCommis
 	}
 
 	if amount < outcoming {
-		logger.Sugar().Errorf("commission amount error")
+		logger.Sugar().Errorf("commission amount error %v < %v", amount, outcoming)
 		return &npool.GetCommissionByAppUserResponse{}, status.Error(codes.Internal, "invalid error")
 	}
 
