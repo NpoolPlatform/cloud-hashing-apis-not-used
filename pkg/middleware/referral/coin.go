@@ -42,6 +42,7 @@ func getCoinSummaries(ctx context.Context, appID, userID string) ([]*npool.CoinS
 		if summary == nil {
 			summary = &npool.CoinSummary{
 				CoinTypeID: order.Good.Main.ID,
+				CoinName:   order.Good.Main.Unit,
 				Unit:       order.Good.Good.Good.Unit,
 			}
 			summaries = append(summaries, summary)

@@ -57,6 +57,36 @@ func getReferralExtra(ctx context.Context, appID, userID string) (*appusermgrpb.
 	return extra.(*appusermgrpb.AppUserExtra), nil
 }
 
+func getLayeredCoinSummaries(ctx context.Context, appID, userID string) ([]*npool.CoinSummary, error) {
+	coinSummaries, err := getCoinSummaries(ctx, appID, userID)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get coin summaries: %v", err)
+	}
+
+	invitees, err := GetLayeredInvitees(ctx, appID, userID)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get invitees: %v", err)
+	}
+
+	for _, iv := range invitees {
+		summaries, err := getCoinSummaries(ctx, iv.AppID, iv.InviteeID)
+		if err != nil {
+			return nil, xerrors.Errorf("fail get coin summaries: %v", err)
+		}
+
+		for _, sum1 := range coinSummaries {
+			for _, sum2 := range summaries {
+				if sum1.CoinTypeID == sum2.CoinTypeID {
+					sum1.Units += sum2.Units
+					sum1.Amount += sum2.Amount
+				}
+			}
+		}
+	}
+
+	return coinSummaries, nil
+}
+
 func getReferral(ctx context.Context, appID, userID string) (*npool.Referral, error) {
 	user, err := getReferralUser(ctx, appID, userID)
 	if err != nil {
@@ -91,7 +121,7 @@ func getReferral(ctx context.Context, appID, userID string) (*npool.Referral, er
 		return nil, xerrors.Errorf("fail get invitees: %v", err)
 	}
 
-	coinSummaries, err := getCoinSummaries(ctx, appID, userID)
+	coinSummaries, err := getLayeredCoinSummaries(ctx, appID, userID)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get coin summaries: %v", err)
 	}
