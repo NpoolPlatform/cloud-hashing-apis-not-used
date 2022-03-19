@@ -58,6 +58,11 @@ func getReferralExtra(ctx context.Context, appID, userID string) (*appusermgrpb.
 }
 
 func getLayeredCoinSummaries(ctx context.Context, appID, userID string) ([]*npool.CoinSummary, error) {
+	mySummaries := cache.GetEntry(CacheKey(appID, userID, cacheCoinSummaries))
+	if mySummaries != nil {
+		return mySummaries.([]*npool.CoinSummary), nil
+	}
+
 	coinSummaries, err := getCoinSummaries(ctx, appID, userID)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get coin summaries: %v", err)
@@ -83,6 +88,8 @@ func getLayeredCoinSummaries(ctx context.Context, appID, userID string) ([]*npoo
 			}
 		}
 	}
+
+	cache.AddEntry(CacheKey(appID, userID, cacheCoinSummaries), coinSummaries)
 
 	return coinSummaries, nil
 }
