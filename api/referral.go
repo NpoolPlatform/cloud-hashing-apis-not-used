@@ -15,24 +15,6 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s *Server) GetMyInvitations(ctx context.Context, in *npool.GetMyInvitationsRequest) (*npool.GetMyInvitationsResponse, error) {
-	resp, err := referral.GetMyInvitations(ctx, in)
-	if err != nil {
-		logger.Sugar().Errorf("get my invitations error: %w", err)
-		return &npool.GetMyInvitationsResponse{}, status.Error(codes.Internal, err.Error())
-	}
-	return resp, nil
-}
-
-func (s *Server) GetMyDirectInvitations(ctx context.Context, in *npool.GetMyDirectInvitationsRequest) (*npool.GetMyDirectInvitationsResponse, error) {
-	resp, err := referral.GetMyDirectInvitations(ctx, in)
-	if err != nil {
-		logger.Sugar().Errorf("get my direct invitations error: %w", err)
-		return &npool.GetMyDirectInvitationsResponse{}, status.Error(codes.Internal, err.Error())
-	}
-	return resp, nil
-}
-
 func (s *Server) GetReferrals(ctx context.Context, in *npool.GetReferralsRequest) (*npool.GetReferralsResponse, error) {
 	logger.Sugar().Infof("req %v", in)
 	resp, err := referral.GetReferrals(ctx, in)

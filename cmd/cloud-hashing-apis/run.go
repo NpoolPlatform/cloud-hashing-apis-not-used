@@ -9,7 +9,6 @@ import (
 	msglistener "github.com/NpoolPlatform/cloud-hashing-apis/pkg/message/listener"
 	msg "github.com/NpoolPlatform/cloud-hashing-apis/pkg/message/message"
 	msgsrv "github.com/NpoolPlatform/cloud-hashing-apis/pkg/message/server"
-	referralupdater "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral"
 
 	apimgrcli "github.com/NpoolPlatform/api-manager/pkg/client"
 
@@ -47,7 +46,6 @@ var runCmd = &cli.Command{
 
 		go msglistener.Listen()
 		go msgSender()
-		go referralupdater.Run()
 
 		return grpc2.RunGRPCGateWay(rpcGatewayRegister)
 	},
