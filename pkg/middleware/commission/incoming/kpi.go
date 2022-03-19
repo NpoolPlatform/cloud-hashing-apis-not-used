@@ -2,7 +2,7 @@ package incoming
 
 import (
 	"context"
-	"time"
+	"sort"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
@@ -12,76 +12,80 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func getPeriodLevelAmount(ctx context.Context, appID, userID string, orderStart uint32, threshold float64, percent, start, end uint32) (float64, error) {
-	if end == 0 {
-		end = uint32(time.Now().Unix())
-	}
-
-	periodAmount, err := referral.GetPeriodUSDAmount(ctx, appID, userID, orderStart, end)
+func getAmount(ctx context.Context, appID, userID string) (float64, error) {
+	settings, err := commissionsetting.GetAmountSettingsByAppUser(ctx, appID, userID)
 	if err != nil {
-		return 0, xerrors.Errorf("fail get period usd amount: %v", err)
+		return 0, xerrors.Errorf("fail get level settings: %v", err)
 	}
 
-	periodSubAmount, err := referral.GetPeriodSubUSDAmount(ctx, appID, userID, orderStart, end)
-	if err != nil {
-		return 0, xerrors.Errorf("fail get period sub usd amount: %v", err)
-	}
-
-	periodAmount += periodSubAmount
-	if periodAmount < threshold {
-		logger.Sugar().Warnf("threshold %v percent %v %v~%v period amount %v user %v order start %v",
-			threshold, percent, start, end, periodAmount, userID, orderStart)
+	if len(settings) == 0 {
 		return 0, nil
 	}
 
-	periodAmount, err = referral.GetPeriodUSDAmount(ctx, appID, userID, start, end)
-	if err != nil {
-		return 0, xerrors.Errorf("fail get period usd amount: %v", err)
-	}
-
-	periodSubAmount, err = referral.GetPeriodSubUSDAmount(ctx, appID, userID, start, end)
-	if err != nil {
-		return 0, xerrors.Errorf("fail get period sub usd amount: %v", err)
-	}
-
-	periodAmount += periodSubAmount
-	levelAmount := periodAmount * float64(percent) / 100.0
-
-	logger.Sugar().Infof("threshold %v percent %v %v~%v level amount %v user %v period amount %v order start %v",
-		threshold, percent, start, end, levelAmount, userID, periodAmount, orderStart)
-
-	return levelAmount, nil
-}
-
-func getLevelAmount(ctx context.Context, appID, userID string) (float64, error) {
-	settings, err := commissionsetting.GetAmountSettingsByAppUser(ctx, appID, userID)
-	if err != nil {
-		return 0, xerrors.Errorf("fail get amount setting: %v", err)
-	}
+	sort.Slice(settings, func(i, j int) bool {
+		return settings[i].Start < settings[j].Start
+	})
+	sort.Slice(settings, func(i, j int) bool {
+		return settings[i].Amount < settings[j].Amount
+	})
 
 	levelAmount := 0.0
-	orderStart := uint32(0)
+	lastAmount := 0.0
+	lastPercent := uint32(0)
 
-	for _, setting := range settings {
-		if orderStart == 0 || orderStart > setting.Start {
-			orderStart = setting.Start
-		}
+	totalAmount, err := referral.GetUSDAmount(ctx, appID, userID)
+	if err != nil {
+		return 0, xerrors.Errorf("fail get usd amount: %v", err)
 	}
 
-	for _, setting := range settings {
-		amount, err := getPeriodLevelAmount(ctx, appID, userID, orderStart,
-			setting.Amount, setting.Percent, setting.Start, setting.End)
-		if err != nil {
-			return 0, xerrors.Errorf("fail get period level amount: %v", err)
-		}
-		levelAmount += amount
+	subAmount, err := referral.GetSubUSDAmount(ctx, appID, userID)
+	if err != nil {
+		return 0, xerrors.Errorf("fail get sub usd amount: %v", err)
 	}
+
+	totalAmount += subAmount
+	remainAmount := totalAmount
+
+	for i, setting := range settings {
+		if setting.End > 0 {
+			continue
+		}
+
+		if i == 0 {
+			lastAmount = setting.Amount
+			lastPercent = setting.Percent
+			continue
+		}
+
+		if remainAmount == 0 {
+			break
+		}
+
+		amount := 0.0
+		if totalAmount < setting.Amount {
+			amount = totalAmount - lastAmount
+		} else {
+			amount = setting.Amount - lastAmount
+		}
+
+		levelAmount += amount * float64(lastPercent) / 100.0
+		logger.Sugar().Infof("amount %v level amount %v sub amount %v total amount %v last amount %v last percent %v user %v",
+			amount, levelAmount, subAmount, totalAmount, lastAmount, lastPercent, userID)
+
+		lastAmount = setting.Amount
+		lastPercent = setting.Percent
+		remainAmount -= setting.Amount
+	}
+
+	levelAmount += remainAmount * float64(lastPercent) / 100.0
+	logger.Sugar().Infof("remain amount %v level amount %v sub amount %v total amount %v last amount %v last percent %v user %v",
+		remainAmount, levelAmount, subAmount, totalAmount, lastAmount, lastPercent, userID)
 
 	return levelAmount, nil
 }
 
 func getRootAmount(ctx context.Context, appID, userID string) (float64, error) {
-	return getLevelAmount(ctx, appID, userID)
+	return getAmount(ctx, appID, userID)
 }
 
 func GetKPIIncoming(ctx context.Context, appID, userID string) (float64, error) {
@@ -104,7 +108,7 @@ func GetKPIIncoming(ctx context.Context, appID, userID string) (float64, error) 
 		totalSubAmount += subAmount
 	}
 
-	logger.Sugar().Infof("root amount %v sub amount %v", rootAmount, totalSubAmount)
+	logger.Sugar().Infof("root amount %v sub amount %v user %v", rootAmount, totalSubAmount, userID)
 
 	return rootAmount - totalSubAmount, nil
 }

@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+
 	cache "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/cache"
 	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
 
@@ -32,7 +34,9 @@ func GetUSDAmount(ctx context.Context, appID, userID string) (float64, error) {
 		if order.Payment == nil || order.Payment.State != orderconst.PaymentStateDone {
 			continue
 		}
-		totalAmount += order.Payment.Amount * order.Payment.CoinUSDCurrency
+		orderAmount := order.Payment.Amount * order.Payment.CoinUSDCurrency
+		logger.Sugar().Infof("order %v units %v amount %v user %v", order.Order.ID, order.Order.Units, orderAmount, userID)
+		totalAmount += orderAmount
 	}
 
 	cache.AddEntry(CacheKey(appID, userID, cacheUSDAmount), &totalAmount)
