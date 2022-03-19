@@ -31,11 +31,11 @@ func GetUSDAmount(ctx context.Context, appID, userID string) (float64, error) {
 
 	totalAmount := 0.0
 	for _, order := range orders {
-		if order.Payment == nil || order.Payment.State != orderconst.PaymentStateDone {
+		if order.Order.Payment == nil || order.Order.Payment.State != orderconst.PaymentStateDone {
 			continue
 		}
-		orderAmount := order.Payment.Amount * order.Payment.CoinUSDCurrency
-		logger.Sugar().Infof("order %v units %v amount %v user %v", order.Order.ID, order.Order.Units, orderAmount, userID)
+		orderAmount := order.Order.Payment.Amount * order.Order.Payment.CoinUSDCurrency
+		logger.Sugar().Infof("order %v units %v amount %v user %v", order.Order.Order.ID, order.Order.Order.Units, orderAmount, userID)
 		totalAmount += orderAmount
 	}
 
@@ -76,14 +76,14 @@ func GetPeriodUSDAmount(ctx context.Context, appID, userID string, start, end ui
 
 	totalAmount := 0.0
 	for _, order := range orders {
-		if order.Payment == nil || order.Payment.State != orderconst.PaymentStateDone {
+		if order.Order.Payment == nil || order.Order.Payment.State != orderconst.PaymentStateDone {
 			continue
 		}
 
-		if order.Order.CreateAt < start || (order.Order.CreateAt >= end && end > 0) {
+		if order.Order.Order.CreateAt < start || (order.Order.Order.CreateAt >= end && end > 0) {
 			continue
 		}
-		totalAmount += order.Payment.Amount * order.Payment.CoinUSDCurrency
+		totalAmount += order.Order.Payment.Amount * order.Order.Payment.CoinUSDCurrency
 	}
 
 	cache.AddEntry(key, &totalAmount)

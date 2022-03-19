@@ -3,23 +3,23 @@ package referral
 import (
 	"context"
 
-	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	cache "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/cache"
-	orderpb "github.com/NpoolPlatform/message/npool/cloud-hashing-order"
+	ordermw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/order"
+	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
 	"golang.org/x/xerrors"
 )
 
 const cacheOrders = "referral:orders"
 
-func GetOrders(ctx context.Context, appID, userID string) ([]*orderpb.OrderDetail, error) {
+func GetOrders(ctx context.Context, appID, userID string) ([]*npool.Order, error) {
 	myOrders := cache.GetEntry(CacheKey(appID, userID, cacheOrders))
 	if myOrders != nil {
-		return myOrders.([]*orderpb.OrderDetail), nil
+		return myOrders.([]*npool.Order), nil
 	}
 
 	// TODO: let database to sum orders amount
-	orders, err := grpc2.GetOrdersDetailByAppUser(ctx, &orderpb.GetOrdersDetailByAppUserRequest{
+	orders, err := ordermw.GetOrdersByAppUser(ctx, &npool.GetOrdersByAppUserRequest{
 		AppID:  appID,
 		UserID: userID,
 	})
@@ -29,5 +29,5 @@ func GetOrders(ctx context.Context, appID, userID string) ([]*orderpb.OrderDetai
 
 	cache.AddEntry(CacheKey(appID, userID, cacheOrders), orders)
 
-	return orders, nil
+	return orders.Infos, nil
 }

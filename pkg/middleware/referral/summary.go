@@ -91,6 +91,11 @@ func getReferral(ctx context.Context, appID, userID string) (*npool.Referral, er
 		return nil, xerrors.Errorf("fail get invitees: %v", err)
 	}
 
+	coinSummaries, err := getCoinSummaries(ctx, appID, userID)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get coin summaries: %v", err)
+	}
+
 	return &npool.Referral{
 		User:         user,
 		Extra:        extra,
@@ -99,6 +104,7 @@ func getReferral(ctx context.Context, appID, userID string) (*npool.Referral, er
 		SubUSDAmount: subAmount,
 		Kol:          len(invitees) > 0,
 		InvitedCount: uint32(len(invitees)),
+		Summaries:    coinSummaries,
 	}, nil
 }
 
