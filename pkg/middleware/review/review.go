@@ -21,7 +21,7 @@ import (
 )
 
 func GetKycReviews(ctx context.Context, in *npool.GetKycReviewsRequest) (*npool.GetKycReviewsResponse, error) {
-	resp, err := grpc2.GetReviewsByAppDomain(ctx, &reviewpb.GetReviewsByAppDomainRequest{
+	infos, err := grpc2.GetReviewsByAppDomain(ctx, &reviewpb.GetReviewsByAppDomainRequest{
 		AppID:  in.GetAppID(),
 		Domain: kycconst.ServiceName,
 	})
@@ -31,8 +31,8 @@ func GetKycReviews(ctx context.Context, in *npool.GetKycReviewsRequest) (*npool.
 	// TODO: Expand reviewer
 
 	reviews := []*npool.KycReview{}
-	for _, info := range resp.Infos {
-		kyc, err := grpc2.GetKycByIDs(ctx, &kycmgrpb.GetKycByKycIDsRequest{
+	for _, info := range infos {
+		kycs, err := grpc2.GetKycByIDs(ctx, &kycmgrpb.GetKycByKycIDsRequest{
 			KycIDs: []string{
 				info.ObjectID,
 			},
@@ -40,24 +40,24 @@ func GetKycReviews(ctx context.Context, in *npool.GetKycReviewsRequest) (*npool.
 		if err != nil {
 			return nil, xerrors.Errorf("fail get kyc info for %v: %v", info.ID, err)
 		}
-		if len(kyc.Infos) == 0 {
+		if len(kycs) == 0 {
 			logger.Sugar().Warnf("empty kyc info for %v", info.ObjectID)
 			continue
 		}
 
 		user, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
 			AppID:  in.GetAppID(),
-			UserID: kyc.Infos[0].UserID,
+			UserID: kycs[0].UserID,
 		})
 		if err != nil {
-			logger.Sugar().Errorf("fail get user %v info for %v: %v", kyc.Infos[0].UserID, info.ObjectID, err)
+			logger.Sugar().Errorf("fail get user %v info for %v: %v", kycs[0].UserID, info.ObjectID, err)
 			continue
 		}
 
 		reviews = append(reviews, &npool.KycReview{
 			Review: info,
-			User:   user.Info,
-			Kyc:    kyc.Infos[0],
+			User:   user,
+			Kyc:    kycs[0],
 		})
 	}
 
@@ -67,7 +67,7 @@ func GetKycReviews(ctx context.Context, in *npool.GetKycReviewsRequest) (*npool.
 }
 
 func GetGoodReviews(ctx context.Context, in *npool.GetGoodReviewsRequest) (*npool.GetGoodReviewsResponse, error) {
-	resp, err := grpc2.GetReviewsByDomain(ctx, &reviewpb.GetReviewsByDomainRequest{
+	infos, err := grpc2.GetReviewsByDomain(ctx, &reviewpb.GetReviewsByDomainRequest{
 		Domain: goodsconst.ServiceName,
 	})
 	if err != nil {
@@ -77,7 +77,7 @@ func GetGoodReviews(ctx context.Context, in *npool.GetGoodReviewsRequest) (*npoo
 	// TODO: Expand good
 
 	reviews := []*npool.GoodReview{}
-	for _, info := range resp.Infos {
+	for _, info := range infos {
 		reviews = append(reviews, &npool.GoodReview{
 			Review: info,
 		})
@@ -89,7 +89,7 @@ func GetGoodReviews(ctx context.Context, in *npool.GetGoodReviewsRequest) (*npoo
 }
 
 func GetWithdrawReviews(ctx context.Context, in *npool.GetWithdrawReviewsRequest) (*npool.GetWithdrawReviewsResponse, error) {
-	resp, err := grpc2.GetReviewsByAppDomain(ctx, &reviewpb.GetReviewsByAppDomainRequest{
+	infos, err := grpc2.GetReviewsByAppDomain(ctx, &reviewpb.GetReviewsByAppDomainRequest{
 		AppID:  in.GetAppID(),
 		Domain: billingconst.ServiceName,
 	})
@@ -98,31 +98,31 @@ func GetWithdrawReviews(ctx context.Context, in *npool.GetWithdrawReviewsRequest
 	}
 
 	reviews := []*npool.WithdrawReview{}
-	for _, info := range resp.Infos {
+	for _, info := range infos {
 		item, err := grpc2.GetUserWithdrawItem(ctx, &billingpb.GetUserWithdrawItemRequest{
 			ID: info.ObjectID,
 		})
 		if err != nil {
 			return nil, xerrors.Errorf("fail get user withdraw info for %v: %v", info.ID, err)
 		}
-		if item.Info == nil {
+		if item == nil {
 			logger.Sugar().Warnf("fail get user withdraw info for %v", info.ObjectID)
 			continue
 		}
 
 		user, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
 			AppID:  in.GetAppID(),
-			UserID: item.Info.UserID,
+			UserID: item.UserID,
 		})
 		if err != nil {
-			logger.Sugar().Errorf("fail get user %v info for %v: %v", item.Info.UserID, info.ObjectID, err)
+			logger.Sugar().Errorf("fail get user %v info for %v: %v", item.UserID, info.ObjectID, err)
 			continue
 		}
 
 		reviews = append(reviews, &npool.WithdrawReview{
 			Review:   info,
-			User:     user.Info,
-			Withdraw: item.Info,
+			User:     user,
+			Withdraw: item,
 		})
 	}
 
@@ -132,7 +132,7 @@ func GetWithdrawReviews(ctx context.Context, in *npool.GetWithdrawReviewsRequest
 }
 
 func GetWithdrawAddressReviews(ctx context.Context, in *npool.GetWithdrawAddressReviewsRequest) (*npool.GetWithdrawAddressReviewsResponse, error) {
-	resp, err := grpc2.GetReviewsByAppDomain(ctx, &reviewpb.GetReviewsByAppDomainRequest{
+	infos, err := grpc2.GetReviewsByAppDomain(ctx, &reviewpb.GetReviewsByAppDomainRequest{
 		AppID:  in.GetAppID(),
 		Domain: billingconst.ServiceName,
 	})
@@ -141,42 +141,39 @@ func GetWithdrawAddressReviews(ctx context.Context, in *npool.GetWithdrawAddress
 	}
 
 	reviews := []*npool.WithdrawAddressReview{}
-	for _, info := range resp.Infos {
+	for _, info := range infos {
 		address, err := grpc2.GetUserWithdraw(ctx, &billingpb.GetUserWithdrawRequest{
 			ID: info.ObjectID,
 		})
 		if err != nil {
 			return nil, xerrors.Errorf("fail get user withdraw info for %v: %v", info.ID, err)
 		}
-		if address.Info == nil {
+		if address == nil {
 			logger.Sugar().Warnf("fail get user withdraw info for %v", info.ObjectID)
 			continue
 		}
 
 		account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
-			ID: address.Info.AccountID,
+			ID: address.AccountID,
 		})
-		if err != nil {
+		if err != nil || account == nil {
 			return nil, xerrors.Errorf("fail get account: %v", err)
-		}
-		if account.Info == nil {
-			return nil, xerrors.Errorf("fail get account")
 		}
 
 		user, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
 			AppID:  in.GetAppID(),
-			UserID: address.Info.UserID,
+			UserID: address.UserID,
 		})
 		if err != nil {
-			logger.Sugar().Errorf("fail get user %v info for %v: %v", address.Info.UserID, info.ObjectID, err)
+			logger.Sugar().Errorf("fail get user %v info for %v: %v", address.UserID, info.ObjectID, err)
 			continue
 		}
 
 		reviews = append(reviews, &npool.WithdrawAddressReview{
 			Review:  info,
-			User:    user.Info,
-			Address: address.Info,
-			Account: account.Info,
+			User:    user,
+			Address: address,
+			Account: account,
 		})
 	}
 
@@ -186,7 +183,7 @@ func GetWithdrawAddressReviews(ctx context.Context, in *npool.GetWithdrawAddress
 }
 
 func GetReviewState(ctx context.Context, in *reviewpb.GetReviewsByAppDomainObjectTypeIDRequest) (string, string, error) { //nolint
-	_review, err := grpc2.GetReviewsByAppDomainObjectTypeID(ctx, in)
+	infos, err := grpc2.GetReviewsByAppDomainObjectTypeID(ctx, in)
 	if err != nil {
 		return "", "", xerrors.Errorf("fail get review: %v", err)
 	}
@@ -195,14 +192,14 @@ func GetReviewState(ctx context.Context, in *reviewpb.GetReviewsByAppDomainObjec
 	reviewMessage := ""
 	messageTime := uint32(0)
 
-	for _, info := range _review.Infos {
+	for _, info := range infos {
 		if info.State == reviewconst.StateWait {
 			reviewState = reviewconst.StateWait
 			break
 		}
 	}
 
-	for _, info := range _review.Infos {
+	for _, info := range infos {
 		if info.State == reviewconst.StateApproved {
 			reviewState = reviewconst.StateApproved
 			break
@@ -210,7 +207,7 @@ func GetReviewState(ctx context.Context, in *reviewpb.GetReviewsByAppDomainObjec
 	}
 
 	if reviewState == reviewconst.StateRejected {
-		for _, info := range _review.Infos {
+		for _, info := range infos {
 			if info.State == reviewconst.StateRejected {
 				if messageTime < info.CreateAt {
 					reviewMessage = info.Message

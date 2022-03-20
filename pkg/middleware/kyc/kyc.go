@@ -18,7 +18,7 @@ import (
 )
 
 func Create(ctx context.Context, in *npool.CreateKycRequest) (*npool.CreateKycResponse, error) {
-	resp, err := grpc2.CreateKyc(ctx, &kycmgrpb.CreateKycRequest{
+	kyc, err := grpc2.CreateKyc(ctx, &kycmgrpb.CreateKycRequest{
 		Info: in.GetInfo(),
 	})
 	if err != nil {
@@ -30,7 +30,7 @@ func Create(ctx context.Context, in *npool.CreateKycRequest) (*npool.CreateKycRe
 			AppID:      in.GetInfo().GetAppID(),
 			Domain:     kycmgrconst.ServiceName,
 			ObjectType: constant.ReviewObjectKyc,
-			ObjectID:   resp.Info.ID,
+			ObjectID:   kyc.ID,
 		},
 	})
 	if err != nil {
@@ -40,7 +40,7 @@ func Create(ctx context.Context, in *npool.CreateKycRequest) (*npool.CreateKycRe
 
 	return &npool.CreateKycResponse{
 		Info: &npool.Kyc{
-			Kyc:   resp.Info,
+			Kyc:   kyc,
 			State: reviewconst.StateWait,
 		},
 	}, nil
@@ -50,14 +50,14 @@ func Update(ctx context.Context, in *npool.UpdateKycRequest) (*npool.UpdateKycRe
 	allowed := true
 	reviewing := false
 
-	_review, err := grpc2.GetReviewsByAppDomainObjectTypeID(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
+	reviews, err := grpc2.GetReviewsByAppDomainObjectTypeID(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
 		AppID:      in.GetInfo().GetAppID(),
 		Domain:     kycmgrconst.ServiceName,
 		ObjectType: constant.ReviewObjectKyc,
 		ObjectID:   in.GetInfo().GetID(),
 	})
 	if err == nil {
-		for _, info := range _review.Infos {
+		for _, info := range reviews {
 			if info.State == reviewconst.StateApproved {
 				allowed = false
 			}
@@ -71,7 +71,7 @@ func Update(ctx context.Context, in *npool.UpdateKycRequest) (*npool.UpdateKycRe
 		return nil, xerrors.Errorf("not allowed update kyc")
 	}
 
-	resp, err := grpc2.UpdateKyc(ctx, &kycmgrpb.UpdateKycRequest{
+	kyc, err := grpc2.UpdateKyc(ctx, &kycmgrpb.UpdateKycRequest{
 		Info: in.GetInfo(),
 	})
 	if err != nil {
@@ -84,7 +84,7 @@ func Update(ctx context.Context, in *npool.UpdateKycRequest) (*npool.UpdateKycRe
 				AppID:      in.GetInfo().GetAppID(),
 				Domain:     kycmgrconst.ServiceName,
 				ObjectType: constant.ReviewObjectKyc,
-				ObjectID:   resp.Info.ID,
+				ObjectID:   kyc.ID,
 			},
 		})
 		if err != nil {
@@ -95,14 +95,14 @@ func Update(ctx context.Context, in *npool.UpdateKycRequest) (*npool.UpdateKycRe
 
 	return &npool.UpdateKycResponse{
 		Info: &npool.Kyc{
-			Kyc:   resp.Info,
+			Kyc:   kyc,
 			State: reviewconst.StateWait,
 		},
 	}, nil
 }
 
 func GetByAppUser(ctx context.Context, in *npool.GetKycByAppUserRequest) (*npool.GetKycByAppUserResponse, error) {
-	resp, err := grpc2.GetKycByUserID(ctx, &kycmgrpb.GetKycByUserIDRequest{
+	kyc, err := grpc2.GetKycByUserID(ctx, &kycmgrpb.GetKycByUserIDRequest{
 		AppID:  in.GetAppID(),
 		UserID: in.GetUserID(),
 	})
@@ -114,7 +114,7 @@ func GetByAppUser(ctx context.Context, in *npool.GetKycByAppUserRequest) (*npool
 		AppID:      in.GetAppID(),
 		Domain:     kycmgrconst.ServiceName,
 		ObjectType: constant.ReviewObjectKyc,
-		ObjectID:   resp.Info.ID,
+		ObjectID:   kyc.ID,
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get review state: %v", err)
@@ -122,7 +122,7 @@ func GetByAppUser(ctx context.Context, in *npool.GetKycByAppUserRequest) (*npool
 
 	return &npool.GetKycByAppUserResponse{
 		Info: &npool.Kyc{
-			Kyc:     resp.Info,
+			Kyc:     kyc,
 			State:   reviewState,
 			Message: reviewMessage,
 		},

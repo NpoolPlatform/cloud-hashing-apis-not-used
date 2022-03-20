@@ -43,7 +43,7 @@ const (
 	grpcTimeout = 60 * time.Second
 )
 
-func CreateGood(ctx context.Context, in *goodspb.CreateGoodRequest) (*goodspb.CreateGoodResponse, error) {
+func CreateGood(ctx context.Context, in *goodspb.CreateGoodRequest) (*goodspb.GoodInfo, error) {
 	conn, err := grpc2.GetGRPCConn(goodsconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get goods connection: %v", err)
@@ -55,10 +55,15 @@ func CreateGood(ctx context.Context, in *goodspb.CreateGoodRequest) (*goodspb.Cr
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.CreateGood(ctx, in)
+	resp, err := cli.CreateGood(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail create good: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func GetGood(ctx context.Context, in *goodspb.GetGoodRequest) (*goodspb.GetGoodResponse, error) {
+func GetGood(ctx context.Context, in *goodspb.GetGoodRequest) (*goodspb.GoodInfo, error) {
 	conn, err := grpc2.GetGRPCConn(goodsconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get goods connection: %v", err)
@@ -70,10 +75,15 @@ func GetGood(ctx context.Context, in *goodspb.GetGoodRequest) (*goodspb.GetGoodR
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetGood(ctx, in)
+	resp, err := cli.GetGood(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail create good: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func GetGoodsDetail(ctx context.Context, in *goodspb.GetGoodsDetailRequest) (*goodspb.GetGoodsDetailResponse, error) {
+func GetGoodsDetail(ctx context.Context, in *goodspb.GetGoodsDetailRequest) ([]*goodspb.GoodDetail, error) {
 	conn, err := grpc2.GetGRPCConn(goodsconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get goods connection: %v", err)
@@ -85,10 +95,15 @@ func GetGoodsDetail(ctx context.Context, in *goodspb.GetGoodsDetailRequest) (*go
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetGoodsDetail(ctx, in)
+	resp, err := cli.GetGoodsDetail(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get goods: %v", err)
+	}
+
+	return resp.Infos, nil
 }
 
-func GetGoodsDetailByApp(ctx context.Context, in *goodspb.GetGoodsDetailByAppRequest) (*goodspb.GetGoodsDetailByAppResponse, error) {
+func GetGoodsDetailByApp(ctx context.Context, in *goodspb.GetGoodsDetailByAppRequest) ([]*goodspb.GoodDetail, error) {
 	conn, err := grpc2.GetGRPCConn(goodsconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get goods connection: %v", err)
@@ -100,10 +115,15 @@ func GetGoodsDetailByApp(ctx context.Context, in *goodspb.GetGoodsDetailByAppReq
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetGoodsDetailByApp(ctx, in)
+	resp, err := cli.GetGoodsDetailByApp(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get goods: %v", err)
+	}
+
+	return resp.Infos, nil
 }
 
-func GetGoodDetail(ctx context.Context, in *goodspb.GetGoodDetailRequest) (*goodspb.GetGoodDetailResponse, error) {
+func GetGoodDetail(ctx context.Context, in *goodspb.GetGoodDetailRequest) (*goodspb.GoodDetail, error) {
 	conn, err := grpc2.GetGRPCConn(goodsconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get goods connection: %v", err)
@@ -115,10 +135,15 @@ func GetGoodDetail(ctx context.Context, in *goodspb.GetGoodDetailRequest) (*good
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetGoodDetail(ctx, in)
+	resp, err := cli.GetGoodDetail(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get good: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func GetRecommendGoodsByApp(ctx context.Context, in *goodspb.GetRecommendGoodsByAppRequest) (*goodspb.GetRecommendGoodsByAppResponse, error) {
+func GetRecommendGoodsByApp(ctx context.Context, in *goodspb.GetRecommendGoodsByAppRequest) ([]*goodspb.RecommendGood, error) {
 	conn, err := grpc2.GetGRPCConn(goodsconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get goods connection: %v", err)
@@ -130,10 +155,15 @@ func GetRecommendGoodsByApp(ctx context.Context, in *goodspb.GetRecommendGoodsBy
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetRecommendGoodsByApp(ctx, in)
+	resp, err := cli.GetRecommendGoodsByApp(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get goods: %v", err)
+	}
+
+	return resp.Infos, nil
 }
 
-func GetAppGoodByAppGood(ctx context.Context, in *goodspb.GetAppGoodByAppGoodRequest) (*goodspb.GetAppGoodByAppGoodResponse, error) {
+func GetAppGoodByAppGood(ctx context.Context, in *goodspb.GetAppGoodByAppGoodRequest) (*goodspb.AppGoodInfo, error) {
 	conn, err := grpc2.GetGRPCConn(goodsconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get goods connection: %v", err)
@@ -145,10 +175,15 @@ func GetAppGoodByAppGood(ctx context.Context, in *goodspb.GetAppGoodByAppGoodReq
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetAppGoodByAppGood(ctx, in)
+	resp, err := cli.GetAppGoodByAppGood(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app good: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func GetAppGoodPromotionByAppGoodTimestamp(ctx context.Context, in *goodspb.GetAppGoodPromotionByAppGoodTimestampRequest) (*goodspb.GetAppGoodPromotionByAppGoodTimestampResponse, error) {
+func GetAppGoodPromotionByAppGoodTimestamp(ctx context.Context, in *goodspb.GetAppGoodPromotionByAppGoodTimestampRequest) (*goodspb.AppGoodPromotion, error) {
 	conn, err := grpc2.GetGRPCConn(goodsconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get goods connection: %v", err)
@@ -160,10 +195,15 @@ func GetAppGoodPromotionByAppGoodTimestamp(ctx context.Context, in *goodspb.GetA
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetAppGoodPromotionByAppGoodTimestamp(ctx, in)
+	resp, err := cli.GetAppGoodPromotionByAppGoodTimestamp(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app good: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func GetAppGoodPromotion(ctx context.Context, in *goodspb.GetAppGoodPromotionRequest) (*goodspb.GetAppGoodPromotionResponse, error) {
+func GetAppGoodPromotion(ctx context.Context, in *goodspb.GetAppGoodPromotionRequest) (*goodspb.AppGoodPromotion, error) {
 	conn, err := grpc2.GetGRPCConn(goodsconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get goods connection: %v", err)
@@ -175,12 +215,17 @@ func GetAppGoodPromotion(ctx context.Context, in *goodspb.GetAppGoodPromotionReq
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetAppGoodPromotion(ctx, in)
+	resp, err := cli.GetAppGoodPromotion(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app good: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
 //---------------------------------------------------------------------------------------------------------------------------
 
-func GetCoinInfos(ctx context.Context, in *coininfopb.GetCoinInfosRequest) (*coininfopb.GetCoinInfosResponse, error) {
+func GetCoinInfos(ctx context.Context, in *coininfopb.GetCoinInfosRequest) ([]*coininfopb.CoinInfo, error) {
 	conn, err := grpc2.GetGRPCConn(coininfoconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get coininfo connection: %v", err)
@@ -192,10 +237,15 @@ func GetCoinInfos(ctx context.Context, in *coininfopb.GetCoinInfosRequest) (*coi
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetCoinInfos(ctx, in)
+	resp, err := cli.GetCoinInfos(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get coin infos: %v", err)
+	}
+
+	return resp.Infos, nil
 }
 
-func GetCoinInfo(ctx context.Context, in *coininfopb.GetCoinInfoRequest) (*coininfopb.GetCoinInfoResponse, error) {
+func GetCoinInfo(ctx context.Context, in *coininfopb.GetCoinInfoRequest) (*coininfopb.CoinInfo, error) {
 	conn, err := grpc2.GetGRPCConn(coininfoconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get coininfo connection: %v", err)
@@ -207,12 +257,17 @@ func GetCoinInfo(ctx context.Context, in *coininfopb.GetCoinInfoRequest) (*coini
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetCoinInfo(ctx, in)
+	resp, err := cli.GetCoinInfo(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get coin info: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
 //---------------------------------------------------------------------------------------------------------------------------
 
-func GetOrder(ctx context.Context, in *orderpb.GetOrderRequest) (*orderpb.GetOrderResponse, error) {
+func GetOrder(ctx context.Context, in *orderpb.GetOrderRequest) (*orderpb.Order, error) {
 	conn, err := grpc2.GetGRPCConn(orderconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get order connection: %v", err)
@@ -224,10 +279,15 @@ func GetOrder(ctx context.Context, in *orderpb.GetOrderRequest) (*orderpb.GetOrd
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetOrder(ctx, in)
+	resp, err := cli.GetOrder(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get order: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func GetOrderByAppUserCouponTypeID(ctx context.Context, in *orderpb.GetOrderByAppUserCouponTypeIDRequest) (*orderpb.GetOrderByAppUserCouponTypeIDResponse, error) {
+func GetOrderByAppUserCouponTypeID(ctx context.Context, in *orderpb.GetOrderByAppUserCouponTypeIDRequest) (*orderpb.Order, error) {
 	conn, err := grpc2.GetGRPCConn(orderconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get order connection: %v", err)
@@ -239,10 +299,15 @@ func GetOrderByAppUserCouponTypeID(ctx context.Context, in *orderpb.GetOrderByAp
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetOrderByAppUserCouponTypeID(ctx, in)
+	resp, err := cli.GetOrderByAppUserCouponTypeID(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get order: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func GetOrderDetail(ctx context.Context, in *orderpb.GetOrderDetailRequest) (*orderpb.GetOrderDetailResponse, error) {
+func GetOrderDetail(ctx context.Context, in *orderpb.GetOrderDetailRequest) (*orderpb.OrderDetail, error) {
 	conn, err := grpc2.GetGRPCConn(orderconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get order connection: %v", err)
@@ -254,7 +319,12 @@ func GetOrderDetail(ctx context.Context, in *orderpb.GetOrderDetailRequest) (*or
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetOrderDetail(ctx, in)
+	resp, err := cli.GetOrderDetail(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get order: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
 func GetOrdersDetailByAppUser(ctx context.Context, in *orderpb.GetOrdersDetailByAppUserRequest) ([]*orderpb.OrderDetail, error) {
@@ -277,7 +347,7 @@ func GetOrdersDetailByAppUser(ctx context.Context, in *orderpb.GetOrdersDetailBy
 	return resp.Infos, nil
 }
 
-func GetOrdersShortDetailByAppUser(ctx context.Context, in *orderpb.GetOrdersShortDetailByAppUserRequest) (*orderpb.GetOrdersShortDetailByAppUserResponse, error) {
+func GetOrdersShortDetailByAppUser(ctx context.Context, in *orderpb.GetOrdersShortDetailByAppUserRequest) ([]*orderpb.OrderDetail, error) {
 	conn, err := grpc2.GetGRPCConn(orderconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get order connection: %v", err)
@@ -289,10 +359,15 @@ func GetOrdersShortDetailByAppUser(ctx context.Context, in *orderpb.GetOrdersSho
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetOrdersShortDetailByAppUser(ctx, in)
+	resp, err := cli.GetOrdersShortDetailByAppUser(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get order short detail")
+	}
+
+	return resp.Infos, nil
 }
 
-func GetOrdersDetailByApp(ctx context.Context, in *orderpb.GetOrdersDetailByAppRequest) (*orderpb.GetOrdersDetailByAppResponse, error) {
+func GetOrdersDetailByApp(ctx context.Context, in *orderpb.GetOrdersDetailByAppRequest) ([]*orderpb.OrderDetail, error) {
 	conn, err := grpc2.GetGRPCConn(orderconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get order connection: %v", err)
@@ -304,10 +379,15 @@ func GetOrdersDetailByApp(ctx context.Context, in *orderpb.GetOrdersDetailByAppR
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetOrdersDetailByApp(ctx, in)
+	resp, err := cli.GetOrdersDetailByApp(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get orders detail: %v", err)
+	}
+
+	return resp.Infos, nil
 }
 
-func GetOrdersDetailByGood(ctx context.Context, in *orderpb.GetOrdersDetailByGoodRequest) (*orderpb.GetOrdersDetailByGoodResponse, error) {
+func GetOrdersDetailByGood(ctx context.Context, in *orderpb.GetOrdersDetailByGoodRequest) ([]*orderpb.OrderDetail, error) {
 	conn, err := grpc2.GetGRPCConn(orderconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get order connection: %v", err)
@@ -319,13 +399,18 @@ func GetOrdersDetailByGood(ctx context.Context, in *orderpb.GetOrdersDetailByGoo
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetOrdersDetailByGood(ctx, in)
+	resp, err := cli.GetOrdersDetailByGood(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get orders detail: %v", err)
+	}
+
+	return resp.Infos, nil
 }
 
-func GetSoldByGood(ctx context.Context, in *orderpb.GetSoldByGoodRequest) (*orderpb.GetSoldByGoodResponse, error) {
+func GetSoldByGood(ctx context.Context, in *orderpb.GetSoldByGoodRequest) (uint32, error) {
 	conn, err := grpc2.GetGRPCConn(orderconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
-		return nil, xerrors.Errorf("fail get order connection: %v", err)
+		return 0, xerrors.Errorf("fail get order connection: %v", err)
 	}
 	defer conn.Close()
 
@@ -334,10 +419,15 @@ func GetSoldByGood(ctx context.Context, in *orderpb.GetSoldByGoodRequest) (*orde
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetSoldByGood(ctx, in)
+	resp, err := cli.GetSoldByGood(ctx, in)
+	if err != nil {
+		return 0, xerrors.Errorf("fail get sold: %v", err)
+	}
+
+	return resp.Sold, nil
 }
 
-func CreateOrder(ctx context.Context, in *orderpb.CreateOrderRequest) (*orderpb.CreateOrderResponse, error) {
+func CreateOrder(ctx context.Context, in *orderpb.CreateOrderRequest) (*orderpb.Order, error) {
 	conn, err := grpc2.GetGRPCConn(orderconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get order connection: %v", err)
@@ -349,10 +439,15 @@ func CreateOrder(ctx context.Context, in *orderpb.CreateOrderRequest) (*orderpb.
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.CreateOrder(ctx, in)
+	resp, err := cli.CreateOrder(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail create order: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func CreateGoodPaying(ctx context.Context, in *orderpb.CreateGoodPayingRequest) (*orderpb.CreateGoodPayingResponse, error) {
+func CreateGoodPaying(ctx context.Context, in *orderpb.CreateGoodPayingRequest) (*orderpb.GoodPaying, error) {
 	conn, err := grpc2.GetGRPCConn(orderconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get order connection: %v", err)
@@ -364,10 +459,15 @@ func CreateGoodPaying(ctx context.Context, in *orderpb.CreateGoodPayingRequest) 
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.CreateGoodPaying(ctx, in)
+	resp, err := cli.CreateGoodPaying(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail create good paying: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func CreateGasPaying(ctx context.Context, in *orderpb.CreateGasPayingRequest) (*orderpb.CreateGasPayingResponse, error) {
+func CreateGasPaying(ctx context.Context, in *orderpb.CreateGasPayingRequest) (*orderpb.GasPaying, error) {
 	conn, err := grpc2.GetGRPCConn(orderconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get order connection: %v", err)
@@ -379,10 +479,15 @@ func CreateGasPaying(ctx context.Context, in *orderpb.CreateGasPayingRequest) (*
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.CreateGasPaying(ctx, in)
+	resp, err := cli.CreateGasPaying(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail create gas paying: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func CreatePayment(ctx context.Context, in *orderpb.CreatePaymentRequest) (*orderpb.CreatePaymentResponse, error) {
+func CreatePayment(ctx context.Context, in *orderpb.CreatePaymentRequest) (*orderpb.Payment, error) {
 	conn, err := grpc2.GetGRPCConn(orderconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get order connection: %v", err)
@@ -394,12 +499,17 @@ func CreatePayment(ctx context.Context, in *orderpb.CreatePaymentRequest) (*orde
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.CreatePayment(ctx, in)
+	resp, err := cli.CreatePayment(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail create payment: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
 //---------------------------------------------------------------------------------------------------------------------------
 
-func GetCouponAllocated(ctx context.Context, in *inspirepb.GetCouponAllocatedDetailRequest) (*inspirepb.GetCouponAllocatedDetailResponse, error) {
+func GetCouponAllocated(ctx context.Context, in *inspirepb.GetCouponAllocatedDetailRequest) (*inspirepb.CouponAllocatedDetail, error) {
 	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
@@ -411,10 +521,15 @@ func GetCouponAllocated(ctx context.Context, in *inspirepb.GetCouponAllocatedDet
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetCouponAllocatedDetail(ctx, in)
+	resp, err := cli.GetCouponAllocatedDetail(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get coupon allocated: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func GetCouponsAllocatedByAppUser(ctx context.Context, in *inspirepb.GetCouponsAllocatedDetailByAppUserRequest) (*inspirepb.GetCouponsAllocatedDetailByAppUserResponse, error) {
+func GetCouponsAllocatedByAppUser(ctx context.Context, in *inspirepb.GetCouponsAllocatedDetailByAppUserRequest) ([]*inspirepb.CouponAllocatedDetail, error) {
 	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
@@ -426,10 +541,15 @@ func GetCouponsAllocatedByAppUser(ctx context.Context, in *inspirepb.GetCouponsA
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetCouponsAllocatedDetailByAppUser(ctx, in)
+	resp, err := cli.GetCouponsAllocatedDetailByAppUser(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get coupons allocated: %v", err)
+	}
+
+	return resp.Infos, nil
 }
 
-func GetUserSpecialReduction(ctx context.Context, in *inspirepb.GetUserSpecialReductionRequest) (*inspirepb.GetUserSpecialReductionResponse, error) {
+func GetUserSpecialReduction(ctx context.Context, in *inspirepb.GetUserSpecialReductionRequest) (*inspirepb.UserSpecialReduction, error) {
 	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
@@ -441,10 +561,15 @@ func GetUserSpecialReduction(ctx context.Context, in *inspirepb.GetUserSpecialRe
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetUserSpecialReduction(ctx, in)
+	resp, err := cli.GetUserSpecialReduction(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get user special reduction: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func GetUserSpecialReductionsByAppUser(ctx context.Context, in *inspirepb.GetUserSpecialReductionsByAppUserRequest) (*inspirepb.GetUserSpecialReductionsByAppUserResponse, error) {
+func GetUserSpecialReductionsByAppUser(ctx context.Context, in *inspirepb.GetUserSpecialReductionsByAppUserRequest) ([]*inspirepb.UserSpecialReduction, error) {
 	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
@@ -456,10 +581,15 @@ func GetUserSpecialReductionsByAppUser(ctx context.Context, in *inspirepb.GetUse
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetUserSpecialReductionsByAppUser(ctx, in)
+	resp, err := cli.GetUserSpecialReductionsByAppUser(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get user special reductions: %v", err)
+	}
+
+	return resp.Infos, nil
 }
 
-func GetUserInvitationCodeByCode(ctx context.Context, in *inspirepb.GetUserInvitationCodeByCodeRequest) (*inspirepb.GetUserInvitationCodeByCodeResponse, error) {
+func GetUserInvitationCodeByCode(ctx context.Context, in *inspirepb.GetUserInvitationCodeByCodeRequest) (*inspirepb.UserInvitationCode, error) {
 	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
@@ -471,10 +601,15 @@ func GetUserInvitationCodeByCode(ctx context.Context, in *inspirepb.GetUserInvit
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetUserInvitationCodeByCode(ctx, in)
+	resp, err := cli.GetUserInvitationCodeByCode(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get user invitation code: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func GetUserInvitationCodeByAppUser(ctx context.Context, in *inspirepb.GetUserInvitationCodeByAppUserRequest) (*inspirepb.GetUserInvitationCodeByAppUserResponse, error) {
+func GetUserInvitationCodeByAppUser(ctx context.Context, in *inspirepb.GetUserInvitationCodeByAppUserRequest) (*inspirepb.UserInvitationCode, error) {
 	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
@@ -486,10 +621,15 @@ func GetUserInvitationCodeByAppUser(ctx context.Context, in *inspirepb.GetUserIn
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetUserInvitationCodeByAppUser(ctx, in)
+	resp, err := cli.GetUserInvitationCodeByAppUser(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get user invitation code: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func CreateRegistrationInvitation(ctx context.Context, in *inspirepb.CreateRegistrationInvitationRequest) (*inspirepb.CreateRegistrationInvitationResponse, error) {
+func CreateRegistrationInvitation(ctx context.Context, in *inspirepb.CreateRegistrationInvitationRequest) (*inspirepb.RegistrationInvitation, error) {
 	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
@@ -501,7 +641,12 @@ func CreateRegistrationInvitation(ctx context.Context, in *inspirepb.CreateRegis
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.CreateRegistrationInvitation(ctx, in)
+	resp, err := cli.CreateRegistrationInvitation(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail create registration invitation: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
 func GetRegistrationInvitationsByAppInviter(ctx context.Context, in *inspirepb.GetRegistrationInvitationsByAppInviterRequest) ([]*inspirepb.RegistrationInvitation, error) {
@@ -564,7 +709,7 @@ func GetCommissionCoinSettings(ctx context.Context, in *inspirepb.GetCommissionC
 	return resp.Infos, nil
 }
 
-func GetAppCommissionSetting(ctx context.Context, in *inspirepb.GetAppCommissionSettingRequest) (*inspirepb.GetAppCommissionSettingResponse, error) {
+func GetAppCommissionSetting(ctx context.Context, in *inspirepb.GetAppCommissionSettingRequest) (*inspirepb.AppCommissionSetting, error) {
 	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
@@ -576,7 +721,12 @@ func GetAppCommissionSetting(ctx context.Context, in *inspirepb.GetAppCommission
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetAppCommissionSetting(ctx, in)
+	resp, err := cli.GetAppCommissionSetting(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app commission setting: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
 func GetAppCommissionSettingByApp(ctx context.Context, in *inspirepb.GetAppCommissionSettingByAppRequest) (*inspirepb.AppCommissionSetting, error) {
@@ -599,7 +749,7 @@ func GetAppCommissionSettingByApp(ctx context.Context, in *inspirepb.GetAppCommi
 	return resp.Info, nil
 }
 
-func GetAppPurchaseAmountSettingsByApp(ctx context.Context, in *inspirepb.GetAppPurchaseAmountSettingsByAppRequest) (*inspirepb.GetAppPurchaseAmountSettingsByAppResponse, error) {
+func GetAppPurchaseAmountSettingsByApp(ctx context.Context, in *inspirepb.GetAppPurchaseAmountSettingsByAppRequest) ([]*inspirepb.AppPurchaseAmountSetting, error) {
 	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
@@ -611,7 +761,12 @@ func GetAppPurchaseAmountSettingsByApp(ctx context.Context, in *inspirepb.GetApp
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetAppPurchaseAmountSettingsByApp(ctx, in)
+	resp, err := cli.GetAppPurchaseAmountSettingsByApp(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app purchase amount setting: %v", err)
+	}
+
+	return resp.Infos, nil
 }
 
 func GetAppPurchaseAmountSettingsByAppUser(ctx context.Context, in *inspirepb.GetAppPurchaseAmountSettingsByAppUserRequest) ([]*inspirepb.AppPurchaseAmountSetting, error) {
@@ -634,7 +789,7 @@ func GetAppPurchaseAmountSettingsByAppUser(ctx context.Context, in *inspirepb.Ge
 	return resp.Infos, nil
 }
 
-func GetAppInvitationSettingsByApp(ctx context.Context, in *inspirepb.GetAppInvitationSettingsByAppRequest) (*inspirepb.GetAppInvitationSettingsByAppResponse, error) {
+func GetAppInvitationSettingsByApp(ctx context.Context, in *inspirepb.GetAppInvitationSettingsByAppRequest) ([]*inspirepb.AppInvitationSetting, error) {
 	conn, err := grpc2.GetGRPCConn(inspireconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get inspire connection: %v", err)
@@ -646,12 +801,17 @@ func GetAppInvitationSettingsByApp(ctx context.Context, in *inspirepb.GetAppInvi
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetAppInvitationSettingsByApp(ctx, in)
+	resp, err := cli.GetAppInvitationSettingsByApp(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app invitation setting: %v", err)
+	}
+
+	return resp.Infos, nil
 }
 
 //---------------------------------------------------------------------------------------------------------------------------
 
-func CreateBillingAccount(ctx context.Context, in *billingpb.CreateCoinAccountRequest) (*billingpb.CreateCoinAccountResponse, error) {
+func CreateBillingAccount(ctx context.Context, in *billingpb.CreateCoinAccountRequest) (*billingpb.CoinAccountInfo, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get billing connection: %v", err)
@@ -663,10 +823,15 @@ func CreateBillingAccount(ctx context.Context, in *billingpb.CreateCoinAccountRe
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.CreateCoinAccount(ctx, in)
+	resp, err := cli.CreateCoinAccount(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail create coin account: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func GetBillingAccount(ctx context.Context, in *billingpb.GetCoinAccountRequest) (*billingpb.GetCoinAccountResponse, error) {
+func GetBillingAccount(ctx context.Context, in *billingpb.GetCoinAccountRequest) (*billingpb.CoinAccountInfo, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get billing connection: %v", err)
@@ -678,10 +843,15 @@ func GetBillingAccount(ctx context.Context, in *billingpb.GetCoinAccountRequest)
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetCoinAccount(ctx, in)
+	resp, err := cli.GetCoinAccount(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get coin account: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func GetIdleGoodPaymentsByGoodPaymentCoin(ctx context.Context, in *billingpb.GetIdleGoodPaymentsByGoodPaymentCoinRequest) (*billingpb.GetIdleGoodPaymentsByGoodPaymentCoinResponse, error) {
+func GetIdleGoodPaymentsByGoodPaymentCoin(ctx context.Context, in *billingpb.GetIdleGoodPaymentsByGoodPaymentCoinRequest) ([]*billingpb.GoodPayment, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get billing connection: %v", err)
@@ -693,10 +863,15 @@ func GetIdleGoodPaymentsByGoodPaymentCoin(ctx context.Context, in *billingpb.Get
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetIdleGoodPaymentsByGoodPaymentCoin(ctx, in)
+	resp, err := cli.GetIdleGoodPaymentsByGoodPaymentCoin(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get good payments: %v", err)
+	}
+
+	return resp.Infos, nil
 }
 
-func CreateGoodPayment(ctx context.Context, in *billingpb.CreateGoodPaymentRequest) (*billingpb.CreateGoodPaymentResponse, error) {
+func CreateGoodPayment(ctx context.Context, in *billingpb.CreateGoodPaymentRequest) (*billingpb.GoodPayment, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get billing connection: %v", err)
@@ -708,10 +883,15 @@ func CreateGoodPayment(ctx context.Context, in *billingpb.CreateGoodPaymentReque
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.CreateGoodPayment(ctx, in)
+	resp, err := cli.CreateGoodPayment(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail create good payment: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func UpdateGoodPayment(ctx context.Context, in *billingpb.UpdateGoodPaymentRequest) (*billingpb.UpdateGoodPaymentResponse, error) {
+func UpdateGoodPayment(ctx context.Context, in *billingpb.UpdateGoodPaymentRequest) (*billingpb.GoodPayment, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get billing connection: %v", err)
@@ -723,10 +903,15 @@ func UpdateGoodPayment(ctx context.Context, in *billingpb.UpdateGoodPaymentReque
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.UpdateGoodPayment(ctx, in)
+	resp, err := cli.UpdateGoodPayment(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail update good payment: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func CreateUserWithdrawItem(ctx context.Context, in *billingpb.CreateUserWithdrawItemRequest) (*billingpb.CreateUserWithdrawItemResponse, error) {
+func CreateUserWithdrawItem(ctx context.Context, in *billingpb.CreateUserWithdrawItemRequest) (*billingpb.UserWithdrawItem, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get billing connection: %v", err)
@@ -738,10 +923,15 @@ func CreateUserWithdrawItem(ctx context.Context, in *billingpb.CreateUserWithdra
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.CreateUserWithdrawItem(ctx, in)
+	resp, err := cli.CreateUserWithdrawItem(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail create user withdraw item: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func CreateUserWithdraw(ctx context.Context, in *billingpb.CreateUserWithdrawRequest) (*billingpb.CreateUserWithdrawResponse, error) {
+func CreateUserWithdraw(ctx context.Context, in *billingpb.CreateUserWithdrawRequest) (*billingpb.UserWithdraw, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get billing connection: %v", err)
@@ -753,10 +943,15 @@ func CreateUserWithdraw(ctx context.Context, in *billingpb.CreateUserWithdrawReq
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.CreateUserWithdraw(ctx, in)
+	resp, err := cli.CreateUserWithdraw(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail create user withdraw: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func UpdateUserWithdrawItem(ctx context.Context, in *billingpb.UpdateUserWithdrawItemRequest) (*billingpb.UpdateUserWithdrawItemResponse, error) {
+func UpdateUserWithdrawItem(ctx context.Context, in *billingpb.UpdateUserWithdrawItemRequest) (*billingpb.UserWithdrawItem, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get billing connection: %v", err)
@@ -768,10 +963,15 @@ func UpdateUserWithdrawItem(ctx context.Context, in *billingpb.UpdateUserWithdra
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.UpdateUserWithdrawItem(ctx, in)
+	resp, err := cli.UpdateUserWithdrawItem(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail update user withdraw item: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func GetUserWithdraw(ctx context.Context, in *billingpb.GetUserWithdrawRequest) (*billingpb.GetUserWithdrawResponse, error) {
+func GetUserWithdraw(ctx context.Context, in *billingpb.GetUserWithdrawRequest) (*billingpb.UserWithdraw, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get billing connection: %v", err)
@@ -783,10 +983,15 @@ func GetUserWithdraw(ctx context.Context, in *billingpb.GetUserWithdrawRequest) 
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetUserWithdraw(ctx, in)
+	resp, err := cli.GetUserWithdraw(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get user withdraw: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func GetUserWithdrawItem(ctx context.Context, in *billingpb.GetUserWithdrawItemRequest) (*billingpb.GetUserWithdrawItemResponse, error) {
+func GetUserWithdrawItem(ctx context.Context, in *billingpb.GetUserWithdrawItemRequest) (*billingpb.UserWithdrawItem, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get billing connection: %v", err)
@@ -798,10 +1003,15 @@ func GetUserWithdrawItem(ctx context.Context, in *billingpb.GetUserWithdrawItemR
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetUserWithdrawItem(ctx, in)
+	resp, err := cli.GetUserWithdrawItem(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get user withdraw item: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func GetUserWithdrawItemsByAppUser(ctx context.Context, in *billingpb.GetUserWithdrawItemsByAppUserRequest) (*billingpb.GetUserWithdrawItemsByAppUserResponse, error) {
+func GetUserWithdrawItemsByAppUser(ctx context.Context, in *billingpb.GetUserWithdrawItemsByAppUserRequest) ([]*billingpb.UserWithdrawItem, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get billing connection: %v", err)
@@ -813,10 +1023,15 @@ func GetUserWithdrawItemsByAppUser(ctx context.Context, in *billingpb.GetUserWit
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetUserWithdrawItemsByAppUser(ctx, in)
+	resp, err := cli.GetUserWithdrawItemsByAppUser(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get user withdraw items: %v", err)
+	}
+
+	return resp.Infos, nil
 }
 
-func GetUserWithdrawItemsByAppUserCoinWithdrawType(ctx context.Context, in *billingpb.GetUserWithdrawItemsByAppUserCoinWithdrawTypeRequest) (*billingpb.GetUserWithdrawItemsByAppUserCoinWithdrawTypeResponse, error) {
+func GetUserWithdrawItemsByAppUserCoinWithdrawType(ctx context.Context, in *billingpb.GetUserWithdrawItemsByAppUserCoinWithdrawTypeRequest) ([]*billingpb.UserWithdrawItem, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get billing connection: %v", err)
@@ -828,10 +1043,15 @@ func GetUserWithdrawItemsByAppUserCoinWithdrawType(ctx context.Context, in *bill
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetUserWithdrawItemsByAppUserCoinWithdrawType(ctx, in)
+	resp, err := cli.GetUserWithdrawItemsByAppUserCoinWithdrawType(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get user withdraw items: %v", err)
+	}
+
+	return resp.Infos, nil
 }
 
-func GetUserWithdrawItemsByAppUserWithdrawType(ctx context.Context, in *billingpb.GetUserWithdrawItemsByAppUserWithdrawTypeRequest) (*billingpb.GetUserWithdrawItemsByAppUserWithdrawTypeResponse, error) {
+func GetUserWithdrawItemsByAppUserWithdrawType(ctx context.Context, in *billingpb.GetUserWithdrawItemsByAppUserWithdrawTypeRequest) ([]*billingpb.UserWithdrawItem, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get billing connection: %v", err)
@@ -843,10 +1063,15 @@ func GetUserWithdrawItemsByAppUserWithdrawType(ctx context.Context, in *billingp
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetUserWithdrawItemsByAppUserWithdrawType(ctx, in)
+	resp, err := cli.GetUserWithdrawItemsByAppUserWithdrawType(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get user withdraw item: %v", err)
+	}
+
+	return resp.Infos, nil
 }
 
-func GetUserBenefitsByAppUserCoin(ctx context.Context, in *billingpb.GetUserBenefitsByAppUserCoinRequest) (*billingpb.GetUserBenefitsByAppUserCoinResponse, error) {
+func GetUserBenefitsByAppUserCoin(ctx context.Context, in *billingpb.GetUserBenefitsByAppUserCoinRequest) ([]*billingpb.UserBenefit, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get billing connection: %v", err)
@@ -858,10 +1083,15 @@ func GetUserBenefitsByAppUserCoin(ctx context.Context, in *billingpb.GetUserBene
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetUserBenefitsByAppUserCoin(ctx, in)
+	resp, err := cli.GetUserBenefitsByAppUserCoin(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get user benefit: %v", err)
+	}
+
+	return resp.Infos, nil
 }
 
-func GetAppWithdrawSettingByAppCoin(ctx context.Context, in *billingpb.GetAppWithdrawSettingByAppCoinRequest) (*billingpb.GetAppWithdrawSettingByAppCoinResponse, error) {
+func GetAppWithdrawSettingByAppCoin(ctx context.Context, in *billingpb.GetAppWithdrawSettingByAppCoinRequest) (*billingpb.AppWithdrawSetting, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get billing connection: %v", err)
@@ -873,10 +1103,15 @@ func GetAppWithdrawSettingByAppCoin(ctx context.Context, in *billingpb.GetAppWit
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetAppWithdrawSettingByAppCoin(ctx, in)
+	resp, err := cli.GetAppWithdrawSettingByAppCoin(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app withdraw setting: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func GetPlatformSetting(ctx context.Context, in *billingpb.GetPlatformSettingRequest) (*billingpb.GetPlatformSettingResponse, error) {
+func GetPlatformSetting(ctx context.Context, in *billingpb.GetPlatformSettingRequest) (*billingpb.PlatformSetting, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get billing connection: %v", err)
@@ -888,10 +1123,15 @@ func GetPlatformSetting(ctx context.Context, in *billingpb.GetPlatformSettingReq
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetPlatformSetting(ctx, in)
+	resp, err := cli.GetPlatformSetting(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get platform setting: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func GetUserWithdrawByAccount(ctx context.Context, in *billingpb.GetUserWithdrawByAccountRequest) (*billingpb.GetUserWithdrawByAccountResponse, error) {
+func GetUserWithdrawByAccount(ctx context.Context, in *billingpb.GetUserWithdrawByAccountRequest) (*billingpb.UserWithdraw, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get billing connection: %v", err)
@@ -903,10 +1143,15 @@ func GetUserWithdrawByAccount(ctx context.Context, in *billingpb.GetUserWithdraw
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetUserWithdrawByAccount(ctx, in)
+	resp, err := cli.GetUserWithdrawByAccount(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get user withdraw: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func GetUserWithdrawsByAppUser(ctx context.Context, in *billingpb.GetUserWithdrawsByAppUserRequest) (*billingpb.GetUserWithdrawsByAppUserResponse, error) {
+func GetUserWithdrawsByAppUser(ctx context.Context, in *billingpb.GetUserWithdrawsByAppUserRequest) ([]*billingpb.UserWithdraw, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get billing connection: %v", err)
@@ -918,10 +1163,15 @@ func GetUserWithdrawsByAppUser(ctx context.Context, in *billingpb.GetUserWithdra
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetUserWithdrawsByAppUser(ctx, in)
+	resp, err := cli.GetUserWithdrawsByAppUser(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get user withdraw: %v", err)
+	}
+
+	return resp.Infos, nil
 }
 
-func GetUserWithdrawsByAppUserCoin(ctx context.Context, in *billingpb.GetUserWithdrawsByAppUserCoinRequest) (*billingpb.GetUserWithdrawsByAppUserCoinResponse, error) {
+func GetUserWithdrawsByAppUserCoin(ctx context.Context, in *billingpb.GetUserWithdrawsByAppUserCoinRequest) ([]*billingpb.UserWithdraw, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get billing connection: %v", err)
@@ -933,10 +1183,15 @@ func GetUserWithdrawsByAppUserCoin(ctx context.Context, in *billingpb.GetUserWit
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetUserWithdrawsByAppUserCoin(ctx, in)
+	resp, err := cli.GetUserWithdrawsByAppUserCoin(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get user withdraw: %v", err)
+	}
+
+	return resp.Infos, nil
 }
 
-func GetCoinSettingByCoin(ctx context.Context, in *billingpb.GetCoinSettingByCoinRequest) (*billingpb.GetCoinSettingByCoinResponse, error) {
+func GetCoinSettingByCoin(ctx context.Context, in *billingpb.GetCoinSettingByCoinRequest) (*billingpb.CoinSetting, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get billing connection: %v", err)
@@ -948,10 +1203,15 @@ func GetCoinSettingByCoin(ctx context.Context, in *billingpb.GetCoinSettingByCoi
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetCoinSettingByCoin(ctx, in)
+	resp, err := cli.GetCoinSettingByCoin(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get coin setting: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func CreateCoinAccountTransaction(ctx context.Context, in *billingpb.CreateCoinAccountTransactionRequest) (*billingpb.CreateCoinAccountTransactionResponse, error) {
+func CreateCoinAccountTransaction(ctx context.Context, in *billingpb.CreateCoinAccountTransactionRequest) (*billingpb.CoinAccountTransaction, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get billing connection: %v", err)
@@ -963,10 +1223,15 @@ func CreateCoinAccountTransaction(ctx context.Context, in *billingpb.CreateCoinA
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.CreateCoinAccountTransaction(ctx, in)
+	resp, err := cli.CreateCoinAccountTransaction(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail create coin account transaction: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func GetCoinAccountTransactionsByAppUserCoin(ctx context.Context, in *billingpb.GetCoinAccountTransactionsByAppUserCoinRequest) (*billingpb.GetCoinAccountTransactionsByAppUserCoinResponse, error) {
+func GetCoinAccountTransactionsByAppUserCoin(ctx context.Context, in *billingpb.GetCoinAccountTransactionsByAppUserCoinRequest) ([]*billingpb.CoinAccountTransaction, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get billing connection: %v", err)
@@ -978,12 +1243,17 @@ func GetCoinAccountTransactionsByAppUserCoin(ctx context.Context, in *billingpb.
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetCoinAccountTransactionsByAppUserCoin(ctx, in)
+	resp, err := cli.GetCoinAccountTransactionsByAppUserCoin(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get coin account transactions: %v", err)
+	}
+
+	return resp.Infos, nil
 }
 
 //---------------------------------------------------------------------------------------------------------------------------
 
-func CreateCoinAddress(ctx context.Context, in *sphinxproxypb.CreateWalletRequest) (*sphinxproxypb.CreateWalletResponse, error) {
+func CreateCoinAddress(ctx context.Context, in *sphinxproxypb.CreateWalletRequest) (*sphinxproxypb.WalletInfo, error) {
 	conn, err := grpc2.GetGRPCConn(sphinxproxyconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get sphinxproxy connection: %v", err)
@@ -995,10 +1265,15 @@ func CreateCoinAddress(ctx context.Context, in *sphinxproxypb.CreateWalletReques
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.CreateWallet(ctx, in)
+	resp, err := cli.CreateWallet(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail create wallet: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func GetBalance(ctx context.Context, in *sphinxproxypb.GetBalanceRequest) (*sphinxproxypb.GetBalanceResponse, error) {
+func GetBalance(ctx context.Context, in *sphinxproxypb.GetBalanceRequest) (*sphinxproxypb.BalanceInfo, error) {
 	conn, err := grpc2.GetGRPCConn(sphinxproxyconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get sphinxproxy connection: %v", err)
@@ -1010,12 +1285,17 @@ func GetBalance(ctx context.Context, in *sphinxproxypb.GetBalanceRequest) (*sphi
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetBalance(ctx, in)
+	resp, err := cli.GetBalance(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get balance info: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
 //---------------------------------------------------------------------------------------------------------------------------
 
-func Signup(ctx context.Context, in *appusermgrpb.CreateAppUserWithSecretRequest) (*appusermgrpb.CreateAppUserWithSecretResponse, error) {
+func Signup(ctx context.Context, in *appusermgrpb.CreateAppUserWithSecretRequest) (*appusermgrpb.AppUser, error) {
 	conn, err := grpc2.GetGRPCConn(appusermgrconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get app user manager connection: %v", err)
@@ -1027,10 +1307,15 @@ func Signup(ctx context.Context, in *appusermgrpb.CreateAppUserWithSecretRequest
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.CreateAppUserWithSecret(ctx, in)
+	resp, err := cli.CreateAppUserWithSecret(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail create app user: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func VerifyAppUserByAppAccountPassword(ctx context.Context, in *appusermgrpb.VerifyAppUserByAppAccountPasswordRequest) (*appusermgrpb.VerifyAppUserByAppAccountPasswordResponse, error) {
+func VerifyAppUserByAppAccountPassword(ctx context.Context, in *appusermgrpb.VerifyAppUserByAppAccountPasswordRequest) (*appusermgrpb.AppUserInfo, error) {
 	conn, err := grpc2.GetGRPCConn(appusermgrconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get app user manager connection: %v", err)
@@ -1042,7 +1327,12 @@ func VerifyAppUserByAppAccountPassword(ctx context.Context, in *appusermgrpb.Ver
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.VerifyAppUserByAppAccountPassword(ctx, in)
+	resp, err := cli.VerifyAppUserByAppAccountPassword(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail verify app user: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
 func GetAppUserByAppUser(ctx context.Context, in *appusermgrpb.GetAppUserByAppUserRequest) (*appusermgrpb.AppUser, error) {
@@ -1085,7 +1375,7 @@ func GetAppUserExtraByAppUser(ctx context.Context, in *appusermgrpb.GetAppUserEx
 	return resp.Info, nil
 }
 
-func UpdateAppUser(ctx context.Context, in *appusermgrpb.UpdateAppUserRequest) (*appusermgrpb.UpdateAppUserResponse, error) {
+func UpdateAppUser(ctx context.Context, in *appusermgrpb.UpdateAppUserRequest) (*appusermgrpb.AppUser, error) {
 	conn, err := grpc2.GetGRPCConn(appusermgrconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get app user manager connection: %v", err)
@@ -1097,10 +1387,15 @@ func UpdateAppUser(ctx context.Context, in *appusermgrpb.UpdateAppUserRequest) (
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.UpdateAppUser(ctx, in)
+	resp, err := cli.UpdateAppUser(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail update app user: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func GetAppUserByAppAccount(ctx context.Context, in *appusermgrpb.GetAppUserByAppAccountRequest) (*appusermgrpb.GetAppUserByAppAccountResponse, error) {
+func GetAppUserByAppAccount(ctx context.Context, in *appusermgrpb.GetAppUserByAppAccountRequest) (*appusermgrpb.AppUser, error) {
 	conn, err := grpc2.GetGRPCConn(appusermgrconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get app user manager connection: %v", err)
@@ -1112,10 +1407,15 @@ func GetAppUserByAppAccount(ctx context.Context, in *appusermgrpb.GetAppUserByAp
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetAppUserByAppAccount(ctx, in)
+	resp, err := cli.GetAppUserByAppAccount(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app user: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func GetAppUserInfoByAppUser(ctx context.Context, in *appusermgrpb.GetAppUserInfoByAppUserRequest) (*appusermgrpb.GetAppUserInfoByAppUserResponse, error) {
+func GetAppUserInfoByAppUser(ctx context.Context, in *appusermgrpb.GetAppUserInfoByAppUserRequest) (*appusermgrpb.AppUserInfo, error) {
 	conn, err := grpc2.GetGRPCConn(appusermgrconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get app user manager connection: %v", err)
@@ -1127,10 +1427,15 @@ func GetAppUserInfoByAppUser(ctx context.Context, in *appusermgrpb.GetAppUserInf
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetAppUserInfoByAppUser(ctx, in)
+	resp, err := cli.GetAppUserInfoByAppUser(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app user info: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func GetAppUserSecretByAppUser(ctx context.Context, in *appusermgrpb.GetAppUserSecretByAppUserRequest) (*appusermgrpb.GetAppUserSecretByAppUserResponse, error) {
+func GetAppUserSecretByAppUser(ctx context.Context, in *appusermgrpb.GetAppUserSecretByAppUserRequest) (*appusermgrpb.AppUserSecret, error) {
 	conn, err := grpc2.GetGRPCConn(appusermgrconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get app user manager connection: %v", err)
@@ -1142,10 +1447,15 @@ func GetAppUserSecretByAppUser(ctx context.Context, in *appusermgrpb.GetAppUserS
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetAppUserSecretByAppUser(ctx, in)
+	resp, err := cli.GetAppUserSecretByAppUser(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app user secret: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func UpdateAppUserSecret(ctx context.Context, in *appusermgrpb.UpdateAppUserSecretRequest) (*appusermgrpb.UpdateAppUserSecretResponse, error) {
+func UpdateAppUserSecret(ctx context.Context, in *appusermgrpb.UpdateAppUserSecretRequest) (*appusermgrpb.AppUserSecret, error) {
 	conn, err := grpc2.GetGRPCConn(appusermgrconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get app user manager connection: %v", err)
@@ -1157,12 +1467,17 @@ func UpdateAppUserSecret(ctx context.Context, in *appusermgrpb.UpdateAppUserSecr
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.UpdateAppUserSecret(ctx, in)
+	resp, err := cli.UpdateAppUserSecret(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail update app user secret: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
 //---------------------------------------------------------------------------------------------------------------------------
 
-func GetApp(ctx context.Context, in *appusermgrpb.GetAppInfoRequest) (*appusermgrpb.GetAppInfoResponse, error) {
+func GetApp(ctx context.Context, in *appusermgrpb.GetAppInfoRequest) (*appusermgrpb.AppInfo, error) {
 	conn, err := grpc2.GetGRPCConn(appusermgrconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get app user manager connection: %v", err)
@@ -1174,12 +1489,17 @@ func GetApp(ctx context.Context, in *appusermgrpb.GetAppInfoRequest) (*appusermg
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetAppInfo(ctx, in)
+	resp, err := cli.GetAppInfo(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app info: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
 //---------------------------------------------------------------------------------------------------------------------------
 
-func GetReviewsByDomain(ctx context.Context, in *reviewpb.GetReviewsByDomainRequest) (*reviewpb.GetReviewsByDomainResponse, error) {
+func GetReviewsByDomain(ctx context.Context, in *reviewpb.GetReviewsByDomainRequest) ([]*reviewpb.Review, error) {
 	conn, err := grpc2.GetGRPCConn(reviewconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get review connection: %v", err)
@@ -1191,10 +1511,15 @@ func GetReviewsByDomain(ctx context.Context, in *reviewpb.GetReviewsByDomainRequ
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetReviewsByDomain(ctx, in)
+	resp, err := cli.GetReviewsByDomain(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get reviews: %v", err)
+	}
+
+	return resp.Infos, nil
 }
 
-func CreateReview(ctx context.Context, in *reviewpb.CreateReviewRequest) (*reviewpb.CreateReviewResponse, error) {
+func CreateReview(ctx context.Context, in *reviewpb.CreateReviewRequest) (*reviewpb.Review, error) {
 	conn, err := grpc2.GetGRPCConn(reviewconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get review connection: %v", err)
@@ -1206,10 +1531,15 @@ func CreateReview(ctx context.Context, in *reviewpb.CreateReviewRequest) (*revie
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.CreateReview(ctx, in)
+	resp, err := cli.CreateReview(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail create review: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func UpdateReview(ctx context.Context, in *reviewpb.UpdateReviewRequest) (*reviewpb.UpdateReviewResponse, error) {
+func UpdateReview(ctx context.Context, in *reviewpb.UpdateReviewRequest) (*reviewpb.Review, error) {
 	conn, err := grpc2.GetGRPCConn(reviewconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get review connection: %v", err)
@@ -1221,10 +1551,15 @@ func UpdateReview(ctx context.Context, in *reviewpb.UpdateReviewRequest) (*revie
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.UpdateReview(ctx, in)
+	resp, err := cli.UpdateReview(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail update review: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func GetReview(ctx context.Context, in *reviewpb.GetReviewRequest) (*reviewpb.GetReviewResponse, error) {
+func GetReview(ctx context.Context, in *reviewpb.GetReviewRequest) (*reviewpb.Review, error) {
 	conn, err := grpc2.GetGRPCConn(reviewconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get review connection: %v", err)
@@ -1236,10 +1571,15 @@ func GetReview(ctx context.Context, in *reviewpb.GetReviewRequest) (*reviewpb.Ge
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetReview(ctx, in)
+	resp, err := cli.GetReview(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get review: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func GetReviewsByAppDomainObjectTypeID(ctx context.Context, in *reviewpb.GetReviewsByAppDomainObjectTypeIDRequest) (*reviewpb.GetReviewsByAppDomainObjectTypeIDResponse, error) {
+func GetReviewsByAppDomainObjectTypeID(ctx context.Context, in *reviewpb.GetReviewsByAppDomainObjectTypeIDRequest) ([]*reviewpb.Review, error) {
 	conn, err := grpc2.GetGRPCConn(reviewconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get review connection: %v", err)
@@ -1251,10 +1591,15 @@ func GetReviewsByAppDomainObjectTypeID(ctx context.Context, in *reviewpb.GetRevi
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetReviewsByAppDomainObjectTypeID(ctx, in)
+	resp, err := cli.GetReviewsByAppDomainObjectTypeID(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get reviews: %v", err)
+	}
+
+	return resp.Infos, nil
 }
 
-func GetReviewsByAppDomain(ctx context.Context, in *reviewpb.GetReviewsByAppDomainRequest) (*reviewpb.GetReviewsByAppDomainResponse, error) {
+func GetReviewsByAppDomain(ctx context.Context, in *reviewpb.GetReviewsByAppDomainRequest) ([]*reviewpb.Review, error) {
 	conn, err := grpc2.GetGRPCConn(reviewconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get review connection: %v", err)
@@ -1266,12 +1611,17 @@ func GetReviewsByAppDomain(ctx context.Context, in *reviewpb.GetReviewsByAppDoma
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetReviewsByAppDomain(ctx, in)
+	resp, err := cli.GetReviewsByAppDomain(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get reviews: %v", err)
+	}
+
+	return resp.Infos, nil
 }
 
 //---------------------------------------------------------------------------------------------------------------------------
 
-func GetKycByIDs(ctx context.Context, in *kycmgrpb.GetKycByKycIDsRequest) (*kycmgrpb.GetKycByKycIDsResponse, error) {
+func GetKycByIDs(ctx context.Context, in *kycmgrpb.GetKycByKycIDsRequest) ([]*kycmgrpb.KycInfo, error) {
 	conn, err := grpc2.GetGRPCConn(kycmgrconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get kyc connection: %v", err)
@@ -1283,10 +1633,15 @@ func GetKycByIDs(ctx context.Context, in *kycmgrpb.GetKycByKycIDsRequest) (*kycm
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetKycByKycIDs(ctx, in)
+	resp, err := cli.GetKycByKycIDs(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get kycs: %v", err)
+	}
+
+	return resp.Infos, nil
 }
 
-func GetKycByUserID(ctx context.Context, in *kycmgrpb.GetKycByUserIDRequest) (*kycmgrpb.GetKycByUserIDResponse, error) {
+func GetKycByUserID(ctx context.Context, in *kycmgrpb.GetKycByUserIDRequest) (*kycmgrpb.KycInfo, error) {
 	conn, err := grpc2.GetGRPCConn(kycmgrconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get kyc connection: %v", err)
@@ -1298,10 +1653,15 @@ func GetKycByUserID(ctx context.Context, in *kycmgrpb.GetKycByUserIDRequest) (*k
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.GetKycByUserID(ctx, in)
+	resp, err := cli.GetKycByUserID(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get kyc: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func CreateKyc(ctx context.Context, in *kycmgrpb.CreateKycRequest) (*kycmgrpb.CreateKycResponse, error) {
+func CreateKyc(ctx context.Context, in *kycmgrpb.CreateKycRequest) (*kycmgrpb.KycInfo, error) {
 	conn, err := grpc2.GetGRPCConn(kycmgrconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get kyc connection: %v", err)
@@ -1313,10 +1673,15 @@ func CreateKyc(ctx context.Context, in *kycmgrpb.CreateKycRequest) (*kycmgrpb.Cr
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.CreateKyc(ctx, in)
+	resp, err := cli.CreateKyc(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail create kyc: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
-func UpdateKyc(ctx context.Context, in *kycmgrpb.UpdateKycRequest) (*kycmgrpb.UpdateKycResponse, error) {
+func UpdateKyc(ctx context.Context, in *kycmgrpb.UpdateKycRequest) (*kycmgrpb.KycInfo, error) {
 	conn, err := grpc2.GetGRPCConn(kycmgrconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get kyc connection: %v", err)
@@ -1328,7 +1693,12 @@ func UpdateKyc(ctx context.Context, in *kycmgrpb.UpdateKycRequest) (*kycmgrpb.Up
 	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
 	defer cancel()
 
-	return cli.UpdateKyc(ctx, in)
+	resp, err := cli.UpdateKyc(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail create kyc: %v", err)
+	}
+
+	return resp.Info, nil
 }
 
 //---------------------------------------------------------------------------------------------------------------------------

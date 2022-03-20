@@ -41,15 +41,12 @@ func Set(ctx context.Context, in *npool.SetWithdrawAddressRequest) (*npool.SetWi
 	coin, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
 		ID: in.GetCoinTypeID(),
 	})
-	if err != nil {
+	if err != nil || coin == nil {
 		return nil, xerrors.Errorf("fail get coin info: %v", err)
-	}
-	if coin.Info == nil {
-		return nil, xerrors.Errorf("fail get coin info")
 	}
 
 	_, err = grpc2.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
-		Name:    coin.Info.Name,
+		Name:    coin.Name,
 		Address: in.GetAddress(),
 	})
 	if err != nil {
@@ -88,7 +85,7 @@ func Set(ctx context.Context, in *npool.SetWithdrawAddressRequest) (*npool.SetWi
 			AppID:      in.GetAppID(),
 			Domain:     billingconst.ServiceName,
 			ObjectType: constant.ReviewObjectUserWithdrawAddress,
-			ObjectID:   address.Info.ID,
+			ObjectID:   address.ID,
 		},
 	})
 	if err != nil {
@@ -97,7 +94,7 @@ func Set(ctx context.Context, in *npool.SetWithdrawAddressRequest) (*npool.SetWi
 
 	return &npool.SetWithdrawAddressResponse{
 		Info: &npool.WithdrawAddress{
-			Address: address.Info,
+			Address: address,
 			Account: _account.Info,
 			State:   reviewconst.StateWait,
 		},
@@ -113,7 +110,7 @@ func GetByAppUser(ctx context.Context, in *npool.GetWithdrawAddressesByAppUserRe
 		return nil, xerrors.Errorf("fail get app user: %v", err)
 	}
 
-	resp, err := grpc2.GetUserWithdrawsByAppUser(ctx, &billingpb.GetUserWithdrawsByAppUserRequest{
+	infos, err := grpc2.GetUserWithdrawsByAppUser(ctx, &billingpb.GetUserWithdrawsByAppUserRequest{
 		AppID:  in.GetAppID(),
 		UserID: in.GetUserID(),
 	})
@@ -123,7 +120,7 @@ func GetByAppUser(ctx context.Context, in *npool.GetWithdrawAddressesByAppUserRe
 
 	addresses := []*npool.WithdrawAddress{}
 
-	for _, info := range resp.Infos {
+	for _, info := range infos {
 		_account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
 			ID: info.AccountID,
 		})
@@ -143,7 +140,7 @@ func GetByAppUser(ctx context.Context, in *npool.GetWithdrawAddressesByAppUserRe
 
 		addresses = append(addresses, &npool.WithdrawAddress{
 			Address: info,
-			Account: _account.Info,
+			Account: _account,
 			State:   reviewState,
 			Message: reviewMessage,
 		})
