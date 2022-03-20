@@ -264,7 +264,7 @@ func GetOrdersByAppUser(ctx context.Context, in *npool.GetOrdersByAppUserRequest
 	}
 
 	sort.Slice(orders, func(i, j int) bool {
-		return orders[i].Order.CreateAt < orders[j].Order.CreateAt
+		return orders[i].Order.CreateAt > orders[j].Order.CreateAt
 	})
 
 	details := []*npool.Order{}
@@ -293,7 +293,7 @@ func GetOrdersShortDetailByAppUser(ctx context.Context, in *npool.GetOrdersByApp
 	}
 
 	sort.Slice(orders, func(i, j int) bool {
-		return orders[i].Order.CreateAt < orders[j].Order.CreateAt
+		return orders[i].Order.CreateAt > orders[j].Order.CreateAt
 	})
 
 	details := []*npool.Order{}
@@ -322,7 +322,7 @@ func GetOrdersByApp(ctx context.Context, in *npool.GetOrdersByAppRequest) (*npoo
 	}
 
 	sort.Slice(orders, func(i, j int) bool {
-		return orders[i].Order.CreateAt < orders[j].Order.CreateAt
+		return orders[i].Order.CreateAt > orders[j].Order.CreateAt
 	})
 
 	details := []*npool.Order{}
@@ -350,7 +350,7 @@ func GetOrdersByGood(ctx context.Context, in *npool.GetOrdersByGoodRequest) (*np
 	}
 
 	sort.Slice(orders, func(i, j int) bool {
-		return orders[i].Order.CreateAt < orders[j].Order.CreateAt
+		return orders[i].Order.CreateAt > orders[j].Order.CreateAt
 	})
 
 	details := []*npool.Order{}
