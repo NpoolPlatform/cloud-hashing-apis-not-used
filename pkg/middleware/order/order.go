@@ -188,7 +188,7 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 
 	cacheGoodInfo := cache.GetEntry(cacheKey(cacheGood, info.Order.GetGoodID()))
 	if cacheGoodInfo != nil {
-		goodInfo = cacheGoodInfo.(*npool.Good)
+		goodInfo = cacheGoodInfo.(*npool.Good) //nolint
 	}
 
 	if goodInfo == nil {
