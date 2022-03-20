@@ -12,8 +12,9 @@ import (
 )
 
 const (
-	cacheReferralUser  = "referral:user"
-	cacheReferralExtra = "referral:extra"
+	cacheReferralUser         = "referral:user"
+	cacheReferralExtra        = "referral:extra"
+	cacheLayeredCoinSummaries = "referral:layered:coin:summaries"
 )
 
 func getReferralUser(ctx context.Context, appID, userID string) (*appusermgrpb.AppUser, error) {
@@ -58,7 +59,7 @@ func getReferralExtra(ctx context.Context, appID, userID string) (*appusermgrpb.
 }
 
 func getLayeredCoinSummaries(ctx context.Context, appID, userID string) ([]*npool.CoinSummary, error) {
-	mySummaries := cache.GetEntry(CacheKey(appID, userID, cacheCoinSummaries))
+	mySummaries := cache.GetEntry(CacheKey(appID, userID, cacheLayeredCoinSummaries))
 	if mySummaries != nil {
 		return mySummaries.([]*npool.CoinSummary), nil
 	}
@@ -73,13 +74,24 @@ func getLayeredCoinSummaries(ctx context.Context, appID, userID string) ([]*npoo
 		return nil, xerrors.Errorf("fail get invitees: %v", err)
 	}
 
+	sums := make([]*npool.CoinSummary, len(coinSummaries))
+	for i, sum := range coinSummaries {
+		sums[i] = &npool.CoinSummary{
+			CoinTypeID: sum.CoinTypeID,
+			CoinName:   sum.CoinName,
+			Units:      sum.Units,
+			Unit:       sum.Unit,
+			Amount:     sum.Amount,
+		}
+	}
+
 	for _, iv := range invitees {
 		summaries, err := getCoinSummaries(ctx, iv.AppID, iv.InviteeID)
 		if err != nil {
 			return nil, xerrors.Errorf("fail get coin summaries: %v", err)
 		}
 
-		for _, sum1 := range coinSummaries {
+		for _, sum1 := range sums {
 			for _, sum2 := range summaries {
 				if sum1.CoinTypeID == sum2.CoinTypeID {
 					sum1.Units += sum2.Units
@@ -89,9 +101,9 @@ func getLayeredCoinSummaries(ctx context.Context, appID, userID string) ([]*npoo
 		}
 	}
 
-	cache.AddEntry(CacheKey(appID, userID, cacheCoinSummaries), coinSummaries)
+	cache.AddEntry(CacheKey(appID, userID, cacheLayeredCoinSummaries), sums)
 
-	return coinSummaries, nil
+	return sums, nil
 }
 
 func getReferral(ctx context.Context, appID, userID string) (*npool.Referral, error) {

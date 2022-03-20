@@ -3,6 +3,8 @@ package referral
 import (
 	"context"
 
+	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+
 	cache "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/cache"
 	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
@@ -48,8 +50,13 @@ func getCoinSummaries(ctx context.Context, appID, userID string) ([]*npool.CoinS
 			summaries = append(summaries, summary)
 		}
 
+		amount := order.Order.Payment.Amount * order.Order.Payment.CoinUSDCurrency
+		logger.Sugar().Infof("order %v coin %v | %v units %v amount %v user %v",
+			order.Order.Order.ID, order.Good.Main.ID, order.Good.Main.Unit,
+			order.Order.Order.Units, amount, userID)
+
 		summary.Units += order.Order.Order.Units
-		summary.Amount += order.Order.Payment.Amount * order.Order.Payment.CoinUSDCurrency
+		summary.Amount += amount
 	}
 
 	cache.AddEntry(CacheKey(appID, userID, cacheCoinSummaries), summaries)
