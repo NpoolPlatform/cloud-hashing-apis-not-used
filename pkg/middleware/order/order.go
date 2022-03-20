@@ -184,14 +184,21 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 		}
 	}
 
-	goodInfo := cache.GetEntry(cacheKey(cacheGood, info.Order.GetGoodID()))
+	var goodInfo *npool.Good
+
+	cacheGoodInfo := cache.GetEntry(cacheKey(cacheGood, info.Order.GetGoodID()))
+	if cacheGoodInfo != nil {
+		goodInfo = cacheGoodInfo.(*npool.Good)
+	}
+
 	if goodInfo == nil {
-		goodInfo, err := gooddetail.Get(ctx, &npool.GetGoodRequest{
+		resp, err := gooddetail.Get(ctx, &npool.GetGoodRequest{
 			ID: info.Order.GetGoodID(),
 		})
 		if err != nil {
 			return nil, xerrors.Errorf("fail get good info: %v", err)
 		}
+		goodInfo = resp.Info
 		cache.AddEntry(cacheKey(cacheGood, info.Order.GetGoodID()), goodInfo)
 	}
 
@@ -218,7 +225,7 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 
 	return constructOrder(
 		info,
-		goodInfo.(*npool.Good),
+		goodInfo,
 		coupon,
 		paymentCoinInfo,
 		accountInfo,
