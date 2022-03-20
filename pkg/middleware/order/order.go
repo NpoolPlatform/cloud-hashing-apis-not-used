@@ -110,7 +110,7 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 			paymentCoinInfo, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
 				ID: info.Payment.CoinInfoID,
 			})
-			if err != nil || coinInfo == nil {
+			if err != nil || paymentCoinInfo == nil {
 				return nil, xerrors.Errorf("fail get payment coin info: %v", err)
 			}
 
@@ -195,7 +195,7 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 		resp, err := gooddetail.Get(ctx, &npool.GetGoodRequest{
 			ID: info.Order.GetGoodID(),
 		})
-		if err != nil {
+		if err != nil || resp.Info == nil {
 			return nil, xerrors.Errorf("fail get good info: %v", err)
 		}
 		goodInfo = resp.Info
