@@ -21,7 +21,7 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 		AppID:   in.GetAppID(),
 		Account: in.GetAccount(),
 	})
-	if err != nil || appUser == nil {
+	if err != nil || appUser != nil {
 		return nil, xerrors.Errorf("fail get app user by app account: %v", err)
 	}
 
