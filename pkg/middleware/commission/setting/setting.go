@@ -35,7 +35,7 @@ func UniqueSetting(ctx context.Context, appID string) (bool, error) {
 	setting, err := grpc2.GetAppCommissionSettingByApp(ctx, &inspirepb.GetAppCommissionSettingByAppRequest{
 		AppID: appID,
 	})
-	if err != nil {
+	if err != nil || setting == nil {
 		return false, xerrors.Errorf("fail get app commission setting")
 	}
 
@@ -46,8 +46,8 @@ func KPISetting(ctx context.Context, appID string) (bool, error) {
 	setting, err := grpc2.GetAppCommissionSettingByApp(ctx, &inspirepb.GetAppCommissionSettingByAppRequest{
 		AppID: appID,
 	})
-	if err != nil {
-		return false, xerrors.Errorf("fail get app commission setting")
+	if err != nil || setting == nil {
+		return false, xerrors.Errorf("fail get app commission setting: %v", err)
 	}
 
 	return setting.KPISetting, nil
