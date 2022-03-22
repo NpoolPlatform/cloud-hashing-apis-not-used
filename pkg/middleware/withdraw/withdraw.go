@@ -35,10 +35,11 @@ import (
 
 func Outcoming(ctx context.Context, appID, userID, coinTypeID, withdrawType string) (float64, error) {
 	withdraws := []*billingpb.UserWithdrawItem{}
+	var err error
 
 	switch withdrawType {
 	case billingstate.WithdrawTypeBenefit:
-		resp, err := grpc2.GetUserWithdrawItemsByAppUserCoinWithdrawType(ctx, &billingpb.GetUserWithdrawItemsByAppUserCoinWithdrawTypeRequest{
+		withdraws, err = grpc2.GetUserWithdrawItemsByAppUserCoinWithdrawType(ctx, &billingpb.GetUserWithdrawItemsByAppUserCoinWithdrawTypeRequest{
 			AppID:        appID,
 			UserID:       userID,
 			CoinTypeID:   coinTypeID,
@@ -47,9 +48,8 @@ func Outcoming(ctx context.Context, appID, userID, coinTypeID, withdrawType stri
 		if err != nil {
 			return 0, xerrors.Errorf("fail get user withdraws: %v", err)
 		}
-		withdraws = resp.Infos
 	case billingstate.WithdrawTypeCommission:
-		resp, err := grpc2.GetUserWithdrawItemsByAppUserWithdrawType(ctx, &billingpb.GetUserWithdrawItemsByAppUserWithdrawTypeRequest{
+		withdraws, err = grpc2.GetUserWithdrawItemsByAppUserWithdrawType(ctx, &billingpb.GetUserWithdrawItemsByAppUserWithdrawTypeRequest{
 			AppID:        appID,
 			UserID:       userID,
 			WithdrawType: withdrawType,
@@ -57,7 +57,6 @@ func Outcoming(ctx context.Context, appID, userID, coinTypeID, withdrawType stri
 		if err != nil {
 			return 0, xerrors.Errorf("fail get user withdraws: %v", err)
 		}
-		withdraws = resp.Infos
 	}
 
 	txs, err := grpc2.GetCoinAccountTransactionsByAppUserCoin(ctx, &billingpb.GetCoinAccountTransactionsByAppUserCoinRequest{
@@ -71,7 +70,7 @@ func Outcoming(ctx context.Context, appID, userID, coinTypeID, withdrawType stri
 
 	outcoming := 0.0
 
-	for _, info := range txs.Infos {
+	for _, info := range txs {
 		myWithdraw := false
 
 		for _, withdraw := range withdraws {
@@ -142,7 +141,7 @@ func benefitWithdrawable(ctx context.Context, appID, userID, coinTypeID, withdra
 	}
 
 	incoming := 0.0
-	for _, info := range benefits.Infos {
+	for _, info := range benefits {
 		incoming += info.Amount
 	}
 
@@ -193,13 +192,10 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 	coin, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
 		ID: in.GetInfo().GetCoinTypeID(),
 	})
-	if err != nil {
+	if err != nil || coin == nil {
 		return nil, xerrors.Errorf("fail get coin info: %v", err)
 	}
-	if coin.Info == nil {
-		return nil, xerrors.Errorf("fail get coin info")
-	}
-	if coin.Info.PreSale {
+	if coin.PreSale {
 		return nil, xerrors.Errorf("cannot withdraw presale coin")
 	}
 
@@ -236,21 +232,18 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 	account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
 		ID: in.GetInfo().GetWithdrawToAccountID(),
 	})
-	if err != nil {
+	if err != nil || account == nil {
 		return nil, xerrors.Errorf("fail get account info: %v", err)
-	}
-	if account.Info == nil {
-		return nil, xerrors.Errorf("fail get account info")
 	}
 
 	withdrawAccount, err := grpc2.GetUserWithdrawByAccount(ctx, &billingpb.GetUserWithdrawByAccountRequest{
 		AccountID: in.GetInfo().GetWithdrawToAccountID(),
 	})
-	if err != nil {
+	if err != nil || withdrawAccount == nil {
 		return nil, xerrors.Errorf("fail get withdraw account")
 	}
 
-	if withdrawAccount.Info.AppID != in.GetInfo().GetAppID() || withdrawAccount.Info.UserID != in.GetInfo().GetUserID() {
+	if withdrawAccount.AppID != in.GetInfo().GetAppID() || withdrawAccount.UserID != in.GetInfo().GetUserID() {
 		return nil, xerrors.Errorf("acount is not belong to user")
 	}
 
@@ -258,7 +251,7 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 		AppID:      in.GetInfo().GetAppID(),
 		Domain:     billingconst.ServiceName,
 		ObjectType: constant.ReviewObjectUserWithdrawAddress,
-		ObjectID:   withdrawAccount.Info.ID,
+		ObjectID:   withdrawAccount.ID,
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get review: %v", err)
@@ -276,18 +269,18 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 	if err != nil {
 		return nil, xerrors.Errorf("fail get app withdraw setting: %v", err)
 	}
-	if setting.Info != nil {
-		autoReviewCoinAmount = int(setting.Info.WithdrawAutoReviewCoinAmount)
+	if setting != nil {
+		autoReviewCoinAmount = int(setting.WithdrawAutoReviewCoinAmount)
 	} else {
 		setting, err := grpc2.GetPlatformSetting(ctx, &billingpb.GetPlatformSettingRequest{})
 		if err != nil {
 			return nil, xerrors.Errorf("fail get platform setting: %v", err)
 		}
-		price, err := currency.USDPrice(ctx, coin.Info.Name)
+		price, err := currency.USDPrice(ctx, coin.Name)
 		if err != nil {
 			return nil, xerrors.Errorf("fail get coin price: %v", err)
 		}
-		autoReviewCoinAmount = int(setting.Info.WithdrawAutoReviewUSDAmount / price)
+		autoReviewCoinAmount = int(setting.WithdrawAutoReviewUSDAmount / price)
 	}
 
 	coinsetting, err := grpc2.GetCoinSettingByCoin(ctx, &billingpb.GetCoinSettingByCoinRequest{
@@ -298,24 +291,21 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 	}
 
 	account, err = grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
-		ID: coinsetting.Info.UserOnlineAccountID,
+		ID: coinsetting.UserOnlineAccountID,
 	})
-	if err != nil {
+	if err != nil || account == nil {
 		return nil, xerrors.Errorf("fail get account info: %v", err)
-	}
-	if account.Info == nil {
-		return nil, xerrors.Errorf("fail get account info")
 	}
 
 	balance, err := grpc2.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
-		Name:    coin.Info.Name,
-		Address: account.Info.Address,
+		Name:    coin.Name,
+		Address: account.Address,
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get wallet balance: %v", err)
 	}
 
-	resp, err := grpc2.CreateUserWithdrawItem(ctx, &billingpb.CreateUserWithdrawItemRequest{
+	withdrawItem, err := grpc2.CreateUserWithdrawItem(ctx, &billingpb.CreateUserWithdrawItemRequest{
 		Info: in.GetInfo(),
 	})
 	if err != nil {
@@ -325,7 +315,7 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 	reason := "auto review"
 	autoReview := true
 
-	if balance.Info.Balance < in.GetInfo().GetAmount()+coin.Info.ReservedAmount {
+	if balance.Balance < in.GetInfo().GetAmount()+coin.ReservedAmount {
 		reason = "insufficient"
 		autoReview = false
 	} else if float64(autoReviewCoinAmount) < in.GetInfo().GetAmount() {
@@ -344,7 +334,7 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 			AppID:      in.GetInfo().GetAppID(),
 			Domain:     billingconst.ServiceName,
 			ObjectType: constant.ReviewObjectWithdraw,
-			ObjectID:   resp.Info.ID,
+			ObjectID:   withdrawItem.ID,
 			Trigger:    reason,
 		},
 	})
@@ -361,12 +351,12 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 			logger.Sugar().Errorf("unlock withdraw review fail: %v", err)
 		}
 
-		resp1, err := grpc2.CreateCoinAccountTransaction(ctx, &billingpb.CreateCoinAccountTransactionRequest{
+		tx, err := grpc2.CreateCoinAccountTransaction(ctx, &billingpb.CreateCoinAccountTransactionRequest{
 			Info: &billingpb.CoinAccountTransaction{
 				AppID:              in.GetInfo().GetAppID(),
 				UserID:             in.GetInfo().GetUserID(),
 				GoodID:             uuid.UUID{}.String(),
-				FromAddressID:      coinsetting.Info.UserOnlineAccountID,
+				FromAddressID:      coinsetting.UserOnlineAccountID,
 				ToAddressID:        in.GetInfo().GetWithdrawToAccountID(),
 				CoinTypeID:         coinTypeID,
 				Amount:             in.GetInfo().GetAmount(),
@@ -378,17 +368,17 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 			return nil, xerrors.Errorf("fail create coin account transaction: %v", err)
 		}
 
-		resp.Info.PlatformTransactionID = resp1.Info.ID
+		withdrawItem.PlatformTransactionID = tx.ID
 		_, err = grpc2.UpdateUserWithdrawItem(ctx, &billingpb.UpdateUserWithdrawItemRequest{
-			Info: resp.Info,
+			Info: withdrawItem,
 		})
 		if err != nil {
 			return nil, xerrors.Errorf("fail update user withdraw item: %v", err)
 		}
 
-		_review.Info.State = reviewconst.StateApproved
+		_review.State = reviewconst.StateApproved
 		_, err = grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{
-			Info: _review.Info,
+			Info: _review,
 		})
 		if err != nil {
 			return nil, xerrors.Errorf("fail update review state: %v", err)
@@ -399,7 +389,7 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 
 	return &npool.SubmitUserWithdrawResponse{
 		Info: &npool.UserWithdraw{
-			Withdraw: resp.Info,
+			Withdraw: withdrawItem,
 			State:    reviewState,
 		},
 	}, nil
@@ -416,110 +406,92 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		AppID:  in.GetAppID(),
 		UserID: in.GetUserID(),
 	})
-	if err != nil {
+	if err != nil || user == nil {
 		return nil, xerrors.Errorf("fail get app user: %v", err)
 	}
-	if user.Info == nil {
-		return nil, xerrors.Errorf("fail get app user")
-	}
 
-	resp, err := grpc2.GetReview(ctx, &reviewpb.GetReviewRequest{
+	_review, err := grpc2.GetReview(ctx, &reviewpb.GetReviewRequest{
 		ID: in.GetInfo().GetID(),
 	})
-	if err != nil {
+	if err != nil || _review == nil {
 		return nil, xerrors.Errorf("fail get review: %v", err)
 	}
-	if resp.Info == nil {
-		return nil, xerrors.Errorf("fail get review")
-	}
-	if resp.Info.State == reviewconst.StateApproved {
+	if _review.State == reviewconst.StateApproved {
 		return nil, xerrors.Errorf("already approved")
 	}
 
-	resp1, err := grpc2.GetUserWithdrawItem(ctx, &billingpb.GetUserWithdrawItemRequest{
-		ID: resp.Info.ObjectID,
+	withdrawItem, err := grpc2.GetUserWithdrawItem(ctx, &billingpb.GetUserWithdrawItemRequest{
+		ID: _review.ObjectID,
 	})
-	if err != nil {
+	if err != nil || withdrawItem == nil {
 		return nil, xerrors.Errorf("fail get object: %v", err)
-	}
-	if resp1.Info == nil {
-		return nil, xerrors.Errorf("fail get object")
 	}
 
 	invalidID := uuid.UUID{}.String()
-	if resp1.Info.PlatformTransactionID != invalidID {
+	if withdrawItem.PlatformTransactionID != invalidID {
 		return nil, xerrors.Errorf("withdraw already processed")
 	}
 
 	coinsetting, err := grpc2.GetCoinSettingByCoin(ctx, &billingpb.GetCoinSettingByCoinRequest{
-		CoinTypeID: resp1.Info.CoinTypeID,
+		CoinTypeID: withdrawItem.CoinTypeID,
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get coin setting: %v", err)
 	}
 
 	account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
-		ID: coinsetting.Info.UserOnlineAccountID,
+		ID: coinsetting.UserOnlineAccountID,
 	})
-	if err != nil {
+	if err != nil || account == nil {
 		return nil, xerrors.Errorf("fail get account info: %v", err)
-	}
-	if account.Info == nil {
-		return nil, xerrors.Errorf("fail get account info")
 	}
 
 	if ok, err := withdrawable(
 		ctx,
-		resp1.Info.AppID,
-		resp1.Info.UserID,
-		resp1.Info.CoinTypeID,
-		resp1.Info.WithdrawType,
-		resp1.Info.Amount,
+		withdrawItem.AppID,
+		withdrawItem.UserID,
+		withdrawItem.CoinTypeID,
+		withdrawItem.WithdrawType,
+		withdrawItem.Amount,
 	); !ok || err != nil {
 		return nil, xerrors.Errorf("user not withdrawable: %v", err)
 	}
 
 	coin, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
-		ID: resp1.Info.CoinTypeID,
+		ID: withdrawItem.CoinTypeID,
 	})
-	if err != nil {
+	if err != nil || coin == nil {
 		return nil, xerrors.Errorf("fail get coin info: %v", err)
-	}
-	if coin.Info == nil {
-		return nil, xerrors.Errorf("fail get coin info")
 	}
 
 	// TODO: here should hold transfer lock
 	balance, err := grpc2.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
-		Name:    coin.Info.Name,
-		Address: account.Info.Address,
+		Name:    coin.Name,
+		Address: account.Address,
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get wallet balance: %v", err)
 	}
 
-	if balance.Info.Balance < resp1.Info.Amount+coin.Info.ReservedAmount {
+	if balance.Balance < withdrawItem.Amount+coin.ReservedAmount {
 		return nil, xerrors.Errorf("not sufficient funds")
 	}
 
 	account, err = grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
-		ID: resp1.Info.WithdrawToAccountID,
+		ID: withdrawItem.WithdrawToAccountID,
 	})
-	if err != nil {
+	if err != nil || account == nil {
 		return nil, xerrors.Errorf("fail get account info: %v", err)
-	}
-	if account.Info == nil {
-		return nil, xerrors.Errorf("fail get account info")
 	}
 
 	withdrawAccount, err := grpc2.GetUserWithdrawByAccount(ctx, &billingpb.GetUserWithdrawByAccountRequest{
-		AccountID: resp1.Info.WithdrawToAccountID,
+		AccountID: withdrawItem.WithdrawToAccountID,
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get withdraw account")
 	}
 
-	if withdrawAccount.Info.AppID != resp1.Info.AppID || withdrawAccount.Info.UserID != resp1.Info.UserID {
+	if withdrawAccount.AppID != withdrawItem.AppID || withdrawAccount.UserID != withdrawItem.UserID {
 		return nil, xerrors.Errorf("invalid account: mismatch app user")
 	}
 
@@ -527,7 +499,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		AppID:      in.GetInfo().GetAppID(),
 		Domain:     billingconst.ServiceName,
 		ObjectType: constant.ReviewObjectUserWithdrawAddress,
-		ObjectID:   withdrawAccount.Info.ID,
+		ObjectID:   withdrawAccount.ID,
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get review: %v", err)
@@ -537,44 +509,38 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 	}
 
 	_, err = grpc2.GetAppUserByAppUser(ctx, &appusermgrpb.GetAppUserByAppUserRequest{
-		AppID:  resp1.Info.AppID,
-		UserID: resp1.Info.UserID,
+		AppID:  withdrawItem.AppID,
+		UserID: withdrawItem.UserID,
 	})
-	if err != nil {
+	if err != nil || user == nil {
 		return nil, xerrors.Errorf("fail get app user: %v", err)
 	}
-	if user.Info == nil {
-		return nil, xerrors.Errorf("fail get app user")
-	}
 
-	if resp1.Info.AppID != in.GetInfo().GetAppID() {
+	if withdrawItem.AppID != in.GetInfo().GetAppID() {
 		return nil, xerrors.Errorf("invalid request")
 	}
 
-	if resp.Info.State != reviewconst.StateWait {
+	if _review.State != reviewconst.StateWait {
 		return nil, xerrors.Errorf("already reviewed")
 	}
 
 	if in.GetInfo().GetState() == reviewconst.StateApproved {
 		account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
-			ID: coinsetting.Info.UserOnlineAccountID,
+			ID: coinsetting.UserOnlineAccountID,
 		})
-		if err != nil {
+		if err != nil || account == nil {
 			return nil, xerrors.Errorf("fail get account info: %v", err)
 		}
-		if account.Info == nil {
-			return nil, xerrors.Errorf("fail get account info")
-		}
 
-		resp2, err := grpc2.CreateCoinAccountTransaction(ctx, &billingpb.CreateCoinAccountTransactionRequest{
+		tx, err := grpc2.CreateCoinAccountTransaction(ctx, &billingpb.CreateCoinAccountTransactionRequest{
 			Info: &billingpb.CoinAccountTransaction{
-				AppID:              resp1.Info.AppID,
-				UserID:             resp1.Info.UserID,
+				AppID:              withdrawItem.AppID,
+				UserID:             withdrawItem.UserID,
 				GoodID:             uuid.UUID{}.String(),
-				FromAddressID:      coinsetting.Info.UserOnlineAccountID,
-				ToAddressID:        resp1.Info.WithdrawToAccountID,
-				CoinTypeID:         resp1.Info.CoinTypeID,
-				Amount:             resp1.Info.Amount,
+				FromAddressID:      coinsetting.UserOnlineAccountID,
+				ToAddressID:        withdrawItem.WithdrawToAccountID,
+				CoinTypeID:         withdrawItem.CoinTypeID,
+				Amount:             withdrawItem.Amount,
 				Message:            fmt.Sprintf("user withdraw at %v", time.Now()),
 				ChainTransactionID: "",
 			},
@@ -583,32 +549,32 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 			return nil, xerrors.Errorf("fail create coin account transaction: %v", err)
 		}
 
-		resp1.Info.PlatformTransactionID = resp2.Info.ID
+		withdrawItem.PlatformTransactionID = tx.ID
 		_, err = grpc2.UpdateUserWithdrawItem(ctx, &billingpb.UpdateUserWithdrawItemRequest{
-			Info: resp1.Info,
+			Info: withdrawItem,
 		})
 		if err != nil {
 			return nil, xerrors.Errorf("fail update user withdraw item: %v", err)
 		}
 
-		resp.Info.State = reviewconst.StateApproved
+		_review.State = reviewconst.StateApproved
 		_, err = grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{
-			Info: resp.Info,
+			Info: _review,
 		})
 		if err != nil {
 			return nil, xerrors.Errorf("fail update review state: %v", err)
 		}
 	}
 
-	resp.Info.State = in.GetInfo().GetState()
-	resp2, err := grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{
-		Info: resp.Info,
+	_review.State = in.GetInfo().GetState()
+	_review, err = grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{
+		Info: _review,
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail update review state: %v", err)
 	}
 
-	reviewLockKey := fmt.Sprintf("withdraw-review:%v:%v", resp1.Info.AppID, resp1.Info.UserID)
+	reviewLockKey := fmt.Sprintf("withdraw-review:%v:%v", withdrawItem.AppID, withdrawItem.UserID)
 	err = redis2.Unlock(reviewLockKey)
 	if err != nil {
 		return nil, xerrors.Errorf("fail unlock withdraw review: %v", err)
@@ -616,15 +582,15 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 
 	return &npool.UpdateUserWithdrawReviewResponse{
 		Info: &npool.WithdrawReview{
-			Withdraw: resp1.Info,
-			Review:   resp2.Info,
-			User:     user.Info,
+			Withdraw: withdrawItem,
+			Review:   _review,
+			User:     user,
 		},
 	}, nil
 }
 
 func GetByAppUser(ctx context.Context, in *npool.GetUserWithdrawsByAppUserRequest) (*npool.GetUserWithdrawsByAppUserResponse, error) { //nolint
-	resp, err := grpc2.GetUserWithdrawItemsByAppUser(ctx, &billingpb.GetUserWithdrawItemsByAppUserRequest{
+	withdrawItems, err := grpc2.GetUserWithdrawItemsByAppUser(ctx, &billingpb.GetUserWithdrawItemsByAppUserRequest{
 		AppID:  in.GetAppID(),
 		UserID: in.GetUserID(),
 	})
@@ -633,7 +599,7 @@ func GetByAppUser(ctx context.Context, in *npool.GetUserWithdrawsByAppUserReques
 	}
 
 	withdraws := []*npool.UserWithdraw{}
-	for _, info := range resp.Infos {
+	for _, info := range withdrawItems {
 		reviewState, reviewMessage, err := review.GetReviewState(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
 			AppID:      info.AppID,
 			Domain:     billingconst.ServiceName,

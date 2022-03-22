@@ -8,8 +8,8 @@ import (
 	commissionsetting "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/commission/setting"
 	"github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral"
 	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
+	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
-	orderpb "github.com/NpoolPlatform/message/npool/cloud-hashing-order"
 
 	"golang.org/x/xerrors"
 )
@@ -39,19 +39,19 @@ func getRebate(ctx context.Context, appID, userID string) (float64, error) {
 	return totalAmount, nil
 }
 
-func getOrderParentRebate(_ context.Context, order *orderpb.OrderDetail, roots, nexts []*inspirepb.AppPurchaseAmountSetting) float64 {
-	if order.Payment == nil || order.Payment.State != orderconst.PaymentStateDone {
+func getOrderParentRebate(_ context.Context, order *npool.Order, roots, nexts []*inspirepb.AppPurchaseAmountSetting) float64 {
+	if order.Order.Payment == nil || order.Order.Payment.State != orderconst.PaymentStateDone {
 		return 0
 	}
 
-	setting := commissionsetting.GetAmountSettingByTimestamp(roots, order.Order.CreateAt)
+	setting := commissionsetting.GetAmountSettingByTimestamp(roots, order.Order.Order.CreateAt)
 	if setting == nil {
 		return 0
 	}
 	rootPercent := int(setting.Percent)
 
 	nextPercent := 0
-	setting = commissionsetting.GetAmountSettingByTimestamp(nexts, order.Order.CreateAt)
+	setting = commissionsetting.GetAmountSettingByTimestamp(nexts, order.Order.Order.CreateAt)
 	if setting != nil {
 		nextPercent = int(setting.Percent)
 	}
@@ -60,12 +60,12 @@ func getOrderParentRebate(_ context.Context, order *orderpb.OrderDetail, roots, 
 		return 0
 	}
 
-	orderAmount := order.Payment.Amount * order.Payment.CoinUSDCurrency
+	orderAmount := order.Order.Payment.Amount * order.Order.Payment.CoinUSDCurrency
 	rootAmount := orderAmount * float64(rootPercent-nextPercent) / 100.0
 
 	logger.Sugar().Infof("sub order %v | %v root %v | %v next %v user %v",
-		order.Order.ID, orderAmount, rootAmount, rootPercent, nextPercent,
-		order.Order.UserID)
+		order.Order.Order.ID, orderAmount, rootAmount, rootPercent, nextPercent,
+		order.Order.Order.UserID)
 
 	return rootAmount
 }

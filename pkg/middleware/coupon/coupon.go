@@ -15,7 +15,7 @@ import (
 )
 
 func GetCouponsByAppUser(ctx context.Context, in *npool.GetCouponsByAppUserRequest) (*npool.GetCouponsByAppUserResponse, error) {
-	resp, err := grpc2.GetCouponsAllocatedByAppUser(ctx, &inspirepb.GetCouponsAllocatedDetailByAppUserRequest{
+	infos, err := grpc2.GetCouponsAllocatedByAppUser(ctx, &inspirepb.GetCouponsAllocatedDetailByAppUserRequest{
 		AppID:  in.GetAppID(),
 		UserID: in.GetUserID(),
 	})
@@ -24,7 +24,7 @@ func GetCouponsByAppUser(ctx context.Context, in *npool.GetCouponsByAppUserReque
 	}
 
 	coupons := []*npool.Coupon{}
-	for _, info := range resp.Infos {
+	for _, info := range infos {
 		order, err := grpc2.GetOrderByAppUserCouponTypeID(ctx, &orderpb.GetOrderByAppUserCouponTypeIDRequest{
 			AppID:      in.AppID,
 			UserID:     in.UserID,
@@ -34,13 +34,14 @@ func GetCouponsByAppUser(ctx context.Context, in *npool.GetCouponsByAppUserReque
 		if err != nil {
 			return nil, xerrors.Errorf("fail get order for coupon: %v", err)
 		}
+
 		coupons = append(coupons, &npool.Coupon{
 			Coupon: info,
-			Order:  order.Info,
+			Order:  order,
 		})
 	}
 
-	resp1, err := grpc2.GetUserSpecialReductionsByAppUser(ctx, &inspirepb.GetUserSpecialReductionsByAppUserRequest{
+	specials, err := grpc2.GetUserSpecialReductionsByAppUser(ctx, &inspirepb.GetUserSpecialReductionsByAppUserRequest{
 		AppID:  in.GetAppID(),
 		UserID: in.GetUserID(),
 	})
@@ -49,7 +50,7 @@ func GetCouponsByAppUser(ctx context.Context, in *npool.GetCouponsByAppUserReque
 	}
 
 	offers := []*npool.UserSpecial{}
-	for _, info := range resp1.Infos {
+	for _, info := range specials {
 		order, err := grpc2.GetOrderByAppUserCouponTypeID(ctx, &orderpb.GetOrderByAppUserCouponTypeIDRequest{
 			AppID:      in.AppID,
 			UserID:     in.UserID,
@@ -61,7 +62,7 @@ func GetCouponsByAppUser(ctx context.Context, in *npool.GetCouponsByAppUserReque
 		}
 		offers = append(offers, &npool.UserSpecial{
 			Coupon: info,
-			Order:  order.Info,
+			Order:  order,
 		})
 	}
 

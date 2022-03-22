@@ -16,7 +16,6 @@ import (
 )
 
 func (s *Server) GetReferrals(ctx context.Context, in *npool.GetReferralsRequest) (*npool.GetReferralsResponse, error) {
-	logger.Sugar().Infof("req %v", in)
 	resp, err := referral.GetReferrals(ctx, in)
 	if err != nil {
 		logger.Sugar().Errorf("get referrals error: %w", err)

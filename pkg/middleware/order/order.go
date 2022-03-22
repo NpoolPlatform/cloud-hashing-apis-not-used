@@ -4,13 +4,15 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"sort"
 	"time"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	redis2 "github.com/NpoolPlatform/go-service-framework/pkg/redis"
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
-	gooddetail "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/good" //nolint
+	cache "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/cache"
+	gooddetail "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/good"
 	currency "github.com/NpoolPlatform/cloud-hashing-staker/pkg/middleware/currency"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
@@ -31,7 +33,13 @@ import (
 
 const (
 	secondsInDay = 24 * 60 * 60
+	cacheGood    = "order:good"
+	cacheCoin    = "order:coin"
 )
+
+func cacheKey(key, id string) string {
+	return fmt.Sprintf("%v:%v", key, id)
+}
 
 func constructOrder(
 	info *orderpb.OrderDetail,
@@ -58,27 +66,20 @@ func constructOrder(
 	}
 }
 
-func expandOrder( //nolint
-	ctx context.Context,
-	info *orderpb.OrderDetail,
-	base bool,
-	goodsDetail map[string]*npool.Good,
-	coinInfos map[string]*coininfopb.CoinInfo) (*npool.Order, error) { //nolint
+func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*npool.Order, error) { //nolint
 	var coupon *inspirepb.CouponAllocatedDetail
+	var err error
 	invalidUUID := uuid.UUID{}.String()
 
 	if !base && info.Order.CouponID != invalidUUID {
-		resp, err := grpc2.GetOrderByAppUserCouponTypeID(ctx, &orderpb.GetOrderByAppUserCouponTypeIDRequest{
+		order, err := grpc2.GetOrderByAppUserCouponTypeID(ctx, &orderpb.GetOrderByAppUserCouponTypeIDRequest{
 			AppID:      info.Order.AppID,
 			UserID:     info.Order.UserID,
 			CouponType: orderconst.FixAmountCoupon,
 			CouponID:   info.Order.CouponID,
 		})
-		if err != nil {
+		if err != nil || order != nil {
 			return nil, xerrors.Errorf("fail check coupon usage: %v", err)
-		}
-		if resp.Info != nil {
-			return nil, xerrors.Errorf("fail check coupon usage")
 		}
 
 		couponAllocated, err := grpc2.GetCouponAllocated(ctx, &inspirepb.GetCouponAllocatedDetailRequest{
@@ -88,11 +89,11 @@ func expandOrder( //nolint
 			return nil, xerrors.Errorf("fail get coupon allocated detail: %v", err)
 		}
 
-		if couponAllocated.Info != nil {
-			if couponAllocated.Info.Allocated.AppID != info.Order.AppID || couponAllocated.Info.Allocated.UserID != info.Order.UserID {
+		if couponAllocated != nil {
+			if couponAllocated.Allocated.AppID != info.Order.AppID || couponAllocated.Allocated.UserID != info.Order.UserID {
 				return nil, xerrors.Errorf("invalid coupon")
 			}
-			coupon = couponAllocated.Info
+			coupon = couponAllocated
 		}
 	}
 
@@ -100,17 +101,20 @@ func expandOrder( //nolint
 	var accountInfo *billingpb.CoinAccountInfo
 
 	if info.Payment != nil {
-		if coinInfo, ok := coinInfos[info.Payment.CoinInfoID]; ok {
-			paymentCoinInfo = coinInfo
-		} else {
-			coinInfo, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
+		coinInfo := cache.GetEntry(cacheKey(cacheCoin, info.Payment.CoinInfoID))
+		if coinInfo != nil {
+			paymentCoinInfo = coinInfo.(*coininfopb.CoinInfo) //nolint
+		}
+
+		if paymentCoinInfo == nil {
+			paymentCoinInfo, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
 				ID: info.Payment.CoinInfoID,
 			})
-			if err != nil {
+			if err != nil || paymentCoinInfo == nil {
 				return nil, xerrors.Errorf("fail get payment coin info: %v", err)
 			}
-			paymentCoinInfo = coinInfo.Info
-			coinInfos[info.Payment.CoinInfoID] = paymentCoinInfo
+
+			cache.AddEntry(cacheKey(cacheCoin, info.Payment.CoinInfoID), paymentCoinInfo)
 		}
 
 		if !base {
@@ -120,24 +124,21 @@ func expandOrder( //nolint
 			if err != nil {
 				return nil, xerrors.Errorf("fail get payment address: %v", err)
 			}
-			accountInfo = account.Info
+			accountInfo = account
 		}
 	}
 
 	var discountCoupon *inspirepb.CouponAllocatedDetail
 
 	if !base && info.Order.DiscountCouponID != invalidUUID {
-		resp, err := grpc2.GetOrderByAppUserCouponTypeID(ctx, &orderpb.GetOrderByAppUserCouponTypeIDRequest{
+		order, err := grpc2.GetOrderByAppUserCouponTypeID(ctx, &orderpb.GetOrderByAppUserCouponTypeIDRequest{
 			AppID:      info.Order.AppID,
 			UserID:     info.Order.UserID,
 			CouponType: orderconst.DiscountCoupon,
 			CouponID:   info.Order.DiscountCouponID,
 		})
-		if err != nil {
+		if err != nil || order != nil {
 			return nil, xerrors.Errorf("fail check coupon usage: %v", err)
-		}
-		if resp.Info != nil {
-			return nil, xerrors.Errorf("fail check coupon usage")
 		}
 
 		discount, err := grpc2.GetCouponAllocated(ctx, &inspirepb.GetCouponAllocatedDetailRequest{
@@ -147,28 +148,25 @@ func expandOrder( //nolint
 			return nil, xerrors.Errorf("fail get discount coupon allocated detail: %v", err)
 		}
 
-		if discount.Info != nil {
-			if discount.Info.Allocated.AppID != info.Order.AppID || discount.Info.Allocated.UserID != info.Order.UserID {
+		if discount != nil {
+			if discount.Allocated.AppID != info.Order.AppID || discount.Allocated.UserID != info.Order.UserID {
 				return nil, xerrors.Errorf("invalid coupon")
 			}
-			discountCoupon = discount.Info
+			discountCoupon = discount
 		}
 	}
 
 	var userSpecialReduction *inspirepb.UserSpecialReduction
 
 	if !base && info.Order.UserSpecialReductionID != invalidUUID {
-		resp, err := grpc2.GetOrderByAppUserCouponTypeID(ctx, &orderpb.GetOrderByAppUserCouponTypeIDRequest{
+		order, err := grpc2.GetOrderByAppUserCouponTypeID(ctx, &orderpb.GetOrderByAppUserCouponTypeIDRequest{
 			AppID:      info.Order.AppID,
 			UserID:     info.Order.UserID,
 			CouponType: orderconst.UserSpecialReductionCoupon,
 			CouponID:   info.Order.UserSpecialReductionID,
 		})
-		if err != nil {
+		if err != nil || order != nil {
 			return nil, xerrors.Errorf("fail check coupon usage: %v", err)
-		}
-		if resp.Info != nil {
-			return nil, xerrors.Errorf("fail check coupon usage")
 		}
 
 		userSpecial, err := grpc2.GetUserSpecialReduction(ctx, &inspirepb.GetUserSpecialReductionRequest{
@@ -178,52 +176,51 @@ func expandOrder( //nolint
 			return nil, xerrors.Errorf("fail get user special reduction: %v", err)
 		}
 
-		if userSpecial.Info != nil {
-			if userSpecial.Info.AppID != info.Order.AppID || userSpecial.Info.UserID != info.Order.UserID {
+		if userSpecial != nil {
+			if userSpecial.AppID != info.Order.AppID || userSpecial.UserID != info.Order.UserID {
 				return nil, xerrors.Errorf("invalid coupon")
 			}
-			userSpecialReduction = userSpecial.Info
+			userSpecialReduction = userSpecial
 		}
 	}
 
 	var goodInfo *npool.Good
-	if detail, ok := goodsDetail[info.Order.GetGoodID()]; ok {
-		goodInfo = detail
-	} else {
+
+	cacheGoodInfo := cache.GetEntry(cacheKey(cacheGood, info.Order.GetGoodID()))
+	if cacheGoodInfo != nil {
+		goodInfo = cacheGoodInfo.(*npool.Good) //nolint
+	}
+
+	if goodInfo == nil {
 		resp, err := gooddetail.Get(ctx, &npool.GetGoodRequest{
 			ID: info.Order.GetGoodID(),
 		})
-		if err != nil {
+		if err != nil || resp.Info == nil {
 			return nil, xerrors.Errorf("fail get good info: %v", err)
 		}
-		goodsDetail[info.Order.GetGoodID()] = resp.Info
 		goodInfo = resp.Info
+		cache.AddEntry(cacheKey(cacheGood, info.Order.GetGoodID()), goodInfo)
 	}
 
 	var appGood *goodspb.AppGoodInfo
-	appGoodResp, err := grpc2.GetAppGoodByAppGood(ctx, &goodspb.GetAppGoodByAppGoodRequest{
+	appGood, err = grpc2.GetAppGoodByAppGood(ctx, &goodspb.GetAppGoodByAppGoodRequest{
 		AppID:  info.Order.GetAppID(),
 		GoodID: info.Order.GetGoodID(),
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get app good: %v", err)
 	}
-	if appGoodResp.Info != nil {
-		appGood = appGoodResp.Info
-	}
 
-	var promotion *goodspb.AppGoodPromotion
-	promotionResp, err := grpc2.GetAppGoodPromotion(ctx, &goodspb.GetAppGoodPromotionRequest{
+	promotion, err := grpc2.GetAppGoodPromotion(ctx, &goodspb.GetAppGoodPromotionRequest{
 		ID: info.Order.PromotionID,
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get promotion: %v", err)
 	}
-	if promotionResp.Info != nil {
-		if info.Order.GetAppID() != promotionResp.Info.AppID || info.Order.GetGoodID() != promotionResp.Info.GoodID {
+	if promotion != nil {
+		if info.Order.GetAppID() != promotion.AppID || info.Order.GetGoodID() != promotion.GoodID {
 			return nil, xerrors.Errorf("invalid promotion")
 		}
-		promotion = promotionResp.Info
 	}
 
 	return constructOrder(
@@ -240,17 +237,14 @@ func expandOrder( //nolint
 }
 
 func GetOrder(ctx context.Context, in *npool.GetOrderRequest) (*npool.GetOrderResponse, error) {
-	orderDetail, err := grpc2.GetOrderDetail(ctx, &orderpb.GetOrderDetailRequest{
+	order, err := grpc2.GetOrderDetail(ctx, &orderpb.GetOrderDetailRequest{
 		ID: in.GetID(),
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get order detail: %v", err)
 	}
 
-	goods := map[string]*npool.Good{}
-	coins := map[string]*coininfopb.CoinInfo{}
-
-	detail, err := expandOrder(ctx, orderDetail.Info, false, goods, coins)
+	detail, err := expandOrder(ctx, order, false)
 	if err != nil {
 		return nil, xerrors.Errorf("fail expand order detail: %v", err)
 	}
@@ -269,12 +263,13 @@ func GetOrdersByAppUser(ctx context.Context, in *npool.GetOrdersByAppUserRequest
 		return nil, xerrors.Errorf("fail get orders detail by app user: %v", err)
 	}
 
-	details := []*npool.Order{}
-	goods := map[string]*npool.Good{}
-	coins := map[string]*coininfopb.CoinInfo{}
+	sort.Slice(orders, func(i, j int) bool {
+		return orders[i].Order.CreateAt > orders[j].Order.CreateAt
+	})
 
+	details := []*npool.Order{}
 	for _, info := range orders {
-		detail, err := expandOrder(ctx, info, false, goods, coins)
+		detail, err := expandOrder(ctx, info, false)
 		if err != nil {
 			logger.Sugar().Warnf("cannot expand order detail: %v", err)
 			continue
@@ -288,26 +283,23 @@ func GetOrdersByAppUser(ctx context.Context, in *npool.GetOrdersByAppUserRequest
 	}, nil
 }
 
-func GetOrdersShortDetailByAppUser( //nolint
-	ctx context.Context,
-	in *npool.GetOrdersByAppUserRequest,
-	goods map[string]*npool.Good,
-	coins map[string]*coininfopb.CoinInfo) (*npool.GetOrdersByAppUserResponse,
-	map[string]*npool.Good,
-	map[string]*coininfopb.CoinInfo,
-	error) {
-	ordersDetail, err := grpc2.GetOrdersShortDetailByAppUser(ctx, &orderpb.GetOrdersShortDetailByAppUserRequest{
+func GetOrdersShortDetailByAppUser(ctx context.Context, in *npool.GetOrdersByAppUserRequest) (*npool.GetOrdersByAppUserResponse, error) {
+	orders, err := grpc2.GetOrdersShortDetailByAppUser(ctx, &orderpb.GetOrdersShortDetailByAppUserRequest{
 		AppID:  in.GetAppID(),
 		UserID: in.GetUserID(),
 	})
 	if err != nil {
-		return nil, nil, nil, xerrors.Errorf("fail get orders detail by app user: %v", err)
+		return nil, xerrors.Errorf("fail get orders detail by app user: %v", err)
 	}
+
+	sort.Slice(orders, func(i, j int) bool {
+		return orders[i].Order.CreateAt > orders[j].Order.CreateAt
+	})
 
 	details := []*npool.Order{}
 
-	for _, info := range ordersDetail.Infos {
-		detail, err := expandOrder(ctx, info, true, goods, coins)
+	for _, info := range orders {
+		detail, err := expandOrder(ctx, info, true)
 		if err != nil {
 			logger.Sugar().Warnf("cannot expand order detail: %v", err)
 			continue
@@ -318,23 +310,24 @@ func GetOrdersShortDetailByAppUser( //nolint
 
 	return &npool.GetOrdersByAppUserResponse{
 		Infos: details,
-	}, goods, coins, nil
+	}, nil
 }
 
 func GetOrdersByApp(ctx context.Context, in *npool.GetOrdersByAppRequest) (*npool.GetOrdersByAppResponse, error) {
-	ordersDetail, err := grpc2.GetOrdersDetailByApp(ctx, &orderpb.GetOrdersDetailByAppRequest{
+	orders, err := grpc2.GetOrdersDetailByApp(ctx, &orderpb.GetOrdersDetailByAppRequest{
 		AppID: in.GetAppID(),
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get orders detail by app: %v", err)
 	}
 
-	details := []*npool.Order{}
-	goods := map[string]*npool.Good{}
-	coins := map[string]*coininfopb.CoinInfo{}
+	sort.Slice(orders, func(i, j int) bool {
+		return orders[i].Order.CreateAt > orders[j].Order.CreateAt
+	})
 
-	for _, info := range ordersDetail.Infos {
-		detail, err := expandOrder(ctx, info, false, goods, coins)
+	details := []*npool.Order{}
+	for _, info := range orders {
+		detail, err := expandOrder(ctx, info, false)
 		if err != nil {
 			logger.Sugar().Warnf("cannot expand order detail: %v", err)
 			continue
@@ -349,19 +342,20 @@ func GetOrdersByApp(ctx context.Context, in *npool.GetOrdersByAppRequest) (*npoo
 }
 
 func GetOrdersByGood(ctx context.Context, in *npool.GetOrdersByGoodRequest) (*npool.GetOrdersByGoodResponse, error) {
-	ordersDetail, err := grpc2.GetOrdersDetailByGood(ctx, &orderpb.GetOrdersDetailByGoodRequest{
+	orders, err := grpc2.GetOrdersDetailByGood(ctx, &orderpb.GetOrdersDetailByGoodRequest{
 		GoodID: in.GetGoodID(),
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get orders detail by good: %v", err)
 	}
 
-	details := []*npool.Order{}
-	goods := map[string]*npool.Good{}
-	coins := map[string]*coininfopb.CoinInfo{}
+	sort.Slice(orders, func(i, j int) bool {
+		return orders[i].Order.CreateAt > orders[j].Order.CreateAt
+	})
 
-	for _, info := range ordersDetail.Infos {
-		detail, err := expandOrder(ctx, info, false, goods, coins)
+	details := []*npool.Order{}
+	for _, info := range orders {
+		detail, err := expandOrder(ctx, info, false)
 		if err != nil {
 			logger.Sugar().Warnf("cannot expand order detail: %v", err)
 			continue
@@ -383,13 +377,13 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 	if err != nil {
 		return nil, xerrors.Errorf("fail get app good: %v", err)
 	}
-	if appGood.Info == nil {
+	if appGood == nil {
 		return nil, xerrors.Errorf("fail get app good")
 	}
-	if !appGood.Info.Online {
+	if !appGood.Online {
 		return nil, xerrors.Errorf("good offline by app")
 	}
-	if appGood.Info.Price <= 0 {
+	if appGood.Price <= 0 {
 		return nil, xerrors.Errorf("good price invalid")
 	}
 
@@ -429,10 +423,10 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 		return nil, xerrors.Errorf("fail get good sold: %v", err)
 	}
 
-	if sold.Sold >= uint32(goodInfo.Info.Good.Good.Total) {
+	if sold >= uint32(goodInfo.Info.Good.Good.Total) {
 		return nil, xerrors.Errorf("good sold out")
 	}
-	if in.GetUnits() > uint32(goodInfo.Info.Good.Good.Total)-sold.Sold {
+	if in.GetUnits() > uint32(goodInfo.Info.Good.Good.Total)-sold {
 		return nil, xerrors.Errorf("good units not enough")
 	}
 
@@ -444,7 +438,7 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 	end := start + uint32(goodInfo.Info.Good.Good.DurationDays)*secondsInDay
 	promotionID := uuid.UUID{}.String()
 
-	resp, err := grpc2.GetAppGoodPromotionByAppGoodTimestamp(ctx, &goodspb.GetAppGoodPromotionByAppGoodTimestampRequest{
+	promotion, err := grpc2.GetAppGoodPromotionByAppGoodTimestamp(ctx, &goodspb.GetAppGoodPromotionByAppGoodTimestampRequest{
 		AppID:     in.GetAppID(),
 		GoodID:    in.GetGoodID(),
 		Timestamp: uint32(time.Now().Unix()),
@@ -452,8 +446,8 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 	if err != nil {
 		return nil, xerrors.Errorf("fail get promotion: %v", err)
 	}
-	if resp.Info != nil {
-		promotionID = resp.Info.ID
+	if promotion != nil {
+		promotionID = promotion.ID
 	}
 
 	// Generate order
@@ -476,7 +470,7 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 	}
 
 	orderDetail, err := GetOrder(ctx, &npool.GetOrderRequest{
-		ID: myOrder.Info.ID,
+		ID: myOrder.ID,
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get order detail:%v", err)
@@ -488,7 +482,7 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 }
 
 func peekIdlePaymentAccount(ctx context.Context, order *npool.Order, paymentCoinInfo *coininfopb.CoinInfo) (*billingpb.CoinAccountInfo, error) {
-	resp, err := grpc2.GetIdleGoodPaymentsByGoodPaymentCoin(ctx, &billingpb.GetIdleGoodPaymentsByGoodPaymentCoinRequest{
+	payments, err := grpc2.GetIdleGoodPaymentsByGoodPaymentCoin(ctx, &billingpb.GetIdleGoodPaymentsByGoodPaymentCoinRequest{
 		GoodID:            order.Good.Good.Good.ID,
 		PaymentCoinTypeID: paymentCoinInfo.ID,
 	})
@@ -499,7 +493,7 @@ func peekIdlePaymentAccount(ctx context.Context, order *npool.Order, paymentCoin
 	var paymentAccount *billingpb.GoodPayment
 	var lockKey string
 
-	for _, info := range resp.Infos {
+	for _, info := range payments {
 		lockKey = paymentwatcher.AccountLockKey(info.ID)
 		err = redis2.TryLock(lockKey, orderconst.TimeoutSeconds*2)
 		if err != nil {
@@ -528,7 +522,7 @@ func peekIdlePaymentAccount(ctx context.Context, order *npool.Order, paymentCoin
 		return nil, xerrors.Errorf("fail update good payment: %v", err)
 	}
 
-	resp1, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
+	account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
 		ID: paymentAccount.AccountID,
 	})
 	if err != nil {
@@ -539,7 +533,7 @@ func peekIdlePaymentAccount(ctx context.Context, order *npool.Order, paymentCoin
 		return nil, xerrors.Errorf("fail get account: %v", err)
 	}
 
-	return resp1.Info, nil
+	return account, nil
 }
 
 func createNewPaymentAccount(ctx context.Context, order *npool.Order, paymentCoinInfo *coininfopb.CoinInfo) (*billingpb.CoinAccountInfo, error) {
@@ -552,14 +546,14 @@ func createNewPaymentAccount(ctx context.Context, order *npool.Order, paymentCoi
 		if err != nil {
 			return nil, xerrors.Errorf("fail create wallet address: %v", err)
 		}
-		if address.Info == nil || address.Info.Address == "" {
+		if address == nil || address.Address == "" {
 			return nil, xerrors.Errorf("fail create wallet address for %v", paymentCoinInfo.Name)
 		}
 
 		account, err := grpc2.CreateBillingAccount(ctx, &billingpb.CreateCoinAccountRequest{
 			Info: &billingpb.CoinAccountInfo{
 				CoinTypeID:             paymentCoinInfo.ID,
-				Address:                address.Info.Address,
+				Address:                address.Address,
 				PlatformHoldPrivateKey: true,
 			},
 		})
@@ -571,7 +565,7 @@ func createNewPaymentAccount(ctx context.Context, order *npool.Order, paymentCoi
 			Info: &billingpb.GoodPayment{
 				GoodID:            order.Good.Good.Good.ID,
 				PaymentCoinTypeID: paymentCoinInfo.ID,
-				AccountID:         account.Info.ID,
+				AccountID:         account.ID,
 			},
 		})
 		if err != nil {
@@ -613,17 +607,17 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		return nil, xerrors.Errorf("invalid coin info id: %v", err)
 	}
 
-	if paymentCoinInfo.Info.PreSale {
+	if paymentCoinInfo.PreSale {
 		return nil, xerrors.Errorf("cannot use presale coin as payment coin")
 	}
-	if !paymentCoinInfo.Info.ForPay {
+	if !paymentCoinInfo.ForPay {
 		return nil, xerrors.Errorf("payment coin not for pay")
 	}
-	if paymentCoinInfo.Info.ENV != myOrder.Info.Good.Main.ENV {
+	if paymentCoinInfo.ENV != myOrder.Info.Good.Main.ENV {
 		return nil, xerrors.Errorf("payment coin env different from good coin env")
 	}
 
-	paymentCoinCurrency, err := currency.USDPrice(ctx, paymentCoinInfo.Info.Name)
+	paymentCoinCurrency, err := currency.USDPrice(ctx, paymentCoinInfo.Name)
 	if err != nil {
 		return nil, xerrors.Errorf("cannot get usd currency for payment coin: %v", err)
 	}
@@ -670,22 +664,22 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		paymentCoinCurrency)
 
 	// TODO: Check if idle address is available with lock
-	paymentAccount, err := peekIdlePaymentAccount(ctx, myOrder.Info, paymentCoinInfo.Info)
+	paymentAccount, err := peekIdlePaymentAccount(ctx, myOrder.Info, paymentCoinInfo)
 	if err != nil {
-		paymentAccount, err = createNewPaymentAccount(ctx, myOrder.Info, paymentCoinInfo.Info)
+		paymentAccount, err = createNewPaymentAccount(ctx, myOrder.Info, paymentCoinInfo)
 	}
 	if err != nil {
 		return nil, xerrors.Errorf("cannot get valid payment account: %v", err)
 	}
 
 	balance, err := grpc2.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
-		Name:    paymentCoinInfo.Info.Name,
+		Name:    paymentCoinInfo.Name,
 		Address: paymentAccount.Address,
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get wallet balance: %v", err)
 	}
-	balanceAmount := balance.Info.Balance
+	balanceAmount := balance.Balance
 
 	// Generate payment
 	myPayment, err := grpc2.CreatePayment(ctx, &orderpb.CreatePaymentRequest{
@@ -709,7 +703,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	_, err = grpc2.CreateGoodPaying(ctx, &orderpb.CreateGoodPayingRequest{
 		Info: &orderpb.GoodPaying{
 			OrderID:   myOrder.Info.Order.Order.ID,
-			PaymentID: myPayment.Info.ID,
+			PaymentID: myPayment.ID,
 		},
 	})
 	if err != nil {
@@ -721,7 +715,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		_, err := grpc2.CreateGasPaying(ctx, &orderpb.CreateGasPayingRequest{
 			Info: &orderpb.GasPaying{
 				OrderID:         myOrder.Info.Order.Order.ID,
-				PaymentID:       myPayment.Info.ID,
+				PaymentID:       myPayment.ID,
 				DurationMinutes: fee.DurationDays * 24 * 60,
 				FeeTypeID:       fee.ID,
 			},
