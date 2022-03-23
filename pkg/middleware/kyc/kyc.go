@@ -3,6 +3,7 @@ package kyc
 import (
 	"context"
 
+	"entgo.io/ent/entc/integration/edgefield/ent/info"
 	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
 
 	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/const"
@@ -137,9 +138,21 @@ func GetByAppUser(ctx context.Context, in *npool.GetKycByAppUserRequest) (*npool
 func UpdateKycReview(ctx context.Context, in *npool.UpdateKycReviewRequest) (*npool.UpdateKycReviewResponse, error) {
 	reviewInfo := in.GetInfo()
 
+	kycs, err := grpc2.GetKycByIDs(ctx, &kycmgrpb.GetKycByKycIDsRequest{
+		KycIDs: []string{
+			reviewInfo.GetObjectID(),
+		},
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get kyc info for %v: %v", info.ID, err)
+	}
+	if len(kycs) == 0 {
+		return nil, xerrors.Errorf("empty kyc info for %v", reviewInfo.GetObjectID())
+	}
+
 	user, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
 		AppID:  reviewInfo.GetAppID(),
-		UserID: reviewInfo.GetObjectID(),
+		UserID: kycs[0].GetUserID(),
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get app user: %v", err)
@@ -147,6 +160,7 @@ func UpdateKycReview(ctx context.Context, in *npool.UpdateKycReviewRequest) (*np
 	if user == nil {
 		return nil, xerrors.Errorf("fail get app user")
 	}
+
 	reviewResp, err := grpc2.GetReview(ctx, &reviewpb.GetReviewRequest{
 		ID: reviewInfo.GetID(),
 	})
@@ -173,6 +187,7 @@ func UpdateKycReview(ctx context.Context, in *npool.UpdateKycReviewRequest) (*np
 	if err != nil {
 		return nil, err
 	}
+
 	if reviewState == reviewconst.StateWait && reviewInfo.GetState() == reviewconst.StateApproved {
 		template, err := grpc2.GetTemplateByAppLangUsedFor(ctx, &notificationpbpb.GetTemplateByAppLangUsedForRequest{
 			AppID:   reviewInfo.GetAppID(),
@@ -185,10 +200,11 @@ func UpdateKycReview(ctx context.Context, in *npool.UpdateKycReviewRequest) (*np
 		if template == nil {
 			return nil, xerrors.Errorf("fail get template")
 		}
+
 		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
 			Info: &notificationpbpb.UserNotification{
 				AppID:   reviewInfo.GetAppID(),
-				UserID:  reviewInfo.GetObjectID(),
+				UserID:  kycs[0].GetUserID(),
 				Title:   template.GetTitle(),
 				Content: template.GetContent(),
 			},
@@ -198,19 +214,11 @@ func UpdateKycReview(ctx context.Context, in *npool.UpdateKycReviewRequest) (*np
 		}
 	}
 
-	kyc, err := grpc2.GetKycByUserID(ctx, &kycmgrpb.GetKycByUserIDRequest{
-		AppID:  reviewInfo.GetAppID(),
-		UserID: reviewInfo.GetObjectID(),
-	})
-	if err != nil {
-		return nil, err
-	}
-
 	return &npool.UpdateKycReviewResponse{
 		Info: &npool.KycReview{
 			Review: reviewInfo,
 			User:   user,
-			Kyc:    kyc,
+			Kyc:    kycs[0],
 		},
 	}, nil
 }

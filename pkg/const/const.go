@@ -8,5 +8,7 @@ const (
 )
 
 const (
-	UsedForKycReviewApprovedNotification = "KycReviewApprovedNotification"
+	UsedForKycReviewApprovedNotification             = "KycReviewApprovedNotification"
+	UsedForWithdrawReviewApprovedNotification        = "WithdrawReviewApprovedNotification"
+	UsedForWithdrawReviewAddressApprovedNotification = "WithdrawReviewAddressApprovedNotification"
 )

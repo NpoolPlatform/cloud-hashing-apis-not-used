@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	notificationpbpb "github.com/NpoolPlatform/message/npool/notification"
+
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
 	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/const"
@@ -619,5 +621,89 @@ func GetByAppUser(ctx context.Context, in *npool.GetUserWithdrawsByAppUserReques
 
 	return &npool.GetUserWithdrawsByAppUserResponse{
 		Infos: withdraws,
+	}, nil
+}
+
+func UpdateWithdrawReview(ctx context.Context, in *npool.UpdateWithdrawReviewRequest) (*npool.UpdateWithdrawReviewResponse, error) {
+	reviewInfo := in.GetInfo()
+
+	withdrawItem, err := grpc2.GetUserWithdrawItem(ctx, &billingpb.GetUserWithdrawItemRequest{
+		ID: reviewInfo.GetObjectID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get withdrawItem: %v", err)
+	}
+	if withdrawItem == nil {
+		return nil, xerrors.Errorf("fail get withdrawItem")
+	}
+
+	user, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
+		AppID:  reviewInfo.GetAppID(),
+		UserID: withdrawItem.GetUserID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app user: %v", err)
+	}
+	if user == nil {
+		return nil, xerrors.Errorf("fail get app user")
+	}
+
+	reviewResp, err := grpc2.GetReview(ctx, &reviewpb.GetReviewRequest{
+		ID: reviewInfo.GetID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get review: %v", err)
+	}
+	if reviewResp == nil {
+		return nil, xerrors.Errorf("fail get review")
+	}
+
+	reviewState, _, err := review.GetReviewState(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
+		AppID:      reviewInfo.GetAppID(),
+		Domain:     billingconst.ServiceName,
+		ObjectType: constant.ReviewObjectWithdraw,
+		ObjectID:   reviewInfo.GetObjectID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get review: %v", err)
+	}
+
+	_, err = grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{
+		Info: reviewInfo,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if reviewState == reviewconst.StateWait && reviewInfo.GetState() == reviewconst.StateApproved {
+		template, err := grpc2.GetTemplateByAppLangUsedFor(ctx, &notificationpbpb.GetTemplateByAppLangUsedForRequest{
+			AppID:   reviewInfo.GetAppID(),
+			LangID:  in.GetLangID(),
+			UsedFor: constant.UsedForWithdrawReviewApprovedNotification,
+		})
+		if err != nil {
+			return nil, err
+		}
+		if template == nil {
+			return nil, xerrors.Errorf("fail get template")
+		}
+		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
+			Info: &notificationpbpb.UserNotification{
+				AppID:   reviewInfo.GetAppID(),
+				UserID:  withdrawItem.GetUserID(),
+				Title:   template.GetTitle(),
+				Content: template.GetContent(),
+			},
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &npool.UpdateWithdrawReviewResponse{
+		Info: &npool.WithdrawReview{
+			Review:   reviewInfo,
+			User:     user,
+			Withdraw: withdrawItem,
+		},
 	}, nil
 }

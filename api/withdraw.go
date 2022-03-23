@@ -1,10 +1,10 @@
+//go:build !codeanalysis
 // +build !codeanalysis
 
 package api
 
 import (
 	"context"
-
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
@@ -75,6 +75,24 @@ func (s *Server) GetWithdrawAddressesByAppUser(ctx context.Context, in *npool.Ge
 	if err != nil {
 		logger.Sugar().Errorf("get user withdraw address error: %v", err)
 		return &npool.GetWithdrawAddressesByAppUserResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return resp, nil
+}
+
+func (s *Server) UpdateWithdrawReview(ctx context.Context, in *npool.UpdateWithdrawReviewRequest) (*npool.UpdateWithdrawReviewResponse, error) {
+	resp, err := withdraw.UpdateWithdrawReview(ctx, in)
+	if err != nil {
+		logger.Sugar().Errorf("update withdraw review error: %w", err)
+		return &npool.UpdateWithdrawReviewResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return resp, nil
+}
+
+func (s *Server) UpdateWithdrawAddressReview(ctx context.Context, in *npool.UpdateWithdrawAddressReviewRequest) (*npool.UpdateWithdrawAddressReviewResponse, error) {
+	resp, err := withdrawaddress.UpdateWithdrawUpdateAddressReview(ctx, in)
+	if err != nil {
+		logger.Sugar().Errorf("update withdraw addresses review error: %w", err)
+		return &npool.UpdateWithdrawAddressReviewResponse{}, status.Error(codes.Internal, err.Error())
 	}
 	return resp, nil
 }
