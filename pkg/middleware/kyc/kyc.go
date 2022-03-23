@@ -2,7 +2,6 @@ package kyc
 
 import (
 	"context"
-	"fmt"
 
 	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
 
@@ -175,8 +174,6 @@ func UpdateKycReview(ctx context.Context, in *npool.UpdateKycReviewRequest) (*np
 		return nil, err
 	}
 	if reviewState == reviewconst.StateWait && reviewInfo.GetState() == reviewconst.StateApproved {
-
-		fmt.Println("**********************调用模板")
 		template, err := grpc2.GetTemplateByAppLangUsedFor(ctx, &notificationpbpb.GetTemplateByAppLangUsedForRequest{
 			AppID:   reviewInfo.GetAppID(),
 			LangID:  in.GetLangID(),
@@ -188,7 +185,6 @@ func UpdateKycReview(ctx context.Context, in *npool.UpdateKycReviewRequest) (*np
 		if template == nil {
 			return nil, xerrors.Errorf("fail get template")
 		}
-		fmt.Println("**********************调用消息通知")
 		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
 			Info: &notificationpbpb.UserNotification{
 				AppID:   reviewInfo.GetAppID(),
