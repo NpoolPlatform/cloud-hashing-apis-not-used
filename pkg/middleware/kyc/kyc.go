@@ -2,6 +2,9 @@ package kyc
 
 import (
 	"context"
+	"fmt"
+
+	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
 
 	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/const"
 	review "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/review"
@@ -9,6 +12,9 @@ import (
 
 	kycmgrconst "github.com/NpoolPlatform/kyc-management/pkg/message/const"
 	kycmgrpb "github.com/NpoolPlatform/message/npool/kyc"
+
+	notificationpbpb "github.com/NpoolPlatform/message/npool/notification"
+
 	reviewpb "github.com/NpoolPlatform/message/npool/review-service"
 	reviewconst "github.com/NpoolPlatform/review-service/pkg/const"
 
@@ -125,6 +131,90 @@ func GetByAppUser(ctx context.Context, in *npool.GetKycByAppUserRequest) (*npool
 			Kyc:     kyc,
 			State:   reviewState,
 			Message: reviewMessage,
+		},
+	}, nil
+}
+
+func UpdateKycReview(ctx context.Context, in *npool.UpdateKycReviewRequest) (*npool.UpdateKycReviewResponse, error) {
+	reviewInfo := in.GetInfo()
+
+	user, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
+		AppID:  reviewInfo.GetAppID(),
+		UserID: reviewInfo.GetObjectID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app user: %v", err)
+	}
+	if user == nil {
+		return nil, xerrors.Errorf("fail get app user")
+	}
+	reviewResp, err := grpc2.GetReview(ctx, &reviewpb.GetReviewRequest{
+		ID: reviewInfo.GetID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get review: %v", err)
+	}
+	if reviewResp == nil {
+		return nil, xerrors.Errorf("fail get review")
+	}
+
+	reviewState, _, err := review.GetReviewState(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
+		AppID:      reviewInfo.GetAppID(),
+		Domain:     kycmgrconst.ServiceName,
+		ObjectType: constant.ReviewObjectKyc,
+		ObjectID:   reviewInfo.GetObjectID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get review: %v", err)
+	}
+
+	_, err = grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{
+		Info: reviewInfo,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if reviewState == reviewconst.StateWait && reviewInfo.GetState() == reviewconst.StateApproved {
+
+		fmt.Println("**********************调用模板")
+		template, err := grpc2.GetTemplateByAppLangUsedFor(ctx, &notificationpbpb.GetTemplateByAppLangUsedForRequest{
+			AppID:   reviewInfo.GetAppID(),
+			LangID:  in.GetLangID(),
+			UsedFor: constant.UsedForKycReviewApprovedNotification,
+		})
+		if err != nil {
+			return nil, err
+		}
+		if template == nil {
+			return nil, xerrors.Errorf("fail get template")
+		}
+		fmt.Println("**********************调用消息通知")
+		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
+			Info: &notificationpbpb.UserNotification{
+				AppID:   reviewInfo.GetAppID(),
+				UserID:  reviewInfo.GetObjectID(),
+				Title:   template.GetTitle(),
+				Content: template.GetContent(),
+			},
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	kyc, err := grpc2.GetKycByUserID(ctx, &kycmgrpb.GetKycByUserIDRequest{
+		AppID:  reviewInfo.GetAppID(),
+		UserID: reviewInfo.GetObjectID(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &npool.UpdateKycReviewResponse{
+		Info: &npool.KycReview{
+			Review: reviewInfo,
+			User:   user,
+			Kyc:    kyc,
 		},
 	}, nil
 }
