@@ -115,8 +115,8 @@ github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220318134912-0a7951df438
 github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220318134912-0a7951df4384/go.mod h1:+9bKjysQmPjBGA6bH5XvxrvXyZrg8jkW7Ue5LrmAcyI=
 github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220225132002-fbc8b850fb8c h1:AYyQDoMsNY++pcwkDlTgIfFLdQ6sBZEjVWQLP/V69pA=
 github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220225132002-fbc8b850fb8c/go.mod h1:S4+sGRG8zI/Wj4EikZg+hAtgiB3LNKDtfNPR9DPhkFg=
-github.com/NpoolPlatform/cloud-hashing-staker v0.0.0-20220303085517-7513392cd81f h1:26DiWBpsx5uZ2Cg0LdXICOlUyRR0x7vLNKwv+5bMN5A=
-github.com/NpoolPlatform/cloud-hashing-staker v0.0.0-20220303085517-7513392cd81f/go.mod h1:mDh0igOVE3dtZ02A8MENLKNaTShkkzL61xVInEes3TQ=
+github.com/NpoolPlatform/cloud-hashing-staker v0.0.0-20220323121644-365addfed6d0 h1:27vGMmDcVcAL6D4j84voRBHDvuaQ3jfTgryh64BOXis=
+github.com/NpoolPlatform/cloud-hashing-staker v0.0.0-20220323121644-365addfed6d0/go.mod h1:BeKTzhVUpjGDJ+EItHqVcDuSHeop9CIBu2bO6NCTC3w=
 github.com/NpoolPlatform/go-service-framework v0.0.0-20211124111341-7f1b2f908552/go.mod h1:6OR9IRTWXpkr7Igky6a7zbnDG2o5Vmx9zuIzNJ3M9xs=
 github.com/NpoolPlatform/go-service-framework v0.0.0-20211207121121-adb2402676f0/go.mod h1:6OR9IRTWXpkr7Igky6a7zbnDG2o5Vmx9zuIzNJ3M9xs=
 github.com/NpoolPlatform/go-service-framework v0.0.0-20211222114515-4928e6cf3f1f/go.mod h1:kR7v9OYmi38GLucJoVUOxLYiA3xtLp5TY/fWqrR6WRw=
@@ -142,6 +142,7 @@ github.com/NpoolPlatform/message v0.0.0-20220224053200-02977b5418df/go.mod h1:r9
 github.com/NpoolPlatform/message v0.0.0-20220225131542-e01fa173e718/go.mod h1:r9cCQsBi8z8pljMAHa6sK6o2iXIG9tRpZ9idBxVpc44=
 github.com/NpoolPlatform/message v0.0.0-20220304033607-29a722285fa4/go.mod h1:r9cCQsBi8z8pljMAHa6sK6o2iXIG9tRpZ9idBxVpc44=
 github.com/NpoolPlatform/message v0.0.0-20220305055109-c792e416ab34/go.mod h1:r9cCQsBi8z8pljMAHa6sK6o2iXIG9tRpZ9idBxVpc44=
+github.com/NpoolPlatform/message v0.0.0-20220312091403-02b92b6d29ee/go.mod h1:r9cCQsBi8z8pljMAHa6sK6o2iXIG9tRpZ9idBxVpc44=
 github.com/NpoolPlatform/message v0.0.0-20220318122310-bdc2b018f155/go.mod h1:Yd0rqn057j1pXgPH/xwDCWHB1b1sIPzzSvGHeBMjA9I=
 github.com/NpoolPlatform/message v0.0.0-20220319152842-fc2a89aba7a3 h1:N7DR9n2qg6JSEnqOsDjOlikUCw3qDPkT64csmUw9VeQ=
 github.com/NpoolPlatform/message v0.0.0-20220319152842-fc2a89aba7a3/go.mod h1:Yd0rqn057j1pXgPH/xwDCWHB1b1sIPzzSvGHeBMjA9I=
