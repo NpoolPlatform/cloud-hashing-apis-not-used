@@ -145,7 +145,7 @@ func UpdateAccount(ctx context.Context, in *npool.UpdateAccountRequest) (*npool.
 		in.GetAccountType(),
 		in.GetVerificationCode(),
 		thirdgwconst.UsedForUpdate,
-		true,
+		false,
 	)
 	if err != nil {
 		return nil, xerrors.Errorf("fail verify code: %v", err)
