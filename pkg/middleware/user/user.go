@@ -229,7 +229,7 @@ func UpdateEmailAddress(ctx context.Context, in *npool.UpdateEmailAddressRequest
 		in.GetOldAccount(),
 		in.GetOldAccountType(),
 		in.GetOldVerificationCode(),
-		thirdgwconst.UsedForSignup,
+		thirdgwconst.UsedForUpdate,
 		true,
 	)
 	if err != nil {
