@@ -76,11 +76,11 @@ func codesVerified(accountType string, v uint32) bool {
 		if v&GoogleCodeVerified == 0 {
 			return false
 		}
-		fallthrough //nolint
-	default:
 		if v&MobileCodeVerified == 0 {
 			return false
 		}
+		fallthrough //nolint
+	default:
 		if v&EmailCodeVerified == 0 {
 			return false
 		}
