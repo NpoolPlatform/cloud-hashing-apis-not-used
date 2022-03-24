@@ -9,6 +9,14 @@ const (
 
 const (
 	UsedForKycReviewApprovedNotification             = "KycReviewApprovedNotification"
+	UsedForKycReviewRejectedNotification             = "KycReviewRejectedNotification"
 	UsedForWithdrawReviewApprovedNotification        = "WithdrawReviewApprovedNotification"
-	UsedForWithdrawReviewAddressApprovedNotification = "WithdrawReviewAddressApprovedNotification"
+	UsedForWithdrawReviewRejectedNotification        = "WithdrawReviewRejectedNotification"
+	UsedForWithdrawAddressReviewApprovedNotification = "WithdrawAddressReviewApprovedNotification"
+	UsedForWithdrawAddressReviewRejectedNotification = "WithdrawAddressReviewRejectedNotification"
+)
+
+const (
+	MessageTemplate = "{{ MESSAGE }}"
+	NameTemplate    = "{{ NAME }}"
 )

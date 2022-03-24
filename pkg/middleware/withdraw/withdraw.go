@@ -12,6 +12,7 @@ import (
 	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/const"
 	commissionmw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/commission"
 	commissionsettingmw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/commission/setting"
+	templatemw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/notificationtemplate"
 	verifymw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/verify"
 
 	review "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/review"
@@ -636,7 +637,6 @@ func UpdateWithdrawReview(ctx context.Context, in *npool.UpdateWithdrawReviewReq
 	if withdrawItem == nil {
 		return nil, xerrors.Errorf("fail get withdrawItem")
 	}
-
 	user, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
 		AppID:  reviewInfo.GetAppID(),
 		UserID: withdrawItem.GetUserID(),
@@ -658,33 +658,14 @@ func UpdateWithdrawReview(ctx context.Context, in *npool.UpdateWithdrawReviewReq
 		return nil, xerrors.Errorf("fail get review")
 	}
 
-	reviewState, _, err := review.GetReviewState(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
-		AppID:      reviewInfo.GetAppID(),
-		Domain:     billingconst.ServiceName,
-		ObjectType: constant.ReviewObjectWithdraw,
-		ObjectID:   reviewInfo.GetObjectID(),
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail get review: %v", err)
-	}
-
-	_, err = grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{
-		Info: reviewInfo,
-	})
-	if err != nil {
-		return nil, err
-	}
-	if reviewState == reviewconst.StateWait && reviewInfo.GetState() == reviewconst.StateApproved {
-		template, err := grpc2.GetTemplateByAppLangUsedFor(ctx, &notificationpbpb.GetTemplateByAppLangUsedForRequest{
+	if reviewInfo.GetState() == reviewconst.StateApproved {
+		template, err := templatemw.GetTemplateByAppLangUsedFor(ctx, &notificationpbpb.GetTemplateByAppLangUsedForRequest{
 			AppID:   reviewInfo.GetAppID(),
 			LangID:  in.GetLangID(),
 			UsedFor: constant.UsedForWithdrawReviewApprovedNotification,
-		})
+		}, reviewInfo.GetMessage(), user.GetExtra().GetUsername())
 		if err != nil {
-			return nil, err
-		}
-		if template == nil {
-			return nil, xerrors.Errorf("fail get template")
+			return nil, xerrors.Errorf("fail get template: %v", err)
 		}
 		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
 			Info: &notificationpbpb.UserNotification{
@@ -695,7 +676,29 @@ func UpdateWithdrawReview(ctx context.Context, in *npool.UpdateWithdrawReviewReq
 			},
 		})
 		if err != nil {
-			return nil, err
+			return nil, xerrors.Errorf("fail create notification: %v", err)
+		}
+	}
+
+	if reviewInfo.GetState() == reviewconst.StateRejected {
+		template, err := templatemw.GetTemplateByAppLangUsedFor(ctx, &notificationpbpb.GetTemplateByAppLangUsedForRequest{
+			AppID:   reviewInfo.GetAppID(),
+			LangID:  in.GetLangID(),
+			UsedFor: constant.UsedForWithdrawReviewRejectedNotification,
+		}, reviewInfo.GetMessage(), user.GetExtra().GetUsername())
+		if err != nil {
+			return nil, xerrors.Errorf("fail get template: %v", err)
+		}
+		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
+			Info: &notificationpbpb.UserNotification{
+				AppID:   reviewInfo.GetAppID(),
+				UserID:  withdrawItem.GetUserID(),
+				Title:   template.GetTitle(),
+				Content: template.GetContent(),
+			},
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail create notification: %v", err)
 		}
 	}
 

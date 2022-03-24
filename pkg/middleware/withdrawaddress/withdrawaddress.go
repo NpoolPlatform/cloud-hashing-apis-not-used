@@ -3,6 +3,8 @@ package withdrawaddress
 import (
 	"context"
 
+	templatemw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/notificationtemplate"
+
 	notificationpbpb "github.com/NpoolPlatform/message/npool/notification"
 
 	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/const"
@@ -197,34 +199,14 @@ func UpdateWithdrawUpdateAddressReview(ctx context.Context, in *npool.UpdateWith
 		return nil, xerrors.Errorf("fail get review")
 	}
 
-	reviewState, _, err := review.GetReviewState(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
-		AppID:      reviewInfo.GetAppID(),
-		Domain:     billingconst.ServiceName,
-		ObjectType: constant.ReviewObjectUserWithdrawAddress,
-		ObjectID:   reviewInfo.GetObjectID(),
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail get review: %v", err)
-	}
-
-	_, err = grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{
-		Info: reviewInfo,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if reviewState == reviewconst.StateWait && reviewInfo.GetState() == reviewconst.StateApproved {
-		template, err := grpc2.GetTemplateByAppLangUsedFor(ctx, &notificationpbpb.GetTemplateByAppLangUsedForRequest{
+	if reviewInfo.GetState() == reviewconst.StateApproved {
+		template, err := templatemw.GetTemplateByAppLangUsedFor(ctx, &notificationpbpb.GetTemplateByAppLangUsedForRequest{
 			AppID:   reviewInfo.GetAppID(),
 			LangID:  in.GetLangID(),
-			UsedFor: constant.UsedForWithdrawReviewAddressApprovedNotification,
-		})
+			UsedFor: constant.UsedForWithdrawAddressReviewApprovedNotification,
+		}, reviewInfo.GetMessage(), user.GetExtra().GetUsername())
 		if err != nil {
-			return nil, err
-		}
-		if template == nil {
-			return nil, xerrors.Errorf("fail get template")
+			return nil, xerrors.Errorf("fail get template: %v", err)
 		}
 		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
 			Info: &notificationpbpb.UserNotification{
@@ -235,7 +217,28 @@ func UpdateWithdrawUpdateAddressReview(ctx context.Context, in *npool.UpdateWith
 			},
 		})
 		if err != nil {
-			return nil, err
+			return nil, xerrors.Errorf("fail create notification: %v", err)
+		}
+	}
+	if reviewInfo.GetState() == reviewconst.StateRejected {
+		template, err := templatemw.GetTemplateByAppLangUsedFor(ctx, &notificationpbpb.GetTemplateByAppLangUsedForRequest{
+			AppID:   reviewInfo.GetAppID(),
+			LangID:  in.GetLangID(),
+			UsedFor: constant.UsedForWithdrawAddressReviewRejectedNotification,
+		}, reviewInfo.GetMessage(), user.GetExtra().GetUsername())
+		if err != nil {
+			return nil, xerrors.Errorf("fail get template: %v", err)
+		}
+		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
+			Info: &notificationpbpb.UserNotification{
+				AppID:   reviewInfo.GetAppID(),
+				UserID:  userWithdraw.GetUserID(),
+				Title:   template.GetTitle(),
+				Content: template.GetContent(),
+			},
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail create notification: %v", err)
 		}
 	}
 
