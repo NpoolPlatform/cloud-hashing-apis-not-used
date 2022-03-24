@@ -68,20 +68,20 @@ func verifyCodes(ctx context.Context, user *appusermgrpb.AppUserInfo, codes []*n
 	return verified, nil
 }
 
-func codesVerified(accountType string, v uint32) bool {
+func codesVerified(user *appusermgrpb.AppUserInfo, accountType string, v uint32) bool {
 	switch accountType {
 	case appusermgrconst.SignupByMobile:
 		fallthrough //nolint
 	case appusermgrconst.SignupByEmail:
-		if v&GoogleCodeVerified == 0 {
+		if user.Ctrl != nil && user.Ctrl.GoogleAuthenticationVerified && v&GoogleCodeVerified == 0 {
 			return false
 		}
-		if v&MobileCodeVerified == 0 {
+		if user.User.PhoneNO != "" && v&MobileCodeVerified == 0 {
 			return false
 		}
 		fallthrough //nolint
 	default:
-		if v&EmailCodeVerified == 0 {
+		if user.User.EmailAddress != "" && v&EmailCodeVerified == 0 {
 			return false
 		}
 	}
@@ -133,7 +133,7 @@ func UpdateAccount(ctx context.Context, in *npool.UpdateAccountRequest) (*npool.
 		return nil, xerrors.Errorf("fail verify codes: %v", err)
 	}
 
-	if !codesVerified(in.GetAccountType(), verified) {
+	if !codesVerified(info, in.GetAccountType(), verified) {
 		return nil, xerrors.Errorf("miss required verification code")
 	}
 
