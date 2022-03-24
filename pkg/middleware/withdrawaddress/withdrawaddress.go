@@ -3,6 +3,10 @@ package withdrawaddress
 import (
 	"context"
 
+	notificationconstant "github.com/NpoolPlatform/notification/pkg/const"
+
+	notificationpbpb "github.com/NpoolPlatform/message/npool/notification"
+
 	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/const"
 	account "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/account"
 	review "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/review"
@@ -148,5 +152,90 @@ func GetByAppUser(ctx context.Context, in *npool.GetWithdrawAddressesByAppUserRe
 
 	return &npool.GetWithdrawAddressesByAppUserResponse{
 		Infos: addresses,
+	}, nil
+}
+
+func UpdateWithdrawUpdateAddressReview(ctx context.Context, in *npool.UpdateWithdrawAddressReviewRequest) (*npool.UpdateWithdrawAddressReviewResponse, error) {
+	reviewInfo := in.GetInfo()
+
+	userWithdraw, err := grpc2.GetUserWithdraw(ctx, &billingpb.GetUserWithdrawRequest{
+		ID: reviewInfo.GetObjectID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get user withdraw: %v", err)
+	}
+	if userWithdraw == nil {
+		return nil, xerrors.Errorf("fail get user withdraw")
+	}
+
+	billingAccount, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
+		ID: userWithdraw.GetAccountID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get billing account: %v", err)
+	}
+	if billingAccount == nil {
+		return nil, xerrors.Errorf("fail get billing account")
+	}
+
+	user, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
+		AppID:  reviewInfo.GetAppID(),
+		UserID: userWithdraw.GetUserID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app user: %v", err)
+	}
+	if user == nil {
+		return nil, xerrors.Errorf("fail get app user")
+	}
+
+	reviewResp, err := grpc2.GetReview(ctx, &reviewpb.GetReviewRequest{
+		ID: reviewInfo.GetID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get review: %v", err)
+	}
+	if reviewResp == nil {
+		return nil, xerrors.Errorf("fail get review")
+	}
+
+	if reviewInfo.GetState() == reviewconst.StateApproved {
+		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
+			Info: &notificationpbpb.UserNotification{
+				AppID:  reviewInfo.GetAppID(),
+				UserID: userWithdraw.GetUserID(),
+			},
+			Message:  in.GetInfo().GetMessage(),
+			LangID:   in.GetLangID(),
+			UsedFor:  notificationconstant.UsedForWithdrawAddressReviewApprovedNotification,
+			UserName: user.GetExtra().GetUsername(),
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail create notification: %v", err)
+		}
+	}
+	if reviewInfo.GetState() == reviewconst.StateRejected {
+		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
+			Info: &notificationpbpb.UserNotification{
+				AppID:  reviewInfo.GetAppID(),
+				UserID: userWithdraw.GetUserID(),
+			},
+			Message:  in.GetInfo().GetMessage(),
+			LangID:   in.GetLangID(),
+			UsedFor:  notificationconstant.UsedForWithdrawAddressReviewRejectedNotification,
+			UserName: user.GetExtra().GetUsername(),
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail create notification: %v", err)
+		}
+	}
+
+	return &npool.UpdateWithdrawAddressReviewResponse{
+		Info: &npool.WithdrawAddressReview{
+			Review:  reviewInfo,
+			User:    user,
+			Address: userWithdraw,
+			Account: billingAccount,
+		},
 	}, nil
 }

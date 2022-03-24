@@ -39,3 +39,12 @@ func (s *Server) GetKycByAppUser(ctx context.Context, in *npool.GetKycByAppUserR
 	}
 	return resp, nil
 }
+
+func (s *Server) UpdateKycReview(ctx context.Context, in *npool.UpdateKycReviewRequest) (*npool.UpdateKycReviewResponse, error) {
+	resp, err := mw.UpdateKycReview(ctx, in)
+	if err != nil {
+		logger.Sugar().Errorf("update kyc review error: %w", err)
+		return &npool.UpdateKycReviewResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return resp, nil
+}
