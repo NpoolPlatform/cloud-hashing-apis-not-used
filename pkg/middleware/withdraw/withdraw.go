@@ -9,6 +9,8 @@ import (
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
+	notificationconstant "github.com/NpoolPlatform/notification/pkg/const"
+
 	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/const"
 	commissionmw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/commission"
 	commissionsettingmw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/commission/setting"
@@ -665,7 +667,7 @@ func UpdateWithdrawReview(ctx context.Context, in *npool.UpdateWithdrawReviewReq
 			},
 			Message:  in.GetInfo().GetMessage(),
 			LangID:   in.GetLangID(),
-			UsedFor:  constant.UsedForWithdrawReviewApprovedNotification,
+			UsedFor:  notificationconstant.UsedForWithdrawReviewApprovedNotification,
 			UserName: user.GetExtra().GetUsername(),
 		})
 		if err != nil {
@@ -681,7 +683,7 @@ func UpdateWithdrawReview(ctx context.Context, in *npool.UpdateWithdrawReviewReq
 			},
 			Message:  in.GetInfo().GetMessage(),
 			LangID:   in.GetLangID(),
-			UsedFor:  constant.UsedForWithdrawReviewRejectedNotification,
+			UsedFor:  notificationconstant.UsedForWithdrawReviewRejectedNotification,
 			UserName: user.GetExtra().GetUsername(),
 		})
 		if err != nil {

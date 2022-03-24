@@ -153,8 +153,8 @@ github.com/NpoolPlatform/message v0.0.0-20220323032900-6b9ced93ee48/go.mod h1:Yd
 github.com/NpoolPlatform/message v0.0.0-20220323124332-fda91709078f/go.mod h1:U/9AZ4KBnjLK74kc9y3OOvLeivFEqc7opw3yeUNnV/o=
 github.com/NpoolPlatform/message v0.0.0-20220324091428-bc6f1502c1a1 h1:p+MfMG1ZK2vq1q+I/Q0/kQHulZMwtxwvXC1cotDT7Js=
 github.com/NpoolPlatform/message v0.0.0-20220324091428-bc6f1502c1a1/go.mod h1:U/9AZ4KBnjLK74kc9y3OOvLeivFEqc7opw3yeUNnV/o=
-github.com/NpoolPlatform/notification v0.0.0-20220324094524-1e4dfe8b57bd h1:YUFE5+V80dj+a3g4w/XA2JPGq9kGuXNiab/QufEL4kA=
-github.com/NpoolPlatform/notification v0.0.0-20220324094524-1e4dfe8b57bd/go.mod h1:ieZ2gIh/zSlJ2hIr/fIuMvi5QMGRY0rXugKiBc+5ZKI=
+github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da h1:qZX3tw6TEsxaWyY/ZEeEtI6zSZzoYoCiqmDdt6DhxfA=
+github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da/go.mod h1:ieZ2gIh/zSlJ2hIr/fIuMvi5QMGRY0rXugKiBc+5ZKI=
 github.com/NpoolPlatform/review-service v0.0.0-20220322082433-0c2b7ee284ed h1:UkFZGrABgBvQ9qhCXKRJFpZQFxBL+LGugu6iYES/g8I=
 github.com/NpoolPlatform/review-service v0.0.0-20220322082433-0c2b7ee284ed/go.mod h1:Y6Lhls+RbkVJn8gZl2hzr8ZSjPxN8b9doZtNzYBCZzA=
 github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211206035652-888de6e20996/go.mod h1:w203lHGAaRvZqEMLxJI8wBxAoVvE3RHMU3jtwN/AdgE=

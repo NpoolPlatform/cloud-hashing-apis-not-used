@@ -6,6 +6,8 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent/info"
 	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
 
+	notificationconstant "github.com/NpoolPlatform/notification/pkg/const"
+
 	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/const"
 	review "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/review"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
@@ -179,7 +181,7 @@ func UpdateKycReview(ctx context.Context, in *npool.UpdateKycReviewRequest) (*np
 			},
 			Message:  in.GetInfo().GetMessage(),
 			LangID:   in.GetLangID(),
-			UsedFor:  constant.UsedForKycReviewApprovedNotification,
+			UsedFor:  notificationconstant.UsedForKycReviewApprovedNotification,
 			UserName: user.GetExtra().GetUsername(),
 		})
 		if err != nil {
@@ -195,7 +197,7 @@ func UpdateKycReview(ctx context.Context, in *npool.UpdateKycReviewRequest) (*np
 			},
 			Message:  in.GetInfo().GetMessage(),
 			LangID:   in.GetLangID(),
-			UsedFor:  constant.UsedForKycReviewRejectedNotification,
+			UsedFor:  notificationconstant.UsedForKycReviewRejectedNotification,
 			UserName: user.GetExtra().GetUsername(),
 		})
 		if err != nil {

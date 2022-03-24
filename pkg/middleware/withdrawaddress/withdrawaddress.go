@@ -3,6 +3,8 @@ package withdrawaddress
 import (
 	"context"
 
+	notificationconstant "github.com/NpoolPlatform/notification/pkg/const"
+
 	notificationpbpb "github.com/NpoolPlatform/message/npool/notification"
 
 	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/const"
@@ -205,7 +207,7 @@ func UpdateWithdrawUpdateAddressReview(ctx context.Context, in *npool.UpdateWith
 			},
 			Message:  in.GetInfo().GetMessage(),
 			LangID:   in.GetLangID(),
-			UsedFor:  constant.UsedForWithdrawAddressReviewApprovedNotification,
+			UsedFor:  notificationconstant.UsedForWithdrawAddressReviewApprovedNotification,
 			UserName: user.GetExtra().GetUsername(),
 		})
 		if err != nil {
@@ -220,7 +222,7 @@ func UpdateWithdrawUpdateAddressReview(ctx context.Context, in *npool.UpdateWith
 			},
 			Message:  in.GetInfo().GetMessage(),
 			LangID:   in.GetLangID(),
-			UsedFor:  constant.UsedForWithdrawAddressReviewRejectedNotification,
+			UsedFor:  notificationconstant.UsedForWithdrawAddressReviewRejectedNotification,
 			UserName: user.GetExtra().GetUsername(),
 		})
 		if err != nil {

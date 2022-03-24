@@ -1319,25 +1319,6 @@ func Signup(ctx context.Context, in *appusermgrpb.CreateAppUserWithSecretRequest
 	return resp.Info, nil
 }
 
-func GetTemplateByAppLangUsedFor(ctx context.Context, in *notificationpb.GetTemplateByAppLangUsedForRequest) (*notificationpb.Template, error) {
-	conn, err := grpc2.GetGRPCConn(notificationconst.ServiceName, grpc2.GRPCTAG)
-	if err != nil {
-		return nil, xerrors.Errorf("fail get notification connection: %v", err)
-	}
-	defer conn.Close()
-
-	cli := notificationpb.NewNotificationClient(conn)
-
-	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
-	defer cancel()
-
-	resp, err := cli.GetTemplateByAppLangUsedFor(ctx, in)
-	if err != nil {
-		return nil, err
-	}
-	return resp.Info, err
-}
-
 func CreateNotification(ctx context.Context, in *notificationpb.CreateNotificationRequest) (*notificationpb.UserNotification, error) {
 	conn, err := grpc2.GetGRPCConn(notificationconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
