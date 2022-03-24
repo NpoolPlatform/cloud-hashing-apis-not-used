@@ -34,6 +34,11 @@ import (
 	kycmgrpb "github.com/NpoolPlatform/message/npool/kyc"
 
 	thirdgwpb "github.com/NpoolPlatform/message/npool/thirdgateway"
+
+	notificationpb "github.com/NpoolPlatform/message/npool/notification"
+
+	notificationconst "github.com/NpoolPlatform/notification/pkg/message/const"
+
 	thirdgwconst "github.com/NpoolPlatform/third-gateway/pkg/message/const"
 
 	"golang.org/x/xerrors"
@@ -1311,8 +1316,26 @@ func Signup(ctx context.Context, in *appusermgrpb.CreateAppUserWithSecretRequest
 	if err != nil {
 		return nil, xerrors.Errorf("fail create app user: %v", err)
 	}
-
 	return resp.Info, nil
+}
+
+func CreateNotification(ctx context.Context, in *notificationpb.CreateNotificationRequest) (*notificationpb.UserNotification, error) {
+	conn, err := grpc2.GetGRPCConn(notificationconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get notification connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := notificationpb.NewNotificationClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	resp, err := cli.CreateNotification(ctx, in)
+	if err != nil {
+		return nil, err
+	}
+	return resp.Info, err
 }
 
 func VerifyAppUserByAppAccountPassword(ctx context.Context, in *appusermgrpb.VerifyAppUserByAppAccountPasswordRequest) (*appusermgrpb.AppUserInfo, error) {

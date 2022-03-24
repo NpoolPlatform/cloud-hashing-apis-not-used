@@ -5,7 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	notificationpbpb "github.com/NpoolPlatform/message/npool/notification"
+
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+
+	notificationconstant "github.com/NpoolPlatform/notification/pkg/const"
 
 	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/const"
 	commissionmw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/commission"
@@ -619,5 +623,79 @@ func GetByAppUser(ctx context.Context, in *npool.GetUserWithdrawsByAppUserReques
 
 	return &npool.GetUserWithdrawsByAppUserResponse{
 		Infos: withdraws,
+	}, nil
+}
+
+func UpdateWithdrawReview(ctx context.Context, in *npool.UpdateWithdrawReviewRequest) (*npool.UpdateWithdrawReviewResponse, error) {
+	reviewInfo := in.GetInfo()
+
+	withdrawItem, err := grpc2.GetUserWithdrawItem(ctx, &billingpb.GetUserWithdrawItemRequest{
+		ID: reviewInfo.GetObjectID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get withdrawItem: %v", err)
+	}
+	if withdrawItem == nil {
+		return nil, xerrors.Errorf("fail get withdrawItem")
+	}
+	user, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
+		AppID:  reviewInfo.GetAppID(),
+		UserID: withdrawItem.GetUserID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app user: %v", err)
+	}
+	if user == nil {
+		return nil, xerrors.Errorf("fail get app user")
+	}
+
+	reviewResp, err := grpc2.GetReview(ctx, &reviewpb.GetReviewRequest{
+		ID: reviewInfo.GetID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get review: %v", err)
+	}
+	if reviewResp == nil {
+		return nil, xerrors.Errorf("fail get review")
+	}
+
+	if reviewInfo.GetState() == reviewconst.StateApproved {
+		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
+			Info: &notificationpbpb.UserNotification{
+				AppID:  reviewInfo.GetAppID(),
+				UserID: withdrawItem.GetUserID(),
+			},
+			Message:  in.GetInfo().GetMessage(),
+			LangID:   in.GetLangID(),
+			UsedFor:  notificationconstant.UsedForWithdrawReviewApprovedNotification,
+			UserName: user.GetExtra().GetUsername(),
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail create notification: %v", err)
+		}
+	}
+
+	if reviewInfo.GetState() == reviewconst.StateRejected {
+		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
+			Info: &notificationpbpb.UserNotification{
+				AppID:  reviewInfo.GetAppID(),
+				UserID: withdrawItem.GetUserID(),
+			},
+			Message:  in.GetInfo().GetMessage(),
+			LangID:   in.GetLangID(),
+			UsedFor:  notificationconstant.UsedForWithdrawReviewRejectedNotification,
+			UserName: user.GetExtra().GetUsername(),
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail create notification: %v", err)
+		}
+	}
+
+	return &npool.UpdateWithdrawReviewResponse{
+		Info: &npool.WithdrawReview{
+			Review:   reviewInfo,
+			User:     user,
+			Withdraw: withdrawItem,
+		},
 	}, nil
 }
