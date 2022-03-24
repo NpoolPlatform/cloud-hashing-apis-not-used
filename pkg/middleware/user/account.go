@@ -9,6 +9,7 @@ import (
 
 	appusermgrconst "github.com/NpoolPlatform/appuser-manager/pkg/const"
 	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
+	logingwpb "github.com/NpoolPlatform/message/npool/logingateway"
 	thirdgwconst "github.com/NpoolPlatform/third-gateway/pkg/const"
 
 	"golang.org/x/xerrors"
@@ -154,6 +155,13 @@ func UpdateAccount(ctx context.Context, in *npool.UpdateAccountRequest) (*npool.
 	info, err = updateAccount(ctx, info, in)
 	if err != nil {
 		return nil, xerrors.Errorf("fail update account: %v", err)
+	}
+
+	info, err = grpc2.UpdateCache(ctx, &logingwpb.UpdateCacheRequest{
+		Info: info,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail update cache: %v", err)
 	}
 
 	return &npool.UpdateAccountResponse{

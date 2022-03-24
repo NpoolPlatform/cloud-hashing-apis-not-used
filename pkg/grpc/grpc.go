@@ -34,12 +34,13 @@ import (
 	kycmgrpb "github.com/NpoolPlatform/message/npool/kyc"
 
 	thirdgwpb "github.com/NpoolPlatform/message/npool/thirdgateway"
+	thirdgwconst "github.com/NpoolPlatform/third-gateway/pkg/message/const"
+
+	logingwconst "github.com/NpoolPlatform/login-gateway/pkg/message/const"
+	logingwpb "github.com/NpoolPlatform/message/npool/logingateway"
 
 	notificationpb "github.com/NpoolPlatform/message/npool/notification"
-
 	notificationconst "github.com/NpoolPlatform/notification/pkg/message/const"
-
-	thirdgwconst "github.com/NpoolPlatform/third-gateway/pkg/message/const"
 
 	"golang.org/x/xerrors"
 )
@@ -1769,4 +1770,26 @@ func VerifyGoogleAuthentication(ctx context.Context, in *thirdgwpb.VerifyGoogleA
 	defer cancel()
 
 	return cli.VerifyGoogleAuthentication(ctx, in)
+}
+
+//---------------------------------------------------------------------------------------------------------------------------
+
+func UpdateCache(ctx context.Context, in *logingwpb.UpdateCacheRequest) (*appusermgrpb.AppUserInfo, error) {
+	conn, err := grpc2.GetGRPCConn(logingwconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get login gateway connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := logingwpb.NewLoginGatewayClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	resp, err := cli.UpdateCache(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail update cache: %v", err)
+	}
+
+	return resp.Info, nil
 }
