@@ -100,7 +100,14 @@ func updateAccount(ctx context.Context, user *appusermgrpb.AppUserInfo, in *npoo
 		return user, nil
 	}
 
-	_, err := grpc2.UpdateAppUser(ctx, &appusermgrpb.UpdateAppUserRequest{
+	_, err := grpc2.UpdateCache(ctx, &logingwpb.UpdateCacheRequest{
+		Info: user,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail update cache: %v", err)
+	}
+
+	_, err = grpc2.UpdateAppUser(ctx, &appusermgrpb.UpdateAppUserRequest{
 		Info: user.User,
 	})
 	if err != nil {
@@ -155,13 +162,6 @@ func UpdateAccount(ctx context.Context, in *npool.UpdateAccountRequest) (*npool.
 	info, err = updateAccount(ctx, info, in)
 	if err != nil {
 		return nil, xerrors.Errorf("fail update account: %v", err)
-	}
-
-	info, err = grpc2.UpdateCache(ctx, &logingwpb.UpdateCacheRequest{
-		Info: info,
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail update cache: %v", err)
 	}
 
 	return &npool.UpdateAccountResponse{
