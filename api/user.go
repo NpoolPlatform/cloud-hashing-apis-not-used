@@ -59,3 +59,12 @@ func (s *Server) UpdatePhoneNO(ctx context.Context, in *npool.UpdatePhoneNOReque
 	}
 	return resp, nil
 }
+
+func (s *Server) UpdateAccount(ctx context.Context, in *npool.UpdateAccountRequest) (*npool.UpdateAccountResponse, error) {
+	resp, err := user.UpdateAccount(ctx, in)
+	if err != nil {
+		logger.Sugar().Errorf("update account error: %v", err)
+		return &npool.UpdateAccountResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return resp, nil
+}
