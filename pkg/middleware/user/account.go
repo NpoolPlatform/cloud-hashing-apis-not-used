@@ -110,12 +110,14 @@ func updateAccount(ctx context.Context, user *appusermgrpb.AppUserInfo, in *npoo
 }
 
 func UpdateAccount(ctx context.Context, in *npool.UpdateAccountRequest) (*npool.UpdateAccountResponse, error) { //nolint
-	old, err := grpc2.GetAppUserByAppAccount(ctx, &appusermgrpb.GetAppUserByAppAccountRequest{
-		AppID:   in.GetAppID(),
-		Account: in.GetAccount(),
-	})
-	if err != nil || old != nil {
-		return nil, xerrors.Errorf("fail get app user by app account: %v", err)
+	if in.GetAccount() != "" {
+		old, err := grpc2.GetAppUserByAppAccount(ctx, &appusermgrpb.GetAppUserByAppAccountRequest{
+			AppID:   in.GetAppID(),
+			Account: in.GetAccount(),
+		})
+		if err != nil || old != nil {
+			return nil, xerrors.Errorf("fail get app user by app account: %v", err)
+		}
 	}
 
 	info, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
