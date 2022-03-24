@@ -12,7 +12,6 @@ import (
 	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/const"
 	commissionmw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/commission"
 	commissionsettingmw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/commission/setting"
-	templatemw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/notificationtemplate"
 	verifymw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/verify"
 
 	review "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/review"
@@ -659,21 +658,15 @@ func UpdateWithdrawReview(ctx context.Context, in *npool.UpdateWithdrawReviewReq
 	}
 
 	if reviewInfo.GetState() == reviewconst.StateApproved {
-		template, err := templatemw.GetTemplateByAppLangUsedFor(ctx, &notificationpbpb.GetTemplateByAppLangUsedForRequest{
-			AppID:   reviewInfo.GetAppID(),
-			LangID:  in.GetLangID(),
-			UsedFor: constant.UsedForWithdrawReviewApprovedNotification,
-		}, reviewInfo.GetMessage(), user.GetExtra().GetUsername())
-		if err != nil {
-			return nil, xerrors.Errorf("fail get template: %v", err)
-		}
 		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
 			Info: &notificationpbpb.UserNotification{
-				AppID:   reviewInfo.GetAppID(),
-				UserID:  withdrawItem.GetUserID(),
-				Title:   template.GetTitle(),
-				Content: template.GetContent(),
+				AppID:  reviewInfo.GetAppID(),
+				UserID: withdrawItem.GetUserID(),
 			},
+			Message:  in.GetInfo().GetMessage(),
+			LangID:   in.GetLangID(),
+			UsedFor:  constant.UsedForWithdrawReviewApprovedNotification,
+			UserName: user.GetExtra().GetUsername(),
 		})
 		if err != nil {
 			return nil, xerrors.Errorf("fail create notification: %v", err)
@@ -681,21 +674,15 @@ func UpdateWithdrawReview(ctx context.Context, in *npool.UpdateWithdrawReviewReq
 	}
 
 	if reviewInfo.GetState() == reviewconst.StateRejected {
-		template, err := templatemw.GetTemplateByAppLangUsedFor(ctx, &notificationpbpb.GetTemplateByAppLangUsedForRequest{
-			AppID:   reviewInfo.GetAppID(),
-			LangID:  in.GetLangID(),
-			UsedFor: constant.UsedForWithdrawReviewRejectedNotification,
-		}, reviewInfo.GetMessage(), user.GetExtra().GetUsername())
-		if err != nil {
-			return nil, xerrors.Errorf("fail get template: %v", err)
-		}
 		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
 			Info: &notificationpbpb.UserNotification{
-				AppID:   reviewInfo.GetAppID(),
-				UserID:  withdrawItem.GetUserID(),
-				Title:   template.GetTitle(),
-				Content: template.GetContent(),
+				AppID:  reviewInfo.GetAppID(),
+				UserID: withdrawItem.GetUserID(),
 			},
+			Message:  in.GetInfo().GetMessage(),
+			LangID:   in.GetLangID(),
+			UsedFor:  constant.UsedForWithdrawReviewRejectedNotification,
+			UserName: user.GetExtra().GetUsername(),
 		})
 		if err != nil {
 			return nil, xerrors.Errorf("fail create notification: %v", err)

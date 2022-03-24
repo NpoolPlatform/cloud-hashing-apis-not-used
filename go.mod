@@ -4,19 +4,21 @@ go 1.17
 
 require (
 	entgo.io/ent v0.10.1
-	github.com/NpoolPlatform/api-manager v0.0.0-20220205130236-69d286e72dba
-	github.com/NpoolPlatform/appuser-manager v0.0.0-20220216022603-bd16c0985e33
-	github.com/NpoolPlatform/cloud-hashing-billing v0.0.0-20220304033953-95121c5cb917
-	github.com/NpoolPlatform/cloud-hashing-goods v0.0.0-20220224054721-2d44a8f75bf1
-	github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220318134912-0a7951df4384
-	github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220225132002-fbc8b850fb8c
+	github.com/NpoolPlatform/api-manager v0.0.0-20220322075405-aefd0a0344ea
+	github.com/NpoolPlatform/appuser-manager v0.0.0-20220322075937-0c7b778de20c
+	github.com/NpoolPlatform/cloud-hashing-billing v0.0.0-20220323125206-d664201be866
+	github.com/NpoolPlatform/cloud-hashing-goods v0.0.0-20220322085658-b133b5db7bd0
+	github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220323081920-a13fe422e1e9
+	github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220322040527-3fead61c5bfd
 	github.com/NpoolPlatform/cloud-hashing-staker v0.0.0-20220323121644-365addfed6d0
-	github.com/NpoolPlatform/go-service-framework v0.0.0-20220211051615-b2300d03022a
-	github.com/NpoolPlatform/kyc-management v0.0.0-20220113122339-4bef8bdcbc5c
-	github.com/NpoolPlatform/message v0.0.0-20220324070414-a4bba62ae4f4
-	github.com/NpoolPlatform/review-service v0.0.0-20220214135408-eb1dbe09de65
-	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211208035009-5ad2768d2290
-	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20211210102925-d9b8abe11021
+	github.com/NpoolPlatform/go-service-framework v0.0.0-20220322082138-7ec761a687ba
+	github.com/NpoolPlatform/kyc-management v0.0.0-20220322081324-f537a7bcd812
+	github.com/NpoolPlatform/message v0.0.0-20220324091428-bc6f1502c1a1
+	github.com/NpoolPlatform/notification v0.0.0-20220324094524-1e4dfe8b57bd
+	github.com/NpoolPlatform/review-service v0.0.0-20220322082433-0c2b7ee284ed
+	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20220322095158-52237287c832
+	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20220323034620-cea972617ed5
+	github.com/NpoolPlatform/third-gateway v0.0.0-20220322080604-a656d7cba609
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.10.0
@@ -27,11 +29,6 @@ require (
 	google.golang.org/grpc v1.45.0
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.2.0
 	google.golang.org/protobuf v1.28.0
-)
-
-require (
-	github.com/NpoolPlatform/notification v0.0.0-20220322091829-193326eb1bac
-	github.com/NpoolPlatform/third-gateway v0.0.0-20220322080604-a656d7cba609
 )
 
 require (

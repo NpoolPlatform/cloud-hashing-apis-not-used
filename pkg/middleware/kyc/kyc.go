@@ -3,8 +3,6 @@ package kyc
 import (
 	"context"
 
-	templatemw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/notificationtemplate"
-
 	"entgo.io/ent/entc/integration/edgefield/ent/info"
 	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
 
@@ -174,21 +172,15 @@ func UpdateKycReview(ctx context.Context, in *npool.UpdateKycReviewRequest) (*np
 	}
 
 	if reviewInfo.GetState() == reviewconst.StateApproved {
-		template, err := templatemw.GetTemplateByAppLangUsedFor(ctx, &notificationpbpb.GetTemplateByAppLangUsedForRequest{
-			AppID:   reviewInfo.GetAppID(),
-			LangID:  in.GetLangID(),
-			UsedFor: constant.UsedForKycReviewApprovedNotification,
-		}, reviewInfo.GetMessage(), user.GetExtra().GetUsername())
-		if err != nil {
-			return nil, xerrors.Errorf("fail get template: %v", err)
-		}
 		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
 			Info: &notificationpbpb.UserNotification{
-				AppID:   reviewInfo.GetAppID(),
-				UserID:  kycs[0].GetUserID(),
-				Title:   template.GetTitle(),
-				Content: template.GetContent(),
+				AppID:  reviewInfo.GetAppID(),
+				UserID: kycs[0].GetUserID(),
 			},
+			Message:  in.GetInfo().GetMessage(),
+			LangID:   in.GetLangID(),
+			UsedFor:  constant.UsedForKycReviewApprovedNotification,
+			UserName: user.GetExtra().GetUsername(),
 		})
 		if err != nil {
 			return nil, xerrors.Errorf("fail create notification: %v", err)
@@ -196,21 +188,15 @@ func UpdateKycReview(ctx context.Context, in *npool.UpdateKycReviewRequest) (*np
 	}
 
 	if reviewInfo.GetState() == reviewconst.StateRejected {
-		template, err := templatemw.GetTemplateByAppLangUsedFor(ctx, &notificationpbpb.GetTemplateByAppLangUsedForRequest{
-			AppID:   reviewInfo.GetAppID(),
-			LangID:  in.GetLangID(),
-			UsedFor: constant.UsedForKycReviewRejectedNotification,
-		}, reviewInfo.GetMessage(), user.GetExtra().GetUsername())
-		if err != nil {
-			return nil, xerrors.Errorf("fail get template: %v", err)
-		}
 		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
 			Info: &notificationpbpb.UserNotification{
-				AppID:   reviewInfo.GetAppID(),
-				UserID:  kycs[0].GetUserID(),
-				Title:   template.GetTitle(),
-				Content: template.GetContent(),
+				AppID:  reviewInfo.GetAppID(),
+				UserID: kycs[0].GetUserID(),
 			},
+			Message:  in.GetInfo().GetMessage(),
+			LangID:   in.GetLangID(),
+			UsedFor:  constant.UsedForKycReviewRejectedNotification,
+			UserName: user.GetExtra().GetUsername(),
 		})
 		if err != nil {
 			return nil, xerrors.Errorf("fail create notification: %v", err)

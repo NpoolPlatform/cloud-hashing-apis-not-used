@@ -3,8 +3,6 @@ package withdrawaddress
 import (
 	"context"
 
-	templatemw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/notificationtemplate"
-
 	notificationpbpb "github.com/NpoolPlatform/message/npool/notification"
 
 	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/const"
@@ -200,42 +198,30 @@ func UpdateWithdrawUpdateAddressReview(ctx context.Context, in *npool.UpdateWith
 	}
 
 	if reviewInfo.GetState() == reviewconst.StateApproved {
-		template, err := templatemw.GetTemplateByAppLangUsedFor(ctx, &notificationpbpb.GetTemplateByAppLangUsedForRequest{
-			AppID:   reviewInfo.GetAppID(),
-			LangID:  in.GetLangID(),
-			UsedFor: constant.UsedForWithdrawAddressReviewApprovedNotification,
-		}, reviewInfo.GetMessage(), user.GetExtra().GetUsername())
-		if err != nil {
-			return nil, xerrors.Errorf("fail get template: %v", err)
-		}
 		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
 			Info: &notificationpbpb.UserNotification{
-				AppID:   reviewInfo.GetAppID(),
-				UserID:  userWithdraw.GetUserID(),
-				Title:   template.GetTitle(),
-				Content: template.GetContent(),
+				AppID:  reviewInfo.GetAppID(),
+				UserID: userWithdraw.GetUserID(),
 			},
+			Message:  in.GetInfo().GetMessage(),
+			LangID:   in.GetLangID(),
+			UsedFor:  constant.UsedForWithdrawAddressReviewApprovedNotification,
+			UserName: user.GetExtra().GetUsername(),
 		})
 		if err != nil {
 			return nil, xerrors.Errorf("fail create notification: %v", err)
 		}
 	}
 	if reviewInfo.GetState() == reviewconst.StateRejected {
-		template, err := templatemw.GetTemplateByAppLangUsedFor(ctx, &notificationpbpb.GetTemplateByAppLangUsedForRequest{
-			AppID:   reviewInfo.GetAppID(),
-			LangID:  in.GetLangID(),
-			UsedFor: constant.UsedForWithdrawAddressReviewRejectedNotification,
-		}, reviewInfo.GetMessage(), user.GetExtra().GetUsername())
-		if err != nil {
-			return nil, xerrors.Errorf("fail get template: %v", err)
-		}
 		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
 			Info: &notificationpbpb.UserNotification{
-				AppID:   reviewInfo.GetAppID(),
-				UserID:  userWithdraw.GetUserID(),
-				Title:   template.GetTitle(),
-				Content: template.GetContent(),
+				AppID:  reviewInfo.GetAppID(),
+				UserID: userWithdraw.GetUserID(),
 			},
+			Message:  in.GetInfo().GetMessage(),
+			LangID:   in.GetLangID(),
+			UsedFor:  constant.UsedForWithdrawAddressReviewRejectedNotification,
+			UserName: user.GetExtra().GetUsername(),
 		})
 		if err != nil {
 			return nil, xerrors.Errorf("fail create notification: %v", err)
