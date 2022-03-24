@@ -88,11 +88,11 @@ func (s *Server) UpdateWithdrawReview(ctx context.Context, in *npool.UpdateWithd
 	return resp, nil
 }
 
-func (s *Server) UpdateWithdrawAddressReview(ctx context.Context, in *npool.UpdateWithdrawAddressReviewRequest) (*npool.UpdateWithdrawAddressReviewResponse, error) {
-	resp, err := withdrawaddress.UpdateWithdrawUpdateAddressReview(ctx, in)
-	if err != nil {
-		logger.Sugar().Errorf("update withdraw addresses review error: %w", err)
-		return &npool.UpdateWithdrawAddressReviewResponse{}, status.Error(codes.Internal, err.Error())
-	}
-	return resp, nil
-}
+// func (s *Server) UpdateWithdrawAddressReview(ctx context.Context, in *npool.UpdateWithdrawAddressReviewRequest) (*npool.UpdateWithdrawAddressReviewResponse, error) {
+//	resp, err := withdrawaddress.UpdateWithdrawUpdateAddressReview(ctx, in)
+//	if err != nil {
+//		logger.Sugar().Errorf("update withdraw addresses review error: %w", err)
+//		return &npool.UpdateWithdrawAddressReviewResponse{}, status.Error(codes.Internal, err.Error())
+//	}
+//	return resp, nil
+// }
