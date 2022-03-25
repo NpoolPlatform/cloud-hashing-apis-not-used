@@ -169,7 +169,7 @@ func UpdateAccount(ctx context.Context, in *npool.UpdateAccountRequest) (*npool.
 	}, nil
 }
 
-func UpdateAppUserExtra(ctx context.Context, in *npool.UpdateAppUserExtraRequest) (*npool.UpdateAppUserExtraResponse, error) {
+func UpdateAppUserExtra(ctx context.Context, in *npool.UpdateAppUserExtraRequest) (*npool.UpdateAppUserExtraResponse, error) { //nolint
 	info, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
 		AppID:  in.GetInfo().GetAppID(),
 		UserID: in.GetInfo().GetUserID(),
@@ -199,7 +199,7 @@ func UpdateAppUserExtra(ctx context.Context, in *npool.UpdateAppUserExtraRequest
 	}, nil
 }
 
-func CreateAppUserExtra(ctx context.Context, in *npool.CreateAppUserExtraRequest) (*npool.CreateAppUserExtraResponse, error) {
+func CreateAppUserExtra(ctx context.Context, in *npool.CreateAppUserExtraRequest) (*npool.CreateAppUserExtraResponse, error) { //nolint
 	info, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
 		AppID:  in.GetInfo().GetAppID(),
 		UserID: in.GetInfo().GetUserID(),
