@@ -14,7 +14,7 @@ require (
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20220322082138-7ec761a687ba
 	github.com/NpoolPlatform/kyc-management v0.0.0-20220322081324-f537a7bcd812
 	github.com/NpoolPlatform/login-gateway v0.0.0-20220324144125-0675c5904170
-	github.com/NpoolPlatform/message v0.0.0-20220324143711-0b3cb5d9ff13
+	github.com/NpoolPlatform/message v0.0.0-20220325045554-42bb4d55211c
 	github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da
 	github.com/NpoolPlatform/review-service v0.0.0-20220322082433-0c2b7ee284ed
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20220322095158-52237287c832
