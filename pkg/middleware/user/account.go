@@ -198,3 +198,33 @@ func UpdateAppUserExtra(ctx context.Context, in *npool.UpdateAppUserExtraRequest
 		Info: info,
 	}, nil
 }
+
+func CreateAppUserExtra(ctx context.Context, in *npool.CreateAppUserExtraRequest) (*npool.CreateAppUserExtraResponse, error) {
+	info, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
+		AppID:  in.GetInfo().GetAppID(),
+		UserID: in.GetInfo().GetUserID(),
+	})
+	if err != nil || info == nil {
+		return nil, xerrors.Errorf("fail get app user by app user: %v", err)
+	}
+
+	info.Extra = in.GetInfo()
+
+	_, err = grpc2.UpdateCache(ctx, &logingwpb.UpdateCacheRequest{
+		Info: info,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail update cache: %v", err)
+	}
+
+	_, err = grpc2.CreateAppUserExtra(ctx, &appusermgrpb.CreateAppUserExtraRequest{
+		Info: in.GetInfo(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail update app user extra: %v", err)
+	}
+
+	return &npool.CreateAppUserExtraResponse{
+		Info: info,
+	}, nil
+}

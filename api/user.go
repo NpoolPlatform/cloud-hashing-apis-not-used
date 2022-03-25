@@ -78,3 +78,12 @@ func (s *Server) UpdateAppUserExtra(ctx context.Context, in *npool.UpdateAppUser
 	}
 	return resp, nil
 }
+
+func (s *Server) CreateAppUserExtra(ctx context.Context, in *npool.CreateAppUserExtraRequest) (*npool.CreateAppUserExtraResponse, error) {
+	resp, err := user.CreateAppUserExtra(ctx, in)
+	if err != nil {
+		logger.Sugar().Errorf("create app user extra error: %v", err)
+		return &npool.CreateAppUserExtraResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return resp, nil
+}
