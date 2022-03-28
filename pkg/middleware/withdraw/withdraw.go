@@ -468,19 +468,6 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		return nil, xerrors.Errorf("fail get coin info: %v", err)
 	}
 
-	// TODO: here should hold transfer lock
-	balance, err := grpc2.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
-		Name:    coin.Name,
-		Address: account.Address,
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail get wallet balance: %v", err)
-	}
-
-	if balance.Balance < withdrawItem.Amount+coin.ReservedAmount {
-		return nil, xerrors.Errorf("not sufficient funds")
-	}
-
 	account, err = grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
 		ID: withdrawItem.WithdrawToAccountID,
 	})
@@ -529,6 +516,19 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 	}
 
 	if in.GetInfo().GetState() == reviewconst.StateApproved {
+		// TODO: here should hold transfer lock
+		balance, err := grpc2.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
+			Name:    coin.Name,
+			Address: account.Address,
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail get wallet balance: %v", err)
+		}
+
+		if balance.Balance < withdrawItem.Amount+coin.ReservedAmount {
+			return nil, xerrors.Errorf("not sufficient funds")
+		}
+
 		account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
 			ID: coinsetting.UserOnlineAccountID,
 		})
@@ -559,14 +559,6 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		})
 		if err != nil {
 			return nil, xerrors.Errorf("fail update user withdraw item: %v", err)
-		}
-
-		_review.State = reviewconst.StateApproved
-		_, err = grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{
-			Info: _review,
-		})
-		if err != nil {
-			return nil, xerrors.Errorf("fail update review state: %v", err)
 		}
 	}
 
