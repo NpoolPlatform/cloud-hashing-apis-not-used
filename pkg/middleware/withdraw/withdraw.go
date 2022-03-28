@@ -478,8 +478,8 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 	withdrawAccount, err := grpc2.GetUserWithdrawByAccount(ctx, &billingpb.GetUserWithdrawByAccountRequest{
 		AccountID: withdrawItem.WithdrawToAccountID,
 	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail get withdraw account")
+	if err != nil || withdrawAccount == nil {
+		return nil, xerrors.Errorf("fail get withdraw account: %v", err)
 	}
 
 	if withdrawAccount.AppID != withdrawItem.AppID || withdrawAccount.UserID != withdrawItem.UserID {
