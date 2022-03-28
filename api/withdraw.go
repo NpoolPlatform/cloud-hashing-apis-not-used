@@ -70,6 +70,15 @@ func (s *Server) SetWithdrawAddress(ctx context.Context, in *npool.SetWithdrawAd
 	return resp, nil
 }
 
+func (s *Server) DeleteWithdrawAddress(ctx context.Context, in *npool.DeleteWithdrawAddressRequest) (*npool.DeleteWithdrawAddressResponse, error) {
+	resp, err := withdrawaddress.Delete(ctx, in)
+	if err != nil {
+		logger.Sugar().Errorf("delete user withdraw address error: %v", err)
+		return &npool.DeleteWithdrawAddressResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return resp, nil
+}
+
 func (s *Server) GetWithdrawAddressesByAppUser(ctx context.Context, in *npool.GetWithdrawAddressesByAppUserRequest) (*npool.GetWithdrawAddressesByAppUserResponse, error) {
 	resp, err := withdrawaddress.GetByAppUser(ctx, in)
 	if err != nil {

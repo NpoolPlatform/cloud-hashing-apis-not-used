@@ -101,6 +101,32 @@ func Set(ctx context.Context, in *npool.SetWithdrawAddressRequest) (*npool.SetWi
 	}, nil
 }
 
+func Delete(ctx context.Context, in *npool.DeleteWithdrawAddressRequest) (*npool.DeleteWithdrawAddressResponse, error) {
+	reviewState, _, err := review.GetReviewState(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
+		AppID:      in.GetAppID(),
+		Domain:     billingconst.ServiceName,
+		ObjectType: constant.ReviewObjectUserWithdrawAddress,
+		ObjectID:   in.GetID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get withdraw address review state: %v", err)
+	}
+	if reviewState == reviewconst.StateWait {
+		return nil, xerrors.Errorf("fail delete reviewing withdarw address")
+	}
+
+	info, err := grpc2.DeleteUserWithdraw(ctx, &billingpb.DeleteUserWithdrawRequest{
+		ID: in.GetID(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail delete withdraw address: %v", err)
+	}
+
+	return &npool.DeleteWithdrawAddressResponse{
+		Info: info,
+	}, nil
+}
+
 func GetByAppUser(ctx context.Context, in *npool.GetWithdrawAddressesByAppUserRequest) (*npool.GetWithdrawAddressesByAppUserResponse, error) {
 	_, err := grpc2.GetAppUserByAppUser(ctx, &appusermgrpb.GetAppUserByAppUserRequest{
 		AppID:  in.GetAppID(),

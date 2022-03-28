@@ -997,6 +997,26 @@ func GetUserWithdraw(ctx context.Context, in *billingpb.GetUserWithdrawRequest) 
 	return resp.Info, nil
 }
 
+func DeleteUserWithdraw(ctx context.Context, in *billingpb.DeleteUserWithdrawRequest) (*billingpb.UserWithdraw, error) {
+	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get billing connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := billingpb.NewCloudHashingBillingClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	resp, err := cli.DeleteUserWithdraw(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get user withdraw: %v", err)
+	}
+
+	return resp.Info, nil
+}
+
 func GetUserWithdrawItem(ctx context.Context, in *billingpb.GetUserWithdrawItemRequest) (*billingpb.UserWithdrawItem, error) {
 	conn, err := grpc2.GetGRPCConn(billingconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
