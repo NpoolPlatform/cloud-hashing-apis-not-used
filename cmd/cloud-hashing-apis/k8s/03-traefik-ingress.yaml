@@ -128,6 +128,8 @@ spec:
       http: *http_rules
     - host: api.xpool.top
       http: *http_rules
+    - host: api.oohash.vip
+      http: *http_rules
 
 ---
 
@@ -176,4 +178,6 @@ spec:
     - host: api.procyon.vip
       http: *http_rules
     - host: api.xpool.top
+      http: *http_rules
+    - host: api.oohash.vip
       http: *http_rules
