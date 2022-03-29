@@ -158,7 +158,7 @@ func benefitWithdrawable(ctx context.Context, appID, userID, coinTypeID, withdra
 		return false, xerrors.Errorf("invalid billing input")
 	}
 	if incoming-outcoming < amount {
-		return false, xerrors.Errorf("not sufficient funds")
+		return false, xerrors.Errorf("not sufficient funds %v - %v < %v", incoming, outcoming, amount)
 	}
 
 	return true, nil
