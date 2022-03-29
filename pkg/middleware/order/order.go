@@ -506,6 +506,17 @@ func peekIdlePaymentAccount(ctx context.Context, order *npool.Order, paymentCoin
 		return nil, xerrors.Errorf("cannot find suitable payment account")
 	}
 
+	account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
+		ID: paymentAccount.AccountID,
+	})
+	if err != nil {
+		xerr := accountlock.Unlock(paymentAccount.AccountID)
+		if xerr != nil {
+			logger.Sugar().Errorf("cannot unlock %v: %v", paymentAccount.AccountID, xerr)
+		}
+		return nil, xerrors.Errorf("fail get account: %v", err)
+	}
+
 	paymentAccount.Idle = false
 	paymentAccount.OccupiedBy = "paying"
 
@@ -518,17 +529,6 @@ func peekIdlePaymentAccount(ctx context.Context, order *npool.Order, paymentCoin
 			logger.Sugar().Errorf("cannot unlock %v: %v", paymentAccount.AccountID, xerr)
 		}
 		return nil, xerrors.Errorf("fail update good payment: %v", err)
-	}
-
-	account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
-		ID: paymentAccount.AccountID,
-	})
-	if err != nil {
-		xerr := accountlock.Unlock(paymentAccount.AccountID)
-		if xerr != nil {
-			logger.Sugar().Errorf("cannot unlock %v: %v", paymentAccount.AccountID, xerr)
-		}
-		return nil, xerrors.Errorf("fail get account: %v", err)
 	}
 
 	return account, nil
