@@ -443,10 +443,10 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		return nil, xerrors.Errorf("fail get coin setting: %v", err)
 	}
 
-	account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
+	onlineAccount, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
 		ID: coinsetting.UserOnlineAccountID,
 	})
-	if err != nil || account == nil {
+	if err != nil || onlineAccount == nil {
 		return nil, xerrors.Errorf("fail get account info: %v", err)
 	}
 
@@ -468,7 +468,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		return nil, xerrors.Errorf("fail get coin info: %v", err)
 	}
 
-	account, err = grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
+	account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
 		ID: withdrawItem.WithdrawToAccountID,
 	})
 	if err != nil || account == nil {
@@ -528,7 +528,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		// TODO: here should hold transfer lock
 		balance, err := grpc2.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
 			Name:    coin.Name,
-			Address: account.Address,
+			Address: onlineAccount.Address,
 		})
 		if err != nil {
 			return nil, xerrors.Errorf("fail get wallet balance: %v", err)
@@ -536,7 +536,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 
 		if balance.Balance < withdrawItem.Amount+coin.ReservedAmount {
 			return nil, xerrors.Errorf("not sufficient funds %v < %v + %v of coin %v address %v",
-				balance.Balance, withdrawItem.Amount, coin.ReservedAmount, coin.Name, account.Address)
+				balance.Balance, withdrawItem.Amount, coin.ReservedAmount, coin.Name, onlineAccount.Address)
 		}
 
 		account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
