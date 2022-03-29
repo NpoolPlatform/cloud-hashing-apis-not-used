@@ -482,7 +482,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		return nil, xerrors.Errorf("fail get withdraw account: %v", err)
 	}
 
-	reviewState := reviewconst.StateRejected
+	var reviewState string
 
 	if withdrawAccount == nil {
 		if in.GetInfo().GetState() != reviewconst.StateRejected {
