@@ -24,7 +24,7 @@ import (
 	sphinxproxypb "github.com/NpoolPlatform/message/npool/sphinxproxy"
 
 	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
-	paymentwatcher "github.com/NpoolPlatform/cloud-hashing-staker/pkg/middleware/payment-watcher"
+	accountlock "github.com/NpoolPlatform/cloud-hashing-staker/pkg/middleware/account"
 
 	"github.com/google/uuid"
 
@@ -491,11 +491,9 @@ func peekIdlePaymentAccount(ctx context.Context, order *npool.Order, paymentCoin
 	}
 
 	var paymentAccount *billingpb.GoodPayment
-	var lockKey string
 
 	for _, info := range payments {
-		lockKey = paymentwatcher.AccountLockKey(info.ID)
-		err = redis2.TryLock(lockKey, orderconst.TimeoutSeconds*2)
+		err = accountlock.Lock(info.AccountID)
 		if err != nil {
 			continue
 		}
@@ -515,9 +513,9 @@ func peekIdlePaymentAccount(ctx context.Context, order *npool.Order, paymentCoin
 		Info: paymentAccount,
 	})
 	if err != nil {
-		xerr := redis2.Unlock(lockKey)
+		xerr := accountlock.Unlock(paymentAccount.AccountID)
 		if xerr != nil {
-			logger.Sugar().Errorf("cannot unlock %v: %v", lockKey, xerr)
+			logger.Sugar().Errorf("cannot unlock %v: %v", paymentAccount.AccountID, xerr)
 		}
 		return nil, xerrors.Errorf("fail update good payment: %v", err)
 	}
@@ -526,9 +524,9 @@ func peekIdlePaymentAccount(ctx context.Context, order *npool.Order, paymentCoin
 		ID: paymentAccount.AccountID,
 	})
 	if err != nil {
-		xerr := redis2.Unlock(lockKey)
+		xerr := accountlock.Unlock(paymentAccount.AccountID)
 		if xerr != nil {
-			logger.Sugar().Errorf("cannot unlock %v: %v", lockKey, xerr)
+			logger.Sugar().Errorf("cannot unlock %v: %v", paymentAccount.AccountID, xerr)
 		}
 		return nil, xerrors.Errorf("fail get account: %v", err)
 	}
