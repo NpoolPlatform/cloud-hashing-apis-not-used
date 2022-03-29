@@ -478,15 +478,24 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 	withdrawAccount, err := grpc2.GetUserWithdrawByAccount(ctx, &billingpb.GetUserWithdrawByAccountRequest{
 		AccountID: withdrawItem.WithdrawToAccountID,
 	})
-	if err != nil || withdrawAccount == nil {
+	if err != nil {
 		return nil, xerrors.Errorf("fail get withdraw account: %v", err)
+	}
+
+	reviewState := reviewconst.StateRejected
+
+	if withdrawAccount == nil {
+		if in.GetInfo().GetState() != reviewconst.StateRejected {
+			return nil, xerrors.Errorf("withdraw account may be deleted: you can only and have to reject this withdraw")
+		}
+		goto lUpdateReview
 	}
 
 	if withdrawAccount.AppID != withdrawItem.AppID || withdrawAccount.UserID != withdrawItem.UserID {
 		return nil, xerrors.Errorf("invalid account: mismatch app user")
 	}
 
-	reviewState, _, err := review.GetReviewState(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
+	reviewState, _, err = review.GetReviewState(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
 		AppID:      in.GetInfo().GetAppID(),
 		Domain:     billingconst.ServiceName,
 		ObjectType: constant.ReviewObjectUserWithdrawAddress,
@@ -562,6 +571,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		}
 	}
 
+lUpdateReview:
 	_review.State = in.GetInfo().GetState()
 	_review, err = grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{
 		Info: _review,
