@@ -535,7 +535,8 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		}
 
 		if balance.Balance < withdrawItem.Amount+coin.ReservedAmount {
-			return nil, xerrors.Errorf("not sufficient funds")
+			return nil, xerrors.Errorf("not sufficient funds %v < %v + %v of coin %v address %v",
+				balance.Balance, withdrawItem.Amount, coin.ReservedAmount, coin.Name, account.Address)
 		}
 
 		account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
