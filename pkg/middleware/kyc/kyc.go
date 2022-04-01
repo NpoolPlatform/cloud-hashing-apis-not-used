@@ -172,7 +172,10 @@ func UpdateKycReview(ctx context.Context, in *npool.UpdateKycReviewRequest) (*np
 	if reviewResp == nil {
 		return nil, xerrors.Errorf("fail get review")
 	}
-
+	reviewUpResp, err := grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{Info: in.GetInfo()})
+	if err != nil {
+		return nil, err
+	}
 	if reviewInfo.GetState() == reviewconst.StateApproved {
 		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
 			Info: &notificationpbpb.UserNotification{
@@ -207,7 +210,7 @@ func UpdateKycReview(ctx context.Context, in *npool.UpdateKycReviewRequest) (*np
 
 	return &npool.UpdateKycReviewResponse{
 		Info: &npool.KycReview{
-			Review: reviewInfo,
+			Review: reviewUpResp,
 			User:   user,
 			Kyc:    kycs[0],
 		},

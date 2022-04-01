@@ -662,6 +662,11 @@ func UpdateWithdrawReview(ctx context.Context, in *npool.UpdateWithdrawReviewReq
 		return nil, xerrors.Errorf("fail get review")
 	}
 
+	reviewUpResp, err := grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{Info: in.GetInfo()})
+	if err != nil {
+		return nil, err
+	}
+
 	if reviewInfo.GetState() == reviewconst.StateApproved {
 		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
 			Info: &notificationpbpb.UserNotification{
@@ -696,7 +701,7 @@ func UpdateWithdrawReview(ctx context.Context, in *npool.UpdateWithdrawReviewReq
 
 	return &npool.UpdateWithdrawReviewResponse{
 		Info: &npool.WithdrawReview{
-			Review:   reviewInfo,
+			Review:   reviewUpResp,
 			User:     user,
 			Withdraw: withdrawItem,
 		},

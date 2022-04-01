@@ -2,7 +2,6 @@ package withdrawaddress
 
 import (
 	"context"
-
 	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/const"
 	account "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/account"
 	review "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/review"
@@ -177,7 +176,7 @@ func GetByAppUser(ctx context.Context, in *npool.GetWithdrawAddressesByAppUserRe
 	}, nil
 }
 
-// func UpdateWithdrawUpdateAddressReview(ctx context.Context, in *npool.UpdateWithdrawAddressReviewRequest) (*npool.UpdateWithdrawAddressReviewResponse, error) {
+//func UpdateWithdrawUpdateAddressReview(ctx context.Context, in *npool.UpdateWithdrawAddressReviewRequest) (*npool.UpdateWithdrawAddressReviewResponse, error) {
 //	reviewInfo := in.GetInfo()
 //
 //	userWithdraw, err := grpc2.GetUserWithdraw(ctx, &billingpb.GetUserWithdrawRequest{
@@ -221,6 +220,11 @@ func GetByAppUser(ctx context.Context, in *npool.GetWithdrawAddressesByAppUserRe
 //		return nil, xerrors.Errorf("fail get review")
 //	}
 //
+//	reviewUpResp, err := grpc2.UpdateReview(ctx,&reviewpb.UpdateReviewRequest{Info: in.GetInfo()})
+//	if err != nil {
+//		return nil, err
+//	}
+//
 //	if reviewInfo.GetState() == reviewconst.StateApproved {
 //		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
 //			Info: &notificationpbpb.UserNotification{
@@ -254,10 +258,10 @@ func GetByAppUser(ctx context.Context, in *npool.GetWithdrawAddressesByAppUserRe
 //
 //	return &npool.UpdateWithdrawAddressReviewResponse{
 //		Info: &npool.WithdrawAddressReview{
-//			Review:  reviewInfo,
+//			Review:  reviewUpResp,
 //			User:    user,
 //			Address: userWithdraw,
 //			Account: billingAccount,
 //		},
 //	}, nil
-// }
+//}
