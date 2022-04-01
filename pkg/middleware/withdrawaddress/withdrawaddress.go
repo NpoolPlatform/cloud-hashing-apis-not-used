@@ -177,7 +177,7 @@ func GetByAppUser(ctx context.Context, in *npool.GetWithdrawAddressesByAppUserRe
 	}, nil
 }
 
-//func UpdateWithdrawUpdateAddressReview(ctx context.Context, in *npool.UpdateWithdrawAddressReviewRequest) (*npool.UpdateWithdrawAddressReviewResponse, error) {
+// func UpdateWithdrawUpdateAddressReview(ctx context.Context, in *npool.UpdateWithdrawAddressReviewRequest) (*npool.UpdateWithdrawAddressReviewResponse, error) {
 //	reviewInfo := in.GetInfo()
 //
 //	userWithdraw, err := grpc2.GetUserWithdraw(ctx, &billingpb.GetUserWithdrawRequest{
@@ -265,4 +265,4 @@ func GetByAppUser(ctx context.Context, in *npool.GetWithdrawAddressesByAppUserRe
 //			Account: billingAccount,
 //		},
 //	}, nil
-//}
+// }
