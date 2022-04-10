@@ -3,6 +3,10 @@ package user
 import (
 	"context"
 
+	"github.com/NpoolPlatform/go-service-framework/pkg/dtm"
+	"github.com/dtm-labs/dtmgrpc"
+	"github.com/google/uuid"
+
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	verifymw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/verify"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
@@ -13,6 +17,8 @@ import (
 	thirdgwpb "github.com/NpoolPlatform/message/npool/thirdgateway"
 	thirdgwconst "github.com/NpoolPlatform/third-gateway/pkg/const"
 
+	appusermgrsvceconst "github.com/NpoolPlatform/appuser-manager/pkg/message/const" //nolint
+	inspiresvcconst "github.com/NpoolPlatform/cloud-hashing-inspire/pkg/message/const"
 	"golang.org/x/xerrors"
 )
 
@@ -83,35 +89,81 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 	} else if in.GetAccountType() == appusermgrconst.SignupByEmail {
 		emailAddress = in.GetAccount()
 	}
-
-	appUser, err = grpc2.Signup(ctx, &appusermgrpb.CreateAppUserWithSecretRequest{
-		User: &appusermgrpb.AppUser{
-			AppID:        in.GetAppID(),
-			EmailAddress: emailAddress,
-			PhoneNO:      phoneNO,
-		},
-		Secret: &appusermgrpb.AppUserSecret{
-			AppID:        in.GetAppID(),
-			PasswordHash: in.GetPasswordHash(),
-		},
-	})
-	if err != nil || appUser == nil {
-		return nil, xerrors.Errorf("fail signup: %v", err)
-	}
-
+	//saga不支持grpc接口返回值所以需要提前生成userID
+	userID := uuid.New().String()
 	if invitationCode != "" && inviterID != "" {
-		_, err = grpc2.CreateRegistrationInvitation(ctx, &inspirepb.CreateRegistrationInvitationRequest{
+
+		//获取dtm服务
+		dtmGrpcServer, err := dtm.GetService()
+		if err != nil {
+			return nil, err
+		}
+
+		//获取事务id
+		gid := dtmgrpc.MustGenGid(dtmGrpcServer)
+
+		createAppUserWithSecretRequest := &appusermgrpb.CreateAppUserWithSecretRequest{
+			User: &appusermgrpb.AppUser{
+				ID:           userID,
+				AppID:        in.GetAppID(),
+				EmailAddress: emailAddress,
+				PhoneNO:      phoneNO,
+			},
+			Secret: &appusermgrpb.AppUserSecret{
+				UserID:       userID,
+				AppID:        in.GetAppID(),
+				PasswordHash: in.GetPasswordHash(),
+			},
+		}
+
+		createRegistrationInvitationRequest := &inspirepb.CreateRegistrationInvitationRequest{
 			Info: &inspirepb.RegistrationInvitation{
 				AppID:     in.GetAppID(),
 				InviterID: inviterID,
-				InviteeID: appUser.ID,
+				InviteeID: userID,
 			},
+		}
+		//获取grpc接口地址
+		createAppUserWithSecret, err := dtm.GetGrpcURL(appusermgrsvceconst.ServiceName, "CreateAppUserWithSecret")
+		createAppUserWithSecretRevert, err := dtm.GetGrpcURL(appusermgrsvceconst.ServiceName, "CreateAppUserWithSecretRevert")
+		createRegistrationInvitation, err := dtm.GetGrpcURL(inspiresvcconst.ServiceName, "CreateRegistrationInvitation")
+		createRegistrationInvitationRevert, err := dtm.GetGrpcURL(inspiresvcconst.ServiceName, "CreateRegistrationInvitationRevert")
+		if err != nil {
+			return nil, err
+		}
+		//执行saga事务
+		saga := dtmgrpc.NewSagaGrpc(dtmGrpcServer, gid).
+			Add(createAppUserWithSecret, createAppUserWithSecretRevert, createAppUserWithSecretRequest).
+			Add(createRegistrationInvitation, createRegistrationInvitationRevert, createRegistrationInvitationRequest)
+		err = saga.Submit()
+		if err != nil {
+			return nil, err
+		}
+		//saga不支持grpc接口返回值所以需要再查询一次
+		//https://www.dtm.pub/practice/saga.html#%E6%9B%B4%E5%A4%9A%E9%AB%98%E7%BA%A7%E5%9C%BA%E6%99%AF
+		appUser, err = grpc2.GetAppUserByAppUser(ctx, &appusermgrpb.GetAppUserByAppUserRequest{
+			AppID:  in.GetAppID(),
+			UserID: userID,
 		})
 		if err != nil {
 			return nil, xerrors.Errorf("fail create registration invitation: %v", err)
 		}
+	} else {
+		appUser, err = grpc2.Signup(ctx, &appusermgrpb.CreateAppUserWithSecretRequest{
+			User: &appusermgrpb.AppUser{
+				AppID:        in.GetAppID(),
+				EmailAddress: emailAddress,
+				PhoneNO:      phoneNO,
+			},
+			Secret: &appusermgrpb.AppUserSecret{
+				AppID:        in.GetAppID(),
+				PasswordHash: in.GetPasswordHash(),
+			},
+		})
+		if err != nil || appUser == nil {
+			return nil, xerrors.Errorf("fail signup: %v", err)
+		}
 	}
-
 	return &npool.SignupResponse{
 		Info: appUser,
 	}, nil
