@@ -29,7 +29,7 @@ func verifyCode(ctx context.Context, user *appusermgrpb.AppUserInfo, code *npool
 		}
 	case appusermgrconst.SignupByEmail:
 		if code.GetAccount() != user.User.EmailAddress {
-			return 0, xerrors.Errorf("invalid phone NO")
+			return 0, xerrors.Errorf("invalid email address")
 		}
 	}
 
