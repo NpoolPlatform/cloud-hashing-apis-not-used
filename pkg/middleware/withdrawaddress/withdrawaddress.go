@@ -221,6 +221,11 @@ func GetByAppUser(ctx context.Context, in *npool.GetWithdrawAddressesByAppUserRe
 //		return nil, xerrors.Errorf("fail get review")
 //	}
 //
+//	reviewUpResp, err := grpc2.UpdateReview(ctx,&reviewpb.UpdateReviewRequest{Info: in.GetInfo()})
+//	if err != nil {
+//		return nil, err
+//	}
+//
 //	if reviewInfo.GetState() == reviewconst.StateApproved {
 //		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
 //			Info: &notificationpbpb.UserNotification{
@@ -254,7 +259,7 @@ func GetByAppUser(ctx context.Context, in *npool.GetWithdrawAddressesByAppUserRe
 //
 //	return &npool.UpdateWithdrawAddressReviewResponse{
 //		Info: &npool.WithdrawAddressReview{
-//			Review:  reviewInfo,
+//			Review:  reviewUpResp,
 //			User:    user,
 //			Address: userWithdraw,
 //			Account: billingAccount,
