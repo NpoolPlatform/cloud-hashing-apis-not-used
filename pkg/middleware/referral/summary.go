@@ -7,6 +7,7 @@ import (
 	cache "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/cache"
 	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
+	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
 
 	"golang.org/x/xerrors"
 )
@@ -145,13 +146,21 @@ func getReferral(ctx context.Context, appID, userID string) (*npool.Referral, er
 		return nil, xerrors.Errorf("fail get coin summaries: %v", err)
 	}
 
+	code, err := grpc2.GetUserInvitationCodeByAppUser(ctx, &inspirepb.GetUserInvitationCodeByAppUserRequest{
+		AppID:  appID,
+		UserID: userID,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get user invitation code: %v", err)
+	}
+
 	return &npool.Referral{
 		User:         user,
 		Extra:        extra,
 		Invitation:   inviter,
 		USDAmount:    amount,
 		SubUSDAmount: subAmount,
-		Kol:          len(invitees) > 0,
+		Kol:          code != nil,
 		InvitedCount: uint32(len(invitees)),
 		Summaries:    coinSummaries,
 	}, nil
