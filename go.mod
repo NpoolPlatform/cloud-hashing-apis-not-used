@@ -120,3 +120,5 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
+
+replace github.com/NpoolPlatform/go-service-framework => github.com/NpoolPlatform/go-service-framework v0.0.0-20220412092316-7c7126436093

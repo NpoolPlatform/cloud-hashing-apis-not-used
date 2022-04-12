@@ -89,17 +89,17 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 	} else if in.GetAccountType() == appusermgrconst.SignupByEmail {
 		emailAddress = in.GetAccount()
 	}
-	//saga不支持grpc接口返回值所以需要提前生成userID
+	// saga不支持grpc接口返回值所以需要提前生成userID
 	userID := uuid.New().String()
-	if invitationCode != "" && inviterID != "" {
 
-		//获取dtm服务
+	if invitationCode != "" && inviterID != "" {
+		// 获取dtm服务
 		dtmGrpcServer, err := dtm.GetService()
 		if err != nil {
 			return nil, err
 		}
 
-		//获取事务id
+		// 获取事务id
 		gid := dtmgrpc.MustGenGid(dtmGrpcServer)
 
 		createAppUserWithSecretRequest := &appusermgrpb.CreateAppUserWithSecretRequest{
@@ -123,24 +123,26 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 				InviteeID: userID,
 			},
 		}
-		//获取grpc接口地址
-		createAppUserWithSecret, err := dtm.GetGrpcURL(appusermgrsvceconst.ServiceName, "CreateAppUserWithSecret")
-		createAppUserWithSecretRevert, err := dtm.GetGrpcURL(appusermgrsvceconst.ServiceName, "CreateAppUserWithSecretRevert")
-		createRegistrationInvitation, err := dtm.GetGrpcURL(inspiresvcconst.ServiceName, "CreateRegistrationInvitation")
-		createRegistrationInvitationRevert, err := dtm.GetGrpcURL(inspiresvcconst.ServiceName, "CreateRegistrationInvitationRevert")
+		// 获取grpc接口地址
+		createAppUserWithSecret, createAppUserWithSecretRevert, err := dtm.GetGrpcURL(appusermgrsvceconst.ServiceName, "CreateAppUserWithSecret", "CreateAppUserWithSecretRevert")
 		if err != nil {
 			return nil, err
 		}
-		//执行saga事务
+		createRegistrationInvitation, createRegistrationInvitationRevert, err := dtm.GetGrpcURL(inspiresvcconst.ServiceName, "CreateRegistrationInvitation", "CreateRegistrationInvitationRevert")
+		if err != nil {
+			return nil, err
+		}
+		// 执行saga事务
 		saga := dtmgrpc.NewSagaGrpc(dtmGrpcServer, gid).
 			Add(createAppUserWithSecret, createAppUserWithSecretRevert, createAppUserWithSecretRequest).
 			Add(createRegistrationInvitation, createRegistrationInvitationRevert, createRegistrationInvitationRequest)
+		saga.WaitResult = true
 		err = saga.Submit()
 		if err != nil {
 			return nil, err
 		}
-		//saga不支持grpc接口返回值所以需要再查询一次
-		//https://www.dtm.pub/practice/saga.html#%E6%9B%B4%E5%A4%9A%E9%AB%98%E7%BA%A7%E5%9C%BA%E6%99%AF
+		// saga不支持grpc接口返回值所以需要再查询一次
+		// https://www.dtm.pub/practice/saga.html#%E6%9B%B4%E5%A4%9A%E9%AB%98%E7%BA%A7%E5%9C%BA%E6%99%AF
 		appUser, err = grpc2.GetAppUserByAppUser(ctx, &appusermgrpb.GetAppUserByAppUserRequest{
 			AppID:  in.GetAppID(),
 			UserID: userID,
