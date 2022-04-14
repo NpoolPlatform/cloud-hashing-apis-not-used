@@ -5,10 +5,13 @@ package api
 
 import (
 	"context"
+
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+	"go.opentelemetry.io/otel"
 
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
+	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/message/const"
 	withdraw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/withdraw"
 	withdrawaddress "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/withdrawaddress"
 
@@ -17,6 +20,9 @@ import (
 )
 
 func (s *Server) SubmitUserWithdraw(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.SubmitUserWithdrawResponse, error) {
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "SubmitUserWithdraw")
+	defer span.End()
+
 	resp, err := withdraw.Create(ctx, in)
 	if err != nil {
 		logger.Sugar().Errorf("create user withdraw error: %v", err)
@@ -26,6 +32,9 @@ func (s *Server) SubmitUserWithdraw(ctx context.Context, in *npool.SubmitUserWit
 }
 
 func (s *Server) UpdateUserWithdrawReview(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*npool.UpdateUserWithdrawReviewResponse, error) {
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "UpdateUserWithdrawReview")
+	defer span.End()
+
 	resp, err := withdraw.Update(ctx, in)
 	if err != nil {
 		logger.Sugar().Errorf("update user withdraw error: %v", err)
@@ -35,6 +44,9 @@ func (s *Server) UpdateUserWithdrawReview(ctx context.Context, in *npool.UpdateU
 }
 
 func (s *Server) UpdateUserWithdrawReviewForOtherAppUser(ctx context.Context, in *npool.UpdateUserWithdrawReviewForOtherAppUserRequest) (*npool.UpdateUserWithdrawReviewForOtherAppUserResponse, error) {
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "UpdateUserWithdrawReviewForOtherAppUser")
+	defer span.End()
+
 	info := in.GetInfo()
 	info.AppID = in.GetTargetAppID()
 
@@ -53,6 +65,9 @@ func (s *Server) UpdateUserWithdrawReviewForOtherAppUser(ctx context.Context, in
 }
 
 func (s *Server) GetUserWithdrawsByAppUser(ctx context.Context, in *npool.GetUserWithdrawsByAppUserRequest) (*npool.GetUserWithdrawsByAppUserResponse, error) {
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetUserWithdrawsByAppUser")
+	defer span.End()
+
 	resp, err := withdraw.GetByAppUser(ctx, in)
 	if err != nil {
 		logger.Sugar().Errorf("get user withdraw error: %v", err)
@@ -62,6 +77,9 @@ func (s *Server) GetUserWithdrawsByAppUser(ctx context.Context, in *npool.GetUse
 }
 
 func (s *Server) SetWithdrawAddress(ctx context.Context, in *npool.SetWithdrawAddressRequest) (*npool.SetWithdrawAddressResponse, error) {
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "SetWithdrawAddress")
+	defer span.End()
+
 	resp, err := withdrawaddress.Set(ctx, in)
 	if err != nil {
 		logger.Sugar().Errorf("create user withdraw address error: %v", err)
@@ -71,6 +89,9 @@ func (s *Server) SetWithdrawAddress(ctx context.Context, in *npool.SetWithdrawAd
 }
 
 func (s *Server) DeleteWithdrawAddress(ctx context.Context, in *npool.DeleteWithdrawAddressRequest) (*npool.DeleteWithdrawAddressResponse, error) {
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "DeleteWithdrawAddress")
+	defer span.End()
+
 	resp, err := withdrawaddress.Delete(ctx, in)
 	if err != nil {
 		logger.Sugar().Errorf("delete user withdraw address error: %v", err)
@@ -80,6 +101,9 @@ func (s *Server) DeleteWithdrawAddress(ctx context.Context, in *npool.DeleteWith
 }
 
 func (s *Server) GetWithdrawAddressesByAppUser(ctx context.Context, in *npool.GetWithdrawAddressesByAppUserRequest) (*npool.GetWithdrawAddressesByAppUserResponse, error) {
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetWithdrawAddressesByAppUser")
+	defer span.End()
+
 	resp, err := withdrawaddress.GetByAppUser(ctx, in)
 	if err != nil {
 		logger.Sugar().Errorf("get user withdraw address error: %v", err)
@@ -89,6 +113,9 @@ func (s *Server) GetWithdrawAddressesByAppUser(ctx context.Context, in *npool.Ge
 }
 
 func (s *Server) UpdateWithdrawReview(ctx context.Context, in *npool.UpdateWithdrawReviewRequest) (*npool.UpdateWithdrawReviewResponse, error) {
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "UpdateWithdrawReview")
+	defer span.End()
+
 	resp, err := withdraw.UpdateWithdrawReview(ctx, in)
 	if err != nil {
 		logger.Sugar().Errorf("update withdraw review error: %w", err)

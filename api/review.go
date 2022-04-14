@@ -4,7 +4,9 @@ import (
 	"context"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+	"go.opentelemetry.io/otel"
 
+	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/message/const"
 	mw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/review"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
@@ -13,6 +15,9 @@ import (
 )
 
 func (s *Server) GetKycReviews(ctx context.Context, in *npool.GetKycReviewsRequest) (*npool.GetKycReviewsResponse, error) {
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetKycReviews")
+	defer span.End()
+
 	resp, err := mw.GetKycReviews(ctx, in)
 	if err != nil {
 		logger.Sugar().Errorf("get kyc reviews error: %v", err)
@@ -22,6 +27,9 @@ func (s *Server) GetKycReviews(ctx context.Context, in *npool.GetKycReviewsReque
 }
 
 func (s *Server) GetKycReviewsByApp(ctx context.Context, in *npool.GetKycReviewsByAppRequest) (*npool.GetKycReviewsByAppResponse, error) {
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetKycReviewsByApp")
+	defer span.End()
+
 	resp, err := mw.GetKycReviews(ctx, &npool.GetKycReviewsRequest{
 		AppID: in.GetAppID(),
 	})
@@ -35,6 +43,9 @@ func (s *Server) GetKycReviewsByApp(ctx context.Context, in *npool.GetKycReviews
 }
 
 func (s *Server) GetKycReviewsByOtherApp(ctx context.Context, in *npool.GetKycReviewsByOtherAppRequest) (*npool.GetKycReviewsByOtherAppResponse, error) {
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetKycReviewsByOtherApp")
+	defer span.End()
+
 	resp, err := mw.GetKycReviews(ctx, &npool.GetKycReviewsRequest{
 		AppID: in.GetTargetAppID(),
 	})
@@ -48,6 +59,9 @@ func (s *Server) GetKycReviewsByOtherApp(ctx context.Context, in *npool.GetKycRe
 }
 
 func (s *Server) GetGoodReviews(ctx context.Context, in *npool.GetGoodReviewsRequest) (*npool.GetGoodReviewsResponse, error) {
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetGoodReviews")
+	defer span.End()
+
 	resp, err := mw.GetGoodReviews(ctx, in)
 	if err != nil {
 		logger.Sugar().Errorf("get good reviews error: %v", err)
@@ -57,6 +71,9 @@ func (s *Server) GetGoodReviews(ctx context.Context, in *npool.GetGoodReviewsReq
 }
 
 func (s *Server) GetWithdrawReviews(ctx context.Context, in *npool.GetWithdrawReviewsRequest) (*npool.GetWithdrawReviewsResponse, error) {
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetWithdrawReviews")
+	defer span.End()
+
 	resp, err := mw.GetWithdrawReviews(ctx, in)
 	if err != nil {
 		logger.Sugar().Errorf("get withdraw reviews error: %v", err)
@@ -66,6 +83,9 @@ func (s *Server) GetWithdrawReviews(ctx context.Context, in *npool.GetWithdrawRe
 }
 
 func (s *Server) GetWithdrawReviewsByApp(ctx context.Context, in *npool.GetWithdrawReviewsByAppRequest) (*npool.GetWithdrawReviewsByAppResponse, error) {
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetWithdrawReviewsByApp")
+	defer span.End()
+
 	resp, err := mw.GetWithdrawReviews(ctx, &npool.GetWithdrawReviewsRequest{
 		AppID: in.GetAppID(),
 	})
@@ -79,6 +99,9 @@ func (s *Server) GetWithdrawReviewsByApp(ctx context.Context, in *npool.GetWithd
 }
 
 func (s *Server) GetWithdrawReviewsByOtherApp(ctx context.Context, in *npool.GetWithdrawReviewsByOtherAppRequest) (*npool.GetWithdrawReviewsByOtherAppResponse, error) {
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetWithdrawReviewsByOtherApp")
+	defer span.End()
+
 	resp, err := mw.GetWithdrawReviews(ctx, &npool.GetWithdrawReviewsRequest{
 		AppID: in.GetTargetAppID(),
 	})
@@ -92,6 +115,9 @@ func (s *Server) GetWithdrawReviewsByOtherApp(ctx context.Context, in *npool.Get
 }
 
 func (s *Server) GetWithdrawAddressReviews(ctx context.Context, in *npool.GetWithdrawAddressReviewsRequest) (*npool.GetWithdrawAddressReviewsResponse, error) {
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetWithdrawAddressReviews")
+	defer span.End()
+
 	resp, err := mw.GetWithdrawAddressReviews(ctx, in)
 	if err != nil {
 		logger.Sugar().Errorf("get withdraw address reviews error: %v", err)
@@ -101,6 +127,9 @@ func (s *Server) GetWithdrawAddressReviews(ctx context.Context, in *npool.GetWit
 }
 
 func (s *Server) GetWithdrawAddressReviewsByApp(ctx context.Context, in *npool.GetWithdrawAddressReviewsByAppRequest) (*npool.GetWithdrawAddressReviewsByAppResponse, error) {
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetWithdrawAddressReviewsByApp")
+	defer span.End()
+
 	resp, err := mw.GetWithdrawAddressReviews(ctx, &npool.GetWithdrawAddressReviewsRequest{
 		AppID: in.GetAppID(),
 	})
@@ -114,6 +143,9 @@ func (s *Server) GetWithdrawAddressReviewsByApp(ctx context.Context, in *npool.G
 }
 
 func (s *Server) GetWithdrawAddressReviewsByOtherApp(ctx context.Context, in *npool.GetWithdrawAddressReviewsByOtherAppRequest) (*npool.GetWithdrawAddressReviewsByOtherAppResponse, error) {
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetWithdrawAddressReviewsByOtherApp")
+	defer span.End()
+
 	resp, err := mw.GetWithdrawAddressReviews(ctx, &npool.GetWithdrawAddressReviewsRequest{
 		AppID: in.GetTargetAppID(),
 	})

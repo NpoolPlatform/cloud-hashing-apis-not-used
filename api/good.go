@@ -1,3 +1,4 @@
+//go:build !codeanalysis
 // +build !codeanalysis
 
 package api
@@ -6,9 +7,11 @@ import (
 	"context"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+	"go.opentelemetry.io/otel"
 
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
+	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/message/const"
 	good "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/good"
 
 	"google.golang.org/grpc/codes"
@@ -16,6 +19,9 @@ import (
 )
 
 func (s *Server) GetGoods(ctx context.Context, in *npool.GetGoodsRequest) (*npool.GetGoodsResponse, error) {
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetGoods")
+	defer span.End()
+
 	resp, err := good.GetAll(ctx, in)
 	if err != nil {
 		logger.Sugar().Errorf("get good all error: %v", err)
@@ -25,6 +31,9 @@ func (s *Server) GetGoods(ctx context.Context, in *npool.GetGoodsRequest) (*npoo
 }
 
 func (s *Server) GetGoodsByApp(ctx context.Context, in *npool.GetGoodsByAppRequest) (*npool.GetGoodsByAppResponse, error) {
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetGoodsByApp")
+	defer span.End()
+
 	resp, err := good.GetByApp(ctx, in)
 	if err != nil {
 		logger.Sugar().Errorf("get good all error: %v", err)
