@@ -10,14 +10,14 @@ require (
 	github.com/NpoolPlatform/cloud-hashing-goods v0.0.0-20220322085658-b133b5db7bd0
 	github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220323081920-a13fe422e1e9
 	github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220322040527-3fead61c5bfd
-	github.com/NpoolPlatform/cloud-hashing-staker v0.0.0-20220415050539-ad351754ba42
-	github.com/NpoolPlatform/go-service-framework v0.0.0-20220415050056-c7563c825533
+	github.com/NpoolPlatform/cloud-hashing-staker v0.0.0-20220415053922-bb036200dc6d
+	github.com/NpoolPlatform/go-service-framework v0.0.0-20220415053132-247e39909fd6
 	github.com/NpoolPlatform/kyc-management v0.0.0-20220322081324-f537a7bcd812
 	github.com/NpoolPlatform/login-gateway v0.0.0-20220324144125-0675c5904170
 	github.com/NpoolPlatform/message v0.0.0-20220414043951-017300b4fc17
 	github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da
 	github.com/NpoolPlatform/review-service v0.0.0-20220322082433-0c2b7ee284ed
-	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20220415050252-1005c976d13d
+	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20220415053221-840ab32dbb20
 	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20220323034620-cea972617ed5
 	github.com/NpoolPlatform/third-gateway v0.0.0-20220322080604-a656d7cba609
 	github.com/go-resty/resty/v2 v2.7.0
