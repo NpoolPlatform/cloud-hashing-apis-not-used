@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"fmt"
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	verifymw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/verify"
@@ -11,8 +12,6 @@ import (
 	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
 	logingwpb "github.com/NpoolPlatform/message/npool/logingateway"
 	thirdgwconst "github.com/NpoolPlatform/third-gateway/pkg/const"
-
-	"golang.org/x/xerrors"
 )
 
 const (
@@ -25,11 +24,11 @@ func verifyCode(ctx context.Context, user *appusermgrpb.AppUserInfo, code *npool
 	switch code.GetAccountType() {
 	case appusermgrconst.SignupByMobile:
 		if code.GetAccount() != user.User.PhoneNO {
-			return 0, xerrors.Errorf("invalid phone NO")
+			return 0, fmt.Errorf("invalid phone NO")
 		}
 	case appusermgrconst.SignupByEmail:
 		if code.GetAccount() != user.User.EmailAddress {
-			return 0, xerrors.Errorf("invalid email address")
+			return 0, fmt.Errorf("invalid email address")
 		}
 	}
 
@@ -44,7 +43,7 @@ func verifyCode(ctx context.Context, user *appusermgrpb.AppUserInfo, code *npool
 		true,
 	)
 	if err != nil {
-		return 0, xerrors.Errorf("fail verify code: %v", err)
+		return 0, fmt.Errorf("fail verify code: %v", err)
 	}
 
 	switch code.GetAccountType() {
@@ -62,7 +61,7 @@ func verifyCodes(ctx context.Context, user *appusermgrpb.AppUserInfo, codes []*n
 	for _, code := range codes {
 		v, err := verifyCode(ctx, user, code)
 		if err != nil {
-			return 0, xerrors.Errorf("fail verify code: %v", err)
+			return 0, fmt.Errorf("fail verify code: %v", err)
 		}
 		verified |= v
 	}
@@ -104,14 +103,14 @@ func updateAccount(ctx context.Context, user *appusermgrpb.AppUserInfo, in *npoo
 		Info: user,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail update cache: %v", err)
+		return nil, fmt.Errorf("fail update cache: %v", err)
 	}
 
 	_, err = grpc2.UpdateAppUser(ctx, &appusermgrpb.UpdateAppUserRequest{
 		Info: user.User,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail update app user: %v", err)
+		return nil, fmt.Errorf("fail update app user: %v", err)
 	}
 
 	return user, nil
@@ -124,7 +123,7 @@ func UpdateAccount(ctx context.Context, in *npool.UpdateAccountRequest) (*npool.
 			Account: in.GetAccount(),
 		})
 		if err != nil || old != nil {
-			return nil, xerrors.Errorf("fail get app user by app account: %v", err)
+			return nil, fmt.Errorf("fail get app user by app account: %v", err)
 		}
 	}
 
@@ -133,16 +132,16 @@ func UpdateAccount(ctx context.Context, in *npool.UpdateAccountRequest) (*npool.
 		UserID: in.GetUserID(),
 	})
 	if err != nil || info == nil {
-		return nil, xerrors.Errorf("fail get app user by app user: %v", err)
+		return nil, fmt.Errorf("fail get app user by app user: %v", err)
 	}
 
 	verified, err := verifyCodes(ctx, info, in.GetVerificationCodes())
 	if err != nil {
-		return nil, xerrors.Errorf("fail verify codes: %v", err)
+		return nil, fmt.Errorf("fail verify codes: %v", err)
 	}
 
 	if !codesVerified(info, in.GetAccountType(), verified) {
-		return nil, xerrors.Errorf("miss required verification code")
+		return nil, fmt.Errorf("miss required verification code")
 	}
 
 	err = verifymw.VerifyCode(
@@ -156,12 +155,12 @@ func UpdateAccount(ctx context.Context, in *npool.UpdateAccountRequest) (*npool.
 		false,
 	)
 	if err != nil {
-		return nil, xerrors.Errorf("fail verify code: %v", err)
+		return nil, fmt.Errorf("fail verify code: %v", err)
 	}
 
 	info, err = updateAccount(ctx, info, in)
 	if err != nil {
-		return nil, xerrors.Errorf("fail update account: %v", err)
+		return nil, fmt.Errorf("fail update account: %v", err)
 	}
 
 	return &npool.UpdateAccountResponse{
@@ -175,7 +174,7 @@ func UpdateAppUserExtra(ctx context.Context, in *npool.UpdateAppUserExtraRequest
 		UserID: in.GetInfo().GetUserID(),
 	})
 	if err != nil || info == nil {
-		return nil, xerrors.Errorf("fail get app user by app user: %v", err)
+		return nil, fmt.Errorf("fail get app user by app user: %v", err)
 	}
 
 	info.Extra = in.GetInfo()
@@ -184,14 +183,14 @@ func UpdateAppUserExtra(ctx context.Context, in *npool.UpdateAppUserExtraRequest
 		Info: info,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail update cache: %v", err)
+		return nil, fmt.Errorf("fail update cache: %v", err)
 	}
 
 	_, err = grpc2.UpdateAppUserExtra(ctx, &appusermgrpb.UpdateAppUserExtraRequest{
 		Info: in.GetInfo(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail update app user extra: %v", err)
+		return nil, fmt.Errorf("fail update app user extra: %v", err)
 	}
 
 	return &npool.UpdateAppUserExtraResponse{
@@ -205,7 +204,7 @@ func CreateAppUserExtra(ctx context.Context, in *npool.CreateAppUserExtraRequest
 		UserID: in.GetInfo().GetUserID(),
 	})
 	if err != nil || info == nil {
-		return nil, xerrors.Errorf("fail get app user by app user: %v", err)
+		return nil, fmt.Errorf("fail get app user by app user: %v", err)
 	}
 
 	info.Extra = in.GetInfo()
@@ -214,14 +213,14 @@ func CreateAppUserExtra(ctx context.Context, in *npool.CreateAppUserExtraRequest
 		Info: info,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail update cache: %v", err)
+		return nil, fmt.Errorf("fail update cache: %v", err)
 	}
 
 	_, err = grpc2.CreateAppUserExtra(ctx, &appusermgrpb.CreateAppUserExtraRequest{
 		Info: in.GetInfo(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail update app user extra: %v", err)
+		return nil, fmt.Errorf("fail update app user extra: %v", err)
 	}
 
 	return &npool.CreateAppUserExtraResponse{
