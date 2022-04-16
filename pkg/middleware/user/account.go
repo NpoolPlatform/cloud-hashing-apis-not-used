@@ -228,3 +228,63 @@ func CreateAppUserExtra(ctx context.Context, in *npool.CreateAppUserExtraRequest
 		Info: info,
 	}, nil
 }
+
+func UpdateAppUserControl(ctx context.Context, in *npool.UpdateAppUserControlRequest) (*npool.UpdateAppUserControlResponse, error) { //nolint
+	info, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
+		AppID:  in.GetInfo().GetAppID(),
+		UserID: in.GetInfo().GetUserID(),
+	})
+	if err != nil || info == nil {
+		return nil, xerrors.Errorf("fail get app user by app user: %v", err)
+	}
+
+	info.Ctrl = in.GetInfo()
+
+	_, err = grpc2.UpdateCache(ctx, &logingwpb.UpdateCacheRequest{
+		Info: info,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail update cache: %v", err)
+	}
+
+	_, err = grpc2.UpdateAppUserControl(ctx, &appusermgrpb.UpdateAppUserControlRequest{
+		Info: in.GetInfo(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail update app user control: %v", err)
+	}
+
+	return &npool.UpdateAppUserControlResponse{
+		Info: info,
+	}, nil
+}
+
+func CreateAppUserControl(ctx context.Context, in *npool.CreateAppUserControlRequest) (*npool.CreateAppUserControlResponse, error) { //nolint
+	info, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
+		AppID:  in.GetInfo().GetAppID(),
+		UserID: in.GetInfo().GetUserID(),
+	})
+	if err != nil || info == nil {
+		return nil, xerrors.Errorf("fail get app user by app user: %v", err)
+	}
+
+	info.Ctrl = in.GetInfo()
+
+	_, err = grpc2.UpdateCache(ctx, &logingwpb.UpdateCacheRequest{
+		Info: info,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail update cache: %v", err)
+	}
+
+	_, err = grpc2.CreateAppUserControl(ctx, &appusermgrpb.CreateAppUserControlRequest{
+		Info: in.GetInfo(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail update app user control: %v", err)
+	}
+
+	return &npool.CreateAppUserControlResponse{
+		Info: info,
+	}, nil
+}

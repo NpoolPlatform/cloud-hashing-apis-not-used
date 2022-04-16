@@ -1479,6 +1479,46 @@ func CreateAppUserExtra(ctx context.Context, in *appusermgrpb.CreateAppUserExtra
 	return resp.Info, nil
 }
 
+func UpdateAppUserControl(ctx context.Context, in *appusermgrpb.UpdateAppUserControlRequest) (*appusermgrpb.AppUserControl, error) {
+	conn, err := grpc2.GetGRPCConn(appusermgrconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app user manager connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := appusermgrpb.NewAppUserManagerClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	resp, err := cli.UpdateAppUserControl(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail update app user control: %v", err)
+	}
+
+	return resp.Info, nil
+}
+
+func CreateAppUserControl(ctx context.Context, in *appusermgrpb.CreateAppUserControlRequest) (*appusermgrpb.AppUserControl, error) {
+	conn, err := grpc2.GetGRPCConn(appusermgrconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get app user manager connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := appusermgrpb.NewAppUserManagerClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	resp, err := cli.CreateAppUserControl(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail create app user control: %v", err)
+	}
+
+	return resp.Info, nil
+}
+
 func GetAppUserByAppAccount(ctx context.Context, in *appusermgrpb.GetAppUserByAppAccountRequest) (*appusermgrpb.AppUser, error) {
 	conn, err := grpc2.GetGRPCConn(appusermgrconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
