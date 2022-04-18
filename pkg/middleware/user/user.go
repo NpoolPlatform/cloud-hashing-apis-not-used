@@ -3,7 +3,8 @@ package user
 import (
 	"context"
 
-	"github.com/NpoolPlatform/go-service-framework/pkg/dtm"
+	"github.com/NpoolPlatform/cloud-hashing-apis/pkg/dtm"
+	dtmsvc "github.com/NpoolPlatform/go-service-framework/pkg/dtm"
 	"github.com/dtm-labs/dtmgrpc"
 	"github.com/google/uuid"
 
@@ -94,7 +95,7 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 
 	if invitationCode != "" && inviterID != "" {
 		// 获取dtm服务
-		dtmGrpcServer, err := dtm.GetService()
+		dtmGrpcServer, err := dtmsvc.GetService()
 		if err != nil {
 			return nil, err
 		}

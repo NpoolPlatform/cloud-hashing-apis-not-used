@@ -119,8 +119,8 @@ github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220322040527-3fead61c5bfd 
 github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220322040527-3fead61c5bfd/go.mod h1:/kBkUJfpQuBNgU/WNySJMC0P8LzImVluaaa0mCWl3+A=
 github.com/NpoolPlatform/cloud-hashing-staker v0.0.0-20220329122640-65b1ed133b9f h1:ordzXmhpylBsAjHXFmTWhcHyu/k0Nedsg+iRfs1gRpI=
 github.com/NpoolPlatform/cloud-hashing-staker v0.0.0-20220329122640-65b1ed133b9f/go.mod h1:BeKTzhVUpjGDJ+EItHqVcDuSHeop9CIBu2bO6NCTC3w=
-github.com/NpoolPlatform/go-service-framework v0.0.0-20220412092316-7c7126436093 h1:XzdMpNHJKRlni/eNBiiGdv7YFv7pqOvu7OOzufzeU5Y=
-github.com/NpoolPlatform/go-service-framework v0.0.0-20220412092316-7c7126436093/go.mod h1:3cPzIvGxvAqTejL/AS9YODLxCG2ium80Kp40Yk2dLMQ=
+github.com/NpoolPlatform/go-service-framework v0.0.0-20220418085026-9b71419fd8dd h1:hrZNp6snfJ5kKLgSgZNMVkJRrsQcr6wSNpfFtNrG824=
+github.com/NpoolPlatform/go-service-framework v0.0.0-20220418085026-9b71419fd8dd/go.mod h1:r2qV9VfwodjYIanIV3vMOl9QZa+/93wqhHe5Nb4SLJc=
 github.com/NpoolPlatform/kyc-management v0.0.0-20220322081324-f537a7bcd812 h1:eWlJzP0EBU5x3x9kztxdgAdtChFf12Yv5jMDSXErDIc=
 github.com/NpoolPlatform/kyc-management v0.0.0-20220322081324-f537a7bcd812/go.mod h1:Zdf1mQcER/oePPIFUvEUyqAXv02Wv8ONhv7iqEkVmhQ=
 github.com/NpoolPlatform/login-gateway v0.0.0-20220324144125-0675c5904170 h1:PdqFMTLNLbkhwzsl//fBavCNhr43aZS2kzSTthdJp3E=
