@@ -87,3 +87,21 @@ func (s *Server) CreateAppUserExtra(ctx context.Context, in *npool.CreateAppUser
 	}
 	return resp, nil
 }
+
+func (s *Server) UpdateAppUserControl(ctx context.Context, in *npool.UpdateAppUserControlRequest) (*npool.UpdateAppUserControlResponse, error) {
+	resp, err := user.UpdateAppUserControl(ctx, in)
+	if err != nil {
+		logger.Sugar().Errorf("update app user control error: %v", err)
+		return &npool.UpdateAppUserControlResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return resp, nil
+}
+
+func (s *Server) CreateAppUserControl(ctx context.Context, in *npool.CreateAppUserControlRequest) (*npool.CreateAppUserControlResponse, error) {
+	resp, err := user.CreateAppUserControl(ctx, in)
+	if err != nil {
+		logger.Sugar().Errorf("create app user control error: %v", err)
+		return &npool.CreateAppUserControlResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return resp, nil
+}

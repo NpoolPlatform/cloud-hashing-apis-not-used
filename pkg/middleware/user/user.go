@@ -15,6 +15,7 @@ import (
 	appusermgrconst "github.com/NpoolPlatform/appuser-manager/pkg/const"
 	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
+	logingwpb "github.com/NpoolPlatform/message/npool/logingateway"
 	thirdgwpb "github.com/NpoolPlatform/message/npool/thirdgateway"
 	thirdgwconst "github.com/NpoolPlatform/third-gateway/pkg/const"
 
@@ -306,6 +307,13 @@ func UpdateEmailAddress(ctx context.Context, in *npool.UpdateEmailAddressRequest
 		return nil, xerrors.Errorf("fail update app user: %v", err)
 	}
 
+	_, err = grpc2.UpdateCache(ctx, &logingwpb.UpdateCacheRequest{
+		Info: info,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail update cache: %v", err)
+	}
+
 	return &npool.UpdateEmailAddressResponse{
 		Info: info,
 	}, nil
@@ -373,6 +381,13 @@ func UpdatePhoneNO(ctx context.Context, in *npool.UpdatePhoneNORequest) (*npool.
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail update app user: %v", err)
+	}
+
+	_, err = grpc2.UpdateCache(ctx, &logingwpb.UpdateCacheRequest{
+		Info: info,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail update cache: %v", err)
 	}
 
 	return &npool.UpdatePhoneNOResponse{

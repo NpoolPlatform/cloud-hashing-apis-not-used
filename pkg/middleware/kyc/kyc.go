@@ -183,7 +183,7 @@ func UpdateKycReview(ctx context.Context, in *npool.UpdateKycReviewRequest) (*np
 				UserID: kycs[0].GetUserID(),
 			},
 			Message:  in.GetInfo().GetMessage(),
-			LangID:   in.GetLangID(),
+			LangID:   in.GetTargetLangID(),
 			UsedFor:  notificationconstant.UsedForKycReviewApprovedNotification,
 			UserName: user.GetExtra().GetUsername(),
 		})
@@ -199,7 +199,7 @@ func UpdateKycReview(ctx context.Context, in *npool.UpdateKycReviewRequest) (*np
 				UserID: kycs[0].GetUserID(),
 			},
 			Message:  in.GetInfo().GetMessage(),
-			LangID:   in.GetLangID(),
+			LangID:   in.GetTargetLangID(),
 			UsedFor:  notificationconstant.UsedForKycReviewRejectedNotification,
 			UserName: user.GetExtra().GetUsername(),
 		})
