@@ -124,11 +124,11 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 			},
 		}
 
-		createAppUserWithSecret, createAppUserWithSecretRevert, err := dtm.GetGrpcURL(appusermgrsvceconst.ServiceName, "CreateAppUserWithSecret", "CreateAppUserWithSecretRevert")
+		createAppUserWithSecret, createAppUserWithSecretRevert, err := dtm.GetGrpcURL(ctx, appusermgrsvceconst.ServiceName, "CreateAppUserWithSecret", "CreateAppUserWithSecretRevert")
 		if err != nil {
 			return nil, err
 		}
-		createRegistrationInvitation, createRegistrationInvitationRevert, err := dtm.GetGrpcURL(inspiresvcconst.ServiceName, "CreateRegistrationInvitation", "CreateRegistrationInvitationRevert")
+		createRegistrationInvitation, createRegistrationInvitationRevert, err := dtm.GetGrpcURL(ctx, inspiresvcconst.ServiceName, "CreateRegistrationInvitation", "CreateRegistrationInvitationRevert")
 		if err != nil {
 			return nil, err
 		}

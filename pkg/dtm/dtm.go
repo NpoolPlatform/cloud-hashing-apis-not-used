@@ -1,41 +1,48 @@
 package dtm
 
 import (
-	appusermgrconst "github.com/NpoolPlatform/appuser-manager/pkg/message/const"
-	inspireconst "github.com/NpoolPlatform/cloud-hashing-inspire/pkg/message/const"
+	"context"
+
+	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	"github.com/NpoolPlatform/go-service-framework/pkg/dtm"
+	apimgrpb "github.com/NpoolPlatform/message/npool/apimgr"
 )
 
-func GetGrpcURL(serviceName, actionGrpcName, compensateGrpcName string, service ...string) (action, compensate string, err error) {
-	grpcURL, err := SetPackageAndService(serviceName, service...)
+func GetGrpcURL(ctx context.Context, serviceName, actionGrpcName, compensateGrpcName string) (action, compensate string, err error) {
+	methodName := []string{actionGrpcName, compensateGrpcName}
+	grpcURL, err := GetPath(ctx, serviceName, methodName)
 	if err != nil {
 		return "", "", err
 	}
-	actionGrpcURL := grpcURL + "/" + actionGrpcName
-	compensateGrpcURL := grpcURL + "/" + compensateGrpcName
+
+	serviceName, err = dtm.GetService(serviceName)
+	if err != nil {
+		return "", "", err
+	}
+
+	actionPath := ""
+	compensatePath := ""
+	for _, val := range grpcURL {
+		if val.MethodName == actionGrpcName {
+			actionPath = val.Path
+		}
+		if val.MethodName == compensateGrpcName {
+			compensatePath = val.Path
+		}
+	}
+
+	actionGrpcURL := serviceName + "/" + actionPath
+	compensateGrpcURL := serviceName + "/" + compensatePath
 	return actionGrpcURL, compensateGrpcURL, nil
 }
 
-func SetPackageAndService(serviceName string, service ...string) (string, error) {
-	switch serviceName {
-	case appusermgrconst.ServiceName:
-		serviceName, err := dtm.GetService(serviceName)
-		if err != nil {
-			return "", err
-		}
-		if len(service) != 0 {
-			return serviceName + "/app.user.manager.v1." + service[0], nil
-		}
-		return serviceName + "/app.user.manager.v1.AppUserManager", nil
-	case inspireconst.ServiceName:
-		serviceName, err := dtm.GetService(serviceName)
-		if err != nil {
-			return "", err
-		}
-		if len(service) != 0 {
-			return serviceName + "/cloud.hashing.inspire.v1." + service[0], nil
-		}
-		return serviceName + "/cloud.hashing.inspire.v1.CloudHashingInspire", nil
+func GetPath(ctx context.Context, serviceName string, methodName []string) ([]*apimgrpb.ServicePath, error) {
+	grpcApis, err := grpc2.GetAPIByServiceNameMethodName(ctx, &apimgrpb.GetApisByServiceNameMethodNameRequest{
+		ServiceName: serviceName,
+		MethodName:  methodName,
+	})
+	if err != nil {
+		return nil, err
 	}
-	return serviceName, nil
+	return grpcApis.Infos, nil
 }

@@ -122,3 +122,5 @@ require (
 )
 
 replace github.com/NpoolPlatform/go-service-framework => github.com/NpoolPlatform/go-service-framework v0.0.0-20220418085026-9b71419fd8dd
+
+replace github.com/NpoolPlatform/message => github.com/NpoolPlatform/message v0.0.0-20220421113823-47246ba5218b

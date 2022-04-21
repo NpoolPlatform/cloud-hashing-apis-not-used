@@ -42,6 +42,9 @@ import (
 	notificationpb "github.com/NpoolPlatform/message/npool/notification"
 	notificationconst "github.com/NpoolPlatform/notification/pkg/message/const"
 
+	apimgrconst "github.com/NpoolPlatform/api-manager/pkg/message/const"
+	apimgrpb "github.com/NpoolPlatform/message/npool/apimgr"
+
 	"golang.org/x/xerrors"
 )
 
@@ -1892,4 +1895,24 @@ func UpdateCache(ctx context.Context, in *logingwpb.UpdateCacheRequest) (*appuse
 	}
 
 	return resp.Info, nil
+}
+
+func GetAPIByServiceNameMethodName(ctx context.Context, in *apimgrpb.GetApisByServiceNameMethodNameRequest) (*apimgrpb.GetApisByServiceNameMethodNameResponse, error) {
+	conn, err := grpc2.GetGRPCConn(apimgrconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get api manager connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := apimgrpb.NewApiManagerClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	resp, err := cli.GetApisByServiceNameMethodName(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail update cache: %v", err)
+	}
+
+	return resp, nil
 }
