@@ -124,7 +124,7 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 			},
 		}
 
-		createAppUserWithSecret, createAppUserWithSecretRevert, err := dtm.GetGrpcURL(ctx, appusermgrsvceconst.ServiceName, "CreateAppUserWithSecret", "CreateAppUserWithSecretRevert")
+		createAppUser, createAppUserRevert, err := dtm.GetGrpcURL(ctx, appusermgrsvceconst.ServiceName, "CreateAppUserWithSecret", "CreateAppUserWithSecretRevert")
 		if err != nil {
 			return nil, err
 		}
@@ -134,7 +134,7 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 		}
 
 		saga := dtmgrpc.NewSagaGrpc(dtmGrpcServer, gid).
-			Add(createAppUserWithSecret, createAppUserWithSecretRevert, createAppUserWithSecretRequest).
+			Add(createAppUser, createAppUserRevert, createAppUserWithSecretRequest).
 			Add(createRegistrationInvitation, createRegistrationInvitationRevert, createRegistrationInvitationRequest)
 		saga.WaitResult = true
 		err = saga.Submit()
