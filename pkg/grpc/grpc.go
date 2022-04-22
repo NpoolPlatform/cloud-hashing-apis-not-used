@@ -1897,7 +1897,7 @@ func UpdateCache(ctx context.Context, in *logingwpb.UpdateCacheRequest) (*appuse
 	return resp.Info, nil
 }
 
-func GetAPIByServiceNameMethodName(ctx context.Context, in *apimgrpb.GetApisByServiceMethodRequest) (*apimgrpb.GetApisByServiceMethodResponse, error) {
+func GetAPIByServiceMethod(ctx context.Context, in *apimgrpb.GetApisByServiceMethodRequest) (*apimgrpb.GetApisByServiceMethodResponse, error) {
 	conn, err := grpc2.GetGRPCConn(apimgrconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get api manager connection: %v", err)
