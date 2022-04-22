@@ -37,7 +37,7 @@ func GetGrpcURL(ctx context.Context, serviceName, actionGrpcName, compensateGrpc
 }
 
 func GetPath(ctx context.Context, serviceName string, methodName []string) ([]*apimgrpb.ServicePath, error) {
-	grpcApis, err := grpc2.GetAPIByServiceNameMethodName(ctx, &apimgrpb.GetApisByServiceNameMethodNameRequest{
+	grpcApis, err := grpc2.GetAPIByServiceNameMethodName(ctx, &apimgrpb.GetApisByServiceMethodRequest{
 		ServiceName: serviceName,
 		MethodName:  methodName,
 	})

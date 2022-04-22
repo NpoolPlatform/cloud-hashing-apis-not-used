@@ -120,8 +120,8 @@ github.com/NpoolPlatform/kyc-management v0.0.0-20220322081324-f537a7bcd812 h1:eW
 github.com/NpoolPlatform/kyc-management v0.0.0-20220322081324-f537a7bcd812/go.mod h1:Zdf1mQcER/oePPIFUvEUyqAXv02Wv8ONhv7iqEkVmhQ=
 github.com/NpoolPlatform/login-gateway v0.0.0-20220324144125-0675c5904170 h1:PdqFMTLNLbkhwzsl//fBavCNhr43aZS2kzSTthdJp3E=
 github.com/NpoolPlatform/login-gateway v0.0.0-20220324144125-0675c5904170/go.mod h1:cPVoVjxG3ToJMCF8NJtj6o2J/0wfry2BbuY/vCpMHTY=
-github.com/NpoolPlatform/message v0.0.0-20220421113823-47246ba5218b h1:bxXkK5zhY+pDmK5qD5XaopOye7qo+FkNOb+MGEIZHek=
-github.com/NpoolPlatform/message v0.0.0-20220421113823-47246ba5218b/go.mod h1:Yd0rqn057j1pXgPH/xwDCWHB1b1sIPzzSvGHeBMjA9I=
+github.com/NpoolPlatform/message v0.0.0-20220422054207-7008de90f113 h1:xEP08jflb4NvTlrYMkSFTKVDuAnBpIK/hHfJduZLsAA=
+github.com/NpoolPlatform/message v0.0.0-20220422054207-7008de90f113/go.mod h1:Yd0rqn057j1pXgPH/xwDCWHB1b1sIPzzSvGHeBMjA9I=
 github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da h1:qZX3tw6TEsxaWyY/ZEeEtI6zSZzoYoCiqmDdt6DhxfA=
 github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da/go.mod h1:ieZ2gIh/zSlJ2hIr/fIuMvi5QMGRY0rXugKiBc+5ZKI=
 github.com/NpoolPlatform/review-service v0.0.0-20220322082433-0c2b7ee284ed h1:UkFZGrABgBvQ9qhCXKRJFpZQFxBL+LGugu6iYES/g8I=
