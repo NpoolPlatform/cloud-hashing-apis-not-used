@@ -3,6 +3,11 @@ package user
 import (
 	"context"
 
+	"github.com/NpoolPlatform/cloud-hashing-apis/pkg/dtm"
+	dtmsvc "github.com/NpoolPlatform/go-service-framework/pkg/dtm"
+	"github.com/dtm-labs/dtmgrpc"
+	"github.com/google/uuid"
+
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	verifymw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/verify"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
@@ -14,6 +19,8 @@ import (
 	thirdgwpb "github.com/NpoolPlatform/message/npool/thirdgateway"
 	thirdgwconst "github.com/NpoolPlatform/third-gateway/pkg/const"
 
+	appusermgrsvceconst "github.com/NpoolPlatform/appuser-manager/pkg/message/const" //nolint
+	inspiresvcconst "github.com/NpoolPlatform/cloud-hashing-inspire/pkg/message/const"
 	"golang.org/x/xerrors"
 )
 
@@ -85,34 +92,80 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 		emailAddress = in.GetAccount()
 	}
 
-	appUser, err = grpc2.Signup(ctx, &appusermgrpb.CreateAppUserWithSecretRequest{
-		User: &appusermgrpb.AppUser{
-			AppID:        in.GetAppID(),
-			EmailAddress: emailAddress,
-			PhoneNO:      phoneNO,
-		},
-		Secret: &appusermgrpb.AppUserSecret{
-			AppID:        in.GetAppID(),
-			PasswordHash: in.GetPasswordHash(),
-		},
-	})
-	if err != nil || appUser == nil {
-		return nil, xerrors.Errorf("fail signup: %v", err)
-	}
+	userID := uuid.New().String()
 
 	if invitationCode != "" && inviterID != "" {
-		_, err = grpc2.CreateRegistrationInvitation(ctx, &inspirepb.CreateRegistrationInvitationRequest{
+		dtmGrpcServer, err := dtmsvc.GetService()
+		if err != nil {
+			return nil, err
+		}
+
+		gid := dtmgrpc.MustGenGid(dtmGrpcServer)
+
+		createAppUserWithSecretRequest := &appusermgrpb.CreateAppUserWithSecretRequest{
+			User: &appusermgrpb.AppUser{
+				ID:           userID,
+				AppID:        in.GetAppID(),
+				EmailAddress: emailAddress,
+				PhoneNO:      phoneNO,
+			},
+			Secret: &appusermgrpb.AppUserSecret{
+				UserID:       userID,
+				AppID:        in.GetAppID(),
+				PasswordHash: in.GetPasswordHash(),
+			},
+		}
+
+		createRegistrationInvitationRequest := &inspirepb.CreateRegistrationInvitationRequest{
 			Info: &inspirepb.RegistrationInvitation{
 				AppID:     in.GetAppID(),
 				InviterID: inviterID,
-				InviteeID: appUser.ID,
+				InviteeID: userID,
 			},
+		}
+
+		createAppUserWithSecret, createAppUserWithSecretRevert, err := dtm.GetGrpcURL(ctx, appusermgrsvceconst.ServiceName, "CreateAppUserWithSecret", "CreateAppUserWithSecretRevert")
+		if err != nil {
+			return nil, err
+		}
+		createRegistrationInvitation, createRegistrationInvitationRevert, err := dtm.GetGrpcURL(ctx, inspiresvcconst.ServiceName, "CreateRegistrationInvitation", "CreateRegistrationInvitationRevert")
+		if err != nil {
+			return nil, err
+		}
+
+		saga := dtmgrpc.NewSagaGrpc(dtmGrpcServer, gid).
+			Add(createAppUserWithSecret, createAppUserWithSecretRevert, createAppUserWithSecretRequest).
+			Add(createRegistrationInvitation, createRegistrationInvitationRevert, createRegistrationInvitationRequest)
+		saga.WaitResult = true
+		saga.TimeoutToFail = 3
+		err = saga.Submit()
+		if err != nil {
+			return nil, err
+		}
+
+		appUser, err = grpc2.GetAppUserByAppUser(ctx, &appusermgrpb.GetAppUserByAppUserRequest{
+			AppID:  in.GetAppID(),
+			UserID: userID,
 		})
 		if err != nil {
 			return nil, xerrors.Errorf("fail create registration invitation: %v", err)
 		}
+	} else {
+		appUser, err = grpc2.Signup(ctx, &appusermgrpb.CreateAppUserWithSecretRequest{
+			User: &appusermgrpb.AppUser{
+				AppID:        in.GetAppID(),
+				EmailAddress: emailAddress,
+				PhoneNO:      phoneNO,
+			},
+			Secret: &appusermgrpb.AppUserSecret{
+				AppID:        in.GetAppID(),
+				PasswordHash: in.GetPasswordHash(),
+			},
+		})
+		if err != nil || appUser == nil {
+			return nil, xerrors.Errorf("fail signup: %v", err)
+		}
 	}
-
 	return &npool.SignupResponse{
 		Info: appUser,
 	}, nil
