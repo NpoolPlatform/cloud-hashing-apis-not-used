@@ -137,6 +137,7 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 			Add(createAppUserWithSecret, createAppUserWithSecretRevert, createAppUserWithSecretRequest).
 			Add(createRegistrationInvitation, createRegistrationInvitationRevert, createRegistrationInvitationRequest)
 		saga.WaitResult = true
+		saga.TimeoutToFail = 3
 		err = saga.Submit()
 		if err != nil {
 			return nil, err
