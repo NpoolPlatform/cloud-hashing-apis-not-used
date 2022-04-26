@@ -44,5 +44,5 @@ func GetPath(ctx context.Context, serviceName string, methodName []string) ([]*a
 	if err != nil {
 		return nil, err
 	}
-	return grpcApis.Infos, nil
+	return grpcApis, nil
 }
