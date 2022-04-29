@@ -16,7 +16,7 @@ import (
 func (s *Server) CreateKyc(ctx context.Context, in *npool.CreateKycRequest) (*npool.CreateKycResponse, error) {
 	resp, err := mw.Create(ctx, in)
 	if err != nil {
-		logger.Sugar().Errorf("create kyc error: %w", err)
+		logger.Sugar().Errorf("create kyc error: %v", err)
 		return &npool.CreateKycResponse{}, status.Error(codes.Internal, err.Error())
 	}
 	return resp, nil
@@ -25,7 +25,7 @@ func (s *Server) CreateKyc(ctx context.Context, in *npool.CreateKycRequest) (*np
 func (s *Server) UpdateKyc(ctx context.Context, in *npool.UpdateKycRequest) (*npool.UpdateKycResponse, error) {
 	resp, err := mw.Update(ctx, in)
 	if err != nil {
-		logger.Sugar().Errorf("update kyc error: %w", err)
+		logger.Sugar().Errorf("update kyc error: %v", err)
 		return &npool.UpdateKycResponse{}, status.Error(codes.Internal, err.Error())
 	}
 	return resp, nil
@@ -34,7 +34,7 @@ func (s *Server) UpdateKyc(ctx context.Context, in *npool.UpdateKycRequest) (*np
 func (s *Server) GetKycByAppUser(ctx context.Context, in *npool.GetKycByAppUserRequest) (*npool.GetKycByAppUserResponse, error) {
 	resp, err := mw.GetByAppUser(ctx, in)
 	if err != nil {
-		logger.Sugar().Errorf("get kyc error: %w", err)
+		logger.Sugar().Errorf("get kyc error: %v", err)
 		return &npool.GetKycByAppUserResponse{}, status.Error(codes.Internal, err.Error())
 	}
 	return resp, nil
@@ -43,7 +43,7 @@ func (s *Server) GetKycByAppUser(ctx context.Context, in *npool.GetKycByAppUserR
 func (s *Server) UpdateKycReview(ctx context.Context, in *npool.UpdateKycReviewRequest) (*npool.UpdateKycReviewResponse, error) {
 	resp, err := mw.UpdateKycReview(ctx, in)
 	if err != nil {
-		logger.Sugar().Errorf("update kyc review error: %w", err)
+		logger.Sugar().Errorf("update kyc review error: %v", err)
 		return &npool.UpdateKycReviewResponse{}, status.Error(codes.Internal, err.Error())
 	}
 	return resp, nil
