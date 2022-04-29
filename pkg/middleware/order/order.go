@@ -78,8 +78,12 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 			CouponType: orderconst.FixAmountCoupon,
 			CouponID:   info.Order.CouponID,
 		})
-		if err != nil || order != nil {
+		if err != nil {
 			return nil, xerrors.Errorf("fail check coupon usage: %v", err)
+		}
+
+		if order != nil && order.ID != info.Order.ID {
+			return nil, xerrors.Errorf("fail check coupon usage")
 		}
 
 		couponAllocated, err := grpc2.GetCouponAllocated(ctx, &inspirepb.GetCouponAllocatedDetailRequest{
@@ -137,8 +141,12 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 			CouponType: orderconst.DiscountCoupon,
 			CouponID:   info.Order.DiscountCouponID,
 		})
-		if err != nil || order != nil {
+		if err != nil {
 			return nil, xerrors.Errorf("fail check coupon usage: %v", err)
+		}
+
+		if order != nil && order.ID != info.Order.ID {
+			return nil, xerrors.Errorf("fail check coupon usage")
 		}
 
 		discount, err := grpc2.GetCouponAllocated(ctx, &inspirepb.GetCouponAllocatedDetailRequest{
@@ -165,8 +173,12 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 			CouponType: orderconst.UserSpecialReductionCoupon,
 			CouponID:   info.Order.UserSpecialReductionID,
 		})
-		if err != nil || order != nil {
+		if err != nil {
 			return nil, xerrors.Errorf("fail check coupon usage: %v", err)
+		}
+
+		if order != nil && order.ID != info.Order.ID {
+			return nil, xerrors.Errorf("fail check coupon usage")
 		}
 
 		userSpecial, err := grpc2.GetUserSpecialReduction(ctx, &inspirepb.GetUserSpecialReductionRequest{
