@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
-	redis2 "github.com/NpoolPlatform/go-service-framework/pkg/redis"
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	cache "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/cache"
@@ -25,6 +24,12 @@ import (
 
 	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
 	accountlock "github.com/NpoolPlatform/cloud-hashing-staker/pkg/middleware/account"
+
+	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
+	"google.golang.org/protobuf/types/known/structpb"
+
+	stockcli "github.com/NpoolPlatform/stock-manager/pkg/client"
+	stockconst "github.com/NpoolPlatform/stock-manager/pkg/const"
 
 	"github.com/google/uuid"
 
@@ -406,41 +411,33 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 		return nil, xerrors.Errorf("fail get order good info: %v", err)
 	}
 
-	if in.GetUnits() > uint32(goodInfo.Info.Good.Good.Total) {
-		return nil, xerrors.Errorf("invalid units")
-	}
-
 	// Validate app id: done by gateway
 	// Validate user id: done by gateway
 	// Validate coupon id: done in expandOrder
 	// TODO: Validate fee ids
 
-	lockKey := fmt.Sprintf("submit-order:%v", in.GetGoodID())
-	err = redis2.TryLock(lockKey, 0)
-	if err != nil {
-		return nil, xerrors.Errorf("fail lock good: %v", err)
+	stock, err := stockcli.GetStockOnly(ctx, cruder.NewFilterConds().
+		WithCond(stockconst.StockFieldGoodID, cruder.EQ, structpb.NewStringValue(in.GetGoodID())))
+	if err != nil || stock == nil {
+		return nil, xerrors.Errorf("fail get good stock: %v", err)
 	}
+
+	stock, err = stockcli.AddStockFields(ctx, stock.ID, cruder.NewFilterFields().
+		WithField(stockconst.StockFieldLocked, structpb.NewNumberValue(float64(in.GetUnits()))))
+	if err != nil {
+		return nil, xerrors.Errorf("fail add locked stock: %v", err)
+	}
+
 	defer func() {
-		err := redis2.Unlock(lockKey)
 		if err != nil {
-			logger.Sugar().Errorf("fail unlock good: %v", err)
+			logger.Sugar().Errorf("try revert locked stock: %v", err)
+			_, err = stockcli.SubStockFields(ctx, stock.ID, cruder.NewFilterFields().
+				WithField(stockconst.StockFieldLocked, structpb.NewNumberValue(float64(in.GetUnits()))))
+			if err != nil {
+				logger.Sugar().Errorf("fail sub locked stock: %v", err)
+			}
 		}
 	}()
-
-	sold, err := grpc2.GetSoldByGood(ctx, &orderpb.GetSoldByGoodRequest{
-		GoodID:       in.GetGoodID(),
-		DurationDays: uint32(goodInfo.Info.Good.Good.DurationDays),
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail get good sold: %v", err)
-	}
-
-	if sold >= uint32(goodInfo.Info.Good.Good.Total) {
-		return nil, xerrors.Errorf("good sold out")
-	}
-	if in.GetUnits() > uint32(goodInfo.Info.Good.Good.Total)-sold {
-		return nil, xerrors.Errorf("good units not enough")
-	}
 
 	start := (uint32(time.Now().Unix()) + secondsInDay) / secondsInDay * secondsInDay
 	if start < goodInfo.Info.Good.Good.StartAt {

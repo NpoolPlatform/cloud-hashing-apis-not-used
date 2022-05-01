@@ -413,26 +413,6 @@ func GetOrdersDetailByGood(ctx context.Context, in *orderpb.GetOrdersDetailByGoo
 	return resp.Infos, nil
 }
 
-func GetSoldByGood(ctx context.Context, in *orderpb.GetSoldByGoodRequest) (uint32, error) {
-	conn, err := grpc2.GetGRPCConn(orderconst.ServiceName, grpc2.GRPCTAG)
-	if err != nil {
-		return 0, xerrors.Errorf("fail get order connection: %v", err)
-	}
-	defer conn.Close()
-
-	cli := orderpb.NewCloudHashingOrderClient(conn)
-
-	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
-	defer cancel()
-
-	resp, err := cli.GetSoldByGood(ctx, in)
-	if err != nil {
-		return 0, xerrors.Errorf("fail get sold: %v", err)
-	}
-
-	return resp.Sold, nil
-}
-
 func CreateOrder(ctx context.Context, in *orderpb.CreateOrderRequest) (*orderpb.Order, error) {
 	conn, err := grpc2.GetGRPCConn(orderconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
