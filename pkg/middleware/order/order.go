@@ -431,8 +431,8 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 	defer func() {
 		if err != nil {
 			logger.Sugar().Errorf("try revert locked stock: %v", err)
-			_, err = stockcli.SubStockFields(ctx, stock.ID, cruder.NewFilterFields().
-				WithField(stockconst.StockFieldLocked, structpb.NewNumberValue(float64(in.GetUnits()))))
+			_, err = stockcli.AddStockFields(ctx, stock.ID, cruder.NewFilterFields().
+				WithField(stockconst.StockFieldLocked, structpb.NewNumberValue(float64(int32(in.GetUnits())*-1))))
 			if err != nil {
 				logger.Sugar().Errorf("fail sub locked stock: %v", err)
 			}
