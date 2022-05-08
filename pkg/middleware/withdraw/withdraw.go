@@ -667,7 +667,7 @@ func UpdateWithdrawReview(ctx context.Context, in *npool.UpdateWithdrawReviewReq
 		return nil, err
 	}
 
-	if reviewInfo.GetState() == reviewconst.StateApproved {
+	if reviewInfo.GetState() == reviewconst.StateApproved && false {
 		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
 			Info: &notificationpbpb.UserNotification{
 				AppID:  reviewInfo.GetAppID(),
@@ -683,7 +683,7 @@ func UpdateWithdrawReview(ctx context.Context, in *npool.UpdateWithdrawReviewReq
 		}
 	}
 
-	if reviewInfo.GetState() == reviewconst.StateRejected {
+	if reviewInfo.GetState() == reviewconst.StateRejected && false {
 		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
 			Info: &notificationpbpb.UserNotification{
 				AppID:  reviewInfo.GetAppID(),

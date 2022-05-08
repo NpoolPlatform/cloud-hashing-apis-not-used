@@ -176,7 +176,7 @@ func UpdateKycReview(ctx context.Context, in *npool.UpdateKycReviewRequest) (*np
 	if err != nil {
 		return nil, err
 	}
-	if reviewInfo.GetState() == reviewconst.StateApproved {
+	if reviewInfo.GetState() == reviewconst.StateApproved && false {
 		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
 			Info: &notificationpbpb.UserNotification{
 				AppID:  reviewInfo.GetAppID(),
@@ -192,7 +192,7 @@ func UpdateKycReview(ctx context.Context, in *npool.UpdateKycReviewRequest) (*np
 		}
 	}
 
-	if reviewInfo.GetState() == reviewconst.StateRejected {
+	if reviewInfo.GetState() == reviewconst.StateRejected && false {
 		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
 			Info: &notificationpbpb.UserNotification{
 				AppID:  reviewInfo.GetAppID(),
