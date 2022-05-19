@@ -10,16 +10,16 @@ require (
 	github.com/NpoolPlatform/cloud-hashing-goods v0.0.0-20220501102606-7252485fb495
 	github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220323081920-a13fe422e1e9
 	github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220430143734-fed41a4f6bd6
-	github.com/NpoolPlatform/cloud-hashing-staker v0.0.0-20220426080034-b9fe0a369eab
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20220404143809-82c40930388a
 	github.com/NpoolPlatform/kyc-management v0.0.0-20220322081324-f537a7bcd812
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20220501112906-1fd771ed0198
 	github.com/NpoolPlatform/login-gateway v0.0.0-20220324144125-0675c5904170
-	github.com/NpoolPlatform/message v0.0.0-20220501143407-c230f4ca021b
+	github.com/NpoolPlatform/message v0.0.0-20220502074121-c68de0d46f6b
 	github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da
 	github.com/NpoolPlatform/review-service v0.0.0-20220322082433-0c2b7ee284ed
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20220322095158-52237287c832
 	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20220323034620-cea972617ed5
+	github.com/NpoolPlatform/staker-manager v0.0.0-20220519040120-c5d8285cb8d7
 	github.com/NpoolPlatform/stock-manager v0.0.0-20220501144918-883eece82647
 	github.com/NpoolPlatform/third-gateway v0.0.0-20220322080604-a656d7cba609
 	github.com/go-resty/resty/v2 v2.7.0
