@@ -19,7 +19,7 @@ require (
 	github.com/NpoolPlatform/review-service v0.0.0-20220322082433-0c2b7ee284ed
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20220322095158-52237287c832
 	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20220323034620-cea972617ed5
-	github.com/NpoolPlatform/staker-manager v0.0.0-20220519040120-c5d8285cb8d7
+	github.com/NpoolPlatform/staker-manager v0.0.0-20220520092816-6538f12e5f79
 	github.com/NpoolPlatform/stock-manager v0.0.0-20220501144918-883eece82647
 	github.com/NpoolPlatform/third-gateway v0.0.0-20220322080604-a656d7cba609
 	github.com/go-resty/resty/v2 v2.7.0

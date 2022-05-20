@@ -171,8 +171,8 @@ github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20220322095158-52237287c832/go.m
 github.com/NpoolPlatform/sphinx-proxy v0.0.0-20211209140052-de1778e36e36/go.mod h1:VwKb8MFR8zJ7sULoVan/YRluZFDds2uJpinP4kQv9tY=
 github.com/NpoolPlatform/sphinx-proxy v0.0.0-20220323034620-cea972617ed5 h1:36ZDnM1zl1eTEmalXT1+B7h1uCw0BRTzvYtRojaeph0=
 github.com/NpoolPlatform/sphinx-proxy v0.0.0-20220323034620-cea972617ed5/go.mod h1:UTfOE+NvjST00NFi625AMlByqHAMGkKs/RN1RiN2SyE=
-github.com/NpoolPlatform/staker-manager v0.0.0-20220519040120-c5d8285cb8d7 h1:0JZoHCEGBsvg5tsPLz+M3TeeZg8C9bHvoqfASpXi5A4=
-github.com/NpoolPlatform/staker-manager v0.0.0-20220519040120-c5d8285cb8d7/go.mod h1:OEQjlH9xgCaPHBFdph6JUhCwDO781ZrwEu0N0yNUpUs=
+github.com/NpoolPlatform/staker-manager v0.0.0-20220520092816-6538f12e5f79 h1:ObvI3tzfwwVDmW5aOiBLBz9UEEKqvFHHpx9x8tee+5w=
+github.com/NpoolPlatform/staker-manager v0.0.0-20220520092816-6538f12e5f79/go.mod h1:OEQjlH9xgCaPHBFdph6JUhCwDO781ZrwEu0N0yNUpUs=
 github.com/NpoolPlatform/stock-manager v0.0.0-20220501144918-883eece82647 h1:erFhrIDGmIbRlIG38/2zokITwCTzyN+N6zN++IKSDD4=
 github.com/NpoolPlatform/stock-manager v0.0.0-20220501144918-883eece82647/go.mod h1:S1yJ9ElTOv0gJspG2IptpcEWzfuP+rrhBFnPlpWaDJ0=
 github.com/NpoolPlatform/third-gateway v0.0.0-20220205094704-a585d53bd025/go.mod h1:NZxtQVYHNvgKZp0NAegcDOMNDSjJGQ18gvmOP1hZrH4=
