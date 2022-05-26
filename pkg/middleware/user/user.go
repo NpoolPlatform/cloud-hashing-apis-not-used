@@ -3,9 +3,7 @@ package user
 import (
 	"context"
 
-	"github.com/NpoolPlatform/cloud-hashing-apis/pkg/dtm"
-	dtmsvc "github.com/NpoolPlatform/go-service-framework/pkg/dtm"
-	"github.com/dtm-labs/dtmgrpc"
+	"github.com/NpoolPlatform/dtm-cluster/pkg/dtm"
 	"github.com/google/uuid"
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
@@ -95,60 +93,20 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 	userID := uuid.New().String()
 
 	if invitationCode != "" && inviterID != "" {
-		dtmGrpcServer, err := dtmsvc.GetService()
-		if err != nil {
-			return nil, err
-		}
-
-		gid := dtmgrpc.MustGenGid(dtmGrpcServer)
-
-		createAppUserWithSecretRequest := &appusermgrpb.CreateAppUserWithSecretRequest{
-			User: &appusermgrpb.AppUser{
-				ID:           userID,
-				AppID:        in.GetAppID(),
-				EmailAddress: emailAddress,
-				PhoneNO:      phoneNO,
-			},
-			Secret: &appusermgrpb.AppUserSecret{
-				UserID:       userID,
-				AppID:        in.GetAppID(),
-				PasswordHash: in.GetPasswordHash(),
-			},
-		}
-
-		createRegistrationInvitationRequest := &inspirepb.CreateRegistrationInvitationRequest{
-			Info: &inspirepb.RegistrationInvitation{
-				AppID:     in.GetAppID(),
-				InviterID: inviterID,
-				InviteeID: userID,
-			},
-		}
-
-		createAppUserWithSecret, createAppUserWithSecretRevert, err := dtm.GetGrpcURL(ctx, appusermgrsvceconst.ServiceName, "CreateAppUserWithSecret", "CreateAppUserWithSecretRevert")
-		if err != nil {
-			return nil, err
-		}
-		createRegistrationInvitation, createRegistrationInvitationRevert, err := dtm.GetGrpcURL(ctx, inspiresvcconst.ServiceName, "CreateRegistrationInvitation", "CreateRegistrationInvitationRevert")
-		if err != nil {
-			return nil, err
-		}
-
-		saga := dtmgrpc.NewSagaGrpc(dtmGrpcServer, gid).
-			Add(createAppUserWithSecret, createAppUserWithSecretRevert, createAppUserWithSecretRequest).
-			Add(createRegistrationInvitation, createRegistrationInvitationRevert, createRegistrationInvitationRequest)
-		saga.WaitResult = true
-		saga.TimeoutToFail = 3
-		err = saga.Submit()
-		if err != nil {
-			return nil, err
-		}
-
-		appUser, err = grpc2.GetAppUserByAppUser(ctx, &appusermgrpb.GetAppUserByAppUserRequest{
-			AppID:  in.GetAppID(),
-			UserID: userID,
+		actions := []*dtm.Action{}
+		err = dtm.WithDTM(ctx, actions, nil, func(ctx context.Context) error {
+			appUser, err = grpc2.GetAppUserByAppUser(ctx, &appusermgrpb.GetAppUserByAppUserRequest{
+				AppID:  in.GetAppID(),
+				UserID: userID,
+			})
+			if err != nil {
+				return xerrors.Errorf("fail create registration invitation: %v", err)
+			}
+			return nil
 		})
+
 		if err != nil {
-			return nil, xerrors.Errorf("fail create registration invitation: %v", err)
+			return nil, xerrors.Errorf("fail dtm: %v", err)
 		}
 	} else {
 		appUser, err = grpc2.Signup(ctx, &appusermgrpb.CreateAppUserWithSecretRequest{
@@ -166,6 +124,7 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 			return nil, xerrors.Errorf("fail signup: %v", err)
 		}
 	}
+
 	return &npool.SignupResponse{
 		Info: appUser,
 	}, nil

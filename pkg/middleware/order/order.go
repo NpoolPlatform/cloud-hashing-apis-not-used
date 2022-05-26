@@ -13,8 +13,8 @@ import (
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	cache "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/cache"
 	gooddetail "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/good"
-	currency "github.com/NpoolPlatform/cloud-hashing-staker/pkg/middleware/currency"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
+	currency "github.com/NpoolPlatform/staker-manager/pkg/middleware/currency"
 
 	billingpb "github.com/NpoolPlatform/message/npool/cloud-hashing-billing"
 	goodspb "github.com/NpoolPlatform/message/npool/cloud-hashing-goods"
@@ -24,7 +24,7 @@ import (
 	sphinxproxypb "github.com/NpoolPlatform/message/npool/sphinxproxy"
 
 	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
-	accountlock "github.com/NpoolPlatform/cloud-hashing-staker/pkg/middleware/account"
+	accountlock "github.com/NpoolPlatform/staker-manager/pkg/middleware/account"
 
 	"github.com/google/uuid"
 

@@ -17,9 +17,9 @@ import (
 	verifymw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/verify"
 
 	review "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/review"
-	currency "github.com/NpoolPlatform/cloud-hashing-staker/pkg/middleware/currency"
 	redis2 "github.com/NpoolPlatform/go-service-framework/pkg/redis"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
+	currency "github.com/NpoolPlatform/staker-manager/pkg/middleware/currency"
 
 	billingstate "github.com/NpoolPlatform/cloud-hashing-billing/pkg/const"
 	billingconst "github.com/NpoolPlatform/cloud-hashing-billing/pkg/message/const"
