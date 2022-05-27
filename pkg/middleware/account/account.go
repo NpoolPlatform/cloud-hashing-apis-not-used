@@ -2,6 +2,7 @@ package account
 
 import (
 	"context"
+	"fmt"
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
@@ -9,8 +10,6 @@ import (
 	billingpb "github.com/NpoolPlatform/message/npool/cloud-hashing-billing"
 	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
 	sphinxproxypb "github.com/NpoolPlatform/message/npool/sphinxproxy"
-
-	"golang.org/x/xerrors"
 )
 
 func CreatePlatformCoinAccount(ctx context.Context, in *npool.CreatePlatformCoinAccountRequest) (*npool.CreatePlatformCoinAccountResponse, error) {
@@ -18,17 +17,17 @@ func CreatePlatformCoinAccount(ctx context.Context, in *npool.CreatePlatformCoin
 		ID: in.GetCoinTypeID(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("invalid coin info id: %v", err)
+		return nil, fmt.Errorf("invalid coin info id: %v", err)
 	}
 	if coinInfo == nil {
-		return nil, xerrors.Errorf("invalid coin info id")
+		return nil, fmt.Errorf("invalid coin info id")
 	}
 
 	address, err := grpc2.CreateCoinAddress(ctx, &sphinxproxypb.CreateWalletRequest{
 		Name: coinInfo.Name,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail create wallet address: %v", err)
+		return nil, fmt.Errorf("fail create wallet address: %v", err)
 	}
 
 	account, err := grpc2.CreateBillingAccount(ctx, &billingpb.CreateCoinAccountRequest{
@@ -39,7 +38,7 @@ func CreatePlatformCoinAccount(ctx context.Context, in *npool.CreatePlatformCoin
 		},
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail create billing account: %v", err)
+		return nil, fmt.Errorf("fail create billing account: %v", err)
 	}
 
 	return &npool.CreatePlatformCoinAccountResponse{
@@ -52,10 +51,10 @@ func CreateUserCoinAccount(ctx context.Context, in *npool.CreateUserCoinAccountR
 		ID: in.GetInfo().GetCoinTypeID(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("invalid coin info id: %v", err)
+		return nil, fmt.Errorf("invalid coin info id: %v", err)
 	}
 	if coinInfo == nil {
-		return nil, xerrors.Errorf("invalid coin info id")
+		return nil, fmt.Errorf("invalid coin info id")
 	}
 
 	_, err = grpc2.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
@@ -63,7 +62,7 @@ func CreateUserCoinAccount(ctx context.Context, in *npool.CreateUserCoinAccountR
 		Address: in.GetInfo().GetAddress(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get wallet balance: %v", err)
+		return nil, fmt.Errorf("fail get wallet balance: %v", err)
 	}
 
 	info := in.GetInfo()
@@ -73,7 +72,7 @@ func CreateUserCoinAccount(ctx context.Context, in *npool.CreateUserCoinAccountR
 		Info: info,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail create billing account: %v", err)
+		return nil, fmt.Errorf("fail create billing account: %v", err)
 	}
 
 	return &npool.CreateUserCoinAccountResponse{

@@ -2,6 +2,7 @@ package review
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
@@ -16,8 +17,6 @@ import (
 	kycmgrpb "github.com/NpoolPlatform/message/npool/kyc"
 	reviewpb "github.com/NpoolPlatform/message/npool/review-service"
 	reviewconst "github.com/NpoolPlatform/review-service/pkg/const"
-
-	"golang.org/x/xerrors"
 )
 
 func GetKycReviews(ctx context.Context, in *npool.GetKycReviewsRequest) (*npool.GetKycReviewsResponse, error) {
@@ -26,7 +25,7 @@ func GetKycReviews(ctx context.Context, in *npool.GetKycReviewsRequest) (*npool.
 		Domain: kycconst.ServiceName,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get kyc reviews: %v", err)
+		return nil, fmt.Errorf("fail get kyc reviews: %v", err)
 	}
 	// TODO: Expand reviewer
 
@@ -38,7 +37,7 @@ func GetKycReviews(ctx context.Context, in *npool.GetKycReviewsRequest) (*npool.
 			},
 		})
 		if err != nil {
-			return nil, xerrors.Errorf("fail get kyc info for %v: %v", info.ID, err)
+			return nil, fmt.Errorf("fail get kyc info for %v: %v", info.ID, err)
 		}
 		if len(kycs) == 0 {
 			logger.Sugar().Warnf("empty kyc info for %v", info.ObjectID)
@@ -71,7 +70,7 @@ func GetGoodReviews(ctx context.Context, in *npool.GetGoodReviewsRequest) (*npoo
 		Domain: goodsconst.ServiceName,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get good reviews: %v", err)
+		return nil, fmt.Errorf("fail get good reviews: %v", err)
 	}
 	// TODO: Expand reviewer
 	// TODO: Expand good
@@ -94,7 +93,7 @@ func GetWithdrawReviews(ctx context.Context, in *npool.GetWithdrawReviewsRequest
 		Domain: billingconst.ServiceName,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get withdraw reviews: %v", err)
+		return nil, fmt.Errorf("fail get withdraw reviews: %v", err)
 	}
 
 	reviews := []*npool.WithdrawReview{}
@@ -103,7 +102,7 @@ func GetWithdrawReviews(ctx context.Context, in *npool.GetWithdrawReviewsRequest
 			ID: info.ObjectID,
 		})
 		if err != nil {
-			return nil, xerrors.Errorf("fail get user withdraw info for %v: %v", info.ID, err)
+			return nil, fmt.Errorf("fail get user withdraw info for %v: %v", info.ID, err)
 		}
 		if item == nil {
 			logger.Sugar().Warnf("fail get user withdraw info for %v", info.ObjectID)
@@ -137,7 +136,7 @@ func GetWithdrawAddressReviews(ctx context.Context, in *npool.GetWithdrawAddress
 		Domain: billingconst.ServiceName,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get withdraw reviews: %v", err)
+		return nil, fmt.Errorf("fail get withdraw reviews: %v", err)
 	}
 
 	reviews := []*npool.WithdrawAddressReview{}
@@ -146,7 +145,7 @@ func GetWithdrawAddressReviews(ctx context.Context, in *npool.GetWithdrawAddress
 			ID: info.ObjectID,
 		})
 		if err != nil {
-			return nil, xerrors.Errorf("fail get user withdraw info for %v: %v", info.ID, err)
+			return nil, fmt.Errorf("fail get user withdraw info for %v: %v", info.ID, err)
 		}
 		if address == nil {
 			logger.Sugar().Warnf("fail get user withdraw info for %v", info.ObjectID)
@@ -157,7 +156,7 @@ func GetWithdrawAddressReviews(ctx context.Context, in *npool.GetWithdrawAddress
 			ID: address.AccountID,
 		})
 		if err != nil || account == nil {
-			return nil, xerrors.Errorf("fail get account: %v", err)
+			return nil, fmt.Errorf("fail get account: %v", err)
 		}
 
 		user, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
@@ -185,7 +184,7 @@ func GetWithdrawAddressReviews(ctx context.Context, in *npool.GetWithdrawAddress
 func GetReviewState(ctx context.Context, in *reviewpb.GetReviewsByAppDomainObjectTypeIDRequest) (string, string, error) { //nolint
 	infos, err := grpc2.GetReviewsByAppDomainObjectTypeID(ctx, in)
 	if err != nil {
-		return "", "", xerrors.Errorf("fail get review: %v", err)
+		return "", "", fmt.Errorf("fail get review: %v", err)
 	}
 
 	reviewState := reviewconst.StateRejected

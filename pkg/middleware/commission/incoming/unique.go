@@ -2,10 +2,9 @@ package incoming
 
 import (
 	"context"
-
-	"golang.org/x/xerrors"
+	"fmt"
 )
 
 func GetUniqueIncoming(ctx context.Context, appID, userID string) (float64, error) {
-	return 0, xerrors.Errorf("NOT IMPLEMENTED")
+	return 0, fmt.Errorf("NOT IMPLEMENTED")
 }

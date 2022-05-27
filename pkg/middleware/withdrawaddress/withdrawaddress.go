@@ -2,6 +2,7 @@ package withdrawaddress
 
 import (
 	"context"
+	"fmt"
 
 	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/const"
 	account "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/account"
@@ -19,8 +20,6 @@ import (
 	thirdgwconst "github.com/NpoolPlatform/third-gateway/pkg/const"
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
-
-	"golang.org/x/xerrors"
 )
 
 func Set(ctx context.Context, in *npool.SetWithdrawAddressRequest) (*npool.SetWithdrawAddressResponse, error) {
@@ -35,14 +34,14 @@ func Set(ctx context.Context, in *npool.SetWithdrawAddressRequest) (*npool.SetWi
 		true,
 	)
 	if err != nil {
-		return nil, xerrors.Errorf("fail verify code: %v", err)
+		return nil, fmt.Errorf("fail verify code: %v", err)
 	}
 
 	coin, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
 		ID: in.GetCoinTypeID(),
 	})
 	if err != nil || coin == nil {
-		return nil, xerrors.Errorf("fail get coin info: %v", err)
+		return nil, fmt.Errorf("fail get coin info: %v", err)
 	}
 
 	_, err = grpc2.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
@@ -50,7 +49,7 @@ func Set(ctx context.Context, in *npool.SetWithdrawAddressRequest) (*npool.SetWi
 		Address: in.GetAddress(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get wallet balance: %v", err)
+		return nil, fmt.Errorf("fail get wallet balance: %v", err)
 	}
 
 	_account, err := account.CreateUserCoinAccount(ctx, &npool.CreateUserCoinAccountRequest{
@@ -61,7 +60,7 @@ func Set(ctx context.Context, in *npool.SetWithdrawAddressRequest) (*npool.SetWi
 		},
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail create account: %v", err)
+		return nil, fmt.Errorf("fail create account: %v", err)
 	}
 
 	// TODO: rollback create user coin account
@@ -77,7 +76,7 @@ func Set(ctx context.Context, in *npool.SetWithdrawAddressRequest) (*npool.SetWi
 		},
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail create address: %v", err)
+		return nil, fmt.Errorf("fail create address: %v", err)
 	}
 
 	_, err = grpc2.CreateReview(ctx, &reviewpb.CreateReviewRequest{
@@ -89,7 +88,7 @@ func Set(ctx context.Context, in *npool.SetWithdrawAddressRequest) (*npool.SetWi
 		},
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail create review: %v", err)
+		return nil, fmt.Errorf("fail create review: %v", err)
 	}
 
 	return &npool.SetWithdrawAddressResponse{
@@ -109,17 +108,17 @@ func Delete(ctx context.Context, in *npool.DeleteWithdrawAddressRequest) (*npool
 		ObjectID:   in.GetID(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get withdraw address review state: %v", err)
+		return nil, fmt.Errorf("fail get withdraw address review state: %v", err)
 	}
 	if reviewState == reviewconst.StateWait {
-		return nil, xerrors.Errorf("fail delete reviewing withdarw address")
+		return nil, fmt.Errorf("fail delete reviewing withdarw address")
 	}
 
 	info, err := grpc2.DeleteUserWithdraw(ctx, &billingpb.DeleteUserWithdrawRequest{
 		ID: in.GetID(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail delete withdraw address: %v", err)
+		return nil, fmt.Errorf("fail delete withdraw address: %v", err)
 	}
 
 	return &npool.DeleteWithdrawAddressResponse{
@@ -133,7 +132,7 @@ func GetByAppUser(ctx context.Context, in *npool.GetWithdrawAddressesByAppUserRe
 		UserID: in.GetUserID(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get app user: %v", err)
+		return nil, fmt.Errorf("fail get app user: %v", err)
 	}
 
 	infos, err := grpc2.GetUserWithdrawsByAppUser(ctx, &billingpb.GetUserWithdrawsByAppUserRequest{
@@ -141,7 +140,7 @@ func GetByAppUser(ctx context.Context, in *npool.GetWithdrawAddressesByAppUserRe
 		UserID: in.GetUserID(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get addresses: %v", err)
+		return nil, fmt.Errorf("fail get addresses: %v", err)
 	}
 
 	addresses := []*npool.WithdrawAddress{}
@@ -151,7 +150,7 @@ func GetByAppUser(ctx context.Context, in *npool.GetWithdrawAddressesByAppUserRe
 			ID: info.AccountID,
 		})
 		if err != nil {
-			return nil, xerrors.Errorf("fail get account: %v", err)
+			return nil, fmt.Errorf("fail get account: %v", err)
 		}
 
 		reviewState, reviewMessage, err := review.GetReviewState(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
@@ -161,7 +160,7 @@ func GetByAppUser(ctx context.Context, in *npool.GetWithdrawAddressesByAppUserRe
 			ObjectID:   info.ID,
 		})
 		if err != nil {
-			return nil, xerrors.Errorf("fail get review state: %v", err)
+			return nil, fmt.Errorf("fail get review state: %v", err)
 		}
 
 		addresses = append(addresses, &npool.WithdrawAddress{
