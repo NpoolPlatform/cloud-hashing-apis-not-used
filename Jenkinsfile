@@ -307,10 +307,12 @@ pipeline {
         expression { TARGET_ENV ==~ /.*development.*/ }
       }
       steps {
-        sh 'sed -i "s#currency_proxy: \\\"\\\"#currency_proxy: \\\"$CURRENCY_REQUEST_PROXY\\\"#g" cmd/cloud-hashing-apis/k8s/00-configmap.yaml'
-        sh 'grep $CURRENCY_REQUEST_PROXY cmd/cloud-hashing-apis/k8s/00-configmap.yaml'
-        sh 'sed -i "s/uhub.service.ucloud.cn/$DOCKER_REGISTRY/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml'
-        sh 'TAG=latest make deploy-to-k8s-cluster'
+        sh (returnStdout: false, script: '''
+        sed -i "s#currency_proxy: \\\"\\\"#currency_proxy: \\\"$CURRENCY_REQUEST_PROXY\\\"#g" cmd/cloud-hashing-apis/k8s/00-configmap.yaml
+        grep $CURRENCY_REQUEST_PROXY cmd/cloud-hashing-apis/k8s/00-configmap.yaml
+        sed -i "s/uhub.service.ucloud.cn/$DOCKER_REGISTRY/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml
+        TAG=latest make deploy-to-k8s-cluster
+        '''.stripIndent())
       }
     }
 
@@ -325,8 +327,8 @@ pipeline {
           tag=`git describe --tags $revlist`
           git reset --hard
           git checkout $tag
-          sh 'sed -i "s#currency_proxy: \\\"\\\"#currency_proxy: \\\"$CURRENCY_REQUEST_PROXY\\\"#g" cmd/cloud-hashing-apis/k8s/00-configmap.yaml'
-          sh 'grep $CURRENCY_REQUEST_PROXY cmd/cloud-hashing-apis/k8s/00-configmap.yaml'
+          sed -i "s#currency_proxy: \\\"\\\"#currency_proxy: \\\"$CURRENCY_REQUEST_PROXY\\\"#g" cmd/cloud-hashing-apis/k8s/00-configmap.yaml
+          grep $CURRENCY_REQUEST_PROXY cmd/cloud-hashing-apis/k8s/00-configmap.yaml
           sed -i "s/cloud-hashing-apis-v2:latest/cloud-hashing-apis-v2:$tag/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml
           sed -i "s/uhub.service.ucloud.cn/$DOCKER_REGISTRY/g" cmd/cloud-hashing-apis/k8s/01-cloud-hashing-apis.yaml
           TAG=$tag make deploy-to-k8s-cluster
