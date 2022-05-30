@@ -92,36 +92,39 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 	userID := uuid.New().String()
 
 	if invitationCode != "" && inviterID != "" {
-		actions := []*dtm.Action{}
-		actions = append(actions, &dtm.Action{
-			ServiceName: appusermgrsvceconst.ServiceName,
-			Action:      appusermgrconst.CreateAppUserWithSecret,
-			Revert:      appusermgrconst.CreateAppUserWithSecretRevert,
-			Param: &appusermgrpb.CreateAppUserWithSecretRequest{
-				User: &appusermgrpb.AppUser{
-					ID:           userID,
-					AppID:        in.GetAppID(),
-					EmailAddress: emailAddress,
-					PhoneNO:      phoneNO,
-				},
-				Secret: &appusermgrpb.AppUserSecret{
-					UserID:       userID,
-					AppID:        in.GetAppID(),
-					PasswordHash: in.GetPasswordHash(),
-				},
-			},
-		}, &dtm.Action{
-			ServiceName: inspiresvcconst.ServiceName,
-			Action:      inspirerconst.CreateRegistrationInvitation,
-			Revert:      inspirerconst.CreateRegistrationInvitationRevert,
-			Param: &inspirepb.CreateRegistrationInvitationRequest{
-				Info: &inspirepb.RegistrationInvitation{
-					AppID:     in.GetAppID(),
-					InviterID: inviterID,
-					InviteeID: userID,
+		actions := []*dtm.Action{
+			{
+				ServiceName: appusermgrsvceconst.ServiceName,
+				Action:      appusermgrconst.CreateAppUserWithSecret,
+				Revert:      appusermgrconst.CreateAppUserWithSecretRevert,
+				Param: &appusermgrpb.CreateAppUserWithSecretRequest{
+					User: &appusermgrpb.AppUser{
+						ID:           userID,
+						AppID:        in.GetAppID(),
+						EmailAddress: emailAddress,
+						PhoneNO:      phoneNO,
+					},
+					Secret: &appusermgrpb.AppUserSecret{
+						UserID:       userID,
+						AppID:        in.GetAppID(),
+						PasswordHash: in.GetPasswordHash(),
+					},
 				},
 			},
-		})
+			{
+				ServiceName: inspiresvcconst.ServiceName,
+				Action:      inspirerconst.CreateRegistrationInvitation,
+				Revert:      inspirerconst.CreateRegistrationInvitationRevert,
+				Param: &inspirepb.CreateRegistrationInvitationRequest{
+					Info: &inspirepb.RegistrationInvitation{
+						AppID:     in.GetAppID(),
+						InviterID: inviterID,
+						InviteeID: userID,
+					},
+				},
+			},
+		}
+
 		err = dtm.WithSaga(ctx, actions, nil, func(ctx context.Context) error {
 			appUser, err = grpc2.GetAppUserByAppUser(ctx, &appusermgrpb.GetAppUserByAppUserRequest{
 				AppID:  in.GetAppID(),

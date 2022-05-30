@@ -4,18 +4,18 @@ go 1.17
 
 require (
 	entgo.io/ent v0.10.1
-	github.com/NpoolPlatform/api-manager v0.0.0-20220526062742-f3a75ecdbebf
-	github.com/NpoolPlatform/appuser-manager v0.0.0-20220322075937-0c7b778de20c
+	github.com/NpoolPlatform/api-manager v0.0.0-20220530012418-ce4eebf51628
+	github.com/NpoolPlatform/appuser-manager v0.0.0-20220530012728-4d7af4ded7a7
 	github.com/NpoolPlatform/cloud-hashing-billing v0.0.0-20220323125206-d664201be866
 	github.com/NpoolPlatform/cloud-hashing-goods v0.0.0-20220501102606-7252485fb495
-	github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220323081920-a13fe422e1e9
+	github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220530012924-e627a19bbed8
 	github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220430143734-fed41a4f6bd6
 	github.com/NpoolPlatform/dtm-cluster v0.0.0-20220526094004-0818ff7291dd
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20220404143809-82c40930388a
 	github.com/NpoolPlatform/kyc-management v0.0.0-20220322081324-f537a7bcd812
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20220526050249-956b54fac9f1
 	github.com/NpoolPlatform/login-gateway v0.0.0-20220324144125-0675c5904170
-	github.com/NpoolPlatform/message v0.0.0-20220526060919-2bd0b10a1f68
+	github.com/NpoolPlatform/message v0.0.0-20220530011435-281c2b6aedd4
 	github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da
 	github.com/NpoolPlatform/review-service v0.0.0-20220322082433-0c2b7ee284ed
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20220322095158-52237287c832
@@ -29,7 +29,7 @@ require (
 	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/testify v1.7.1
 	github.com/urfave/cli/v2 v2.4.0
-	google.golang.org/grpc v1.46.0
+	google.golang.org/grpc v1.46.2
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.2.0
 	google.golang.org/protobuf v1.28.0
 )
@@ -115,7 +115,7 @@ require (
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad // indirect
 	golang.org/x/text v0.3.7 // indirect
-	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
+	golang.org/x/xerrors v0.0.0-20220411194840-2f41105eb62f // indirect
 	google.golang.org/genproto v0.0.0-20220317150908-0efb43f6373e // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
