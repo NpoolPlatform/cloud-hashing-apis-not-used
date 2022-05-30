@@ -124,8 +124,11 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 				},
 			},
 		}
-
-		err = dtm.WithSaga(ctx, actions, nil, func(ctx context.Context) error {
+		dispose := dtm.SagaDispose{}
+		dispose.TransOptions.WaitResult = true
+		dispose.TransOptions.TimeoutToFail = 10
+		dispose.Actions = actions
+		err = dtm.WithSaga(ctx, &dispose, nil, func(ctx context.Context) error {
 			appUser, err = grpc2.GetAppUserByAppUser(ctx, &appusermgrpb.GetAppUserByAppUserRequest{
 				AppID:  in.GetAppID(),
 				UserID: userID,
