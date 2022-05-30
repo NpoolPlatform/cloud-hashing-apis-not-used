@@ -2,6 +2,7 @@ package incoming
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
@@ -10,14 +11,12 @@ import (
 	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
-
-	"golang.org/x/xerrors"
 )
 
 func getRebate(ctx context.Context, appID, userID string) (float64, error) {
 	settings, err := commissionsetting.GetAmountSettingsByAppUser(ctx, appID, userID)
 	if err != nil {
-		return 0, xerrors.Errorf("fail get amount settings: %v", err)
+		return 0, fmt.Errorf("fail get amount settings: %v", err)
 	}
 
 	totalAmount := 0.0
@@ -29,7 +28,7 @@ func getRebate(ctx context.Context, appID, userID string) (float64, error) {
 
 		amount, err := referral.GetPeriodUSDAmount(ctx, appID, userID, setting.Start, setting.End)
 		if err != nil {
-			return 0, xerrors.Errorf("fail get period usd amount: %v", err)
+			return 0, fmt.Errorf("fail get period usd amount: %v", err)
 		}
 		totalAmount += amount * float64(setting.Percent) / 100.0
 
@@ -73,7 +72,7 @@ func getOrderParentRebate(_ context.Context, order *npool.Order, roots, nexts []
 func getPeriodRebate(ctx context.Context, appID, userID string, roots, nexts []*inspirepb.AppPurchaseAmountSetting) (float64, error) {
 	orders, err := referral.GetOrders(ctx, appID, userID)
 	if err != nil {
-		return 0, xerrors.Errorf("fail get orders: %v", err)
+		return 0, fmt.Errorf("fail get orders: %v", err)
 	}
 
 	totalRootAmount := 0.0
@@ -88,12 +87,12 @@ func getPeriodRebate(ctx context.Context, appID, userID string, roots, nexts []*
 func getIncomings(ctx context.Context, appID, userID string) (float64, error) {
 	roots, err := commissionsetting.GetAmountSettingsByAppUser(ctx, appID, userID)
 	if err != nil {
-		return 0, xerrors.Errorf("fail get amount settings: %v", err)
+		return 0, fmt.Errorf("fail get amount settings: %v", err)
 	}
 
 	invitees, err := referral.GetLayeredInvitees(ctx, appID, userID)
 	if err != nil {
-		return 0, xerrors.Errorf("fail get layered invitees: %v", err)
+		return 0, fmt.Errorf("fail get layered invitees: %v", err)
 	}
 
 	totalRootAmount := 0.0
@@ -101,12 +100,12 @@ func getIncomings(ctx context.Context, appID, userID string) (float64, error) {
 	for _, iv := range invitees {
 		nexts, err := commissionsetting.GetAmountSettingsByAppUser(ctx, iv.AppID, iv.InviteeID)
 		if err != nil {
-			return 0, xerrors.Errorf("fail get amount settings: %v", err)
+			return 0, fmt.Errorf("fail get amount settings: %v", err)
 		}
 
 		rootAmount, err := getPeriodRebate(ctx, iv.AppID, iv.InviteeID, roots, nexts)
 		if err != nil {
-			return 0, xerrors.Errorf("fail get rebate: %v", err)
+			return 0, fmt.Errorf("fail get rebate: %v", err)
 		}
 
 		totalRootAmount += rootAmount
@@ -118,12 +117,12 @@ func getIncomings(ctx context.Context, appID, userID string) (float64, error) {
 func GetSeparateIncoming(ctx context.Context, appID, userID string) (float64, error) {
 	incoming, err := getRebate(ctx, appID, userID)
 	if err != nil {
-		return 0, xerrors.Errorf("fail get total incoming: %v", err)
+		return 0, fmt.Errorf("fail get total incoming: %v", err)
 	}
 
 	subAmount, err := getIncomings(ctx, appID, userID)
 	if err != nil {
-		return 0, xerrors.Errorf("fail get sub incomings: %v", err)
+		return 0, fmt.Errorf("fail get sub incomings: %v", err)
 	}
 
 	incoming += subAmount

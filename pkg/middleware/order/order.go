@@ -32,8 +32,6 @@ import (
 	stockconst "github.com/NpoolPlatform/stock-manager/pkg/const"
 
 	"github.com/google/uuid"
-
-	"golang.org/x/xerrors"
 )
 
 const (
@@ -84,23 +82,23 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 			CouponID:   info.Order.CouponID,
 		})
 		if err != nil {
-			return nil, xerrors.Errorf("fail check coupon usage: %v", err)
+			return nil, fmt.Errorf("fail check coupon usage: %v", err)
 		}
 
 		if order != nil && order.ID != info.Order.ID {
-			return nil, xerrors.Errorf("fail check coupon usage")
+			return nil, fmt.Errorf("fail check coupon usage")
 		}
 
 		couponAllocated, err := grpc2.GetCouponAllocated(ctx, &inspirepb.GetCouponAllocatedDetailRequest{
 			ID: info.Order.CouponID,
 		})
 		if err != nil && info.Order.CouponID != invalidUUID {
-			return nil, xerrors.Errorf("fail get coupon allocated detail: %v", err)
+			return nil, fmt.Errorf("fail get coupon allocated detail: %v", err)
 		}
 
 		if couponAllocated != nil {
 			if couponAllocated.Allocated.AppID != info.Order.AppID || couponAllocated.Allocated.UserID != info.Order.UserID {
-				return nil, xerrors.Errorf("invalid coupon")
+				return nil, fmt.Errorf("invalid coupon")
 			}
 			coupon = couponAllocated
 		}
@@ -120,7 +118,7 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 				ID: info.Payment.CoinInfoID,
 			})
 			if err != nil || paymentCoinInfo == nil {
-				return nil, xerrors.Errorf("fail get payment coin info: %v", err)
+				return nil, fmt.Errorf("fail get payment coin info: %v", err)
 			}
 
 			cache.AddEntry(cacheKey(cacheCoin, info.Payment.CoinInfoID), paymentCoinInfo)
@@ -131,7 +129,7 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 				ID: info.Payment.AccountID,
 			})
 			if err != nil {
-				return nil, xerrors.Errorf("fail get payment address: %v", err)
+				return nil, fmt.Errorf("fail get payment address: %v", err)
 			}
 			accountInfo = account
 		}
@@ -147,23 +145,23 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 			CouponID:   info.Order.DiscountCouponID,
 		})
 		if err != nil {
-			return nil, xerrors.Errorf("fail check coupon usage: %v", err)
+			return nil, fmt.Errorf("fail check coupon usage: %v", err)
 		}
 
 		if order != nil && order.ID != info.Order.ID {
-			return nil, xerrors.Errorf("fail check coupon usage")
+			return nil, fmt.Errorf("fail check coupon usage")
 		}
 
 		discount, err := grpc2.GetCouponAllocated(ctx, &inspirepb.GetCouponAllocatedDetailRequest{
 			ID: info.Order.DiscountCouponID,
 		})
 		if err != nil {
-			return nil, xerrors.Errorf("fail get discount coupon allocated detail: %v", err)
+			return nil, fmt.Errorf("fail get discount coupon allocated detail: %v", err)
 		}
 
 		if discount != nil {
 			if discount.Allocated.AppID != info.Order.AppID || discount.Allocated.UserID != info.Order.UserID {
-				return nil, xerrors.Errorf("invalid coupon")
+				return nil, fmt.Errorf("invalid coupon")
 			}
 			discountCoupon = discount
 		}
@@ -179,23 +177,23 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 			CouponID:   info.Order.UserSpecialReductionID,
 		})
 		if err != nil {
-			return nil, xerrors.Errorf("fail check coupon usage: %v", err)
+			return nil, fmt.Errorf("fail check coupon usage: %v", err)
 		}
 
 		if order != nil && order.ID != info.Order.ID {
-			return nil, xerrors.Errorf("fail check coupon usage")
+			return nil, fmt.Errorf("fail check coupon usage")
 		}
 
 		userSpecial, err := grpc2.GetUserSpecialReduction(ctx, &inspirepb.GetUserSpecialReductionRequest{
 			ID: info.Order.UserSpecialReductionID,
 		})
 		if err != nil {
-			return nil, xerrors.Errorf("fail get user special reduction: %v", err)
+			return nil, fmt.Errorf("fail get user special reduction: %v", err)
 		}
 
 		if userSpecial != nil {
 			if userSpecial.AppID != info.Order.AppID || userSpecial.UserID != info.Order.UserID {
-				return nil, xerrors.Errorf("invalid coupon")
+				return nil, fmt.Errorf("invalid coupon")
 			}
 			userSpecialReduction = userSpecial
 		}
@@ -213,7 +211,7 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 			ID: info.Order.GetGoodID(),
 		})
 		if err != nil || resp.Info == nil {
-			return nil, xerrors.Errorf("fail get good info: %v", err)
+			return nil, fmt.Errorf("fail get good info: %v", err)
 		}
 		goodInfo = resp.Info
 		cache.AddEntry(cacheKey(cacheGood, info.Order.GetGoodID()), goodInfo)
@@ -225,18 +223,18 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 		GoodID: info.Order.GetGoodID(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get app good: %v", err)
+		return nil, fmt.Errorf("fail get app good: %v", err)
 	}
 
 	promotion, err := grpc2.GetAppGoodPromotion(ctx, &goodspb.GetAppGoodPromotionRequest{
 		ID: info.Order.PromotionID,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get promotion: %v", err)
+		return nil, fmt.Errorf("fail get promotion: %v", err)
 	}
 	if promotion != nil {
 		if info.Order.GetAppID() != promotion.AppID || info.Order.GetGoodID() != promotion.GoodID {
-			return nil, xerrors.Errorf("invalid promotion")
+			return nil, fmt.Errorf("invalid promotion")
 		}
 	}
 
@@ -258,12 +256,12 @@ func GetOrder(ctx context.Context, in *npool.GetOrderRequest) (*npool.GetOrderRe
 		ID: in.GetID(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get order detail: %v", err)
+		return nil, fmt.Errorf("fail get order detail: %v", err)
 	}
 
 	detail, err := expandOrder(ctx, order, false)
 	if err != nil {
-		return nil, xerrors.Errorf("fail expand order detail: %v", err)
+		return nil, fmt.Errorf("fail expand order detail: %v", err)
 	}
 
 	return &npool.GetOrderResponse{
@@ -277,7 +275,7 @@ func GetOrdersByAppUser(ctx context.Context, in *npool.GetOrdersByAppUserRequest
 		UserID: in.GetUserID(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get orders detail by app user: %v", err)
+		return nil, fmt.Errorf("fail get orders detail by app user: %v", err)
 	}
 
 	sort.Slice(orders, func(i, j int) bool {
@@ -306,7 +304,7 @@ func GetOrdersShortDetailByAppUser(ctx context.Context, in *npool.GetOrdersByApp
 		UserID: in.GetUserID(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get orders detail by app user: %v", err)
+		return nil, fmt.Errorf("fail get orders detail by app user: %v", err)
 	}
 
 	sort.Slice(orders, func(i, j int) bool {
@@ -335,7 +333,7 @@ func GetOrdersByApp(ctx context.Context, in *npool.GetOrdersByAppRequest) (*npoo
 		AppID: in.GetAppID(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get orders detail by app: %v", err)
+		return nil, fmt.Errorf("fail get orders detail by app: %v", err)
 	}
 
 	sort.Slice(orders, func(i, j int) bool {
@@ -363,7 +361,7 @@ func GetOrdersByGood(ctx context.Context, in *npool.GetOrdersByGoodRequest) (*np
 		GoodID: in.GetGoodID(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get orders detail by good: %v", err)
+		return nil, fmt.Errorf("fail get orders detail by good: %v", err)
 	}
 
 	sort.Slice(orders, func(i, j int) bool {
@@ -392,23 +390,23 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 		GoodID: in.GetGoodID(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get app good: %v", err)
+		return nil, fmt.Errorf("fail get app good: %v", err)
 	}
 	if appGood == nil {
-		return nil, xerrors.Errorf("fail get app good")
+		return nil, fmt.Errorf("fail get app good")
 	}
 	if !appGood.Online {
-		return nil, xerrors.Errorf("good offline by app")
+		return nil, fmt.Errorf("good offline by app")
 	}
 	if appGood.Price <= 0 {
-		return nil, xerrors.Errorf("good price invalid")
+		return nil, fmt.Errorf("good price invalid")
 	}
 
 	goodInfo, err := gooddetail.Get(ctx, &npool.GetGoodRequest{
 		ID: in.GetGoodID(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get order good info: %v", err)
+		return nil, fmt.Errorf("fail get order good info: %v", err)
 	}
 
 	// Validate app id: done by gateway
@@ -419,13 +417,13 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 	stock, err := stockcli.GetStockOnly(ctx, cruder.NewFilterConds().
 		WithCond(stockconst.StockFieldGoodID, cruder.EQ, structpb.NewStringValue(in.GetGoodID())))
 	if err != nil || stock == nil {
-		return nil, xerrors.Errorf("fail get good stock: %v", err)
+		return nil, fmt.Errorf("fail get good stock: %v", err)
 	}
 
 	stock, err = stockcli.AddStockFields(ctx, stock.ID, cruder.NewFilterFields().
 		WithField(stockconst.StockFieldLocked, structpb.NewNumberValue(float64(in.GetUnits()))))
 	if err != nil {
-		return nil, xerrors.Errorf("fail add locked stock: %v", err)
+		return nil, fmt.Errorf("fail add locked stock: %v", err)
 	}
 
 	defer func() {
@@ -453,7 +451,7 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 		Timestamp: uint32(time.Now().Unix()),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get promotion: %v", err)
+		return nil, fmt.Errorf("fail get promotion: %v", err)
 	}
 	if promotion != nil {
 		promotionID = promotion.ID
@@ -475,14 +473,14 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 		},
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail create order: %v", err)
+		return nil, fmt.Errorf("fail create order: %v", err)
 	}
 
 	orderDetail, err := GetOrder(ctx, &npool.GetOrderRequest{
 		ID: myOrder.ID,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get order detail:%v", err)
+		return nil, fmt.Errorf("fail get order detail:%v", err)
 	}
 
 	return &npool.SubmitOrderResponse{
@@ -496,7 +494,7 @@ func peekIdlePaymentAccount(ctx context.Context, order *npool.Order, paymentCoin
 		PaymentCoinTypeID: paymentCoinInfo.ID,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get idle good payments: %v", err)
+		return nil, fmt.Errorf("fail get idle good payments: %v", err)
 	}
 
 	var paymentAccount *billingpb.GoodPayment
@@ -512,7 +510,7 @@ func peekIdlePaymentAccount(ctx context.Context, order *npool.Order, paymentCoin
 	}
 
 	if paymentAccount == nil {
-		return nil, xerrors.Errorf("cannot find suitable payment account")
+		return nil, fmt.Errorf("cannot find suitable payment account")
 	}
 
 	account, err := grpc2.GetBillingAccount(ctx, &billingpb.GetCoinAccountRequest{
@@ -523,7 +521,7 @@ func peekIdlePaymentAccount(ctx context.Context, order *npool.Order, paymentCoin
 		if xerr != nil {
 			logger.Sugar().Errorf("cannot unlock %v: %v", paymentAccount.AccountID, xerr)
 		}
-		return nil, xerrors.Errorf("fail get account: %v", err)
+		return nil, fmt.Errorf("fail get account: %v", err)
 	}
 
 	paymentAccount.Idle = false
@@ -537,7 +535,7 @@ func peekIdlePaymentAccount(ctx context.Context, order *npool.Order, paymentCoin
 		if xerr != nil {
 			logger.Sugar().Errorf("cannot unlock %v: %v", paymentAccount.AccountID, xerr)
 		}
-		return nil, xerrors.Errorf("fail update good payment: %v", err)
+		return nil, fmt.Errorf("fail update good payment: %v", err)
 	}
 
 	return account, nil
@@ -551,10 +549,10 @@ func createNewPaymentAccount(ctx context.Context, order *npool.Order, paymentCoi
 			Name: paymentCoinInfo.Name,
 		})
 		if err != nil {
-			return nil, xerrors.Errorf("fail create wallet address: %v", err)
+			return nil, fmt.Errorf("fail create wallet address: %v", err)
 		}
 		if address == nil || address.Address == "" {
-			return nil, xerrors.Errorf("fail create wallet address for %v", paymentCoinInfo.Name)
+			return nil, fmt.Errorf("fail create wallet address for %v", paymentCoinInfo.Name)
 		}
 
 		account, err := grpc2.CreateBillingAccount(ctx, &billingpb.CreateCoinAccountRequest{
@@ -565,7 +563,7 @@ func createNewPaymentAccount(ctx context.Context, order *npool.Order, paymentCoi
 			},
 		})
 		if err != nil {
-			return nil, xerrors.Errorf("fail create billing account: %v", err)
+			return nil, fmt.Errorf("fail create billing account: %v", err)
 		}
 
 		_, err = grpc2.CreateGoodPayment(ctx, &billingpb.CreateGoodPaymentRequest{
@@ -576,7 +574,7 @@ func createNewPaymentAccount(ctx context.Context, order *npool.Order, paymentCoi
 			},
 		})
 		if err != nil {
-			return nil, xerrors.Errorf("fail create good payment: %v", err)
+			return nil, fmt.Errorf("fail create good payment: %v", err)
 		}
 
 		successCreated++
@@ -586,7 +584,7 @@ func createNewPaymentAccount(ctx context.Context, order *npool.Order, paymentCoi
 		return peekIdlePaymentAccount(ctx, order, paymentCoinInfo)
 	}
 
-	return nil, xerrors.Errorf("SHOULD NOT BE HERE")
+	return nil, fmt.Errorf("SHOULD NOT BE HERE")
 }
 
 func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest) (*npool.CreateOrderPaymentResponse, error) { //nolint
@@ -594,7 +592,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		ID: in.GetOrderID(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get order: %v", err)
+		return nil, fmt.Errorf("fail get order: %v", err)
 	}
 	if myOrder.Info.Order.Payment != nil {
 		return &npool.CreateOrderPaymentResponse{
@@ -604,29 +602,29 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 
 	paymentDeadline := time.Unix(int64(myOrder.Info.PaymentDeadline), 0)
 	if time.Now().After(paymentDeadline) {
-		return nil, xerrors.Errorf("order expired")
+		return nil, fmt.Errorf("order expired")
 	}
 
 	paymentCoinInfo, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
 		ID: in.GetPaymentCoinTypeID(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("invalid coin info id: %v", err)
+		return nil, fmt.Errorf("invalid coin info id: %v", err)
 	}
 
 	if paymentCoinInfo.PreSale {
-		return nil, xerrors.Errorf("cannot use presale coin as payment coin")
+		return nil, fmt.Errorf("cannot use presale coin as payment coin")
 	}
 	if !paymentCoinInfo.ForPay {
-		return nil, xerrors.Errorf("payment coin not for pay")
+		return nil, fmt.Errorf("payment coin not for pay")
 	}
 	if paymentCoinInfo.ENV != myOrder.Info.Good.Main.ENV {
-		return nil, xerrors.Errorf("payment coin env different from good coin env")
+		return nil, fmt.Errorf("payment coin env different from good coin env")
 	}
 
 	paymentCoinCurrency, err := currency.USDPrice(ctx, paymentCoinInfo.Name)
 	if err != nil {
-		return nil, xerrors.Errorf("cannot get usd currency for payment coin: %v", err)
+		return nil, fmt.Errorf("cannot get usd currency for payment coin: %v", err)
 	}
 
 	goodPrice := myOrder.Info.Good.Good.Good.Price
@@ -676,7 +674,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		paymentAccount, err = createNewPaymentAccount(ctx, myOrder.Info, paymentCoinInfo)
 	}
 	if err != nil {
-		return nil, xerrors.Errorf("cannot get valid payment account: %v", err)
+		return nil, fmt.Errorf("cannot get valid payment account: %v", err)
 	}
 
 	balance, err := grpc2.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
@@ -684,7 +682,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		Address: paymentAccount.Address,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get wallet balance: %v", err)
+		return nil, fmt.Errorf("fail get wallet balance: %v", err)
 	}
 	balanceAmount := balance.Balance
 
@@ -703,7 +701,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		},
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail create payment: %v", err)
+		return nil, fmt.Errorf("fail create payment: %v", err)
 	}
 
 	// Generate good paying
@@ -714,7 +712,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		},
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail create good paying: %v", err)
+		return nil, fmt.Errorf("fail create good paying: %v", err)
 	}
 
 	// Generate gas payings
@@ -728,7 +726,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 			},
 		})
 		if err != nil {
-			return nil, xerrors.Errorf("fail create fee: %v", err)
+			return nil, fmt.Errorf("fail create fee: %v", err)
 		}
 	}
 
@@ -736,7 +734,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		ID: myOrder.Info.Order.Order.ID,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get order detail: %v", err)
+		return nil, fmt.Errorf("fail get order detail: %v", err)
 	}
 
 	// Watch payment address and change payment state

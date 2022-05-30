@@ -2,19 +2,23 @@ package user
 
 import (
 	"context"
+	"fmt"
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	verifymw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/verify"
+	inspirerconst "github.com/NpoolPlatform/cloud-hashing-inspire/pkg/const"
+	inspiresvcconst "github.com/NpoolPlatform/cloud-hashing-inspire/pkg/message/const"
+	"github.com/NpoolPlatform/dtm-cluster/pkg/dtm"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
+	"github.com/google/uuid"
 
 	appusermgrconst "github.com/NpoolPlatform/appuser-manager/pkg/const"
+	appusermgrsvceconst "github.com/NpoolPlatform/appuser-manager/pkg/message/const"
 	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
 	logingwpb "github.com/NpoolPlatform/message/npool/logingateway"
 	thirdgwpb "github.com/NpoolPlatform/message/npool/thirdgateway"
 	thirdgwconst "github.com/NpoolPlatform/third-gateway/pkg/const"
-
-	"golang.org/x/xerrors"
 )
 
 func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse, error) { //nolint
@@ -23,7 +27,7 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 		Account: in.GetAccount(),
 	})
 	if err != nil || appUser != nil {
-		return nil, xerrors.Errorf("fail get app user by app account: %v", err)
+		return nil, fmt.Errorf("fail get app user by app account: %v", err)
 	}
 
 	invitationCode := in.GetInvitationCode()
@@ -33,12 +37,12 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 		ID: in.GetAppID(),
 	})
 	if err != nil || app == nil {
-		return nil, xerrors.Errorf("fail get app: %v", err)
+		return nil, fmt.Errorf("fail get app: %v", err)
 	}
 
 	if app.Ctrl != nil && app.Ctrl.InvitationCodeMust {
 		if invitationCode == "" {
-			return nil, xerrors.Errorf("invitation code is must")
+			return nil, fmt.Errorf("invitation code is must")
 		}
 	}
 
@@ -47,16 +51,16 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 			Code: invitationCode,
 		})
 		if err != nil {
-			return nil, xerrors.Errorf("fail get user invitation code: %v", err)
+			return nil, fmt.Errorf("fail get user invitation code: %v", err)
 		}
 
 		if code == nil {
 			if app.Ctrl != nil && app.Ctrl.InvitationCodeMust {
-				return nil, xerrors.Errorf("fail get invitation code")
+				return nil, fmt.Errorf("fail get invitation code")
 			}
 		} else {
 			if code.AppID != in.GetAppID() {
-				return nil, xerrors.Errorf("invalid invitation code for app")
+				return nil, fmt.Errorf("invalid invitation code for app")
 			}
 			inviterID = code.UserID
 		}
@@ -73,7 +77,7 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 		false,
 	)
 	if err != nil {
-		return nil, xerrors.Errorf("fail verify code: %v", err)
+		return nil, fmt.Errorf("fail verify code: %v", err)
 	}
 
 	emailAddress := ""
@@ -85,31 +89,72 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 		emailAddress = in.GetAccount()
 	}
 
-	appUser, err = grpc2.Signup(ctx, &appusermgrpb.CreateAppUserWithSecretRequest{
-		User: &appusermgrpb.AppUser{
-			AppID:        in.GetAppID(),
-			EmailAddress: emailAddress,
-			PhoneNO:      phoneNO,
-		},
-		Secret: &appusermgrpb.AppUserSecret{
-			AppID:        in.GetAppID(),
-			PasswordHash: in.GetPasswordHash(),
-		},
-	})
-	if err != nil || appUser == nil {
-		return nil, xerrors.Errorf("fail signup: %v", err)
-	}
+	userID := uuid.New().String()
 
 	if invitationCode != "" && inviterID != "" {
-		_, err = grpc2.CreateRegistrationInvitation(ctx, &inspirepb.CreateRegistrationInvitationRequest{
-			Info: &inspirepb.RegistrationInvitation{
-				AppID:     in.GetAppID(),
-				InviterID: inviterID,
-				InviteeID: appUser.ID,
+		actions := []*dtm.Action{
+			{
+				ServiceName: appusermgrsvceconst.ServiceName,
+				Action:      appusermgrconst.CreateAppUserWithSecret,
+				Revert:      appusermgrconst.CreateAppUserWithSecretRevert,
+				Param: &appusermgrpb.CreateAppUserWithSecretRequest{
+					User: &appusermgrpb.AppUser{
+						ID:           userID,
+						AppID:        in.GetAppID(),
+						EmailAddress: emailAddress,
+						PhoneNO:      phoneNO,
+					},
+					Secret: &appusermgrpb.AppUserSecret{
+						UserID:       userID,
+						AppID:        in.GetAppID(),
+						PasswordHash: in.GetPasswordHash(),
+					},
+				},
 			},
+			{
+				ServiceName: inspiresvcconst.ServiceName,
+				Action:      inspirerconst.CreateRegistrationInvitation,
+				Revert:      inspirerconst.CreateRegistrationInvitationRevert,
+				Param: &inspirepb.CreateRegistrationInvitationRequest{
+					Info: &inspirepb.RegistrationInvitation{
+						AppID:     in.GetAppID(),
+						InviterID: inviterID,
+						InviteeID: userID,
+					},
+				},
+			},
+		}
+		dispose := dtm.SagaDispose{}
+		dispose.TransOptions.WaitResult = true
+		dispose.TransOptions.TimeoutToFail = 10
+		dispose.Actions = actions
+		err = dtm.WithSaga(ctx, &dispose, nil, func(ctx context.Context) error {
+			appUser, err = grpc2.GetAppUserByAppUser(ctx, &appusermgrpb.GetAppUserByAppUserRequest{
+				AppID:  in.GetAppID(),
+				UserID: userID,
+			})
+			if err != nil {
+				return fmt.Errorf("fail create registration invitation: %v", err)
+			}
+			return nil
 		})
 		if err != nil {
-			return nil, xerrors.Errorf("fail create registration invitation: %v", err)
+			return nil, fmt.Errorf("fail dtm: %v", err)
+		}
+	} else {
+		appUser, err = grpc2.Signup(ctx, &appusermgrpb.CreateAppUserWithSecretRequest{
+			User: &appusermgrpb.AppUser{
+				AppID:        in.GetAppID(),
+				EmailAddress: emailAddress,
+				PhoneNO:      phoneNO,
+			},
+			Secret: &appusermgrpb.AppUserSecret{
+				AppID:        in.GetAppID(),
+				PasswordHash: in.GetPasswordHash(),
+			},
+		})
+		if err != nil || appUser == nil {
+			return nil, fmt.Errorf("fail signup: %v", err)
 		}
 	}
 
@@ -132,7 +177,7 @@ func UpdatePasswordByAppUser(ctx context.Context, in *npool.UpdatePasswordByAppU
 		true,
 	)
 	if err != nil {
-		return nil, xerrors.Errorf("fail verify code: %v", err)
+		return nil, fmt.Errorf("fail verify code: %v", err)
 	}
 
 	secret, err := grpc2.GetAppUserSecretByAppUser(ctx, &appusermgrpb.GetAppUserSecretByAppUserRequest{
@@ -140,7 +185,7 @@ func UpdatePasswordByAppUser(ctx context.Context, in *npool.UpdatePasswordByAppU
 		UserID: in.GetUserID(),
 	})
 	if err != nil || secret == nil {
-		return nil, xerrors.Errorf("fail get app user secret: %v", err)
+		return nil, fmt.Errorf("fail get app user secret: %v", err)
 	}
 
 	if checkOldPassword {
@@ -150,7 +195,7 @@ func UpdatePasswordByAppUser(ctx context.Context, in *npool.UpdatePasswordByAppU
 			PasswordHash: in.GetOldPasswordHash(),
 		})
 		if err != nil {
-			return nil, xerrors.Errorf("fail verify username or password: %v", err)
+			return nil, fmt.Errorf("fail verify username or password: %v", err)
 		}
 	}
 
@@ -161,7 +206,7 @@ func UpdatePasswordByAppUser(ctx context.Context, in *npool.UpdatePasswordByAppU
 		Info: secret,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail update app user secret: %v", err)
+		return nil, fmt.Errorf("fail update app user secret: %v", err)
 	}
 
 	return &npool.UpdatePasswordByAppUserResponse{
@@ -175,7 +220,7 @@ func UpdatePassword(ctx context.Context, in *npool.UpdatePasswordRequest) (*npoo
 		Account: in.GetAccount(),
 	})
 	if err != nil || appUser == nil {
-		return nil, xerrors.Errorf("fail get app user by app account: %v", err)
+		return nil, fmt.Errorf("fail get app user by app account: %v", err)
 	}
 	resp, err := UpdatePasswordByAppUser(ctx, &npool.UpdatePasswordByAppUserRequest{
 		AppID:            in.GetAppID(),
@@ -186,7 +231,7 @@ func UpdatePassword(ctx context.Context, in *npool.UpdatePasswordRequest) (*npoo
 		VerificationCode: in.GetVerificationCode(),
 	}, false)
 	if err != nil {
-		return nil, xerrors.Errorf("fail update password: %v", err)
+		return nil, fmt.Errorf("fail update password: %v", err)
 	}
 
 	return &npool.UpdatePasswordResponse{
@@ -200,7 +245,7 @@ func UpdateEmailAddress(ctx context.Context, in *npool.UpdateEmailAddressRequest
 		Account: in.GetNewEmailAddress(),
 	})
 	if err != nil || old != nil {
-		return nil, xerrors.Errorf("fail get app user by app account: %v", err)
+		return nil, fmt.Errorf("fail get app user by app account: %v", err)
 	}
 
 	info, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
@@ -208,19 +253,19 @@ func UpdateEmailAddress(ctx context.Context, in *npool.UpdateEmailAddressRequest
 		UserID: in.GetUserID(),
 	})
 	if err != nil || info == nil {
-		return nil, xerrors.Errorf("fail get app user by app user: %v", err)
+		return nil, fmt.Errorf("fail get app user by app user: %v", err)
 	}
 
 	if in.GetOldAccountType() == appusermgrconst.SignupByMobile {
 		if in.GetOldAccount() != info.User.PhoneNO {
-			return nil, xerrors.Errorf("invalid account info")
+			return nil, fmt.Errorf("invalid account info")
 		}
 	} else if in.GetOldAccountType() == appusermgrconst.SignupByEmail {
 		if in.GetOldAccount() != info.User.EmailAddress {
-			return nil, xerrors.Errorf("invalid account info")
+			return nil, fmt.Errorf("invalid account info")
 		}
 	} else {
-		return nil, xerrors.Errorf("invalid account type")
+		return nil, fmt.Errorf("invalid account type")
 	}
 
 	err = verifymw.VerifyCode(
@@ -234,7 +279,7 @@ func UpdateEmailAddress(ctx context.Context, in *npool.UpdateEmailAddressRequest
 		true,
 	)
 	if err != nil {
-		return nil, xerrors.Errorf("fail verify code: %v", err)
+		return nil, fmt.Errorf("fail verify code: %v", err)
 	}
 
 	_, err = grpc2.VerifyEmailCode(ctx, &thirdgwpb.VerifyEmailCodeRequest{
@@ -244,7 +289,7 @@ func UpdateEmailAddress(ctx context.Context, in *npool.UpdateEmailAddressRequest
 		Code:         in.GetNewEmailVerificationCode(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail verify code: %v", err)
+		return nil, fmt.Errorf("fail verify code: %v", err)
 	}
 
 	info.User.EmailAddress = in.GetNewEmailAddress()
@@ -252,14 +297,14 @@ func UpdateEmailAddress(ctx context.Context, in *npool.UpdateEmailAddressRequest
 		Info: info.User,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail update app user: %v", err)
+		return nil, fmt.Errorf("fail update app user: %v", err)
 	}
 
 	_, err = grpc2.UpdateCache(ctx, &logingwpb.UpdateCacheRequest{
 		Info: info,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail update cache: %v", err)
+		return nil, fmt.Errorf("fail update cache: %v", err)
 	}
 
 	return &npool.UpdateEmailAddressResponse{
@@ -273,7 +318,7 @@ func UpdatePhoneNO(ctx context.Context, in *npool.UpdatePhoneNORequest) (*npool.
 		Account: in.GetNewPhoneNO(),
 	})
 	if err != nil || old != nil {
-		return nil, xerrors.Errorf("fail get app user by app account: %v", err)
+		return nil, fmt.Errorf("fail get app user by app account: %v", err)
 	}
 
 	info, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
@@ -281,19 +326,19 @@ func UpdatePhoneNO(ctx context.Context, in *npool.UpdatePhoneNORequest) (*npool.
 		UserID: in.GetUserID(),
 	})
 	if err != nil || info == nil {
-		return nil, xerrors.Errorf("fail get app user by app user: %v", err)
+		return nil, fmt.Errorf("fail get app user by app user: %v", err)
 	}
 
 	if in.GetOldAccountType() == appusermgrconst.SignupByMobile {
 		if in.GetOldAccount() != info.User.PhoneNO {
-			return nil, xerrors.Errorf("invalid account info")
+			return nil, fmt.Errorf("invalid account info")
 		}
 	} else if in.GetOldAccountType() == appusermgrconst.SignupByEmail {
 		if in.GetOldAccount() != info.User.EmailAddress {
-			return nil, xerrors.Errorf("invalid account info")
+			return nil, fmt.Errorf("invalid account info")
 		}
 	} else {
-		return nil, xerrors.Errorf("invalid account type")
+		return nil, fmt.Errorf("invalid account type")
 	}
 
 	err = verifymw.VerifyCode(
@@ -307,7 +352,7 @@ func UpdatePhoneNO(ctx context.Context, in *npool.UpdatePhoneNORequest) (*npool.
 		true,
 	)
 	if err != nil {
-		return nil, xerrors.Errorf("fail verify code: %v", err)
+		return nil, fmt.Errorf("fail verify code: %v", err)
 	}
 
 	resp1, err := grpc2.VerifySMSCode(ctx, &thirdgwpb.VerifySMSCodeRequest{
@@ -317,10 +362,10 @@ func UpdatePhoneNO(ctx context.Context, in *npool.UpdatePhoneNORequest) (*npool.
 		Code:    in.GetNewPhoneVerificationCode(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail verify code: %v", err)
+		return nil, fmt.Errorf("fail verify code: %v", err)
 	}
 	if resp1.Code < 0 {
-		return nil, xerrors.Errorf("fail verify code")
+		return nil, fmt.Errorf("fail verify code")
 	}
 
 	info.User.PhoneNO = in.GetNewPhoneNO()
@@ -328,14 +373,14 @@ func UpdatePhoneNO(ctx context.Context, in *npool.UpdatePhoneNORequest) (*npool.
 		Info: info.User,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail update app user: %v", err)
+		return nil, fmt.Errorf("fail update app user: %v", err)
 	}
 
 	_, err = grpc2.UpdateCache(ctx, &logingwpb.UpdateCacheRequest{
 		Info: info,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail update cache: %v", err)
+		return nil, fmt.Errorf("fail update cache: %v", err)
 	}
 
 	return &npool.UpdatePhoneNOResponse{

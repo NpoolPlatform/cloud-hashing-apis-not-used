@@ -8,8 +8,6 @@ import (
 
 	cache "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/cache"
 	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
-
-	"golang.org/x/xerrors"
 )
 
 const (
@@ -26,7 +24,7 @@ func GetUSDAmount(ctx context.Context, appID, userID string) (float64, error) {
 	// TODO: let database to sum orders amount
 	orders, err := GetOrders(ctx, appID, userID)
 	if err != nil {
-		return 0, xerrors.Errorf("fail get orders: %v", err)
+		return 0, fmt.Errorf("fail get orders: %v", err)
 	}
 
 	totalAmount := 0.0
@@ -47,14 +45,14 @@ func GetUSDAmount(ctx context.Context, appID, userID string) (float64, error) {
 func GetSubUSDAmount(ctx context.Context, appID, userID string) (float64, error) {
 	invitees, err := GetLayeredInvitees(ctx, appID, userID)
 	if err != nil {
-		return 0, xerrors.Errorf("fail get invitees: %v", err)
+		return 0, fmt.Errorf("fail get invitees: %v", err)
 	}
 
 	totalAmount := 0.0
 	for _, iv := range invitees {
 		amount, err := GetUSDAmount(ctx, iv.AppID, iv.InviteeID)
 		if err != nil {
-			return 0, xerrors.Errorf("fail get usd amount: %v", err)
+			return 0, fmt.Errorf("fail get usd amount: %v", err)
 		}
 		totalAmount += amount
 	}
@@ -71,7 +69,7 @@ func GetPeriodUSDAmount(ctx context.Context, appID, userID string, start, end ui
 
 	orders, err := GetOrders(ctx, appID, userID)
 	if err != nil {
-		return 0, xerrors.Errorf("fail get orders: %v", err)
+		return 0, fmt.Errorf("fail get orders: %v", err)
 	}
 
 	totalAmount := 0.0
@@ -94,14 +92,14 @@ func GetPeriodUSDAmount(ctx context.Context, appID, userID string, start, end ui
 func GetPeriodSubUSDAmount(ctx context.Context, appID, userID string, start, end uint32) (float64, error) {
 	invitees, err := GetLayeredInvitees(ctx, appID, userID)
 	if err != nil {
-		return 0, xerrors.Errorf("fail get invitees: %v", err)
+		return 0, fmt.Errorf("fail get invitees: %v", err)
 	}
 
 	totalAmount := 0.0
 	for _, iv := range invitees {
 		amount, err := GetPeriodUSDAmount(ctx, iv.AppID, iv.InviteeID, start, end)
 		if err != nil {
-			return 0, xerrors.Errorf("fail get usd amount: %v", err)
+			return 0, fmt.Errorf("fail get usd amount: %v", err)
 		}
 		totalAmount += amount
 	}
