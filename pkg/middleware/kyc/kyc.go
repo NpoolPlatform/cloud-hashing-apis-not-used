@@ -153,7 +153,7 @@ func UpdateKycReview(ctx context.Context, in *npool.UpdateKycReviewRequest) (*np
 	}
 
 	user, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
-		AppID:  reviewInfo.GetAppID(),
+		AppID:  kycs[0].GetAppID(),
 		UserID: kycs[0].GetUserID(),
 	})
 	if err != nil {
@@ -172,35 +172,26 @@ func UpdateKycReview(ctx context.Context, in *npool.UpdateKycReviewRequest) (*np
 	if reviewResp == nil {
 		return nil, xerrors.Errorf("fail get review")
 	}
-	reviewUpResp, err := grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{Info: in.GetInfo()})
+	reviewUpResp, err := grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{
+		Info: in.GetInfo(),
+	})
 	if err != nil {
 		return nil, err
 	}
-	if reviewInfo.GetState() == reviewconst.StateApproved && false {
+
+	switch reviewInfo.GetState() {
+	case reviewconst.StateApproved:
+		fallthrough //nolint
+	case reviewconst.StateRejected:
+	default:
 		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
 			Info: &notificationpbpb.UserNotification{
-				AppID:  reviewInfo.GetAppID(),
+				AppID:  kycs[0].GetAppID(),
 				UserID: kycs[0].GetUserID(),
 			},
 			Message:  in.GetInfo().GetMessage(),
 			LangID:   in.GetTargetLangID(),
 			UsedFor:  notificationconstant.UsedForKycReviewApprovedNotification,
-			UserName: user.GetExtra().GetUsername(),
-		})
-		if err != nil {
-			return nil, xerrors.Errorf("fail create notification: %v", err)
-		}
-	}
-
-	if reviewInfo.GetState() == reviewconst.StateRejected && false {
-		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
-			Info: &notificationpbpb.UserNotification{
-				AppID:  reviewInfo.GetAppID(),
-				UserID: kycs[0].GetUserID(),
-			},
-			Message:  in.GetInfo().GetMessage(),
-			LangID:   in.GetTargetLangID(),
-			UsedFor:  notificationconstant.UsedForKycReviewRejectedNotification,
 			UserName: user.GetExtra().GetUsername(),
 		})
 		if err != nil {
