@@ -10,7 +10,7 @@ require (
 	github.com/NpoolPlatform/cloud-hashing-goods v0.0.0-20220501102606-7252485fb495
 	github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220530012924-e627a19bbed8
 	github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220430143734-fed41a4f6bd6
-	github.com/NpoolPlatform/dtm-cluster v0.0.0-20220526094004-0818ff7291dd
+	github.com/NpoolPlatform/dtm-cluster v0.0.0-20220530080516-f05d7a8fed6d
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20220404143809-82c40930388a
 	github.com/NpoolPlatform/kyc-management v0.0.0-20220322081324-f537a7bcd812
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20220526050249-956b54fac9f1
@@ -56,6 +56,7 @@ require (
 	github.com/go-chassis/go-archaius v1.5.3 // indirect
 	github.com/go-chassis/openlog v1.1.3 // indirect
 	github.com/go-openapi/inflect v0.19.0 // indirect
+	github.com/go-playground/validator/v10 v10.11.0 // indirect
 	github.com/go-redis/redis/v8 v8.11.4 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
