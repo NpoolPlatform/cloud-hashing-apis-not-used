@@ -30,7 +30,7 @@ if [ "xdevelopment" == "x$2" ]; then
 fi
 
 if [ "xfeature" == "x$2" ]; then
-  version=feat/add-prometheus
+  version=feature
 fi
 
 registry=uhub.service.ucloud.cn
