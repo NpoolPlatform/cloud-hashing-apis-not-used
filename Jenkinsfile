@@ -131,7 +131,7 @@ pipeline {
       }
       steps {
         sh 'make verify-build'
-        sh 'DEVELOPMENT=feature DOCKER_REGISTRY=$DOCKER_REGISTRY make generate-docker-images'
+        sh 'DEVELOPMENT=feat/add-prometheus DOCKER_REGISTRY=$DOCKER_REGISTRY make generate-docker-images'
       }
     }
 
