@@ -1,16 +1,19 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: cloud-hashing-apis-v2
-  namespace: monitor
   labels:
     release: prometheus
+  name: prometheus-kube-prometheus-alertmanager
+  namespace: monitor
 spec:
+  endpoints:
+    - path: /metrics
+      port: metrics
   namespaceSelector:
     matchNames:
       - kube-system
   selector:
     matchLabels:
       app: cloud-hashing-apis-v2
-  endpoints:
-    - port: metrics
+      release: prometheus
+      self-monitor: "true"
