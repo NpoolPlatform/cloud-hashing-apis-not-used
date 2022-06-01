@@ -54,5 +54,8 @@ spec:
   - name: http
     port: 50140
     targetPort: 50140
+  - name: metrics
+    port: 50143
+    targetPort: 50143
   selector:
     app: cloud-hashing-apis-v2
