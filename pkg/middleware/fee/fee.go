@@ -12,21 +12,28 @@ import (
 	"golang.org/x/xerrors"
 )
 
-// TODO: not a fix amount
-func GetCurrentFee(ctx context.Context, in *npool.GetCurrentFeeRequest) (*npool.GetCurrentFeeResponse, error) {
+func FeeAmount(ctx context.Context, coinTypeID string) (float64, error) {
 	coin, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
-		ID: in.GetCoinTypeID(),
+		ID: coinTypeID,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("invalid coin info id: %v", err)
+		return 0, xerrors.Errorf("invalid coin info id: %v", err)
 	}
 
 	price, err := currency.USDPrice(ctx, coin.Name)
 	if err != nil {
-		return nil, xerrors.Errorf("cannot get usd currency for coin: %v", err)
+		return 0, xerrors.Errorf("cannot get usd currency for coin: %v", err)
 	}
 
-	amount := constant.FeeUSDTAmount / price
+	return constant.FeeUSDTAmount / price, nil
+}
+
+// TODO: not a fix amount
+func GetCurrentFee(ctx context.Context, in *npool.GetCurrentFeeRequest) (*npool.GetCurrentFeeResponse, error) {
+	amount, err := FeeAmount(ctx, in.GetCoinTypeID())
+	if err != nil {
+		return nil, xerrors.Errorf("fail get fee amount: %v", err)
+	}
 
 	return &npool.GetCurrentFeeResponse{
 		FeeAmount: amount,
