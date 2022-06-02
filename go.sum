@@ -159,8 +159,8 @@ github.com/NpoolPlatform/message v0.0.0-20220430143110-a1247fd97970/go.mod h1:i/
 github.com/NpoolPlatform/message v0.0.0-20220501030927-34f296682c0c/go.mod h1:i/F/sQWjQk44RGvfgEB0zH0oAK/0qLvgJ1AsJDZQDkk=
 github.com/NpoolPlatform/message v0.0.0-20220501143407-c230f4ca021b/go.mod h1:i/F/sQWjQk44RGvfgEB0zH0oAK/0qLvgJ1AsJDZQDkk=
 github.com/NpoolPlatform/message v0.0.0-20220502074121-c68de0d46f6b/go.mod h1:i/F/sQWjQk44RGvfgEB0zH0oAK/0qLvgJ1AsJDZQDkk=
-github.com/NpoolPlatform/message v0.0.0-20220602110705-f55143ad63e9 h1:JjcQ7+H4xWQBpOg7KLytsSUXKRlmhdQr1nPCjSf+7nM=
-github.com/NpoolPlatform/message v0.0.0-20220602110705-f55143ad63e9/go.mod h1:3Enb49K3JrhlSwA+6bcsBuTdTzVxVKhdkllDGgv0n3M=
+github.com/NpoolPlatform/message v0.0.0-20220602143425-5fd679b1b7ea h1:3kBWqNNHZCqjYvWaDj5l1LfGggWEUsUptsbX0Dg0aMg=
+github.com/NpoolPlatform/message v0.0.0-20220602143425-5fd679b1b7ea/go.mod h1:3Enb49K3JrhlSwA+6bcsBuTdTzVxVKhdkllDGgv0n3M=
 github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da h1:qZX3tw6TEsxaWyY/ZEeEtI6zSZzoYoCiqmDdt6DhxfA=
 github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da/go.mod h1:ieZ2gIh/zSlJ2hIr/fIuMvi5QMGRY0rXugKiBc+5ZKI=
 github.com/NpoolPlatform/review-service v0.0.0-20220322082433-0c2b7ee284ed h1:UkFZGrABgBvQ9qhCXKRJFpZQFxBL+LGugu6iYES/g8I=

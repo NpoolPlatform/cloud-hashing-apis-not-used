@@ -14,6 +14,7 @@ import (
 	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/const"
 	commissionmw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/commission"
 	commissionsettingmw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/commission/setting"
+	fee "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/fee"
 	verifymw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/verify"
 
 	review "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/review"
@@ -127,7 +128,17 @@ func commissionWithdrawable(ctx context.Context, appID, userID, withdrawType str
 	if myCommission < outcoming {
 		return false, xerrors.Errorf("invalid billing input")
 	}
-	if myCommission < amount {
+
+	feeAmount, err := fee.Amount(ctx, coinTypeID)
+	if err != nil {
+		return false, xerrors.Errorf("fail get fee amount: %v", err)
+	}
+
+	if amount <= feeAmount {
+		return false, xerrors.Errorf("transfer amount is not enough for fee")
+	}
+
+	if myCommission-outcoming < amount {
 		return false, xerrors.Errorf("not sufficient funds")
 	}
 
@@ -157,6 +168,16 @@ func benefitWithdrawable(ctx context.Context, appID, userID, coinTypeID, withdra
 	if incoming < outcoming {
 		return false, xerrors.Errorf("invalid billing input")
 	}
+
+	feeAmount, err := fee.Amount(ctx, coinTypeID)
+	if err != nil {
+		return false, xerrors.Errorf("fail get fee amount: %v", err)
+	}
+
+	if amount <= feeAmount {
+		return false, xerrors.Errorf("transfer amount is not enough for fee")
+	}
+
 	if incoming-outcoming < amount {
 		return false, xerrors.Errorf("not sufficient funds %v - %v < %v", incoming, outcoming, amount)
 	}
@@ -355,6 +376,11 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 			logger.Sugar().Errorf("unlock withdraw review fail: %v", err)
 		}
 
+		feeAmount, err := fee.Amount(ctx, coinTypeID)
+		if err != nil {
+			return nil, xerrors.Errorf("fail get fee amount: %v", err)
+		}
+
 		tx, err := grpc2.CreateCoinAccountTransaction(ctx, &billingpb.CreateCoinAccountTransactionRequest{
 			Info: &billingpb.CoinAccountTransaction{
 				AppID:              in.GetInfo().GetAppID(),
@@ -364,6 +390,7 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 				ToAddressID:        in.GetInfo().GetWithdrawToAccountID(),
 				CoinTypeID:         coinTypeID,
 				Amount:             in.GetInfo().GetAmount(),
+				TransactionFee:     feeAmount,
 				Message:            fmt.Sprintf("user withdraw at %v", time.Now()),
 				ChainTransactionID: "",
 			},
@@ -546,6 +573,11 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 			return nil, xerrors.Errorf("fail get account info: %v", err)
 		}
 
+		feeAmount, err := fee.Amount(ctx, withdrawItem.CoinTypeID)
+		if err != nil {
+			return nil, xerrors.Errorf("fail get fee amount: %v", err)
+		}
+
 		tx, err := grpc2.CreateCoinAccountTransaction(ctx, &billingpb.CreateCoinAccountTransactionRequest{
 			Info: &billingpb.CoinAccountTransaction{
 				AppID:              withdrawItem.AppID,
@@ -555,6 +587,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 				ToAddressID:        withdrawItem.WithdrawToAccountID,
 				CoinTypeID:         withdrawItem.CoinTypeID,
 				Amount:             withdrawItem.Amount,
+				TransactionFee:     feeAmount,
 				Message:            fmt.Sprintf("user withdraw at %v", time.Now()),
 				ChainTransactionID: "",
 			},

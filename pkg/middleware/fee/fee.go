@@ -12,7 +12,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func FeeAmount(ctx context.Context, coinTypeID string) (float64, error) {
+func Amount(ctx context.Context, coinTypeID string) (float64, error) {
 	coin, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
 		ID: coinTypeID,
 	})
@@ -30,7 +30,7 @@ func FeeAmount(ctx context.Context, coinTypeID string) (float64, error) {
 
 // TODO: not a fix amount
 func GetCurrentFee(ctx context.Context, in *npool.GetCurrentFeeRequest) (*npool.GetCurrentFeeResponse, error) {
-	amount, err := FeeAmount(ctx, in.GetCoinTypeID())
+	amount, err := Amount(ctx, in.GetCoinTypeID())
 	if err != nil {
 		return nil, xerrors.Errorf("fail get fee amount: %v", err)
 	}
