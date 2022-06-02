@@ -5,4 +5,6 @@ const (
 	ReviewObjectKyc                 = "kyc"
 	ReviewObjectWithdraw            = "withdraw"
 	ReviewObjectUserWithdrawAddress = "user-withdraw-address"
+
+	FeeUSDTAmount = 10
 )

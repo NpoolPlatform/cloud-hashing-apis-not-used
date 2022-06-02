@@ -14,7 +14,7 @@ require (
 	github.com/NpoolPlatform/kyc-management v0.0.0-20220322081324-f537a7bcd812
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20220501112906-1fd771ed0198
 	github.com/NpoolPlatform/login-gateway v0.0.0-20220324144125-0675c5904170
-	github.com/NpoolPlatform/message v0.0.0-20220502074121-c68de0d46f6b
+	github.com/NpoolPlatform/message v0.0.0-20220602110705-f55143ad63e9
 	github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da
 	github.com/NpoolPlatform/review-service v0.0.0-20220322082433-0c2b7ee284ed
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20220322095158-52237287c832
@@ -29,7 +29,7 @@ require (
 	github.com/stretchr/testify v1.7.1
 	github.com/urfave/cli/v2 v2.4.0
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
-	google.golang.org/grpc v1.46.0
+	google.golang.org/grpc v1.46.2
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.2.0
 	google.golang.org/protobuf v1.28.0
 )
