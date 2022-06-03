@@ -37,9 +37,14 @@ import (
 )
 
 const (
-	secondsInDay = 24 * 60 * 60
-	cacheGood    = "order:good"
-	cacheCoin    = "order:coin"
+	secondsInDay          = 24 * 60 * 60
+	cacheGood             = "order:good"
+	cacheCoin             = "order:coin"
+	cacheFixAmount        = "order:fix-amount"
+	cacheDiscount         = "order:discount"
+	cacheSpecialOffer     = "order:user-special-offer"
+	cacheAppGood          = "order:app-good"
+	cacheAppGoodPromotion = "order:app-good-promotion"
 )
 
 func cacheKey(key, id string) string {
@@ -77,32 +82,40 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 	invalidUUID := uuid.UUID{}.String()
 
 	if !base && info.Order.CouponID != invalidUUID {
-		order, err := grpc2.GetOrderByAppUserCouponTypeID(ctx, &orderpb.GetOrderByAppUserCouponTypeIDRequest{
-			AppID:      info.Order.AppID,
-			UserID:     info.Order.UserID,
-			CouponType: orderconst.FixAmountCoupon,
-			CouponID:   info.Order.CouponID,
-		})
-		if err != nil {
-			return nil, xerrors.Errorf("fail check coupon usage: %v", err)
-		}
-
-		if order != nil && order.ID != info.Order.ID {
-			return nil, xerrors.Errorf("fail check coupon usage")
-		}
-
-		couponAllocated, err := grpc2.GetCouponAllocated(ctx, &inspirepb.GetCouponAllocatedDetailRequest{
-			ID: info.Order.CouponID,
-		})
-		if err != nil && info.Order.CouponID != invalidUUID {
-			return nil, xerrors.Errorf("fail get coupon allocated detail: %v", err)
-		}
-
+		couponAllocated := cache.GetEntry(cacheKey(cacheFixAmount, info.Order.CouponID))
 		if couponAllocated != nil {
-			if couponAllocated.Allocated.AppID != info.Order.AppID || couponAllocated.Allocated.UserID != info.Order.UserID {
-				return nil, xerrors.Errorf("invalid coupon")
+			coupon = couponAllocated.(*inspirepb.CouponAllocatedDetail) //nolint
+		}
+
+		if coupon == nil {
+			order, err := grpc2.GetOrderByAppUserCouponTypeID(ctx, &orderpb.GetOrderByAppUserCouponTypeIDRequest{
+				AppID:      info.Order.AppID,
+				UserID:     info.Order.UserID,
+				CouponType: orderconst.FixAmountCoupon,
+				CouponID:   info.Order.CouponID,
+			})
+			if err != nil {
+				return nil, xerrors.Errorf("fail check coupon usage: %v", err)
 			}
-			coupon = couponAllocated
+
+			if order != nil && order.ID != info.Order.ID {
+				return nil, xerrors.Errorf("fail check coupon usage")
+			}
+
+			couponAllocated, err := grpc2.GetCouponAllocated(ctx, &inspirepb.GetCouponAllocatedDetailRequest{
+				ID: info.Order.CouponID,
+			})
+			if err != nil && info.Order.CouponID != invalidUUID {
+				return nil, xerrors.Errorf("fail get coupon allocated detail: %v", err)
+			}
+
+			if couponAllocated != nil {
+				if couponAllocated.Allocated.AppID != info.Order.AppID || couponAllocated.Allocated.UserID != info.Order.UserID {
+					return nil, xerrors.Errorf("invalid coupon")
+				}
+				coupon = couponAllocated
+				cache.AddEntry(cacheKey(cacheFixAmount, info.Order.CouponID), coupon)
+			}
 		}
 	}
 
@@ -140,64 +153,80 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 	var discountCoupon *inspirepb.CouponAllocatedDetail
 
 	if !base && info.Order.DiscountCouponID != invalidUUID {
-		order, err := grpc2.GetOrderByAppUserCouponTypeID(ctx, &orderpb.GetOrderByAppUserCouponTypeIDRequest{
-			AppID:      info.Order.AppID,
-			UserID:     info.Order.UserID,
-			CouponType: orderconst.DiscountCoupon,
-			CouponID:   info.Order.DiscountCouponID,
-		})
-		if err != nil {
-			return nil, xerrors.Errorf("fail check coupon usage: %v", err)
-		}
-
-		if order != nil && order.ID != info.Order.ID {
-			return nil, xerrors.Errorf("fail check coupon usage")
-		}
-
-		discount, err := grpc2.GetCouponAllocated(ctx, &inspirepb.GetCouponAllocatedDetailRequest{
-			ID: info.Order.DiscountCouponID,
-		})
-		if err != nil {
-			return nil, xerrors.Errorf("fail get discount coupon allocated detail: %v", err)
-		}
-
+		discount := cache.GetEntry(cacheKey(cacheDiscount, info.Order.DiscountCouponID))
 		if discount != nil {
-			if discount.Allocated.AppID != info.Order.AppID || discount.Allocated.UserID != info.Order.UserID {
-				return nil, xerrors.Errorf("invalid coupon")
+			discountCoupon = discount.(*inspirepb.CouponAllocatedDetail) //nolint
+		}
+
+		if discountCoupon == nil {
+			order, err := grpc2.GetOrderByAppUserCouponTypeID(ctx, &orderpb.GetOrderByAppUserCouponTypeIDRequest{
+				AppID:      info.Order.AppID,
+				UserID:     info.Order.UserID,
+				CouponType: orderconst.DiscountCoupon,
+				CouponID:   info.Order.DiscountCouponID,
+			})
+			if err != nil {
+				return nil, xerrors.Errorf("fail check coupon usage: %v", err)
 			}
-			discountCoupon = discount
+
+			if order != nil && order.ID != info.Order.ID {
+				return nil, xerrors.Errorf("fail check coupon usage")
+			}
+
+			discount, err := grpc2.GetCouponAllocated(ctx, &inspirepb.GetCouponAllocatedDetailRequest{
+				ID: info.Order.DiscountCouponID,
+			})
+			if err != nil {
+				return nil, xerrors.Errorf("fail get discount coupon allocated detail: %v", err)
+			}
+
+			if discount != nil {
+				if discount.Allocated.AppID != info.Order.AppID || discount.Allocated.UserID != info.Order.UserID {
+					return nil, xerrors.Errorf("invalid coupon")
+				}
+				discountCoupon = discount
+				cache.AddEntry(cacheKey(cacheDiscount, info.Order.DiscountCouponID), discountCoupon)
+			}
 		}
 	}
 
 	var userSpecialReduction *inspirepb.UserSpecialReduction
 
 	if !base && info.Order.UserSpecialReductionID != invalidUUID {
-		order, err := grpc2.GetOrderByAppUserCouponTypeID(ctx, &orderpb.GetOrderByAppUserCouponTypeIDRequest{
-			AppID:      info.Order.AppID,
-			UserID:     info.Order.UserID,
-			CouponType: orderconst.UserSpecialReductionCoupon,
-			CouponID:   info.Order.UserSpecialReductionID,
-		})
-		if err != nil {
-			return nil, xerrors.Errorf("fail check coupon usage: %v", err)
+		special := cache.GetEntry(cacheKey(cacheSpecialOffer, info.Order.UserSpecialReductionID))
+		if special != nil {
+			userSpecialReduction = special.(*inspirepb.UserSpecialReduction) //nolint
 		}
 
-		if order != nil && order.ID != info.Order.ID {
-			return nil, xerrors.Errorf("fail check coupon usage")
-		}
-
-		userSpecial, err := grpc2.GetUserSpecialReduction(ctx, &inspirepb.GetUserSpecialReductionRequest{
-			ID: info.Order.UserSpecialReductionID,
-		})
-		if err != nil {
-			return nil, xerrors.Errorf("fail get user special reduction: %v", err)
-		}
-
-		if userSpecial != nil {
-			if userSpecial.AppID != info.Order.AppID || userSpecial.UserID != info.Order.UserID {
-				return nil, xerrors.Errorf("invalid coupon")
+		if userSpecialReduction == nil {
+			order, err := grpc2.GetOrderByAppUserCouponTypeID(ctx, &orderpb.GetOrderByAppUserCouponTypeIDRequest{
+				AppID:      info.Order.AppID,
+				UserID:     info.Order.UserID,
+				CouponType: orderconst.UserSpecialReductionCoupon,
+				CouponID:   info.Order.UserSpecialReductionID,
+			})
+			if err != nil {
+				return nil, xerrors.Errorf("fail check coupon usage: %v", err)
 			}
-			userSpecialReduction = userSpecial
+
+			if order != nil && order.ID != info.Order.ID {
+				return nil, xerrors.Errorf("fail check coupon usage")
+			}
+
+			userSpecial, err := grpc2.GetUserSpecialReduction(ctx, &inspirepb.GetUserSpecialReductionRequest{
+				ID: info.Order.UserSpecialReductionID,
+			})
+			if err != nil {
+				return nil, xerrors.Errorf("fail get user special reduction: %v", err)
+			}
+
+			if userSpecial != nil {
+				if userSpecial.AppID != info.Order.AppID || userSpecial.UserID != info.Order.UserID {
+					return nil, xerrors.Errorf("invalid coupon")
+				}
+				userSpecialReduction = userSpecial
+				cache.AddEntry(cacheKey(cacheDiscount, info.Order.UserSpecialReductionID), userSpecialReduction)
+			}
 		}
 	}
 
@@ -220,24 +249,43 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 	}
 
 	var appGood *goodspb.AppGoodInfo
-	appGood, err = grpc2.GetAppGoodByAppGood(ctx, &goodspb.GetAppGoodByAppGoodRequest{
-		AppID:  info.Order.GetAppID(),
-		GoodID: info.Order.GetGoodID(),
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail get app good: %v", err)
+
+	cacheAppGoodInfo := cache.GetEntry(cacheKey(cacheAppGood, fmt.Sprintf(info.Order.GetAppID(), info.Order.GetGoodID())))
+	if cacheAppGoodInfo != nil {
+		appGood = cacheAppGoodInfo.(*goodspb.AppGoodInfo) //nolint
 	}
 
-	promotion, err := grpc2.GetAppGoodPromotion(ctx, &goodspb.GetAppGoodPromotionRequest{
-		ID: info.Order.PromotionID,
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail get promotion: %v", err)
-	}
-	if promotion != nil {
-		if info.Order.GetAppID() != promotion.AppID || info.Order.GetGoodID() != promotion.GoodID {
-			return nil, xerrors.Errorf("invalid promotion")
+	if appGood == nil {
+		appGood, err = grpc2.GetAppGoodByAppGood(ctx, &goodspb.GetAppGoodByAppGoodRequest{
+			AppID:  info.Order.GetAppID(),
+			GoodID: info.Order.GetGoodID(),
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail get app good: %v", err)
 		}
+		cache.AddEntry(cacheKey(cacheAppGood, fmt.Sprintf(info.Order.GetAppID(), info.Order.GetGoodID())), appGood)
+	}
+
+	var promotion *goodspb.AppGoodPromotion
+
+	cachedAppGoodPromotion := cache.GetEntry(cacheKey(cacheAppGoodPromotion, info.Order.PromotionID))
+	if cachedAppGoodPromotion != nil {
+		promotion = cachedAppGoodPromotion.(*goodspb.AppGoodPromotion) //nolint
+	}
+
+	if promotion == nil {
+		promotion, err = grpc2.GetAppGoodPromotion(ctx, &goodspb.GetAppGoodPromotionRequest{
+			ID: info.Order.PromotionID,
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail get promotion: %v", err)
+		}
+		if promotion != nil {
+			if info.Order.GetAppID() != promotion.AppID || info.Order.GetGoodID() != promotion.GoodID {
+				return nil, xerrors.Errorf("invalid promotion")
+			}
+		}
+		cache.AddEntry(cacheKey(cacheAppGoodPromotion, info.Order.PromotionID), promotion)
 	}
 
 	return constructOrder(
