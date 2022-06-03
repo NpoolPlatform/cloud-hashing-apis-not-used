@@ -12,7 +12,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func Amount(ctx context.Context, coinTypeID string) (float64, error) {
+func amount(ctx context.Context, coinTypeID string, amount float64) (float64, error) {
 	coin, err := grpc2.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
 		ID: coinTypeID,
 	})
@@ -25,7 +25,15 @@ func Amount(ctx context.Context, coinTypeID string) (float64, error) {
 		return 0, xerrors.Errorf("cannot get usd currency for coin: %v", err)
 	}
 
-	return constant.FeeUSDTAmount / price, nil
+	return amount / price, nil
+}
+
+func Amount(ctx context.Context, coinTypeID string) (float64, error) {
+	return amount(ctx, coinTypeID, constant.FeeUSDTAmount)
+}
+
+func ExtraAmount(ctx context.Context, coinTypeID string) (float64, error) {
+	return amount(ctx, coinTypeID, constant.ExtraPayAmount)
 }
 
 // TODO: not a fix amount

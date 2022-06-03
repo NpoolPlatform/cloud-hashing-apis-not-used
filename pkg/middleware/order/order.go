@@ -11,6 +11,7 @@ import (
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	cache "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/cache"
+	fee "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/fee"
 	gooddetail "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/good"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 	currency "github.com/NpoolPlatform/staker-manager/pkg/middleware/currency"
@@ -711,6 +712,11 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	}
 
 	amountTarget := math.Ceil(amountUSD*10000/paymentCoinCurrency) / 10000
+	extraAmount, err := fee.ExtraAmount(ctx, in.GetPaymentCoinTypeID())
+	if err != nil {
+		return nil, xerrors.Errorf("fail get extra payment amount: %v", err)
+	}
+
 	logger.Sugar().Infof("purchase %v goods with price %v amountUSD %v amount target %v currency %v",
 		myOrder.Info.Order.Order.Units,
 		goodPrice,
@@ -788,6 +794,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	}
 
 	// Watch payment address and change payment state
+	orderDetail.Info.Order.Payment.Amount += extraAmount
 
 	return &npool.CreateOrderPaymentResponse{
 		Info: orderDetail.Info,

@@ -6,5 +6,6 @@ const (
 	ReviewObjectWithdraw            = "withdraw"
 	ReviewObjectUserWithdrawAddress = "user-withdraw-address"
 
-	FeeUSDTAmount = 10
+	FeeUSDTAmount  = 10
+	ExtraPayAmount = 20
 )
