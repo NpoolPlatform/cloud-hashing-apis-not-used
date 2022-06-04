@@ -435,7 +435,7 @@ func GetOrdersByGood(ctx context.Context, in *npool.GetOrdersByGoodRequest) (*np
 	}, nil
 }
 
-func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.SubmitOrderResponse, error) {
+func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.SubmitOrderResponse, error) { //nolint
 	appGood, err := grpc2.GetAppGoodByAppGood(ctx, &goodspb.GetAppGoodByAppGoodRequest{
 		AppID:  in.GetAppID(),
 		GoodID: in.GetGoodID(),
