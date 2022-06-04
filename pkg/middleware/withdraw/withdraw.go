@@ -298,7 +298,7 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 		autoReviewCoinAmount = int(setting.WithdrawAutoReviewCoinAmount)
 	} else {
 		setting, err := grpc2.GetPlatformSetting(ctx, &billingpb.GetPlatformSettingRequest{})
-		if err != nil {
+		if err != nil || setting == nil {
 			return nil, xerrors.Errorf("fail get platform setting: %v", err)
 		}
 		price, err := currency.USDPrice(ctx, coin.Name)
