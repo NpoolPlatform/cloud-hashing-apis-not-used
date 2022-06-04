@@ -460,6 +460,10 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 		return nil, xerrors.Errorf("fail get order good info: %v", err)
 	}
 
+	if int32(in.GetUnits()) > appGood.PurchaseLimit {
+		return nil, xerrors.Errorf("too much units in a single order")
+	}
+
 	// Validate app id: done by gateway
 	// Validate user id: done by gateway
 	// Validate coupon id: done in expandOrder
