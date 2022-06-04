@@ -8,4 +8,6 @@ const (
 
 	FeeUSDTAmount  = 10
 	ExtraPayAmount = 0
+
+	MaxUnpaidOrder = 3
 )

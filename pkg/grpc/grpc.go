@@ -413,6 +413,26 @@ func GetOrdersDetailByGood(ctx context.Context, in *orderpb.GetOrdersDetailByGoo
 	return resp.Infos, nil
 }
 
+func GetPaymentsByAppUserState(ctx context.Context, in *orderpb.GetPaymentsByAppUserStateRequest) ([]*orderpb.Payment, error) {
+	conn, err := grpc2.GetGRPCConn(orderconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get order connection: %v", err)
+	}
+	defer conn.Close()
+
+	cli := orderpb.NewCloudHashingOrderClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
+	defer cancel()
+
+	resp, err := cli.GetPaymentsByAppUserState(ctx, in)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get payments detail: %v", err)
+	}
+
+	return resp.Infos, nil
+}
+
 func CreateOrder(ctx context.Context, in *orderpb.CreateOrderRequest) (*orderpb.Order, error) {
 	conn, err := grpc2.GetGRPCConn(orderconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {

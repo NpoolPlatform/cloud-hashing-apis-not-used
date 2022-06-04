@@ -9,6 +9,7 @@ import (
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
+	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/const"
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	cache "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/cache"
 	fee "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/fee"
@@ -436,6 +437,18 @@ func GetOrdersByGood(ctx context.Context, in *npool.GetOrdersByGoodRequest) (*np
 }
 
 func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.SubmitOrderResponse, error) {
+	payments, err := grpc2.GetPaymentsByAppUserState(ctx, &orderpb.GetPaymentsByAppUserStateRequest{
+		AppID:  in.GetAppID(),
+		UserID: in.GetUserID(),
+		State:  orderconst.PaymentStateWait,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail get wait payments: %v", err)
+	}
+	if len(payments) > constant.MaxUnpaidOrder {
+		return nil, xerrors.Errorf("too many unpaid orders")
+	}
+
 	appGood, err := grpc2.GetAppGoodByAppGood(ctx, &goodspb.GetAppGoodByAppGoodRequest{
 		AppID:  in.GetAppID(),
 		GoodID: in.GetGoodID(),
@@ -461,36 +474,13 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 	}
 
 	if appGood.PurchaseLimit > 0 && int32(in.GetUnits()) > appGood.PurchaseLimit {
-		return nil, xerrors.Errorf("too much units in a single order")
+		return nil, xerrors.Errorf("too many units in a single order")
 	}
 
 	// Validate app id: done by gateway
 	// Validate user id: done by gateway
 	// Validate coupon id: done in expandOrder
 	// TODO: Validate fee ids
-
-	stock, err := stockcli.GetStockOnly(ctx, cruder.NewFilterConds().
-		WithCond(stockconst.StockFieldGoodID, cruder.EQ, structpb.NewStringValue(in.GetGoodID())))
-	if err != nil || stock == nil {
-		return nil, xerrors.Errorf("fail get good stock: %v", err)
-	}
-
-	stock, err = stockcli.AddStockFields(ctx, stock.ID, cruder.NewFilterFields().
-		WithField(stockconst.StockFieldLocked, structpb.NewNumberValue(float64(in.GetUnits()))))
-	if err != nil {
-		return nil, xerrors.Errorf("fail add locked stock: %v", err)
-	}
-
-	defer func() {
-		if err != nil {
-			logger.Sugar().Errorf("try revert locked stock: %v", err)
-			_, err = stockcli.AddStockFields(ctx, stock.ID, cruder.NewFilterFields().
-				WithField(stockconst.StockFieldLocked, structpb.NewNumberValue(float64(int32(in.GetUnits())*-1))))
-			if err != nil {
-				logger.Sugar().Errorf("fail sub locked stock: %v", err)
-			}
-		}
-	}()
 
 	start := (uint32(time.Now().Unix()) + secondsInDay) / secondsInDay * secondsInDay
 	if start < goodInfo.Info.Good.Good.StartAt {
@@ -720,6 +710,29 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	if err != nil {
 		return nil, xerrors.Errorf("fail get extra payment amount: %v", err)
 	}
+
+	stock, err := stockcli.GetStockOnly(ctx, cruder.NewFilterConds().
+		WithCond(stockconst.StockFieldGoodID, cruder.EQ, structpb.NewStringValue(myOrder.Info.AppGood.GoodID)))
+	if err != nil || stock == nil {
+		return nil, xerrors.Errorf("fail get good stock: %v", err)
+	}
+
+	stock, err = stockcli.AddStockFields(ctx, stock.ID, cruder.NewFilterFields().
+		WithField(stockconst.StockFieldLocked, structpb.NewNumberValue(float64(myOrder.Info.Order.Order.Units))))
+	if err != nil {
+		return nil, xerrors.Errorf("fail add locked stock: %v", err)
+	}
+
+	defer func() {
+		if err != nil {
+			logger.Sugar().Errorf("try revert locked stock: %v", err)
+			_, err = stockcli.AddStockFields(ctx, stock.ID, cruder.NewFilterFields().
+				WithField(stockconst.StockFieldLocked, structpb.NewNumberValue(float64(int32(myOrder.Info.Order.Order.Units)*-1))))
+			if err != nil {
+				logger.Sugar().Errorf("fail sub locked stock: %v", err)
+			}
+		}
+	}()
 
 	logger.Sugar().Infof("purchase %v goods with price %v amountUSD %v amount target %v currency %v",
 		myOrder.Info.Order.Order.Units,
