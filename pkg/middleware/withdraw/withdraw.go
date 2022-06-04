@@ -433,14 +433,6 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		return nil, xerrors.Errorf("mismatch reviewer id")
 	}
 
-	user, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
-		AppID:  in.GetAppID(),
-		UserID: in.GetUserID(),
-	})
-	if err != nil || user == nil {
-		return nil, xerrors.Errorf("fail get app user: %v", err)
-	}
-
 	_review, err := grpc2.GetReview(ctx, &reviewpb.GetReviewRequest{
 		ID: in.GetInfo().GetID(),
 	})
@@ -456,6 +448,14 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 	})
 	if err != nil || withdrawItem == nil {
 		return nil, xerrors.Errorf("fail get object: %v", err)
+	}
+
+	user, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
+		AppID:  withdrawItem.AppID,
+		UserID: withdrawItem.UserID,
+	})
+	if err != nil || user == nil {
+		return nil, xerrors.Errorf("fail get app user: %v", err)
 	}
 
 	invalidID := uuid.UUID{}.String()
@@ -523,7 +523,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 	}
 
 	reviewState, _, err = review.GetReviewState(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
-		AppID:      in.GetInfo().GetAppID(),
+		AppID:      withdrawItem.AppID,
 		Domain:     billingconst.ServiceName,
 		ObjectType: constant.ReviewObjectUserWithdrawAddress,
 		ObjectID:   withdrawAccount.ID,
