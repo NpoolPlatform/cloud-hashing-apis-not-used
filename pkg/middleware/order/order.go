@@ -460,7 +460,7 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 		return nil, xerrors.Errorf("fail get order good info: %v", err)
 	}
 
-	if int32(in.GetUnits()) > appGood.PurchaseLimit {
+	if appGood.PurchaseLimit > 0 && int32(in.GetUnits()) > appGood.PurchaseLimit {
 		return nil, xerrors.Errorf("too much units in a single order")
 	}
 
