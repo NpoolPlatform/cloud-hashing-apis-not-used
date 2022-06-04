@@ -436,7 +436,7 @@ func GetOrdersByGood(ctx context.Context, in *npool.GetOrdersByGoodRequest) (*np
 	}, nil
 }
 
-func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.SubmitOrderResponse, error) {
+func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.SubmitOrderResponse, error) { //nolint
 	payments, err := grpc2.GetPaymentsByAppUserState(ctx, &orderpb.GetPaymentsByAppUserStateRequest{
 		AppID:  in.GetAppID(),
 		UserID: in.GetUserID(),
