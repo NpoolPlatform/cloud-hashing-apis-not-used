@@ -543,10 +543,6 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		return nil, xerrors.Errorf("fail get app user: %v", err)
 	}
 
-	if withdrawItem.AppID != in.GetInfo().GetAppID() {
-		return nil, xerrors.Errorf("invalid request")
-	}
-
 	if _review.State != reviewconst.StateWait {
 		return nil, xerrors.Errorf("already reviewed")
 	}
@@ -675,7 +671,7 @@ func UpdateWithdrawReview(ctx context.Context, in *npool.UpdateWithdrawReviewReq
 		return nil, xerrors.Errorf("fail get withdrawItem")
 	}
 	user, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
-		AppID:  reviewInfo.GetAppID(),
+		AppID:  withdrawItem.GetAppID(),
 		UserID: withdrawItem.GetUserID(),
 	})
 	if err != nil {
@@ -703,7 +699,7 @@ func UpdateWithdrawReview(ctx context.Context, in *npool.UpdateWithdrawReviewReq
 	if reviewInfo.GetState() == reviewconst.StateApproved && false {
 		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
 			Info: &notificationpbpb.UserNotification{
-				AppID:  reviewInfo.GetAppID(),
+				AppID:  withdrawItem.GetAppID(),
 				UserID: withdrawItem.GetUserID(),
 			},
 			Message:  in.GetInfo().GetMessage(),
@@ -719,7 +715,7 @@ func UpdateWithdrawReview(ctx context.Context, in *npool.UpdateWithdrawReviewReq
 	if reviewInfo.GetState() == reviewconst.StateRejected && false {
 		_, err = grpc2.CreateNotification(ctx, &notificationpbpb.CreateNotificationRequest{
 			Info: &notificationpbpb.UserNotification{
-				AppID:  reviewInfo.GetAppID(),
+				AppID:  withdrawItem.GetAppID(),
 				UserID: withdrawItem.GetUserID(),
 			},
 			Message:  in.GetInfo().GetMessage(),
