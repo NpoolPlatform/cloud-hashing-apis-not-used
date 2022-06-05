@@ -2,6 +2,7 @@ package incoming
 
 import (
 	"context"
+	"time"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
@@ -14,6 +15,10 @@ import (
 	"golang.org/x/xerrors"
 )
 
+func dayBeginning() uint32 {
+	return uint32(time.Now().Unix() / 24 / 60 / 60 * 24 * 60 * 60)
+}
+
 func getRebate(ctx context.Context, appID, userID string) (float64, error) {
 	settings, err := commissionsetting.GetAmountSettingsByAppUser(ctx, appID, userID)
 	if err != nil {
@@ -23,7 +28,16 @@ func getRebate(ctx context.Context, appID, userID string) (float64, error) {
 	totalAmount := 0.0
 
 	for _, setting := range settings {
-		amount, err := referral.GetPeriodUSDAmount(ctx, appID, userID, setting.Start, setting.End)
+		if setting.Start >= dayBeginning() {
+			continue
+		}
+
+		end := setting.End
+		if end == 0 || end >= dayBeginning() {
+			end = dayBeginning()
+		}
+
+		amount, err := referral.GetPeriodUSDAmount(ctx, appID, userID, setting.Start, end)
 		if err != nil {
 			return 0, xerrors.Errorf("fail get period usd amount: %v", err)
 		}
@@ -37,6 +51,10 @@ func getRebate(ctx context.Context, appID, userID string) (float64, error) {
 
 func getOrderParentRebate(_ context.Context, order *npool.Order, roots, nexts []*inspirepb.AppPurchaseAmountSetting) float64 {
 	if order.Order.Payment == nil || order.Order.Payment.State != orderconst.PaymentStateDone {
+		return 0
+	}
+
+	if order.Order.Order.CreateAt > dayBeginning() {
 		return 0
 	}
 
