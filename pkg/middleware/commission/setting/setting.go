@@ -36,7 +36,7 @@ func UniqueSetting(ctx context.Context, appID string) (bool, error) {
 		AppID: appID,
 	})
 	if err != nil || setting == nil {
-		return false, xerrors.Errorf("fail get app commission setting")
+		return false, xerrors.Errorf("fail get app commission setting: %v", err)
 	}
 
 	return setting.UniqueSetting, nil
