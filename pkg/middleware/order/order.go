@@ -15,7 +15,7 @@ import (
 	fee "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/fee"
 	gooddetail "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/good"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
-	currency "github.com/NpoolPlatform/staker-manager/pkg/middleware/currency"
+	currency "github.com/NpoolPlatform/oracle-manager/pkg/middleware/currency"
 
 	billingpb "github.com/NpoolPlatform/message/npool/cloud-hashing-billing"
 	goodspb "github.com/NpoolPlatform/message/npool/cloud-hashing-goods"

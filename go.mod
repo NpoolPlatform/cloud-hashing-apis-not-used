@@ -12,14 +12,15 @@ require (
 	github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220430143734-fed41a4f6bd6
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20220404143809-82c40930388a
 	github.com/NpoolPlatform/kyc-management v0.0.0-20220322081324-f537a7bcd812
-	github.com/NpoolPlatform/libent-cruder v0.0.0-20220501112906-1fd771ed0198
+	github.com/NpoolPlatform/libent-cruder v0.0.0-20220526050249-956b54fac9f1
 	github.com/NpoolPlatform/login-gateway v0.0.0-20220324144125-0675c5904170
-	github.com/NpoolPlatform/message v0.0.0-20220604070518-a11344218d8d
+	github.com/NpoolPlatform/message v0.0.0-20220606130737-824c3198b695
 	github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da
+	github.com/NpoolPlatform/oracle-manager v0.0.0-20220606135947-0f09e9f3818a
 	github.com/NpoolPlatform/review-service v0.0.0-20220322082433-0c2b7ee284ed
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20220322095158-52237287c832
 	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20220323034620-cea972617ed5
-	github.com/NpoolPlatform/staker-manager v0.0.0-20220530082209-549e370ec2ab
+	github.com/NpoolPlatform/staker-manager v0.0.0-20220606140400-2b2168e378b3
 	github.com/NpoolPlatform/stock-manager v0.0.0-20220501144918-883eece82647
 	github.com/NpoolPlatform/third-gateway v0.0.0-20220322080604-a656d7cba609
 	github.com/go-resty/resty/v2 v2.7.0

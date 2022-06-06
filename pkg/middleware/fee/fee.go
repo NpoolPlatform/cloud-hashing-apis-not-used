@@ -7,7 +7,7 @@ import (
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
-	currency "github.com/NpoolPlatform/staker-manager/pkg/middleware/currency"
+	currency "github.com/NpoolPlatform/oracle-manager/pkg/middleware/currency"
 
 	"golang.org/x/xerrors"
 )
