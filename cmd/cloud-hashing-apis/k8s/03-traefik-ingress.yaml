@@ -20,10 +20,6 @@ spec:
     - host: api.npool.top
       http: &http_rules
         paths:
-          - path: /api/cloud-hashing-apis-v2/v1/get/good
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
           - path: /api/cloud-hashing-apis-v2/v1/create/good
             backend:
               serviceName: cloud-hashing-apis-v2
@@ -167,6 +163,10 @@ spec:
     - host: api.npool.top
       http: &http_rules
         paths:
+          - path: /api/cloud-hashing-apis-v2/v1/get/good
+            backend:
+              serviceName: cloud-hashing-apis-v2
+              servicePort: 50140
           - path: /api/cloud-hashing-apis-v2/v1/get/goods
             backend:
               serviceName: cloud-hashing-apis-v2
