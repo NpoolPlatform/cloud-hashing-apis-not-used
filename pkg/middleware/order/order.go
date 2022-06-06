@@ -15,6 +15,9 @@ import (
 	fee "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/fee"
 	gooddetail "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/good"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
+
+	oraclecli "github.com/NpoolPlatform/oracle-manager/pkg/client"
+	oracleconst "github.com/NpoolPlatform/oracle-manager/pkg/const"
 	currency "github.com/NpoolPlatform/oracle-manager/pkg/middleware/currency"
 
 	billingpb "github.com/NpoolPlatform/message/npool/cloud-hashing-billing"
@@ -667,9 +670,24 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		return nil, xerrors.Errorf("payment coin env different from good coin env")
 	}
 
-	paymentCoinCurrency, err := currency.USDPrice(ctx, paymentCoinInfo.Name)
+	paymentLiveCoinCurrency, err := currency.USDPrice(ctx, paymentCoinInfo.Name)
 	if err != nil {
 		return nil, xerrors.Errorf("cannot get usd currency for payment coin: %v", err)
+	}
+
+	paymentCoinCurrency := paymentLiveCoinCurrency
+	paymentLocalCoinCurrency := 0.0
+
+	payCurrency, err := oraclecli.GetCurrencyOnly(ctx,
+		cruder.NewFilterConds().
+			WithCond(oracleconst.FieldAppID, cruder.EQ, structpb.NewStringValue(myOrder.Info.Order.Order.AppID)).
+			WithCond(oracleconst.FieldCoinTypeID, cruder.EQ, structpb.NewStringValue(in.GetPaymentCoinTypeID())))
+	if err != nil {
+		return nil, xerrors.Errorf("fail get pay currency info: %v", err)
+	}
+	if payCurrency != nil {
+		paymentCoinCurrency = payCurrency.AppPriceVSUSDT
+		paymentLocalCoinCurrency = payCurrency.PriceVSUSDT
 	}
 
 	goodPrice := myOrder.Info.Good.Good.Good.Price
@@ -762,15 +780,17 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	// Generate payment
 	myPayment, err := grpc2.CreatePayment(ctx, &orderpb.CreatePaymentRequest{
 		Info: &orderpb.Payment{
-			AppID:           myOrder.Info.Order.Order.AppID,
-			UserID:          myOrder.Info.Order.Order.UserID,
-			GoodID:          myOrder.Info.Order.Order.GoodID,
-			OrderID:         myOrder.Info.Order.Order.ID,
-			AccountID:       paymentAccount.ID,
-			StartAmount:     balanceAmount,
-			Amount:          amountTarget,
-			CoinUSDCurrency: paymentCoinCurrency,
-			CoinInfoID:      in.GetPaymentCoinTypeID(),
+			AppID:                myOrder.Info.Order.Order.AppID,
+			UserID:               myOrder.Info.Order.Order.UserID,
+			GoodID:               myOrder.Info.Order.Order.GoodID,
+			OrderID:              myOrder.Info.Order.Order.ID,
+			AccountID:            paymentAccount.ID,
+			StartAmount:          balanceAmount,
+			Amount:               amountTarget,
+			CoinUSDCurrency:      paymentCoinCurrency,
+			LocalCoinUSDCurrency: paymentLocalCoinCurrency,
+			LiveCoinUSDCurrency:  paymentLiveCoinCurrency,
+			CoinInfoID:           in.GetPaymentCoinTypeID(),
 		},
 	})
 	if err != nil {
