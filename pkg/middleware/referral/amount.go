@@ -83,7 +83,8 @@ func GetPeriodUSDAmount(ctx context.Context, appID, userID string, start, end ui
 		if order.Order.Order.CreateAt < start || (order.Order.Order.CreateAt >= end && end > 0) {
 			continue
 		}
-		totalAmount += order.Order.Payment.Amount * order.Order.Payment.CoinUSDCurrency
+		orderAmount := order.Order.Payment.Amount * order.Order.Payment.CoinUSDCurrency
+		totalAmount += orderAmount
 	}
 
 	cache.AddEntry(key, &totalAmount)
