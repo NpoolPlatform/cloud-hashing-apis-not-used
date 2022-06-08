@@ -683,7 +683,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 			WithCond(oracleconst.FieldAppID, cruder.EQ, structpb.NewStringValue(myOrder.Info.Order.Order.AppID)).
 			WithCond(oracleconst.FieldCoinTypeID, cruder.EQ, structpb.NewStringValue(in.GetPaymentCoinTypeID())))
 	if err != nil {
-		return nil, xerrors.Errorf("fail get pay currency info: %v", err)
+		logger.Sugar().Errorf("fail get pay currency info: %v", err)
 	}
 	if payCurrency != nil {
 		paymentCoinCurrency = payCurrency.AppPriceVSUSDT
