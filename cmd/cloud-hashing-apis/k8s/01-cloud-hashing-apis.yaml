@@ -49,6 +49,8 @@ kind: Service
 metadata:
   name: cloud-hashing-apis-v2
   namespace: kube-system
+  labels:
+    app: cloud-hashing-apis-v2
 spec:
   ports:
   - name: http
