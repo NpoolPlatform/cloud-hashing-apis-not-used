@@ -3,7 +3,7 @@ kind: ServiceMonitor
 metadata:
   labels:
     release: prometheus
-  name: prometheus-kube-prometheus-alertmanager
+  name: prometheus-cloud-hashing-apis-v2
   namespace: monitor
 spec:
   endpoints:
