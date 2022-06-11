@@ -603,6 +603,8 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 
 lUpdateReview:
 	_review.State = in.GetInfo().GetState()
+	_review.ReviewerID = in.GetInfo().GetReviewerID()
+
 	_review, err = grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{
 		Info: _review,
 	})
