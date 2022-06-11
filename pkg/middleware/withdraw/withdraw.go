@@ -330,13 +330,6 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 		return nil, xerrors.Errorf("fail get wallet balance: %v", err)
 	}
 
-	withdrawItem, err := grpc2.CreateUserWithdrawItem(ctx, &billingpb.CreateUserWithdrawItemRequest{
-		Info: in.GetInfo(),
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail create user withdraw item: %v", err)
-	}
-
 	reason := "auto review"
 	autoReview := true
 
@@ -352,6 +345,13 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 	err = redis2.TryLock(reviewLockKey, 0)
 	if err != nil {
 		return nil, xerrors.Errorf("fail lock withdraw review: %v", err)
+	}
+
+	withdrawItem, err := grpc2.CreateUserWithdrawItem(ctx, &billingpb.CreateUserWithdrawItemRequest{
+		Info: in.GetInfo(),
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail create user withdraw item: %v", err)
 	}
 
 	_review, err := grpc2.CreateReview(ctx, &reviewpb.CreateReviewRequest{
