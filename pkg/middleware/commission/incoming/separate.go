@@ -99,6 +99,20 @@ func getPeriodRebate(ctx context.Context, appID, userID string, roots, nexts []*
 	return totalRootAmount, nil
 }
 
+func findRootInviter(_ context.Context, rootUserID, inviteeID string, invitees []*inspirepb.RegistrationInvitation) (string, error) {
+getInviter:
+	for _, iv := range invitees {
+		if iv.InviteeID == inviteeID {
+			if iv.InviterID == rootUserID {
+				return iv.InviteeID, nil
+			}
+			inviteeID = iv.InviterID
+			goto getInviter
+		}
+	}
+	return "", xerrors.Errorf("cannot find root inviter")
+}
+
 func getIncomings(ctx context.Context, appID, userID string) (float64, error) {
 	roots, err := commissionsetting.GetAmountSettingsByAppUser(ctx, appID, userID)
 	if err != nil {
@@ -113,7 +127,12 @@ func getIncomings(ctx context.Context, appID, userID string) (float64, error) {
 	totalRootAmount := 0.0
 
 	for _, iv := range invitees {
-		nexts, err := commissionsetting.GetAmountSettingsByAppUser(ctx, iv.AppID, iv.InviteeID)
+		inviteeID, err := findRootInviter(ctx, userID, iv.InviteeID, invitees)
+		if err != nil {
+			return 0, xerrors.Errorf("fail find root inviter: %v", err)
+		}
+
+		nexts, err := commissionsetting.GetAmountSettingsByAppUser(ctx, iv.AppID, inviteeID)
 		if err != nil {
 			return 0, xerrors.Errorf("fail get amount settings: %v", err)
 		}
