@@ -103,7 +103,6 @@ func findRootInviter(_ context.Context, rootUserID, inviteeID string, invitees [
 getInviter:
 	for _, iv := range invitees {
 		if iv.InviteeID == inviteeID {
-			logger.Sugar().Infof("root %v invitee %v inviter %v", rootUserID, inviteeID, iv.InviterID)
 			if iv.InviterID == rootUserID {
 				return iv.InviteeID, nil
 			}
