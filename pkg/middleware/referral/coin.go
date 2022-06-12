@@ -59,7 +59,9 @@ func getCoinSummaries(ctx context.Context, appID, userID string) ([]*npool.CoinS
 		summary.Amount += amount
 	}
 
-	cache.AddEntry(CacheKey(appID, userID, cacheCoinSummaries), summaries)
+	if len(summaries) > 0 {
+		cache.AddEntry(CacheKey(appID, userID, cacheCoinSummaries), summaries)
+	}
 
 	return summaries, nil
 }

@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-const expireDuration = 24 * time.Hour
+const expireDuration = 4 * time.Hour
 
 type entry struct {
 	createAt time.Time

@@ -91,7 +91,9 @@ func GetAmountSettingsByAppUser(ctx context.Context, appID, userID string) ([]*i
 		}
 	}
 
-	cache.AddEntry(referral.CacheKey(appID, userID, cacheFor), settings)
+	if len(settings) > 0 {
+		cache.AddEntry(referral.CacheKey(appID, userID, cacheFor), settings)
+	}
 
 	return settings, nil
 }

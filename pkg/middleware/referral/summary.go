@@ -102,7 +102,9 @@ func getLayeredCoinSummaries(ctx context.Context, appID, userID string) ([]*npoo
 		}
 	}
 
-	cache.AddEntry(CacheKey(appID, userID, cacheLayeredCoinSummaries), sums)
+	if len(sums) > 0 {
+		cache.AddEntry(CacheKey(appID, userID, cacheLayeredCoinSummaries), sums)
+	}
 
 	return sums, nil
 }
