@@ -17,9 +17,6 @@ spec:
         - name: cloud-hashing-apis-v2
           image: uhub.service.ucloud.cn/entropypool/cloud-hashing-apis-v2:feature
           imagePullPolicy: Always
-          ports:
-            - name: metrics
-              containerPort: 50143
           env:
             - name: ENV_ENVIRONMENT_TARGET
               valueFrom:
