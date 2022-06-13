@@ -3,7 +3,7 @@ kind: ServiceMonitor
 metadata:
   labels:
     release: prometheus
-  name: prometheus-cloud-hashing-apis-v2
+  name: cloud-hashing-apis-v2
   namespace: monitor
 spec:
   endpoints:
@@ -15,5 +15,3 @@ spec:
   selector:
     matchLabels:
       app: cloud-hashing-apis-v2
-      release: prometheus
-      self-monitor: "true"
