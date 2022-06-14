@@ -38,6 +38,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
+// nolint
 func Outcoming(ctx context.Context, appID, userID, coinTypeID, withdrawType string) (float64, error) {
 	withdraws := []*billingpb.UserWithdrawItem{}
 	var err error
@@ -95,6 +96,26 @@ func Outcoming(ctx context.Context, appID, userID, coinTypeID, withdrawType stri
 		}
 
 		outcoming += info.Amount
+	}
+
+	states, err := GetByAppUser(ctx, &npool.GetUserWithdrawsByAppUserRequest{
+		AppID:  appID,
+		UserID: userID,
+	})
+	if err != nil {
+		return 0, xerrors.Errorf("fail get user withdraws: %v", err)
+	}
+
+	for _, s := range states.Infos {
+		if s.Withdraw.WithdrawType != withdrawType {
+			continue
+		}
+		if s.Withdraw.CoinTypeID != coinTypeID {
+			continue
+		}
+		if s.State == reviewconst.StateWait {
+			outcoming += s.Withdraw.Amount
+		}
 	}
 
 	return outcoming, nil

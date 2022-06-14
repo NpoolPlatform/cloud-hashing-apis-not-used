@@ -16,19 +16,12 @@ pipeline {
     stage('Prepare') {
       steps {
         // Get linter and other build tools.
-        sh 'go get golang.org/x/lint/golint'
-        sh 'go install golang.org/x/lint/golint'
-        sh 'go get github.com/tebeka/go2xunit'
-        sh 'go install github.com/tebeka/go2xunit'
-        sh 'go get github.com/t-yuki/gocover-cobertura'
-        sh 'go install github.com/t-yuki/gocover-cobertura'
-
-        // Get dependencies
-        sh 'go get golang.org/x/image/tiff/lzw'
-        sh 'go install golang.org/x/image/tiff/lzw'
-        sh 'go get github.com/boombuler/barcode'
-        sh 'go install github.com/boombuler/barcode'
-        sh 'make deps'
+        sh '''
+          go install golang.org/x/lint/golint@latest
+          go install github.com/tebeka/go2xunit@latest
+          go install github.com/t-yuki/gocover-cobertura@latest
+          make deps
+        '''
       }
     }
 
@@ -117,10 +110,22 @@ pipeline {
     stage('Generate docker image for development') {
       when {
         expression { BUILD_TARGET == 'true' }
+        expression { BRANCH_NAME == 'master' }
       }
       steps {
         sh 'make verify-build'
         sh 'DEVELOPMENT=development DOCKER_REGISTRY=$DOCKER_REGISTRY make generate-docker-images'
+      }
+    }
+
+    stage('Generate docker image for feature test') {
+      when {
+        expression { BUILD_TARGET == 'true' }
+        expression { BRANCH_NAME != 'master' }
+      }
+      steps {
+        sh 'make verify-build'
+        sh 'DEVELOPMENT=feature DOCKER_REGISTRY=$DOCKER_REGISTRY make generate-docker-images'
       }
     }
 
