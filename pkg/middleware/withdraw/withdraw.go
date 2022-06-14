@@ -39,7 +39,7 @@ import (
 )
 
 // nolint
-func Outcoming(ctx context.Context, appID, userID, coinTypeID, withdrawType string) (float64, error) {
+func Outcoming(ctx context.Context, appID, userID, coinTypeID, withdrawType string, includeReviewing bool) (float64, error) {
 	withdraws := []*billingpb.UserWithdrawItem{}
 	var err error
 
@@ -98,23 +98,25 @@ func Outcoming(ctx context.Context, appID, userID, coinTypeID, withdrawType stri
 		outcoming += info.Amount
 	}
 
-	states, err := GetByAppUser(ctx, &npool.GetUserWithdrawsByAppUserRequest{
-		AppID:  appID,
-		UserID: userID,
-	})
-	if err != nil {
-		return 0, xerrors.Errorf("fail get user withdraws: %v", err)
-	}
+	if includeReviewing {
+		states, err := GetByAppUser(ctx, &npool.GetUserWithdrawsByAppUserRequest{
+			AppID:  appID,
+			UserID: userID,
+		})
+		if err != nil {
+			return 0, xerrors.Errorf("fail get user withdraws: %v", err)
+		}
 
-	for _, s := range states.Infos {
-		if s.Withdraw.WithdrawType != withdrawType {
-			continue
-		}
-		if s.Withdraw.CoinTypeID != coinTypeID {
-			continue
-		}
-		if s.State == reviewconst.StateWait {
-			outcoming += s.Withdraw.Amount
+		for _, s := range states.Infos {
+			if s.Withdraw.WithdrawType != withdrawType {
+				continue
+			}
+			if s.Withdraw.CoinTypeID != coinTypeID {
+				continue
+			}
+			if s.State == reviewconst.StateWait {
+				outcoming += s.Withdraw.Amount
+			}
 		}
 	}
 
@@ -130,7 +132,7 @@ func CommissionCoinTypeID(ctx context.Context) (string, error) {
 	return coin.CoinTypeID, nil
 }
 
-func commissionWithdrawable(ctx context.Context, appID, userID, withdrawType string, amount float64) (bool, error) {
+func commissionWithdrawable(ctx context.Context, appID, userID, withdrawType string, amount float64, includeReviewing bool) (bool, error) {
 	myCommission, err := commissionmw.GetCommission(ctx, appID, userID)
 	if err != nil {
 		return false, xerrors.Errorf("fail get total amount: %v", err)
@@ -141,7 +143,7 @@ func commissionWithdrawable(ctx context.Context, appID, userID, withdrawType str
 		return false, xerrors.Errorf("fail get coin type id: %v", err)
 	}
 
-	outcoming, err := Outcoming(ctx, appID, userID, coinTypeID, withdrawType)
+	outcoming, err := Outcoming(ctx, appID, userID, coinTypeID, withdrawType, includeReviewing)
 	if err != nil {
 		return false, xerrors.Errorf("fail get withdraw outcoming: %v", err)
 	}
@@ -166,7 +168,7 @@ func commissionWithdrawable(ctx context.Context, appID, userID, withdrawType str
 	return true, nil
 }
 
-func benefitWithdrawable(ctx context.Context, appID, userID, coinTypeID, withdrawType string, amount float64) (bool, error) {
+func benefitWithdrawable(ctx context.Context, appID, userID, coinTypeID, withdrawType string, amount float64, includeReviewing bool) (bool, error) {
 	benefits, err := grpc2.GetUserBenefitsByAppUserCoin(ctx, &billingpb.GetUserBenefitsByAppUserCoinRequest{
 		AppID:      appID,
 		UserID:     userID,
@@ -181,7 +183,7 @@ func benefitWithdrawable(ctx context.Context, appID, userID, coinTypeID, withdra
 		incoming += info.Amount
 	}
 
-	outcoming, err := Outcoming(ctx, appID, userID, coinTypeID, withdrawType)
+	outcoming, err := Outcoming(ctx, appID, userID, coinTypeID, withdrawType, includeReviewing)
 	if err != nil {
 		return false, xerrors.Errorf("fail get withdraw outcoming: %v", err)
 	}
@@ -206,12 +208,12 @@ func benefitWithdrawable(ctx context.Context, appID, userID, coinTypeID, withdra
 	return true, nil
 }
 
-func withdrawable(ctx context.Context, appID, userID, coinTypeID, withdrawType string, amount float64) (bool, error) {
+func withdrawable(ctx context.Context, appID, userID, coinTypeID, withdrawType string, amount float64, includeReviewing bool) (bool, error) {
 	switch withdrawType {
 	case billingstate.WithdrawTypeBenefit:
-		return benefitWithdrawable(ctx, appID, userID, coinTypeID, withdrawType, amount)
+		return benefitWithdrawable(ctx, appID, userID, coinTypeID, withdrawType, amount, includeReviewing)
 	case billingstate.WithdrawTypeCommission:
-		return commissionWithdrawable(ctx, appID, userID, withdrawType, amount)
+		return commissionWithdrawable(ctx, appID, userID, withdrawType, amount, includeReviewing)
 	}
 	return false, xerrors.Errorf("invalid withdraw type")
 }
@@ -271,6 +273,7 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 		coinTypeID,
 		in.GetInfo().GetWithdrawType(),
 		in.GetInfo().GetAmount(),
+		true,
 	); !ok || err != nil {
 		return nil, xerrors.Errorf("user not withdrawable: %v", err)
 	}
@@ -505,6 +508,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		withdrawItem.CoinTypeID,
 		withdrawItem.WithdrawType,
 		withdrawItem.Amount,
+		false,
 	); !ok || err != nil {
 		return nil, xerrors.Errorf("user not withdrawable: %v", err)
 	}

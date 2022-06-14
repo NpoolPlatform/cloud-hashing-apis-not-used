@@ -30,7 +30,7 @@ func (s *Server) GetCommissionByAppUser(ctx context.Context, in *npool.GetCommis
 		return &npool.GetCommissionByAppUserResponse{}, status.Error(codes.Internal, err.Error())
 	}
 
-	outcoming, err := withdraw.Outcoming(ctx, in.GetAppID(), in.GetUserID(), coinTypeID, billingstate.WithdrawTypeCommission)
+	outcoming, err := withdraw.Outcoming(ctx, in.GetAppID(), in.GetUserID(), coinTypeID, billingstate.WithdrawTypeCommission, true)
 	if err != nil {
 		logger.Sugar().Errorf("get commission withdraw error: %v", err)
 		return &npool.GetCommissionByAppUserResponse{}, status.Error(codes.Internal, err.Error())
