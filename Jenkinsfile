@@ -16,12 +16,7 @@ pipeline {
     stage('Prepare') {
       steps {
         // Get linter and other build tools.
-        sh '''
-          go install golang.org/x/lint/golint@latest
-          go install github.com/tebeka/go2xunit@latest
-          go install github.com/t-yuki/gocover-cobertura@latest
-          make deps
-        '''
+        sh 'make deps'
       }
     }
 
