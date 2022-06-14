@@ -38,6 +38,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
+// nolint
 func Outcoming(ctx context.Context, appID, userID, coinTypeID, withdrawType string) (float64, error) {
 	withdraws := []*billingpb.UserWithdrawItem{}
 	var err error

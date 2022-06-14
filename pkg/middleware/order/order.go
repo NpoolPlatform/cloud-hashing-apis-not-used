@@ -548,6 +548,10 @@ func peekIdlePaymentAccount(ctx context.Context, order *npool.Order, paymentCoin
 	var paymentAccount *billingpb.GoodPayment
 
 	for _, info := range payments {
+		if uint32(time.Now().Unix()) <= info.AvailableAt {
+			continue
+		}
+
 		err = accountlock.Lock(info.AccountID)
 		if err != nil {
 			continue
