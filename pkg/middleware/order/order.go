@@ -552,6 +552,10 @@ func peekIdlePaymentAccount(ctx context.Context, order *npool.Order, paymentCoin
 			continue
 		}
 
+		if !info.Idle {
+			continue
+		}
+
 		err = accountlock.Lock(info.AccountID)
 		if err != nil {
 			continue
