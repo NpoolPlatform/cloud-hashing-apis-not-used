@@ -62,7 +62,10 @@ func GetAll(ctx context.Context, in *npool.GetGoodsRequest) (*npool.GetGoodsResp
 		return nil, xerrors.Errorf("fail get goods info: %v", err)
 	}
 
-	coinInfos, err := grpc2.GetCoinInfos(ctx, &coininfopb.GetCoinInfosRequest{})
+	coinInfos, err := grpc2.GetCoinInfos(ctx, &coininfopb.GetCoinInfosRequest{
+		Offset: 0,
+		Limit:  100,
+	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get coin infos: %v", err)
 	}
@@ -134,7 +137,10 @@ func Get(ctx context.Context, in *npool.GetGoodRequest) (*npool.GetGoodResponse,
 		return nil, xerrors.Errorf("fail get good detail: %v", err)
 	}
 
-	coinInfos, err := grpc2.GetCoinInfos(ctx, &coininfopb.GetCoinInfosRequest{})
+	coinInfos, err := grpc2.GetCoinInfos(ctx, &coininfopb.GetCoinInfosRequest{
+		Offset: 0,
+		Limit:  100,
+	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get coin infos: %v", err)
 	}
@@ -167,7 +173,10 @@ func GetRecommendsByApp(ctx context.Context, in *npool.GetRecommendGoodsByAppReq
 		return nil, xerrors.Errorf("fail get goods info: %v", err)
 	}
 
-	coinInfos, err := grpc2.GetCoinInfos(ctx, &coininfopb.GetCoinInfosRequest{})
+	coinInfos, err := grpc2.GetCoinInfos(ctx, &coininfopb.GetCoinInfosRequest{
+		Offset: 0,
+		Limit:  100,
+	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get coin infos: %v", err)
 	}
@@ -211,7 +220,10 @@ func GetByApp(ctx context.Context, in *npool.GetGoodsByAppRequest) (*npool.GetGo
 		return nil, xerrors.Errorf("fail get goods info: %v", err)
 	}
 
-	coinInfos, err := grpc2.GetCoinInfos(ctx, &coininfopb.GetCoinInfosRequest{})
+	coinInfos, err := grpc2.GetCoinInfos(ctx, &coininfopb.GetCoinInfosRequest{
+		Offset: 0,
+		Limit:  100,
+	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get coin infos: %v", err)
 	}
