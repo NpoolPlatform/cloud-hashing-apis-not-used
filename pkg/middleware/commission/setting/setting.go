@@ -7,8 +7,10 @@ import (
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	cache "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/cache"
 	referral "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral"
+	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
 
+	"github.com/google/uuid"
 	"golang.org/x/xerrors"
 )
 
@@ -98,13 +100,16 @@ func GetAmountSettingsByAppUser(ctx context.Context, appID, userID string) ([]*i
 	return settings, nil
 }
 
-func GetAmountSettingByTimestamp(settings []*inspirepb.AppPurchaseAmountSetting, timestamp uint32) *inspirepb.AppPurchaseAmountSetting {
+func GetOrderAmountSetting(settings []*inspirepb.AppPurchaseAmountSetting, order *npool.Order) *inspirepb.AppPurchaseAmountSetting {
+	invalidID := uuid.UUID{}.String()
 	for _, s := range settings {
 		if s.Amount > 0 {
 			continue
 		}
-		if s.Start <= timestamp && (timestamp < s.End || s.End == 0) {
-			return s
+		if s.Start <= order.Order.Order.CreateAt && (order.Order.Order.CreateAt < s.End || s.End == 0) {
+			if s.GoodID == invalidID || s.GoodID == order.Order.Order.GoodID {
+				return s
+			}
 		}
 	}
 	return nil
