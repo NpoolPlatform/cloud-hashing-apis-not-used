@@ -13,8 +13,8 @@ import (
 
 	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/const"
 	commissionmw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/commission"
-	commissionsettingmw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/commission/setting"
 	fee "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/fee"
+	commissionsettingmw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral/setting"
 	verifymw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/verify"
 
 	review "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/review"

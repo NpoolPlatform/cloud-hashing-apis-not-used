@@ -6,7 +6,7 @@ import (
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	cache "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/cache"
-	referral "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral"
+	cachekey "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral/cachekey"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
 
@@ -63,7 +63,7 @@ func getAmountSettingsByApp(ctx context.Context, appID string) (*inspirepb.AppPu
 func GetAmountSettingsByAppUser(ctx context.Context, appID, userID string) ([]*inspirepb.AppPurchaseAmountSetting, error) {
 	cacheFor := "purchase:amount:settings"
 
-	mySettings := cache.GetEntry(referral.CacheKey(appID, userID, cacheFor))
+	mySettings := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheFor))
 	if mySettings != nil {
 		return mySettings.([]*inspirepb.AppPurchaseAmountSetting), nil
 	}
@@ -94,7 +94,7 @@ func GetAmountSettingsByAppUser(ctx context.Context, appID, userID string) ([]*i
 	}
 
 	if len(settings) > 0 {
-		cache.AddEntry(referral.CacheKey(appID, userID, cacheFor), settings)
+		cache.AddEntry(cachekey.CacheKey(appID, userID, cacheFor), settings)
 	}
 
 	return settings, nil
@@ -108,6 +108,21 @@ func GetOrderAmountSetting(settings []*inspirepb.AppPurchaseAmountSetting, order
 		}
 		if s.Start <= order.Order.Order.CreateAt && (order.Order.Order.CreateAt < s.End || s.End == 0) {
 			if s.GoodID == invalidID || s.GoodID == order.Order.Order.GoodID {
+				return s
+			}
+		}
+	}
+	return nil
+}
+
+func GetGoodAmountSetting(settings []*inspirepb.AppPurchaseAmountSetting, goodID string) *inspirepb.AppPurchaseAmountSetting {
+	invalidID := uuid.UUID{}.String()
+	for _, s := range settings {
+		if s.Amount > 0 {
+			continue
+		}
+		if s.End == 0 {
+			if s.GoodID == invalidID || s.GoodID == goodID {
 				return s
 			}
 		}

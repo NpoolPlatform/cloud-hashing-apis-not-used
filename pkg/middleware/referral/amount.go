@@ -7,6 +7,7 @@ import (
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
 	cache "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/cache"
+	cachekey "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral/cachekey"
 	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
 
 	"golang.org/x/xerrors"
@@ -18,7 +19,7 @@ const (
 )
 
 func GetUSDAmount(ctx context.Context, appID, userID string) (float64, error) {
-	amount := cache.GetEntry(CacheKey(appID, userID, cacheUSDAmount))
+	amount := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheUSDAmount))
 	if amount != nil {
 		return *(amount.(*float64)), nil
 	}
@@ -39,7 +40,7 @@ func GetUSDAmount(ctx context.Context, appID, userID string) (float64, error) {
 		totalAmount += orderAmount
 	}
 
-	cache.AddEntry(CacheKey(appID, userID, cacheUSDAmount), &totalAmount)
+	cache.AddEntry(cachekey.CacheKey(appID, userID, cacheUSDAmount), &totalAmount)
 
 	return totalAmount, nil
 }
@@ -63,7 +64,7 @@ func GetSubUSDAmount(ctx context.Context, appID, userID string) (float64, error)
 }
 
 func GetPeriodUSDAmount(ctx context.Context, appID, userID string, start, end uint32) (float64, error) {
-	key := fmt.Sprintf("%v:%v:%v", CacheKey(appID, userID, cachePeriodUSDAmount), start, end)
+	key := fmt.Sprintf("%v:%v:%v", cachekey.CacheKey(appID, userID, cachePeriodUSDAmount), start, end)
 	amount := cache.GetEntry(key)
 	if amount != nil {
 		return *(amount.(*float64)), nil

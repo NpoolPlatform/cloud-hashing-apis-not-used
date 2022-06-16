@@ -5,6 +5,7 @@ import (
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	cache "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/cache"
+	cachekey "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral/cachekey"
 	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
@@ -20,7 +21,7 @@ const (
 )
 
 func getReferralUser(ctx context.Context, appID, userID string) (*appusermgrpb.AppUser, error) {
-	user := cache.GetEntry(CacheKey(appID, userID, cacheReferralUser))
+	user := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheReferralUser))
 	if user != nil {
 		return user.(*appusermgrpb.AppUser), nil
 	}
@@ -36,13 +37,13 @@ func getReferralUser(ctx context.Context, appID, userID string) (*appusermgrpb.A
 		return nil, xerrors.Errorf("invalid app user")
 	}
 
-	cache.AddEntry(CacheKey(appID, userID, cacheReferralUser), user)
+	cache.AddEntry(cachekey.CacheKey(appID, userID, cacheReferralUser), user)
 
 	return user.(*appusermgrpb.AppUser), nil
 }
 
 func getReferralExtra(ctx context.Context, appID, userID string) (*appusermgrpb.AppUserExtra, error) {
-	extra := cache.GetEntry(CacheKey(appID, userID, cacheReferralExtra))
+	extra := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheReferralExtra))
 	if extra != nil {
 		return extra.(*appusermgrpb.AppUserExtra), nil
 	}
@@ -55,13 +56,13 @@ func getReferralExtra(ctx context.Context, appID, userID string) (*appusermgrpb.
 		return nil, xerrors.Errorf("fail get app user extra: %v", err)
 	}
 
-	cache.AddEntry(CacheKey(appID, userID, cacheReferralExtra), extra)
+	cache.AddEntry(cachekey.CacheKey(appID, userID, cacheReferralExtra), extra)
 
 	return extra.(*appusermgrpb.AppUserExtra), nil
 }
 
 func getLayeredGoodSummaries(ctx context.Context, appID, userID string) ([]*npool.GoodSummary, error) {
-	mySummaries := cache.GetEntry(CacheKey(appID, userID, cacheLayeredGoodSummaries))
+	mySummaries := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheLayeredGoodSummaries))
 	if mySummaries != nil {
 		return mySummaries.([]*npool.GoodSummary), nil
 	}
@@ -105,14 +106,14 @@ func getLayeredGoodSummaries(ctx context.Context, appID, userID string) ([]*npoo
 	}
 
 	if len(sums) > 0 {
-		cache.AddEntry(CacheKey(appID, userID, cacheLayeredGoodSummaries), sums)
+		cache.AddEntry(cachekey.CacheKey(appID, userID, cacheLayeredGoodSummaries), sums)
 	}
 
 	return sums, nil
 }
 
 func getLayeredCoinSummaries(ctx context.Context, appID, userID string) ([]*npool.CoinSummary, error) {
-	mySummaries := cache.GetEntry(CacheKey(appID, userID, cacheLayeredCoinSummaries))
+	mySummaries := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheLayeredCoinSummaries))
 	if mySummaries != nil {
 		return mySummaries.([]*npool.CoinSummary), nil
 	}
@@ -155,7 +156,7 @@ func getLayeredCoinSummaries(ctx context.Context, appID, userID string) ([]*npoo
 	}
 
 	if len(sums) > 0 {
-		cache.AddEntry(CacheKey(appID, userID, cacheLayeredCoinSummaries), sums)
+		cache.AddEntry(cachekey.CacheKey(appID, userID, cacheLayeredCoinSummaries), sums)
 	}
 
 	return sums, nil

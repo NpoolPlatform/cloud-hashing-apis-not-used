@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/commission/incoming"
-	"github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/commission/setting"
+	"github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral/setting"
 
 	"golang.org/x/xerrors"
 )

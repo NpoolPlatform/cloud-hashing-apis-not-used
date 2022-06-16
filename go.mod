@@ -14,7 +14,7 @@ require (
 	github.com/NpoolPlatform/kyc-management v0.0.0-20220322081324-f537a7bcd812
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20220526050249-956b54fac9f1
 	github.com/NpoolPlatform/login-gateway v0.0.0-20220324144125-0675c5904170
-	github.com/NpoolPlatform/message v0.0.0-20220616063027-86b1c0ba332c
+	github.com/NpoolPlatform/message v0.0.0-20220616080347-b15b27d82547
 	github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da
 	github.com/NpoolPlatform/oracle-manager v0.0.0-20220615040511-dc235b31fa14
 	github.com/NpoolPlatform/review-service v0.0.0-20220322082433-0c2b7ee284ed

@@ -6,8 +6,8 @@ import (
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
-	commissionsetting "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/commission/setting"
 	"github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral"
+	commissionsetting "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral/setting"
 
 	"golang.org/x/xerrors"
 )
