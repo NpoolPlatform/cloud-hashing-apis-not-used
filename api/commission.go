@@ -48,3 +48,25 @@ func (s *Server) GetCommissionByAppUser(ctx context.Context, in *npool.GetCommis
 		},
 	}, nil
 }
+
+func (s *Server) GetGoodCommissions(ctx context.Context, in *npool.GetGoodCommissionsRequest) (*npool.GetGoodCommissionsResponse, error) {
+	commissions, err := commission.GetGoodCommissions(ctx, in.GetAppID(), in.GetUserID(), false)
+	if err != nil {
+		logger.Sugar().Errorf("get good commission error: %v", err)
+		return &npool.GetGoodCommissionsResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return &npool.GetGoodCommissionsResponse{
+		Infos: commissions,
+	}, nil
+}
+
+func (s *Server) GetUserGoodCommissions(ctx context.Context, in *npool.GetUserGoodCommissionsRequest) (*npool.GetUserGoodCommissionsResponse, error) {
+	commissions, err := commission.GetGoodCommissions(ctx, in.GetAppID(), in.GetTargetUserID(), false)
+	if err != nil {
+		logger.Sugar().Errorf("get good commission error: %v", err)
+		return &npool.GetUserGoodCommissionsResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return &npool.GetUserGoodCommissionsResponse{
+		Infos: commissions,
+	}, nil
+}
