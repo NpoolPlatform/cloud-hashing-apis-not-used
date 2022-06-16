@@ -107,7 +107,7 @@ func GetOrderAmountSetting(settings []*inspirepb.AppPurchaseAmountSetting, order
 			continue
 		}
 		if s.Start <= order.Order.Order.CreateAt && (order.Order.Order.CreateAt < s.End || s.End == 0) {
-			if s.GoodID == invalidID || s.GoodID == order.Order.Order.GoodID {
+			if s.GoodID == invalidID || s.GoodID == "" || s.GoodID == order.Order.Order.GoodID {
 				return s
 			}
 		}
@@ -122,7 +122,7 @@ func GetGoodAmountSetting(settings []*inspirepb.AppPurchaseAmountSetting, goodID
 			continue
 		}
 		if s.End == 0 {
-			if s.GoodID == invalidID || s.GoodID == goodID {
+			if s.GoodID == invalidID || s.GoodID == "" || s.GoodID == goodID {
 				return s
 			}
 		}
