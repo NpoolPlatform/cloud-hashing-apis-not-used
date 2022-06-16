@@ -4,10 +4,16 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	"github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral"
 	rsetting "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral/setting"
+	inspirecli "github.com/NpoolPlatform/cloud-hashing-inspire/pkg/client"
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
+	thirdgwpb "github.com/NpoolPlatform/message/npool/thirdgateway"
+	thirdgwcli "github.com/NpoolPlatform/third-gateway/pkg/client"
+	thirdgwconst "github.com/NpoolPlatform/third-gateway/pkg/const"
 )
 
 func GetAmountSettings(ctx context.Context, appID, userID string) ([]*inspirepb.AppPurchaseAmountSetting, error) {
@@ -37,7 +43,12 @@ func GetAmountSettings(ctx context.Context, appID, userID string) ([]*inspirepb.
 	return settings, nil
 }
 
-func CreateAmountSetting(ctx context.Context, appID, userID, targetUserID string, setting *inspirepb.AppPurchaseAmountSetting) ([]*inspirepb.AppPurchaseAmountSetting, error) {
+func CreateAmountSetting(
+	ctx context.Context,
+	appID, userID, targetUserID, langID string,
+	inviterName, inviteeName string,
+	setting *inspirepb.AppPurchaseAmountSetting,
+) ([]*inspirepb.AppPurchaseAmountSetting, error) {
 	iv, err := grpc2.GetRegistrationInvitationByAppInvitee(ctx, &inspirepb.GetRegistrationInvitationByAppInviteeRequest{
 		AppID:     appID,
 		InviteeID: targetUserID,
@@ -49,8 +60,34 @@ func CreateAmountSetting(ctx context.Context, appID, userID, targetUserID string
 		return nil, fmt.Errorf("permission denied")
 	}
 
-	// Create amount settings
-	// Send email
+	setting.AppID = appID
+	setting.UserID = targetUserID
 
-	return nil, nil
+	_, err = inspirecli.CreateAmountSetting(ctx, setting)
+	if err != nil {
+		return nil, fmt.Errorf("fail create amount setting: %v", err)
+	}
+
+	settings, err := grpc2.GetAppPurchaseAmountSettingsByAppUser(ctx, &inspirepb.GetAppPurchaseAmountSettingsByAppUserRequest{
+		AppID:  appID,
+		UserID: targetUserID,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("fail get amount settings: %v", err)
+	}
+
+	err = thirdgwcli.NotifyEmail(ctx, &thirdgwpb.NotifyEmailRequest{
+		AppID:        appID,
+		UserID:       userID,
+		ReceiverID:   targetUserID,
+		LangID:       langID,
+		SenderName:   inviterName,
+		ReceiverName: inviteeName,
+		UsedFor:      thirdgwconst.UsedForSetCommission,
+	})
+	if err != nil {
+		logger.Sugar().Warnf("fail notify email: %v", err)
+	}
+
+	return settings, nil
 }

@@ -83,7 +83,11 @@ func (s *Server) GetAmountSettings(ctx context.Context, in *npool.GetAmountSetti
 }
 
 func (s *Server) CreateAmountSetting(ctx context.Context, in *npool.CreateAmountSettingRequest) (*npool.CreateAmountSettingResponse, error) {
-	settings, err := commission.CreateAmountSetting(ctx, in.GetAppID(), in.GetUserID(), in.GetTargetUserID(), in.GetInfo())
+	settings, err := commission.CreateAmountSetting(
+		ctx,
+		in.GetAppID(), in.GetUserID(), in.GetTargetUserID(), in.GetLangID(),
+		in.GetInviterName(), in.GetInviteeName(),
+		in.GetInfo())
 	if err != nil {
 		logger.Sugar().Errorf("create amount settings error: %v", err)
 		return &npool.CreateAmountSettingResponse{}, status.Error(codes.Internal, err.Error())
