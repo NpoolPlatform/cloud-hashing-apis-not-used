@@ -3,7 +3,6 @@ package commission
 import (
 	"context"
 
-	"github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/commission/incoming"
 	"github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral/setting"
 
 	"golang.org/x/xerrors"
@@ -16,7 +15,7 @@ func getIncoming(ctx context.Context, appID, userID string) (float64, error) {
 	}
 
 	if kpi {
-		return incoming.GetKPIIncoming(ctx, appID, userID)
+		return getKPIIncoming(ctx, appID, userID)
 	}
 
 	unique, err := setting.UniqueSetting(ctx, appID)
@@ -25,8 +24,8 @@ func getIncoming(ctx context.Context, appID, userID string) (float64, error) {
 	}
 
 	if unique {
-		return incoming.GetUniqueIncoming(ctx, appID, userID)
+		return getUniqueIncoming(ctx, appID, userID)
 	}
 
-	return incoming.GetSeparateIncoming(ctx, appID, userID)
+	return getSeparateIncoming(ctx, appID, userID)
 }

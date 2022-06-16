@@ -1,4 +1,4 @@
-package incoming
+package commission
 
 import (
 	"context"
@@ -154,7 +154,7 @@ func getIncomings(ctx context.Context, appID, userID string) (float64, error) {
 	return totalRootAmount, nil
 }
 
-func GetSeparateIncoming(ctx context.Context, appID, userID string) (float64, error) {
+func getSeparateIncoming(ctx context.Context, appID, userID string) (float64, error) {
 	incoming, err := getRebate(ctx, appID, userID)
 	if err != nil {
 		return 0, xerrors.Errorf("fail get total incoming: %v", err)
@@ -168,4 +168,8 @@ func GetSeparateIncoming(ctx context.Context, appID, userID string) (float64, er
 	incoming += subAmount
 
 	return incoming, nil
+}
+
+func getSeparateGoodCommissions(ctx context.Context, appID, userID string) ([]*npool.GoodCommission, error) {
+	return nil, xerrors.Errorf("NOT IMPLEMENTED")
 }
