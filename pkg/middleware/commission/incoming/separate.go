@@ -58,14 +58,14 @@ func getOrderParentRebate(_ context.Context, order *npool.Order, roots, nexts []
 		return 0
 	}
 
-	setting := commissionsetting.GetAmountSettingByTimestamp(roots, order.Order.Order.CreateAt)
+	setting := commissionsetting.GetOrderAmountSetting(roots, order)
 	if setting == nil {
 		return 0
 	}
 	rootPercent := int(setting.Percent)
 
 	nextPercent := 0
-	setting = commissionsetting.GetAmountSettingByTimestamp(nexts, order.Order.Order.CreateAt)
+	setting = commissionsetting.GetOrderAmountSetting(nexts, order)
 	if setting != nil {
 		nextPercent = int(setting.Percent)
 	}
