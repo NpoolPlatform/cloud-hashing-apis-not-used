@@ -16,6 +16,7 @@ const (
 	cacheReferralUser         = "referral:user"
 	cacheReferralExtra        = "referral:extra"
 	cacheLayeredCoinSummaries = "referral:layered:coin:summaries"
+	cacheLayeredGoodSummaries = "referral:layered:good:summaries"
 )
 
 func getReferralUser(ctx context.Context, appID, userID string) (*appusermgrpb.AppUser, error) {
@@ -57,6 +58,57 @@ func getReferralExtra(ctx context.Context, appID, userID string) (*appusermgrpb.
 	cache.AddEntry(CacheKey(appID, userID, cacheReferralExtra), extra)
 
 	return extra.(*appusermgrpb.AppUserExtra), nil
+}
+
+func getLayeredGoodSummaries(ctx context.Context, appID, userID string) ([]*npool.GoodSummary, error) {
+	mySummaries := cache.GetEntry(CacheKey(appID, userID, cacheLayeredGoodSummaries))
+	if mySummaries != nil {
+		return mySummaries.([]*npool.GoodSummary), nil
+	}
+
+	coinSummaries, err := getGoodSummaries(ctx, appID, userID)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get coin summaries: %v", err)
+	}
+
+	invitees, err := GetLayeredInvitees(ctx, appID, userID)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get invitees: %v", err)
+	}
+
+	sums := make([]*npool.GoodSummary, len(coinSummaries))
+	for i, sum := range coinSummaries {
+		sums[i] = &npool.GoodSummary{
+			GoodID:     sum.GoodID,
+			CoinTypeID: sum.CoinTypeID,
+			CoinName:   sum.CoinName,
+			Units:      sum.Units,
+			Unit:       sum.Unit,
+			Amount:     sum.Amount,
+		}
+	}
+
+	for _, iv := range invitees {
+		summaries, err := getGoodSummaries(ctx, iv.AppID, iv.InviteeID)
+		if err != nil {
+			return nil, xerrors.Errorf("fail get coin summaries: %v", err)
+		}
+
+		for _, sum1 := range sums {
+			for _, sum2 := range summaries {
+				if sum1.GoodID == sum2.GoodID {
+					sum1.Units += sum2.Units
+					sum1.Amount += sum2.Amount
+				}
+			}
+		}
+	}
+
+	if len(sums) > 0 {
+		cache.AddEntry(CacheKey(appID, userID, cacheLayeredGoodSummaries), sums)
+	}
+
+	return sums, nil
 }
 
 func getLayeredCoinSummaries(ctx context.Context, appID, userID string) ([]*npool.CoinSummary, error) {
@@ -148,6 +200,11 @@ func getReferral(ctx context.Context, appID, userID string) (*npool.Referral, er
 		return nil, xerrors.Errorf("fail get coin summaries: %v", err)
 	}
 
+	goodSummaries, err := getLayeredGoodSummaries(ctx, appID, userID)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get good summaries: %v", err)
+	}
+
 	code, err := grpc2.GetUserInvitationCodeByAppUser(ctx, &inspirepb.GetUserInvitationCodeByAppUserRequest{
 		AppID:  appID,
 		UserID: userID,
@@ -157,14 +214,15 @@ func getReferral(ctx context.Context, appID, userID string) (*npool.Referral, er
 	}
 
 	return &npool.Referral{
-		User:         user,
-		Extra:        extra,
-		Invitation:   inviter,
-		USDAmount:    amount,
-		SubUSDAmount: subAmount,
-		Kol:          code != nil,
-		InvitedCount: uint32(len(invitees)),
-		Summaries:    coinSummaries,
+		User:          user,
+		Extra:         extra,
+		Invitation:    inviter,
+		USDAmount:     amount,
+		SubUSDAmount:  subAmount,
+		Kol:           code != nil,
+		InvitedCount:  uint32(len(invitees)),
+		Summaries:     coinSummaries,
+		GoodSummaries: goodSummaries,
 	}, nil
 }
 
