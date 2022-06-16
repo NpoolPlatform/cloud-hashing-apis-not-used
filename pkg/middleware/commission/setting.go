@@ -49,7 +49,6 @@ func CreateAmountSetting(ctx context.Context, appID, userID, targetUserID string
 		return nil, fmt.Errorf("permission denied")
 	}
 
-	// Create code
 	// Create amount settings
 	// Send email
 

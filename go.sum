@@ -112,8 +112,8 @@ github.com/NpoolPlatform/cloud-hashing-goods v0.0.0-20220501102606-7252485fb495 
 github.com/NpoolPlatform/cloud-hashing-goods v0.0.0-20220501102606-7252485fb495/go.mod h1:Df+OTnGmSWNZaW9gya4klNgtR+/1KLprcQriNXsNlaY=
 github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20211224023242-bd6da3111653/go.mod h1:VBiNGga8uFzy0Pt3Epzx4Dg7RxzM0Y4lzsr+9a7icU8=
 github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220224025352-b4d29cbbeebc/go.mod h1:WpshYcxRNkUjYI+oIf+iL3KKiG/zR6Go3ha1xswHDjE=
-github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220616135219-f6415eef262e h1:0uCb3lrx3CF7miVD2YCGlBhnwR+//afesM3vgI2lxAU=
-github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220616135219-f6415eef262e/go.mod h1:rrTBDEujSy1uQsBtty+gYvBX/SS1dNrlAbJHEu6wMw4=
+github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220616152100-2248cbd3d90b h1:v2yxwYua/yacIY5aPG7YXj5hYWgOeAru9Hi852ylMnA=
+github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220616152100-2248cbd3d90b/go.mod h1:rrTBDEujSy1uQsBtty+gYvBX/SS1dNrlAbJHEu6wMw4=
 github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220225132002-fbc8b850fb8c/go.mod h1:S4+sGRG8zI/Wj4EikZg+hAtgiB3LNKDtfNPR9DPhkFg=
 github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220430143734-fed41a4f6bd6 h1:YXcRzgW3n55KwDfTPvYwIf2n+t14rNQWKBmtZznODKA=
 github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220430143734-fed41a4f6bd6/go.mod h1:ROuXzJXA3A/KnjQu1wbB6rL+ywBSuUBX59PkUXOgfpk=
