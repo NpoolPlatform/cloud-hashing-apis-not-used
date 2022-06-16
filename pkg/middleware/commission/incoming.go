@@ -5,27 +5,31 @@ import (
 
 	"github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral/setting"
 
+	"github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/commission/kpi"
+	"github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/commission/separate"
+	"github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/commission/unique"
+
 	"golang.org/x/xerrors"
 )
 
 func getIncoming(ctx context.Context, appID, userID string) (float64, error) {
-	kpi, err := setting.KPISetting(ctx, appID)
+	_kpi, err := setting.KPISetting(ctx, appID)
 	if err != nil {
 		return 0, xerrors.Errorf("fail get kpi setting: %v", err)
 	}
 
-	if kpi {
-		return getKPIIncoming(ctx, appID, userID)
+	if _kpi {
+		return kpi.GetKPIIncoming(ctx, appID, userID)
 	}
 
-	unique, err := setting.UniqueSetting(ctx, appID)
+	_unique, err := setting.UniqueSetting(ctx, appID)
 	if err != nil {
 		return 0, xerrors.Errorf("fail get unique setting: %v", err)
 	}
 
-	if unique {
-		return getUniqueIncoming(ctx, appID, userID)
+	if _unique {
+		return unique.GetUniqueIncoming(ctx, appID, userID)
 	}
 
-	return getSeparateIncoming(ctx, appID, userID)
+	return separate.GetSeparateIncoming(ctx, appID, userID)
 }

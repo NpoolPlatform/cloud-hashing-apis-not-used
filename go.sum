@@ -160,8 +160,8 @@ github.com/NpoolPlatform/message v0.0.0-20220430143110-a1247fd97970/go.mod h1:i/
 github.com/NpoolPlatform/message v0.0.0-20220501030927-34f296682c0c/go.mod h1:i/F/sQWjQk44RGvfgEB0zH0oAK/0qLvgJ1AsJDZQDkk=
 github.com/NpoolPlatform/message v0.0.0-20220501143407-c230f4ca021b/go.mod h1:i/F/sQWjQk44RGvfgEB0zH0oAK/0qLvgJ1AsJDZQDkk=
 github.com/NpoolPlatform/message v0.0.0-20220606130737-824c3198b695/go.mod h1:3Enb49K3JrhlSwA+6bcsBuTdTzVxVKhdkllDGgv0n3M=
-github.com/NpoolPlatform/message v0.0.0-20220616090456-7d754ae8d54a h1:IjSDXW7xqxOtIW1SrSS4bNXkka4XrMjAkJI+hOnJP7w=
-github.com/NpoolPlatform/message v0.0.0-20220616090456-7d754ae8d54a/go.mod h1:VWuStqZaa5i8scdETxGvBh5CJzebGWw1dxTE0EUqRXk=
+github.com/NpoolPlatform/message v0.0.0-20220616100312-3f926da8b0a8 h1:26VPQBwH5WMN4wTAXFrFntxN2TxqZD23Nur1A2bqDJA=
+github.com/NpoolPlatform/message v0.0.0-20220616100312-3f926da8b0a8/go.mod h1:VWuStqZaa5i8scdETxGvBh5CJzebGWw1dxTE0EUqRXk=
 github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da h1:qZX3tw6TEsxaWyY/ZEeEtI6zSZzoYoCiqmDdt6DhxfA=
 github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da/go.mod h1:ieZ2gIh/zSlJ2hIr/fIuMvi5QMGRY0rXugKiBc+5ZKI=
 github.com/NpoolPlatform/oracle-manager v0.0.0-20220606135947-0f09e9f3818a/go.mod h1:f9Seypsw5N+Kc0P13IurAD/WNHXhzYsBt+d/R17oLfA=

@@ -1,4 +1,4 @@
-package commission
+package unique
 
 import (
 	"context"
@@ -8,10 +8,10 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func getUniqueIncoming(ctx context.Context, appID, userID string) (float64, error) {
+func GetUniqueIncoming(ctx context.Context, appID, userID string) (float64, error) {
 	return 0, xerrors.Errorf("NOT IMPLEMENTED")
 }
 
-func getUniqueGoodCommissions(ctx context.Context, appID, userID string) ([]*npool.GoodCommission, error) {
+func GetUniqueGoodCommissions(ctx context.Context, appID, userID string) ([]*npool.GoodCommission, error) {
 	return nil, xerrors.Errorf("NOT IMPLEMENTED")
 }

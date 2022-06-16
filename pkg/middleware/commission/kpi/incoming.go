@@ -1,4 +1,4 @@
-package commission
+package kpi
 
 import (
 	"context"
@@ -89,7 +89,7 @@ func getRootAmount(ctx context.Context, appID, userID string) (float64, error) {
 	return getAmount(ctx, appID, userID)
 }
 
-func getKPIIncoming(ctx context.Context, appID, userID string) (float64, error) {
+func GetKPIIncoming(ctx context.Context, appID, userID string) (float64, error) {
 	rootAmount, err := getRootAmount(ctx, appID, userID)
 	if err != nil {
 		return 0, xerrors.Errorf("fail get root amount: %v", err)
@@ -114,6 +114,6 @@ func getKPIIncoming(ctx context.Context, appID, userID string) (float64, error) 
 	return rootAmount - totalSubAmount, nil
 }
 
-func getKPIGoodCommissions(ctx context.Context, appID, userID string) ([]*npool.GoodCommission, error) {
+func GetKPIGoodCommissions(ctx context.Context, appID, userID string) ([]*npool.GoodCommission, error) {
 	return nil, xerrors.Errorf("NOT IMPLEMENTED")
 }
