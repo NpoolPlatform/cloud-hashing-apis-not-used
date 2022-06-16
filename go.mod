@@ -4,17 +4,17 @@ go 1.17
 
 require (
 	entgo.io/ent v0.10.1
-	github.com/NpoolPlatform/api-manager v0.0.0-20220322075405-aefd0a0344ea
+	github.com/NpoolPlatform/api-manager v0.0.0-20220421114434-bf0e069b0c83
 	github.com/NpoolPlatform/appuser-manager v0.0.0-20220322075937-0c7b778de20c
 	github.com/NpoolPlatform/cloud-hashing-billing v0.0.0-20220323125206-d664201be866
 	github.com/NpoolPlatform/cloud-hashing-goods v0.0.0-20220501102606-7252485fb495
-	github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220323081920-a13fe422e1e9
+	github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220616135219-f6415eef262e
 	github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220430143734-fed41a4f6bd6
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20220404143809-82c40930388a
 	github.com/NpoolPlatform/kyc-management v0.0.0-20220322081324-f537a7bcd812
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20220526050249-956b54fac9f1
-	github.com/NpoolPlatform/login-gateway v0.0.0-20220324144125-0675c5904170
-	github.com/NpoolPlatform/message v0.0.0-20220616132024-67c96caedb8e
+	github.com/NpoolPlatform/login-gateway v0.0.0-20220328094651-99c681b06955
+	github.com/NpoolPlatform/message v0.0.0-20220616151339-6047b5c8156d
 	github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da
 	github.com/NpoolPlatform/oracle-manager v0.0.0-20220615040511-dc235b31fa14
 	github.com/NpoolPlatform/review-service v0.0.0-20220322082433-0c2b7ee284ed
@@ -22,7 +22,7 @@ require (
 	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20220323034620-cea972617ed5
 	github.com/NpoolPlatform/staker-manager v0.0.0-20220606140400-2b2168e378b3
 	github.com/NpoolPlatform/stock-manager v0.0.0-20220501144918-883eece82647
-	github.com/NpoolPlatform/third-gateway v0.0.0-20220322080604-a656d7cba609
+	github.com/NpoolPlatform/third-gateway v0.0.0-20220616145507-934c2f311167
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.10.0
