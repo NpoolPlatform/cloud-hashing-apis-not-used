@@ -70,3 +70,25 @@ func (s *Server) GetUserGoodCommissions(ctx context.Context, in *npool.GetUserGo
 		Infos: commissions,
 	}, nil
 }
+
+func (s *Server) GetAmountSettings(ctx context.Context, in *npool.GetAmountSettingsRequest) (*npool.GetAmountSettingsResponse, error) {
+	settings, err := commission.GetAmountSettings(ctx, in.GetAppID(), in.GetUserID())
+	if err != nil {
+		logger.Sugar().Errorf("get amount settings error: %v", err)
+		return &npool.GetAmountSettingsResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return &npool.GetAmountSettingsResponse{
+		Infos: settings,
+	}, nil
+}
+
+func (s *Server) CreateAmountSetting(ctx context.Context, in *npool.CreateAmountSettingRequest) (*npool.CreateAmountSettingResponse, error) {
+	settings, err := commission.CreateAmountSetting(ctx, in.GetAppID(), in.GetUserID(), in.GetTargetUserID(), in.GetInfo())
+	if err != nil {
+		logger.Sugar().Errorf("create amount settings error: %v", err)
+		return &npool.CreateAmountSettingResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return &npool.CreateAmountSettingResponse{
+		Infos: settings,
+	}, nil
+}
