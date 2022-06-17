@@ -76,6 +76,8 @@ func CreateAmountSetting(
 		return nil, fmt.Errorf("fail get amount settings: %v", err)
 	}
 
+	rsetting.UpdateAmountSettingsCache(ctx, appID, targetUserID, settings)
+
 	err = thirdgwcli.NotifyEmail(ctx, &thirdgwpb.NotifyEmailRequest{
 		AppID:        appID,
 		UserID:       userID,
