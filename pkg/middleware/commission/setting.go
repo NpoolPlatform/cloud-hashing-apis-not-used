@@ -77,6 +77,19 @@ func CreateAmountSetting(
 	}
 
 	rsetting.UpdateAmountSettingsCache(ctx, appID, targetUserID, settings)
+	summaries, err := referral.GetGoodSummaries(ctx, appID, targetUserID)
+	if err != nil {
+		logger.Sugar().Warnf("fail get good summaries: %v", err)
+	}
+	if summaries != nil {
+		for _, sum := range summaries {
+			if sum.GoodID == setting.GoodID {
+				sum.Percent = setting.Percent
+				break
+			}
+		}
+		referral.UpdateGoodSummariesCache(ctx, appID, userID, summaries)
+	}
 
 	err = thirdgwcli.NotifyEmail(ctx, &thirdgwpb.NotifyEmailRequest{
 		AppID:        appID,

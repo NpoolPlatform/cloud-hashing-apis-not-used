@@ -81,3 +81,13 @@ func getGoodSummaries(ctx context.Context, appID, userID string) ([]*npool.GoodS
 
 	return summaries, nil
 }
+
+func GetGoodSummaries(ctx context.Context, appID, userID string) ([]*npool.GoodSummary, error) {
+	return getGoodSummaries(ctx, appID, userID)
+}
+
+func UpdateGoodSummariesCache(ctx context.Context, appID, userID string, summaries []*npool.GoodSummary) {
+	if len(summaries) > 0 {
+		cache.AddEntry(cachekey.CacheKey(appID, userID, cacheGoodSummaries), summaries)
+	}
+}
