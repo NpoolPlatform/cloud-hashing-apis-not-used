@@ -144,7 +144,7 @@ func getDirectInviteeGoodCommissions(ctx context.Context, appID, userID string) 
 	return commissions, nil
 }
 
-func GetSeparateGoodCommissions(ctx context.Context, appID, userID string) ([]*npool.GoodCommission, error) {
+func getSeparateGoodCommissions(ctx context.Context, appID, userID string) ([]*npool.GoodCommission, error) {
 	commissions, err := getUserGoodCommissions(ctx, appID, userID)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get user good commissions: %v", err)
@@ -155,6 +155,45 @@ func GetSeparateGoodCommissions(ctx context.Context, appID, userID string) ([]*n
 		return nil, xerrors.Errorf("fail get invitees good commissions: %v", err)
 	}
 
-	commissions = append(commissions, comms...)
+	for _, comm := range comms {
+		found := false
+		for _, commission := range commissions {
+			if commission.GoodID == comm.GoodID {
+				commission.Amount += comm.Amount
+				found = true
+			}
+		}
+		if !found {
+			commissions = append(commissions, comm)
+		}
+	}
+
+	for _, comm := range commissions {
+		comm.AppID = appID
+		comm.UserID = userID
+	}
+
 	return commissions, nil
+}
+
+func GetSeparateGoodCommissions(ctx context.Context, appID, userID string) ([]*npool.GoodCommission, error) {
+	comms, err := getSeparateGoodCommissions(ctx, appID, userID)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get user good commissions: %v", err)
+	}
+
+	invitees, err := referral.GetInvitees(ctx, appID, userID)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get invitees: %v", err)
+	}
+
+	for _, iv := range invitees {
+		commissions, err := getSeparateGoodCommissions(ctx, appID, iv.InviteeID)
+		if err != nil {
+			return nil, xerrors.Errorf("fail get user good commissions: %v", err)
+		}
+		comms = append(comms, commissions...)
+	}
+
+	return comms, nil
 }
