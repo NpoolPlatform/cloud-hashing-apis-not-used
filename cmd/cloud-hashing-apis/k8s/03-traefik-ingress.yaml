@@ -137,11 +137,11 @@ spec:
             backend:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/get/create/invitation/code
+          - path: /api/cloud-hashing-apis-v2/v1/create/invitation/code
             backend:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/get/create/amount/setting
+          - path: /api/cloud-hashing-apis-v2/v1/create/amount/setting
             backend:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
