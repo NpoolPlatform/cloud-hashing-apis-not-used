@@ -769,7 +769,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 
 	// TODO: Check if idle address is available with lock
 	paymentAccount, err := peekIdlePaymentAccount(ctx, myOrder.Info, paymentCoinInfo)
-	if err != nil {
+	if err != nil || paymentAccount == nil {
 		paymentAccount, err = createNewPaymentAccount(ctx, myOrder.Info, paymentCoinInfo)
 	}
 	if err != nil || paymentAccount == nil {
