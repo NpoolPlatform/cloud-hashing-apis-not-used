@@ -772,7 +772,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	if err != nil {
 		paymentAccount, err = createNewPaymentAccount(ctx, myOrder.Info, paymentCoinInfo)
 	}
-	if err != nil {
+	if err != nil || paymentAccount == nil {
 		return nil, xerrors.Errorf("cannot get valid payment account: %v", err)
 	}
 
