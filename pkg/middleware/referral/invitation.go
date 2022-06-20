@@ -27,9 +27,7 @@ func GetInvitees(ctx context.Context, appID, userID string) ([]*inspirepb.Regist
 		return nil, xerrors.Errorf("fail get invitations: %v", err)
 	}
 
-	if len(invitees.([]*inspirepb.RegistrationInvitation)) > 0 {
-		cache.AddEntry(cachekey.CacheKey(appID, userID, cacheFor), invitees)
-	}
+	cache.AddEntry(cachekey.CacheKey(appID, userID, cacheFor), invitees)
 	return invitees.([]*inspirepb.RegistrationInvitation), nil
 }
 
