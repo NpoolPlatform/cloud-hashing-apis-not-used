@@ -60,9 +60,15 @@ func getAmountSettingsByApp(ctx context.Context, appID string) (*inspirepb.AppPu
 	return nil, nil
 }
 
-func GetAmountSettingsByAppUser(ctx context.Context, appID, userID string) ([]*inspirepb.AppPurchaseAmountSetting, error) {
-	cacheFor := "purchase:amount:settings"
+const cacheFor = "purchase:amount:settings"
 
+func UpdateAmountSettingsCache(ctx context.Context, appID, userID string, settings []*inspirepb.AppPurchaseAmountSetting) {
+	if len(settings) > 0 {
+		cache.AddEntry(cachekey.CacheKey(appID, userID, cacheFor), settings)
+	}
+}
+
+func GetAmountSettingsByAppUser(ctx context.Context, appID, userID string) ([]*inspirepb.AppPurchaseAmountSetting, error) {
 	mySettings := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheFor))
 	if mySettings != nil {
 		return mySettings.([]*inspirepb.AppPurchaseAmountSetting), nil
@@ -93,9 +99,7 @@ func GetAmountSettingsByAppUser(ctx context.Context, appID, userID string) ([]*i
 		}
 	}
 
-	if len(settings) > 0 {
-		cache.AddEntry(cachekey.CacheKey(appID, userID, cacheFor), settings)
-	}
+	UpdateAmountSettingsCache(ctx, appID, userID, settings)
 
 	return settings, nil
 }
@@ -107,7 +111,7 @@ func GetOrderAmountSetting(settings []*inspirepb.AppPurchaseAmountSetting, order
 			continue
 		}
 		if s.Start <= order.Order.Order.CreateAt && (order.Order.Order.CreateAt < s.End || s.End == 0) {
-			if s.GoodID == invalidID || s.GoodID == order.Order.Order.GoodID {
+			if s.GoodID == invalidID || s.GoodID == "" || s.GoodID == order.Order.Order.GoodID {
 				return s
 			}
 		}
@@ -122,7 +126,7 @@ func GetGoodAmountSetting(settings []*inspirepb.AppPurchaseAmountSetting, goodID
 			continue
 		}
 		if s.End == 0 {
-			if s.GoodID == invalidID || s.GoodID == goodID {
+			if s.GoodID == invalidID || s.GoodID == "" || s.GoodID == goodID {
 				return s
 			}
 		}

@@ -67,9 +67,9 @@ func getLayeredGoodSummaries(ctx context.Context, appID, userID string) ([]*npoo
 		return mySummaries.([]*npool.GoodSummary), nil
 	}
 
-	coinSummaries, err := getGoodSummaries(ctx, appID, userID)
+	goodSummaries, err := getGoodSummaries(ctx, appID, userID)
 	if err != nil {
-		return nil, xerrors.Errorf("fail get coin summaries: %v", err)
+		return nil, xerrors.Errorf("fail get good summaries: %v", err)
 	}
 
 	invitees, err := GetLayeredInvitees(ctx, appID, userID)
@@ -77,8 +77,8 @@ func getLayeredGoodSummaries(ctx context.Context, appID, userID string) ([]*npoo
 		return nil, xerrors.Errorf("fail get invitees: %v", err)
 	}
 
-	sums := make([]*npool.GoodSummary, len(coinSummaries))
-	for i, sum := range coinSummaries {
+	sums := make([]*npool.GoodSummary, len(goodSummaries))
+	for i, sum := range goodSummaries {
 		sums[i] = &npool.GoodSummary{
 			GoodID:     sum.GoodID,
 			CoinTypeID: sum.CoinTypeID,
@@ -86,13 +86,14 @@ func getLayeredGoodSummaries(ctx context.Context, appID, userID string) ([]*npoo
 			Units:      sum.Units,
 			Unit:       sum.Unit,
 			Amount:     sum.Amount,
+			Percent:    sum.Percent,
 		}
 	}
 
 	for _, iv := range invitees {
 		summaries, err := getGoodSummaries(ctx, iv.AppID, iv.InviteeID)
 		if err != nil {
-			return nil, xerrors.Errorf("fail get coin summaries: %v", err)
+			return nil, xerrors.Errorf("fail get good summaries: %v", err)
 		}
 
 		for _, sum1 := range sums {

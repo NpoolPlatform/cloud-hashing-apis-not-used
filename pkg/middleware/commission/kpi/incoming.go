@@ -1,4 +1,4 @@
-package incoming
+package kpi
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 
 	"github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral"
 	commissionsetting "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral/setting"
+	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
 	"golang.org/x/xerrors"
 )
@@ -111,4 +112,8 @@ func GetKPIIncoming(ctx context.Context, appID, userID string) (float64, error) 
 	logger.Sugar().Infof("root amount %v sub amount %v user %v", rootAmount, totalSubAmount, userID)
 
 	return rootAmount - totalSubAmount, nil
+}
+
+func GetKPIGoodCommissions(ctx context.Context, appID, userID string) ([]*npool.GoodCommission, error) {
+	return nil, xerrors.Errorf("NOT IMPLEMENTED")
 }

@@ -769,10 +769,10 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 
 	// TODO: Check if idle address is available with lock
 	paymentAccount, err := peekIdlePaymentAccount(ctx, myOrder.Info, paymentCoinInfo)
-	if err != nil {
+	if err != nil || paymentAccount == nil {
 		paymentAccount, err = createNewPaymentAccount(ctx, myOrder.Info, paymentCoinInfo)
 	}
-	if err != nil {
+	if err != nil || paymentAccount == nil {
 		return nil, xerrors.Errorf("cannot get valid payment account: %v", err)
 	}
 
@@ -780,8 +780,8 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		Name:    paymentCoinInfo.Name,
 		Address: paymentAccount.Address,
 	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail get wallet balance: %v", err)
+	if err != nil || balance == nil {
+		return nil, xerrors.Errorf("fail get wallet balance for %v %v: %v", paymentCoinInfo.Name, paymentAccount.Address, err)
 	}
 	balanceAmount := balance.Balance
 
@@ -801,7 +801,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 			CoinInfoID:           in.GetPaymentCoinTypeID(),
 		},
 	})
-	if err != nil {
+	if err != nil || myPayment == nil {
 		return nil, xerrors.Errorf("fail create payment: %v", err)
 	}
 
@@ -834,7 +834,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	orderDetail, err := GetOrder(ctx, &npool.GetOrderRequest{
 		ID: myOrder.Info.Order.Order.ID,
 	})
-	if err != nil {
+	if err != nil || orderDetail.Info == nil {
 		return nil, xerrors.Errorf("fail get order detail: %v", err)
 	}
 

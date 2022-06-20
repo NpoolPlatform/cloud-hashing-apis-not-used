@@ -48,3 +48,51 @@ func (s *Server) GetCommissionByAppUser(ctx context.Context, in *npool.GetCommis
 		},
 	}, nil
 }
+
+func (s *Server) GetGoodCommissions(ctx context.Context, in *npool.GetGoodCommissionsRequest) (*npool.GetGoodCommissionsResponse, error) {
+	commissions, err := commission.GetGoodCommissions(ctx, in.GetAppID(), in.GetUserID())
+	if err != nil {
+		logger.Sugar().Errorf("get good commission error: %v", err)
+		return &npool.GetGoodCommissionsResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return &npool.GetGoodCommissionsResponse{
+		Infos: commissions,
+	}, nil
+}
+
+func (s *Server) GetUserGoodCommissions(ctx context.Context, in *npool.GetUserGoodCommissionsRequest) (*npool.GetUserGoodCommissionsResponse, error) {
+	commissions, err := commission.GetGoodCommissions(ctx, in.GetAppID(), in.GetTargetUserID())
+	if err != nil {
+		logger.Sugar().Errorf("get good commission error: %v", err)
+		return &npool.GetUserGoodCommissionsResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return &npool.GetUserGoodCommissionsResponse{
+		Infos: commissions,
+	}, nil
+}
+
+func (s *Server) GetAmountSettings(ctx context.Context, in *npool.GetAmountSettingsRequest) (*npool.GetAmountSettingsResponse, error) {
+	settings, err := commission.GetAmountSettings(ctx, in.GetAppID(), in.GetUserID())
+	if err != nil {
+		logger.Sugar().Errorf("get amount settings error: %v", err)
+		return &npool.GetAmountSettingsResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return &npool.GetAmountSettingsResponse{
+		Infos: settings,
+	}, nil
+}
+
+func (s *Server) CreateAmountSetting(ctx context.Context, in *npool.CreateAmountSettingRequest) (*npool.CreateAmountSettingResponse, error) {
+	settings, err := commission.CreateAmountSetting(
+		ctx,
+		in.GetAppID(), in.GetUserID(), in.GetTargetUserID(), in.GetLangID(),
+		in.GetInviterName(), in.GetInviteeName(),
+		in.GetInfo())
+	if err != nil {
+		logger.Sugar().Errorf("create amount settings error: %v", err)
+		return &npool.CreateAmountSettingResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return &npool.CreateAmountSettingResponse{
+		Infos: settings,
+	}, nil
+}
