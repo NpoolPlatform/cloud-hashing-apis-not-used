@@ -10,7 +10,7 @@ require (
 	github.com/NpoolPlatform/cloud-hashing-goods v0.0.0-20220501102606-7252485fb495
 	github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220616152100-2248cbd3d90b
 	github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220430143734-fed41a4f6bd6
-	github.com/NpoolPlatform/go-service-framework v0.0.0-20220404143809-82c40930388a
+	github.com/NpoolPlatform/go-service-framework v0.0.0-20220620123217-e9d90908e4b4
 	github.com/NpoolPlatform/kyc-management v0.0.0-20220322081324-f537a7bcd812
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20220526050249-956b54fac9f1
 	github.com/NpoolPlatform/login-gateway v0.0.0-20220328094651-99c681b06955
