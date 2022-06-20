@@ -14,34 +14,34 @@ spec:
         app: cloud-hashing-apis-v2
     spec:
       containers:
-      - name: cloud-hashing-apis-v2
-        image: uhub.service.ucloud.cn/entropypool/cloud-hashing-apis-v2:latest
-        imagePullPolicy: Always
-        env:
-        - name: ENV_ENVIRONMENT_TARGET
-          valueFrom:
-            configMapKeyRef:
-              name: system-environment
-              key: environment.target
-        - name: ENV_CONSUL_HOST
-          valueFrom:
-            configMapKeyRef:
-              name: system-environment
-              key: environment.consul_host
-        - name: ENV_CONSUL_PORT
-          valueFrom:
-            configMapKeyRef:
-              name: system-environment
-              key: environment.consul_port
-        - name: ENV_CURRENCY_REQUEST_PROXY
-          valueFrom:
-            configMapKeyRef:
-              name: currency-proxy-environment
-              key: environment.currency_proxy
-        - name: ENV_CLUSTER_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
+        - name: cloud-hashing-apis-v2
+          image: uhub.service.ucloud.cn/entropypool/cloud-hashing-apis-v2:feature
+          imagePullPolicy: Always
+          env:
+            - name: ENV_ENVIRONMENT_TARGET
+              valueFrom:
+                configMapKeyRef:
+                  name: system-environment
+                  key: environment.target
+            - name: ENV_CONSUL_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: system-environment
+                  key: environment.consul_host
+            - name: ENV_CONSUL_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: system-environment
+                  key: environment.consul_port
+            - name: ENV_CURRENCY_REQUEST_PROXY
+              valueFrom:
+                configMapKeyRef:
+                  name: currency-proxy-environment
+                  key: environment.currency_proxy
+            - name: ENV_CLUSTER_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
 
 ---
 apiVersion: v1
@@ -49,10 +49,15 @@ kind: Service
 metadata:
   name: cloud-hashing-apis-v2
   namespace: kube-system
+  labels:
+    app: cloud-hashing-apis-v2
 spec:
   ports:
-  - name: http
-    port: 50140
-    targetPort: 50140
+    - name: http
+      port: 50140
+      targetPort: 50140
+    - name: metrics
+      port: 50143
+      targetPort: 50143
   selector:
     app: cloud-hashing-apis-v2
