@@ -83,7 +83,38 @@ func getGoodSummaries(ctx context.Context, appID, userID string) ([]*npool.GoodS
 }
 
 func GetGoodSummaries(ctx context.Context, appID, userID string) ([]*npool.GoodSummary, error) {
-	return getGoodSummaries(ctx, appID, userID)
+	comms, err := getGoodSummaries(ctx, appID, userID)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get user good summaries: %v", err)
+	}
+
+	invitees, err := GetInvitees(ctx, appID, userID)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get user invitees: %v", err)
+	}
+
+	for _, iv := range invitees {
+		commissions, err := getGoodSummaries(ctx, appID, iv.InviteeID)
+		if err != nil {
+			return nil, xerrors.Errorf("fail get user good summaries: %v", err)
+		}
+		for _, commission := range commissions {
+			found := false
+			for _, comm := range comms {
+				if comm.GoodID == commission.GoodID {
+					comm.Units += commission.Units
+					comm.Amount += commission.Amount
+					found = true
+					break
+				}
+			}
+			if !found {
+				comms = append(comms, commission)
+			}
+		}
+	}
+
+	return comms, err
 }
 
 func UpdateGoodSummariesCache(ctx context.Context, appID, userID string, summaries []*npool.GoodSummary) {
