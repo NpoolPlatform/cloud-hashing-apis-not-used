@@ -88,7 +88,7 @@ func GetGoodSummaries(ctx context.Context, appID, userID string) ([]*npool.GoodS
 		return nil, xerrors.Errorf("fail get user good summaries: %v", err)
 	}
 
-	invitees, err := GetInvitees(ctx, appID, userID)
+	invitees, err := GetLayeredInvitees(ctx, appID, userID)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get user invitees: %v", err)
 	}
