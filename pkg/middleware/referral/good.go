@@ -18,16 +18,13 @@ const (
 	cacheGoodSummaries = "referral:good:summaries"
 )
 
-//nolint
-func getGoodSummaries(ctx context.Context, appID, userID string) ([]*npool.GoodSummary, error) { //nolint
-	/*
-		mySummaries := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheGoodSummaries), func(data []byte) (interface{}, error) {
-			return cache.UnmarshalGoodSummaries(data)
-		})
-		if mySummaries != nil {
-			return mySummaries.([]*npool.GoodSummary), nil
-		}
-	*/
+func getGoodSummaries(ctx context.Context, appID, userID string) ([]*npool.GoodSummary, error) {
+	mySummaries := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheGoodSummaries), func(data []byte) (interface{}, error) {
+		return cache.UnmarshalGoodSummaries(data)
+	})
+	if mySummaries != nil {
+		return mySummaries.([]*npool.GoodSummary), nil
+	}
 
 	orders, err := GetOrders(ctx, appID, userID)
 	if err != nil {
