@@ -10,11 +10,6 @@ import (
 	"golang.org/x/xerrors"
 )
 
-const (
-	cacheUSDAmount       = "referral:usd:amount"
-	cachePeriodUSDAmount = "referral:period:usd:amount"
-)
-
 func GetUSDAmount(ctx context.Context, appID, userID string) (float64, error) {
 	// TODO: let database to sum orders amount
 	orders, err := GetOrders(ctx, appID, userID)
