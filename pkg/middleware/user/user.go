@@ -4,6 +4,7 @@ import (
 	"context"
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
+	referral "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral"
 	verifymw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/verify"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
@@ -111,6 +112,8 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 		if err != nil {
 			return nil, xerrors.Errorf("fail create registration invitation: %v", err)
 		}
+
+		referral.GetInviteesRT(ctx, in.GetAppID(), inviterID)
 	}
 
 	return &npool.SignupResponse{

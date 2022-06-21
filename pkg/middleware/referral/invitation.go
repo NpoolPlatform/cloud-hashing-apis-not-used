@@ -11,14 +11,9 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func GetInvitees(ctx context.Context, appID, userID string) ([]*inspirepb.RegistrationInvitation, error) {
-	cacheFor := "invitees"
+const cacheForInvitees = "invitees"
 
-	invitees := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheFor))
-	if invitees != nil {
-		return invitees.([]*inspirepb.RegistrationInvitation), nil
-	}
-
+func GetInviteesRT(ctx context.Context, appID, userID string) ([]*inspirepb.RegistrationInvitation, error) {
 	invitees, err := grpc2.GetRegistrationInvitationsByAppInviter(ctx, &inspirepb.GetRegistrationInvitationsByAppInviterRequest{
 		AppID:     appID,
 		InviterID: userID,
@@ -27,8 +22,17 @@ func GetInvitees(ctx context.Context, appID, userID string) ([]*inspirepb.Regist
 		return nil, xerrors.Errorf("fail get invitations: %v", err)
 	}
 
-	cache.AddEntry(cachekey.CacheKey(appID, userID, cacheFor), invitees)
-	return invitees.([]*inspirepb.RegistrationInvitation), nil
+	cache.AddEntry(cachekey.CacheKey(appID, userID, cacheForInvitees), invitees)
+	return invitees, nil
+}
+
+func GetInvitees(ctx context.Context, appID, userID string) ([]*inspirepb.RegistrationInvitation, error) {
+	invitees := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheForInvitees))
+	if invitees != nil {
+		return invitees.([]*inspirepb.RegistrationInvitation), nil
+	}
+
+	return GetInviteesRT(ctx, appID, userID)
 }
 
 func GetInviter(ctx context.Context, appID, userID string) (*inspirepb.RegistrationInvitation, error) {
