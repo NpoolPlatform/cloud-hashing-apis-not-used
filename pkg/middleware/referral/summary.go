@@ -66,12 +66,14 @@ func getReferralExtra(ctx context.Context, appID, userID string) (*appusermgrpb.
 }
 
 func getLayeredGoodSummaries(ctx context.Context, appID, userID string) ([]*npool.GoodSummary, error) {
-	mySummaries := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheLayeredGoodSummaries), func(data []byte) (interface{}, error) {
-		return cache.UnmarshalGoodSummaries(data)
-	})
-	if mySummaries != nil {
-		return mySummaries.([]*npool.GoodSummary), nil
-	}
+	/*
+		mySummaries := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheLayeredGoodSummaries), func(data []byte) (interface{}, error) {
+			return cache.UnmarshalGoodSummaries(data)
+		})
+		if mySummaries != nil {
+			return mySummaries.([]*npool.GoodSummary), nil
+		}
+	*/
 
 	goodSummaries, err := getGoodSummaries(ctx, appID, userID)
 	if err != nil {
