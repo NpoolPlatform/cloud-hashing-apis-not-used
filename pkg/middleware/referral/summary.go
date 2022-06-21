@@ -21,7 +21,9 @@ const (
 )
 
 func getReferralUser(ctx context.Context, appID, userID string) (*appusermgrpb.AppUser, error) {
-	user := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheReferralUser))
+	user := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheReferralUser), func(data []byte) (interface{}, error) {
+		return cache.UnmarshalAppUser(data)
+	})
 	if user != nil {
 		return user.(*appusermgrpb.AppUser), nil
 	}
@@ -43,7 +45,9 @@ func getReferralUser(ctx context.Context, appID, userID string) (*appusermgrpb.A
 }
 
 func getReferralExtra(ctx context.Context, appID, userID string) (*appusermgrpb.AppUserExtra, error) {
-	extra := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheReferralExtra))
+	extra := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheReferralExtra), func(data []byte) (interface{}, error) {
+		return cache.UnmarshalAppUserExtra(data)
+	})
 	if extra != nil {
 		return extra.(*appusermgrpb.AppUserExtra), nil
 	}
@@ -62,7 +66,9 @@ func getReferralExtra(ctx context.Context, appID, userID string) (*appusermgrpb.
 }
 
 func getLayeredGoodSummaries(ctx context.Context, appID, userID string) ([]*npool.GoodSummary, error) {
-	mySummaries := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheLayeredGoodSummaries))
+	mySummaries := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheLayeredGoodSummaries), func(data []byte) (interface{}, error) {
+		return cache.UnmarshalGoodSummaries(data)
+	})
 	if mySummaries != nil {
 		return mySummaries.([]*npool.GoodSummary), nil
 	}
@@ -114,7 +120,9 @@ func getLayeredGoodSummaries(ctx context.Context, appID, userID string) ([]*npoo
 }
 
 func getLayeredCoinSummaries(ctx context.Context, appID, userID string) ([]*npool.CoinSummary, error) {
-	mySummaries := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheLayeredCoinSummaries))
+	mySummaries := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheLayeredCoinSummaries), func(data []byte) (interface{}, error) {
+		return cache.UnmarshalCoinSummaries(data)
+	})
 	if mySummaries != nil {
 		return mySummaries.([]*npool.CoinSummary), nil
 	}

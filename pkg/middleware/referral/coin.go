@@ -18,7 +18,9 @@ const (
 )
 
 func getCoinSummaries(ctx context.Context, appID, userID string) ([]*npool.CoinSummary, error) {
-	mySummaries := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheCoinSummaries))
+	mySummaries := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheCoinSummaries), func(data []byte) (interface{}, error) {
+		return cache.UnmarshalCoinSummaries(data)
+	})
 	if mySummaries != nil {
 		return mySummaries.([]*npool.CoinSummary), nil
 	}

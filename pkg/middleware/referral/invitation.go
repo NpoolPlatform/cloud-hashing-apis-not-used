@@ -27,7 +27,9 @@ func GetInviteesRT(ctx context.Context, appID, userID string) ([]*inspirepb.Regi
 }
 
 func GetInvitees(ctx context.Context, appID, userID string) ([]*inspirepb.RegistrationInvitation, error) {
-	invitees := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheForInvitees))
+	invitees := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheForInvitees), func(data []byte) (interface{}, error) {
+		return cache.UnmarshalInvitees(data)
+	})
 	if invitees != nil {
 		return invitees.([]*inspirepb.RegistrationInvitation), nil
 	}
@@ -38,7 +40,9 @@ func GetInvitees(ctx context.Context, appID, userID string) ([]*inspirepb.Regist
 func GetInviter(ctx context.Context, appID, userID string) (*inspirepb.RegistrationInvitation, error) {
 	cacheFor := "inviter"
 
-	inviter := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheFor))
+	inviter := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheFor), func(data []byte) (interface{}, error) {
+		return cache.UnmarshalInviter(data)
+	})
 	if inviter != nil {
 		return inviter.(*inspirepb.RegistrationInvitation), nil
 	}

@@ -67,7 +67,9 @@ func UpdateAmountSettingsCache(ctx context.Context, appID, userID string, settin
 }
 
 func GetAmountSettingsByAppUser(ctx context.Context, appID, userID string) ([]*inspirepb.AppPurchaseAmountSetting, error) {
-	mySettings := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheFor))
+	mySettings := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheFor), func(data []byte) (interface{}, error) {
+		return cache.UnmarshalAmountSettings(data)
+	})
 	if mySettings != nil {
 		return mySettings.([]*inspirepb.AppPurchaseAmountSetting), nil
 	}

@@ -14,7 +14,9 @@ import (
 const cacheOrders = "referral:orders"
 
 func GetOrders(ctx context.Context, appID, userID string) ([]*npool.Order, error) {
-	myOrders := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheOrders))
+	myOrders := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheOrders), func(data []byte) (interface{}, error) {
+		return cache.UnmarshalOrders(data)
+	})
 	if myOrders != nil {
 		return myOrders.([]*npool.Order), nil
 	}

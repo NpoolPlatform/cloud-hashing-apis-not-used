@@ -87,7 +87,9 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 	invalidUUID := uuid.UUID{}.String()
 
 	if !base && info.Order.CouponID != invalidUUID {
-		couponAllocated := cache.GetEntry(cacheKey(cacheFixAmount, info.Order.CouponID))
+		couponAllocated := cache.GetEntry(cacheKey(cacheFixAmount, info.Order.CouponID), func(data []byte) (interface{}, error) {
+			return cache.UnmarshalCouponAllocated(data)
+		})
 		if couponAllocated != nil {
 			coupon = couponAllocated.(*inspirepb.CouponAllocatedDetail) //nolint
 		}
@@ -128,7 +130,9 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 	var accountInfo *billingpb.CoinAccountInfo
 
 	if info.Payment != nil {
-		coinInfo := cache.GetEntry(cacheKey(cacheCoin, info.Payment.CoinInfoID))
+		coinInfo := cache.GetEntry(cacheKey(cacheCoin, info.Payment.CoinInfoID), func(data []byte) (interface{}, error) {
+			return cache.UnmarshalCoinInfo(data)
+		})
 		if coinInfo != nil {
 			paymentCoinInfo = coinInfo.(*coininfopb.CoinInfo) //nolint
 		}
@@ -158,7 +162,9 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 	var discountCoupon *inspirepb.CouponAllocatedDetail
 
 	if !base && info.Order.DiscountCouponID != invalidUUID {
-		discount := cache.GetEntry(cacheKey(cacheDiscount, info.Order.DiscountCouponID))
+		discount := cache.GetEntry(cacheKey(cacheDiscount, info.Order.DiscountCouponID), func(data []byte) (interface{}, error) {
+			return cache.UnmarshalCouponAllocated(data)
+		})
 		if discount != nil {
 			discountCoupon = discount.(*inspirepb.CouponAllocatedDetail) //nolint
 		}
@@ -198,7 +204,9 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 	var userSpecialReduction *inspirepb.UserSpecialReduction
 
 	if !base && info.Order.UserSpecialReductionID != invalidUUID {
-		special := cache.GetEntry(cacheKey(cacheSpecialOffer, info.Order.UserSpecialReductionID))
+		special := cache.GetEntry(cacheKey(cacheSpecialOffer, info.Order.UserSpecialReductionID), func(data []byte) (interface{}, error) {
+			return cache.UnmarshalSpecialOffer(data)
+		})
 		if special != nil {
 			userSpecialReduction = special.(*inspirepb.UserSpecialReduction) //nolint
 		}
@@ -237,7 +245,9 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 
 	var goodInfo *npool.Good
 
-	cacheGoodInfo := cache.GetEntry(cacheKey(cacheGood, info.Order.GetGoodID()))
+	cacheGoodInfo := cache.GetEntry(cacheKey(cacheGood, info.Order.GetGoodID()), func(data []byte) (interface{}, error) {
+		return cache.UnmarshalGood(data)
+	})
 	if cacheGoodInfo != nil {
 		goodInfo = cacheGoodInfo.(*npool.Good) //nolint
 	}
@@ -255,7 +265,9 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 
 	var appGood *goodspb.AppGoodInfo
 
-	cacheAppGoodInfo := cache.GetEntry(cacheKey(cacheAppGood, fmt.Sprintf(info.Order.GetAppID(), info.Order.GetGoodID())))
+	cacheAppGoodInfo := cache.GetEntry(cacheKey(cacheAppGood, fmt.Sprintf(info.Order.GetAppID(), info.Order.GetGoodID())), func(data []byte) (interface{}, error) {
+		return cache.UnmarshalAppGoodInfo(data)
+	})
 	if cacheAppGoodInfo != nil {
 		appGood = cacheAppGoodInfo.(*goodspb.AppGoodInfo) //nolint
 	}
@@ -273,7 +285,9 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 
 	var promotion *goodspb.AppGoodPromotion
 
-	cachedAppGoodPromotion := cache.GetEntry(cacheKey(cacheAppGoodPromotion, info.Order.PromotionID))
+	cachedAppGoodPromotion := cache.GetEntry(cacheKey(cacheAppGoodPromotion, info.Order.PromotionID), func(data []byte) (interface{}, error) {
+		return cache.UnmarshalAppGoodPromotion(data)
+	})
 	if cachedAppGoodPromotion != nil {
 		promotion = cachedAppGoodPromotion.(*goodspb.AppGoodPromotion) //nolint
 	}

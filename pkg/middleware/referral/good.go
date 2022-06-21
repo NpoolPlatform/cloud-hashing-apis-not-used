@@ -19,7 +19,9 @@ const (
 )
 
 func getGoodSummaries(ctx context.Context, appID, userID string) ([]*npool.GoodSummary, error) {
-	mySummaries := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheGoodSummaries))
+	mySummaries := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheGoodSummaries), func(data []byte) (interface{}, error) {
+		return cache.UnmarshalGoodSummaries(data)
+	})
 	if mySummaries != nil {
 		return mySummaries.([]*npool.GoodSummary), nil
 	}
