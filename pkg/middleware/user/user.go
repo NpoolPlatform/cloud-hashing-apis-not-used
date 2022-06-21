@@ -6,6 +6,7 @@ import (
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	referral "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral"
 	verifymw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/verify"
+	logger "github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
 	appusermgrconst "github.com/NpoolPlatform/appuser-manager/pkg/const"
@@ -113,7 +114,9 @@ func Signup(ctx context.Context, in *npool.SignupRequest) (*npool.SignupResponse
 			return nil, xerrors.Errorf("fail create registration invitation: %v", err)
 		}
 
-		referral.GetInviteesRT(ctx, in.GetAppID(), inviterID)
+		if _, err := referral.GetInviteesRT(ctx, in.GetAppID(), inviterID); err != nil {
+			logger.Sugar().Errorf("fail update invitees cache: %v", err)
+		}
 	}
 
 	return &npool.SignupResponse{
