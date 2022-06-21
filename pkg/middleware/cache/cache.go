@@ -3,6 +3,8 @@ package cache
 import (
 	"sync"
 	"time"
+
+	redis2 "github.com/NpoolPlatform/go-service-framework/pkg/redis"
 )
 
 const expireDuration = 4 * time.Hour
@@ -20,26 +22,21 @@ var (
 func AddEntry(key string, value interface{}) {
 	lock.Lock()
 	defer lock.Unlock()
-	entries[key] = &entry{
-		createAt: time.Now(),
-		value:    value,
-	}
+	redis2.Set(key, value, expireDuration)
 }
 
 func DelEntry(key string) {
 	lock.Lock()
 	defer lock.Unlock()
-	delete(entries, key)
+	redis2.Del(key)
 }
 
 func GetEntry(key string) interface{} {
 	lock.Lock()
 	defer lock.Unlock()
-	if val, ok := entries[key]; ok {
-		if time.Now().After(val.createAt.Add(expireDuration)) {
-			return nil
-		}
-		return val.value
+	v, err := redis2.Get(key)
+	if err != nil {
+		return nil
 	}
-	return nil
+	return v
 }
