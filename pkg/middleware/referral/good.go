@@ -18,6 +18,7 @@ const (
 	cacheGoodSummaries = "referral:good:summaries"
 )
 
+//nolint
 func getGoodSummaries(ctx context.Context, appID, userID string) ([]*npool.GoodSummary, error) { //nolint
 	/*
 		mySummaries := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheGoodSummaries), func(data []byte) (interface{}, error) {
