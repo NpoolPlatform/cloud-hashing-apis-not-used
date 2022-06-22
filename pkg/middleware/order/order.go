@@ -708,8 +708,15 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		logger.Sugar().Errorf("fail get pay currency info: %v", err)
 	}
 	if payCurrency != nil {
-		paymentCoinCurrency = payCurrency.AppPriceVSUSDT
-		paymentLocalCoinCurrency = payCurrency.PriceVSUSDT
+		if payCurrency.AppPriceVSUSDT > 0 {
+			paymentCoinCurrency = payCurrency.AppPriceVSUSDT
+		}
+		if payCurrency.PriceVSUSDT > 0 {
+			paymentLocalCoinCurrency = payCurrency.PriceVSUSDT
+		}
+	}
+	if paymentCoinCurrency <= 0 {
+		return nil, xerrors.Errorf("invalid payment coin currency")
 	}
 
 	goodPrice := myOrder.Info.Good.Good.Good.Price
