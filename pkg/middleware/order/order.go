@@ -720,10 +720,10 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	}
 
 	goodPrice := myOrder.Info.Good.Good.Good.Price
-	if myOrder.Info.AppGood != nil {
+	if myOrder.Info.AppGood != nil && myOrder.Info.AppGood.Price > 0 {
 		goodPrice = myOrder.Info.AppGood.Price
 	}
-	if myOrder.Info.Promotion != nil {
+	if myOrder.Info.Promotion != nil && myOrder.Info.Promotion.Price > 0 {
 		goodPrice = myOrder.Info.Promotion.Price
 	}
 	if goodPrice <= 0 {
