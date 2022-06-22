@@ -726,8 +726,15 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	if myOrder.Info.Promotion != nil {
 		goodPrice = myOrder.Info.Promotion.Price
 	}
+	if goodPrice <= 0 {
+		return nil, xerrors.Errorf("invalid good price")
+	}
 
 	amountUSD := float64(myOrder.Info.Order.Order.Units) * goodPrice
+	if amountUSD <= 0 {
+		return nil, xerrors.Errorf("invalid payment amount")
+	}
+
 	if myOrder.Info.DiscountCoupon != nil {
 		discount := myOrder.Info.DiscountCoupon.Discount
 		if discount.Start < uint32(time.Now().Unix()) && uint32(time.Now().Unix()) < discount.Start+uint32(discount.DurationDays)*secondsInDay {
