@@ -42,6 +42,9 @@ func GetEntry(key string, f func(data []byte) (interface{}, error)) interface{} 
 		logger.Sugar().Errorf("fail get cache %v: %v", key, err)
 		return nil
 	}
+	if v.(string) == "" {
+		return nil
+	}
 	if f != nil {
 		s, err := f([]byte(v.(string)))
 		if err != nil {
