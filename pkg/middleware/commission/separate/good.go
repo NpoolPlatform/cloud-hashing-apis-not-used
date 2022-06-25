@@ -133,10 +133,16 @@ func getDirectInviteeGoodCommissions(ctx context.Context, appID, userID string) 
 		}
 
 		for _, comm := range comms {
+			found := false
 			for _, commission := range commissions {
 				if commission.GoodID == comm.GoodID {
 					commission.Amount += comm.Amount
+					found = true
 				}
+			}
+
+			if !found {
+				commissions = append(commissions, comm)
 			}
 		}
 	}
