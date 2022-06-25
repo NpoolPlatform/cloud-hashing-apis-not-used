@@ -60,6 +60,27 @@ func CreateAmountSetting(
 		return nil, fmt.Errorf("permission denied")
 	}
 
+	settings, err := grpc2.GetAppPurchaseAmountSettingsByAppUser(ctx, &inspirepb.GetAppPurchaseAmountSettingsByAppUserRequest{
+		AppID:  appID,
+		UserID: iv.InviterID,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("fail get amount settings: %v", err)
+	}
+
+	percent := uint32(0)
+	for _, s := range settings {
+		if s.End != 0 {
+			continue
+		}
+		percent = s.Percent
+		break
+	}
+
+	if setting.Percent > percent {
+		return nil, fmt.Errorf("overflow percent")
+	}
+
 	setting.AppID = appID
 	setting.UserID = targetUserID
 
@@ -68,7 +89,7 @@ func CreateAmountSetting(
 		return nil, fmt.Errorf("fail create amount setting: %v", err)
 	}
 
-	settings, err := grpc2.GetAppPurchaseAmountSettingsByAppUser(ctx, &inspirepb.GetAppPurchaseAmountSettingsByAppUserRequest{
+	settings, err = grpc2.GetAppPurchaseAmountSettingsByAppUser(ctx, &inspirepb.GetAppPurchaseAmountSettingsByAppUserRequest{
 		AppID:  appID,
 		UserID: targetUserID,
 	})
