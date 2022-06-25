@@ -103,7 +103,7 @@ func getOrderParentGoodCommissions(ctx context.Context, appID, userID string, ro
 	return commissions, nil
 }
 
-func getDirectInviteeGoodCommissions(ctx context.Context, appID, userID string) ([]*npool.GoodCommission, error) {
+func getDirectInviteeGoodCommissions(ctx context.Context, appID, userID string) ([]*npool.GoodCommission, error) { //nolint
 	roots, err := commissionsetting.GetAmountSettingsByAppUser(ctx, appID, userID)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get amount settings: %v", err)
