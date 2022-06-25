@@ -70,7 +70,7 @@ func CreateAmountSetting(
 
 	percent := uint32(0)
 	for _, s := range settings {
-		if s.End != 0 {
+		if s.End != 0 || s.GoodID != setting.GoodID {
 			continue
 		}
 		percent = s.Percent
