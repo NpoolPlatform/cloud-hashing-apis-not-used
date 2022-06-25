@@ -43,6 +43,7 @@ func GetAmountSettings(ctx context.Context, appID, userID string) ([]*inspirepb.
 	return settings, nil
 }
 
+// nolint
 func CreateAmountSetting(
 	ctx context.Context,
 	appID, userID, targetUserID, langID string,
