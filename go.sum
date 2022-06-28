@@ -154,8 +154,8 @@ github.com/NpoolPlatform/message v0.0.0-20220501030927-34f296682c0c/go.mod h1:i/
 github.com/NpoolPlatform/message v0.0.0-20220501143407-c230f4ca021b/go.mod h1:i/F/sQWjQk44RGvfgEB0zH0oAK/0qLvgJ1AsJDZQDkk=
 github.com/NpoolPlatform/message v0.0.0-20220606130737-824c3198b695/go.mod h1:3Enb49K3JrhlSwA+6bcsBuTdTzVxVKhdkllDGgv0n3M=
 github.com/NpoolPlatform/message v0.0.0-20220616144445-e670acc37bf4/go.mod h1:VWuStqZaa5i8scdETxGvBh5CJzebGWw1dxTE0EUqRXk=
-github.com/NpoolPlatform/message v0.0.0-20220617041847-b7107557198c h1:qZdZJhC27ydKYnM3CrKazpP/o7ca2thfsU6n94ognSs=
-github.com/NpoolPlatform/message v0.0.0-20220617041847-b7107557198c/go.mod h1:VWuStqZaa5i8scdETxGvBh5CJzebGWw1dxTE0EUqRXk=
+github.com/NpoolPlatform/message v0.0.0-20220628032730-af9d4ccca072 h1:CZR5WLvZiTenROgqkMCar6MeFUg0ScWC9jYq4sXQrns=
+github.com/NpoolPlatform/message v0.0.0-20220628032730-af9d4ccca072/go.mod h1:+GlL8noQ1F4Dm7u5Qox5L3Wz2WGoZox4vPxAd5XBAVA=
 github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da h1:qZX3tw6TEsxaWyY/ZEeEtI6zSZzoYoCiqmDdt6DhxfA=
 github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da/go.mod h1:ieZ2gIh/zSlJ2hIr/fIuMvi5QMGRY0rXugKiBc+5ZKI=
 github.com/NpoolPlatform/oracle-manager v0.0.0-20220606135947-0f09e9f3818a/go.mod h1:f9Seypsw5N+Kc0P13IurAD/WNHXhzYsBt+d/R17oLfA=
@@ -2324,8 +2324,9 @@ golang.org/x/sys v0.0.0-20211124211545-fe61309f8881/go.mod h1:oPkhp1MJrh7nUepCBc
 golang.org/x/sys v0.0.0-20211205182925-97ca703d548d/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20220114195835-da31bd327af9/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
-golang.org/x/sys v0.0.0-20220207234003-57398862261d h1:Bm7BNOQt2Qv7ZqysjeLjgCBanX+88Z/OtdvsrEv1Djc=
 golang.org/x/sys v0.0.0-20220207234003-57398862261d/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.0.0-20220615213510-4f61da869c0c h1:aFV+BgZ4svzjfabn8ERpuB4JI4N6/rdy1iusx77G3oU=
+golang.org/x/sys v0.0.0-20220615213510-4f61da869c0c/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/term v0.0.0-20201117132131-f5c789dd3221/go.mod h1:Nr5EML6q2oocZ2LXRh80K7BxOlk5/8JxuGnuhpl+muw=
 golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
 golang.org/x/term v0.0.0-20201210144234-2321bbc49cbf/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=

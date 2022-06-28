@@ -182,6 +182,75 @@ func getSeparateGoodCommissions(ctx context.Context, appID, userID string) ([]*n
 	return commissions, nil
 }
 
+func getSeparateGoodContributions(ctx context.Context, comms []*npool.GoodCommission, appID, userID string) error {
+	invitees, err := referral.GetLayeredInvitees(ctx, appID, userID)
+	if err != nil {
+		return xerrors.Errorf("fail get invitees: %v", err)
+	}
+
+	roots, err := commissionsetting.GetAmountSettingsByAppUser(ctx, appID, userID)
+	if err != nil {
+		return xerrors.Errorf("fail get amount settings: %v", err)
+	}
+
+	for _, iv := range invitees {
+		inviteeID, err := findRootInviter(ctx, userID, iv.InviteeID, invitees)
+		if err != nil {
+			return xerrors.Errorf("cannot find root inviter: %v", err)
+		}
+
+		nexts, err := commissionsetting.GetAmountSettingsByAppUser(ctx, iv.AppID, inviteeID)
+		if err != nil {
+			return xerrors.Errorf("fail get amount settings: %v", err)
+		}
+
+		orders, err := referral.GetOrders(ctx, appID, userID)
+		if err != nil {
+			return xerrors.Errorf("fail get orders: %v", err)
+		}
+
+		for _, order := range orders {
+			if order.Order.Payment == nil || order.Order.Payment.State != orderconst.PaymentStateDone {
+				continue
+			}
+
+			if order.Order.Order.CreateAt >= dayBeginning() {
+				continue
+			}
+
+			root := commissionsetting.GetOrderAmountSetting(roots, order)
+			if root == nil {
+				continue
+			}
+
+			rootPercent := root.Percent
+			nextPercent := uint32(0)
+
+			next := commissionsetting.GetOrderAmountSetting(nexts, order)
+			if next != nil {
+				nextPercent = next.Percent
+			}
+
+			orderAmount := order.Order.Payment.Amount * order.Order.Payment.CoinUSDCurrency
+
+			var commission *npool.GoodCommission
+			for _, comm := range comms {
+				if comm.GoodID == order.Good.Good.Good.ID {
+					commission = comm
+					break
+				}
+			}
+			if commission == nil {
+				continue
+			}
+
+			commission.Contribution += orderAmount * float64(rootPercent-nextPercent)
+		}
+	}
+
+	return nil
+}
+
 func GetSeparateGoodCommissions(ctx context.Context, appID, userID string) ([]*npool.GoodCommission, error) {
 	comms, err := getSeparateGoodCommissions(ctx, appID, userID)
 	if err != nil {
@@ -199,6 +268,11 @@ func GetSeparateGoodCommissions(ctx context.Context, appID, userID string) ([]*n
 			return nil, xerrors.Errorf("fail get user good commissions: %v", err)
 		}
 		comms = append(comms, commissions...)
+	}
+
+	err = getSeparateGoodContributions(ctx, comms, appID, userID)
+	if err != nil {
+		return nil, xerrors.Errorf("fail get user good contributions: %v", err)
 	}
 
 	return comms, nil

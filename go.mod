@@ -14,7 +14,7 @@ require (
 	github.com/NpoolPlatform/kyc-management v0.0.0-20220322081324-f537a7bcd812
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20220526050249-956b54fac9f1
 	github.com/NpoolPlatform/login-gateway v0.0.0-20220328094651-99c681b06955
-	github.com/NpoolPlatform/message v0.0.0-20220617041847-b7107557198c
+	github.com/NpoolPlatform/message v0.0.0-20220628032730-af9d4ccca072
 	github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da
 	github.com/NpoolPlatform/oracle-manager v0.0.0-20220624095427-ce43ee0215f9
 	github.com/NpoolPlatform/review-service v0.0.0-20220322082433-0c2b7ee284ed
@@ -100,7 +100,7 @@ require (
 	go.uber.org/zap v1.19.1 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
 	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd // indirect
-	golang.org/x/sys v0.0.0-20220207234003-57398862261d // indirect
+	golang.org/x/sys v0.0.0-20220615213510-4f61da869c0c // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/genproto v0.0.0-20220317150908-0efb43f6373e // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
