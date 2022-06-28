@@ -245,7 +245,7 @@ func getSeparateGoodContributions(ctx context.Context, comms []*npool.GoodCommis
 				continue
 			}
 
-			commission.Contribution += orderAmount * float64(rootPercent-nextPercent)
+			commission.Contribution += orderAmount * float64(rootPercent-nextPercent) / 100.0
 		}
 	}
 
