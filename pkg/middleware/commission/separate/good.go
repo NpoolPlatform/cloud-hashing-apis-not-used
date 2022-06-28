@@ -182,6 +182,7 @@ func getSeparateGoodCommissions(ctx context.Context, appID, userID string) ([]*n
 	return commissions, nil
 }
 
+// nolint
 func getSeparateGoodContributions(ctx context.Context, comms []*npool.GoodCommission, appID, userID string) error {
 	invitees, err := referral.GetLayeredInvitees(ctx, appID, userID)
 	if err != nil {
