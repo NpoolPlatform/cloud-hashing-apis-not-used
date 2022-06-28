@@ -236,7 +236,7 @@ func getSeparateGoodContributions(ctx context.Context, comms []*npool.GoodCommis
 
 			var commission *npool.GoodCommission
 			for _, comm := range comms {
-				if comm.GoodID == order.Good.Good.Good.ID {
+				if comm.GoodID == order.Good.Good.Good.ID && comm.UserID == inviteeID {
 					commission = comm
 					break
 				}
