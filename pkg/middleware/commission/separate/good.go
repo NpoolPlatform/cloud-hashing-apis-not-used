@@ -205,7 +205,7 @@ func getSeparateGoodContributions(ctx context.Context, comms []*npool.GoodCommis
 			return nil, xerrors.Errorf("fail get amount settings: %v", err)
 		}
 
-		orders, err := referral.GetOrders(ctx, appID, userID)
+		orders, err := referral.GetOrders(ctx, appID, iv.InviteeID)
 		if err != nil {
 			return nil, xerrors.Errorf("fail get orders: %v", err)
 		}
@@ -253,6 +253,8 @@ func getSeparateGoodContributions(ctx context.Context, comms []*npool.GoodCommis
 			}
 
 			commission.Contribution += orderAmount * float64(rootPercent-nextPercent) / 100.0
+			logger.Sugar().Infof("order %v contribute %v coin %v percent %v - %v user %v",
+				order.Order.Order.ID, orderAmount, order.Good.Main.Unit, rootPercent, nextPercent, inviteeID)
 		}
 	}
 
