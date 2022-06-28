@@ -242,7 +242,14 @@ func getSeparateGoodContributions(ctx context.Context, comms []*npool.GoodCommis
 				}
 			}
 			if commission == nil {
-				continue
+				commission = &npool.GoodCommission{
+					GoodID:     order.Good.Good.Good.ID,
+					CoinTypeID: order.Good.Main.ID,
+					CoinName:   order.Good.Main.Unit,
+					AppID:      appID,
+					UserID:     inviteeID,
+				}
+				comms = append(comms, commission)
 			}
 
 			commission.Contribution += orderAmount * float64(rootPercent-nextPercent) / 100.0
