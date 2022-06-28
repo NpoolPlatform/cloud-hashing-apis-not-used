@@ -183,31 +183,31 @@ func getSeparateGoodCommissions(ctx context.Context, appID, userID string) ([]*n
 }
 
 // nolint
-func getSeparateGoodContributions(ctx context.Context, comms []*npool.GoodCommission, appID, userID string) error {
+func getSeparateGoodContributions(ctx context.Context, comms []*npool.GoodCommission, appID, userID string) ([]*npool.GoodCommission, error) {
 	invitees, err := referral.GetLayeredInvitees(ctx, appID, userID)
 	if err != nil {
-		return xerrors.Errorf("fail get invitees: %v", err)
+		return nil, xerrors.Errorf("fail get invitees: %v", err)
 	}
 
 	roots, err := commissionsetting.GetAmountSettingsByAppUser(ctx, appID, userID)
 	if err != nil {
-		return xerrors.Errorf("fail get amount settings: %v", err)
+		return nil, xerrors.Errorf("fail get amount settings: %v", err)
 	}
 
 	for _, iv := range invitees {
 		inviteeID, err := findRootInviter(ctx, userID, iv.InviteeID, invitees)
 		if err != nil {
-			return xerrors.Errorf("cannot find root inviter: %v", err)
+			return nil, xerrors.Errorf("cannot find root inviter: %v", err)
 		}
 
 		nexts, err := commissionsetting.GetAmountSettingsByAppUser(ctx, iv.AppID, inviteeID)
 		if err != nil {
-			return xerrors.Errorf("fail get amount settings: %v", err)
+			return nil, xerrors.Errorf("fail get amount settings: %v", err)
 		}
 
 		orders, err := referral.GetOrders(ctx, appID, userID)
 		if err != nil {
-			return xerrors.Errorf("fail get orders: %v", err)
+			return nil, xerrors.Errorf("fail get orders: %v", err)
 		}
 
 		for _, order := range orders {
@@ -256,7 +256,7 @@ func getSeparateGoodContributions(ctx context.Context, comms []*npool.GoodCommis
 		}
 	}
 
-	return nil
+	return comms, nil
 }
 
 func GetSeparateGoodCommissions(ctx context.Context, appID, userID string) ([]*npool.GoodCommission, error) {
@@ -278,7 +278,7 @@ func GetSeparateGoodCommissions(ctx context.Context, appID, userID string) ([]*n
 		comms = append(comms, commissions...)
 	}
 
-	err = getSeparateGoodContributions(ctx, comms, appID, userID)
+	comms, err = getSeparateGoodContributions(ctx, comms, appID, userID)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get user good contributions: %v", err)
 	}
