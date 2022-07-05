@@ -80,7 +80,7 @@ func Set(ctx context.Context, in *npool.SetWithdrawAddressRequest) (*npool.SetWi
 		return nil, xerrors.Errorf("fail create address: %v", err)
 	}
 
-	_, err = grpc2.CreateReview(ctx, &reviewpb.CreateReviewRequest{
+	_review, err := grpc2.CreateReview(ctx, &reviewpb.CreateReviewRequest{
 		Info: &reviewpb.Review{
 			AppID:      in.GetAppID(),
 			Domain:     billingconst.ServiceName,
@@ -90,6 +90,14 @@ func Set(ctx context.Context, in *npool.SetWithdrawAddressRequest) (*npool.SetWi
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail create review: %v", err)
+	}
+
+	_review.State = reviewconst.StateApproved
+	_, err = grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{
+		Info: _review,
+	})
+	if err != nil {
+		return nil, xerrors.Errorf("fail update review: %v", err)
 	}
 
 	return &npool.SetWithdrawAddressResponse{
