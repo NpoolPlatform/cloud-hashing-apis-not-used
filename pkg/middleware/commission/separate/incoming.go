@@ -32,6 +32,16 @@ func getRebate(ctx context.Context, appID, userID string) (float64, error) {
 
 	totalAmount := 0.0
 	for _, order := range orders {
+		switch order.Order.Order.OrderType {
+		case orderconst.OrderTypeNormal:
+		case orderconst.OrderTypeOffline:
+			fallthrough //nolint
+		case orderconst.OrderTypeAirdrop:
+			continue
+		default:
+			return 0, xerrors.Errorf("invalid order type: %v", order.Order.Order.OrderType)
+		}
+
 		if order.Order.Payment == nil || order.Order.Payment.State != orderconst.PaymentStateDone {
 			continue
 		}
@@ -99,6 +109,16 @@ func getPeriodRebate(ctx context.Context, appID, userID string, roots, nexts []*
 	totalRootAmount := 0.0
 
 	for _, order := range orders {
+		switch order.Order.Order.OrderType {
+		case orderconst.OrderTypeNormal:
+		case orderconst.OrderTypeOffline:
+			fallthrough //nolint
+		case orderconst.OrderTypeAirdrop:
+			continue
+		default:
+			return 0, xerrors.Errorf("invalid order type: %v", order.Order.Order.OrderType)
+		}
+
 		totalRootAmount += getOrderParentRebate(ctx, order, roots, nexts)
 	}
 

@@ -32,6 +32,16 @@ func getCoinSummaries(ctx context.Context, appID, userID string) ([]*npool.CoinS
 
 	summaries := []*npool.CoinSummary{}
 	for _, order := range orders {
+		switch order.Order.Order.OrderType {
+		case orderconst.OrderTypeNormal:
+		case orderconst.OrderTypeOffline:
+			fallthrough //nolint
+		case orderconst.OrderTypeAirdrop:
+			continue
+		default:
+			return nil, xerrors.Errorf("invalid order type: %v", order.Order.Order.OrderType)
+		}
+
 		if order.Order.Payment == nil || order.Order.Payment.State != orderconst.PaymentStateDone {
 			continue
 		}
