@@ -73,6 +73,44 @@ func (s *Server) SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) 
 	return resp, nil
 }
 
+func (s *Server) SubmitUserOrder(ctx context.Context, in *npool.SubmitUserOrderRequest) (*npool.SubmitUserOrderResponse, error) {
+	resp, err := order.SubmitOrder(ctx, &npool.SubmitOrderRequest{
+		GoodID:                 in.GetGoodID(),
+		Units:                  in.GetUnits(),
+		UserID:                 in.GetTargetUserID(),
+		AppID:                  in.GetAppID(),
+		CouponID:               in.GetCouponID(),
+		DiscountCouponID:       in.GetDiscountCouponID(),
+		UserSpecialReductionID: in.GetUserSpecialReductionID(),
+	})
+	if err != nil {
+		logger.Sugar().Errorf("submit order error: %v", err)
+		return &npool.SubmitUserOrderResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return &npool.SubmitUserOrderResponse{
+		Info: resp.Info,
+	}, nil
+}
+
+func (s *Server) SubmitAppUserOrder(ctx context.Context, in *npool.SubmitAppUserOrderRequest) (*npool.SubmitAppUserOrderResponse, error) {
+	resp, err := order.SubmitOrder(ctx, &npool.SubmitOrderRequest{
+		GoodID:                 in.GetGoodID(),
+		Units:                  in.GetUnits(),
+		UserID:                 in.GetTargetUserID(),
+		AppID:                  in.GetTargetAppID(),
+		CouponID:               in.GetCouponID(),
+		DiscountCouponID:       in.GetDiscountCouponID(),
+		UserSpecialReductionID: in.GetUserSpecialReductionID(),
+	})
+	if err != nil {
+		logger.Sugar().Errorf("submit order error: %v", err)
+		return &npool.SubmitAppUserOrderResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return &npool.SubmitAppUserOrderResponse{
+		Info: resp.Info,
+	}, nil
+}
+
 func (s *Server) CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest) (*npool.CreateOrderPaymentResponse, error) {
 	resp, err := order.CreateOrderPayment(ctx, in)
 	if err != nil {

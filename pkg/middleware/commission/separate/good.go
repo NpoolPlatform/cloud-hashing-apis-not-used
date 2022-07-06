@@ -14,7 +14,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func getUserGoodCommissions(ctx context.Context, appID, userID string) ([]*npool.GoodCommission, error) {
+func getUserGoodCommissions(ctx context.Context, appID, userID string) ([]*npool.GoodCommission, error) { // nolint
 	orders, err := referral.GetOrders(ctx, appID, userID)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get orders: %v", err)
