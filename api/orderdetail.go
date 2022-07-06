@@ -7,6 +7,7 @@ import (
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
+	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
 	"github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/order" //nolint
@@ -65,7 +66,7 @@ func (s *Server) GetOrdersByGood(ctx context.Context, in *npool.GetOrdersByGoodR
 }
 
 func (s *Server) SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.SubmitOrderResponse, error) {
-	resp, err := order.SubmitOrder(ctx, in)
+	resp, err := order.SubmitOrder(ctx, in, orderconst.OrderTypeNormal)
 	if err != nil {
 		logger.Sugar().Errorf("submit order error: %v", err)
 		return &npool.SubmitOrderResponse{}, status.Error(codes.Internal, err.Error())
@@ -82,7 +83,7 @@ func (s *Server) SubmitUserOrder(ctx context.Context, in *npool.SubmitUserOrderR
 		CouponID:               in.GetCouponID(),
 		DiscountCouponID:       in.GetDiscountCouponID(),
 		UserSpecialReductionID: in.GetUserSpecialReductionID(),
-	})
+	}, orderconst.OrderTypeOffline)
 	if err != nil {
 		logger.Sugar().Errorf("submit order error: %v", err)
 		return &npool.SubmitUserOrderResponse{}, status.Error(codes.Internal, err.Error())
@@ -101,7 +102,7 @@ func (s *Server) SubmitAppUserOrder(ctx context.Context, in *npool.SubmitAppUser
 		CouponID:               in.GetCouponID(),
 		DiscountCouponID:       in.GetDiscountCouponID(),
 		UserSpecialReductionID: in.GetUserSpecialReductionID(),
-	})
+	}, orderconst.OrderTypeOffline)
 	if err != nil {
 		logger.Sugar().Errorf("submit order error: %v", err)
 		return &npool.SubmitAppUserOrderResponse{}, status.Error(codes.Internal, err.Error())
