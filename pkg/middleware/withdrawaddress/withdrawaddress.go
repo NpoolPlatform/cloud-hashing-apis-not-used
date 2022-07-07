@@ -104,7 +104,7 @@ func Set(ctx context.Context, in *npool.SetWithdrawAddressRequest) (*npool.SetWi
 		Info: &npool.WithdrawAddress{
 			Address: address,
 			Account: _account.Info,
-			State:   reviewconst.StateWait,
+			State:   reviewconst.StateApproved,
 		},
 	}, nil
 }
