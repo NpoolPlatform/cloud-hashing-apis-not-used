@@ -14,7 +14,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func getUserGoodCommissions(ctx context.Context, appID, userID string) ([]*npool.GoodCommission, error) {
+func getUserGoodCommissions(ctx context.Context, appID, userID string) ([]*npool.GoodCommission, error) { // nolint
 	orders, err := referral.GetOrders(ctx, appID, userID)
 	if err != nil {
 		return nil, xerrors.Errorf("fail get orders: %v", err)
@@ -28,6 +28,16 @@ func getUserGoodCommissions(ctx context.Context, appID, userID string) ([]*npool
 	commissions := []*npool.GoodCommission{}
 
 	for _, order := range orders {
+		switch order.Order.Order.OrderType {
+		case orderconst.OrderTypeNormal:
+		case orderconst.OrderTypeOffline:
+			fallthrough //nolint
+		case orderconst.OrderTypeAirdrop:
+			continue
+		default:
+			return nil, xerrors.Errorf("invalid order type: %v", order.Order.Order.OrderType)
+		}
+
 		if order.Order.Payment == nil || order.Order.Payment.State != orderconst.PaymentStateDone {
 			continue
 		}
@@ -76,6 +86,16 @@ func getOrderParentGoodCommissions(ctx context.Context, appID, userID string, ro
 	commissions := []*npool.GoodCommission{}
 
 	for _, order := range orders {
+		switch order.Order.Order.OrderType {
+		case orderconst.OrderTypeNormal:
+		case orderconst.OrderTypeOffline:
+			fallthrough //nolint
+		case orderconst.OrderTypeAirdrop:
+			continue
+		default:
+			return nil, xerrors.Errorf("invalid order type: %v", order.Order.Order.OrderType)
+		}
+
 		amount := getOrderParentRebate(ctx, order, roots, nexts)
 		if amount <= 0 {
 			continue
@@ -211,6 +231,16 @@ func getSeparateGoodContributions(ctx context.Context, comms []*npool.GoodCommis
 		}
 
 		for _, order := range orders {
+			switch order.Order.Order.OrderType {
+			case orderconst.OrderTypeNormal:
+			case orderconst.OrderTypeOffline:
+				fallthrough //nolint
+			case orderconst.OrderTypeAirdrop:
+				continue
+			default:
+				return nil, xerrors.Errorf("invalid order type: %v", order.Order.Order.OrderType)
+			}
+
 			if order.Order.Payment == nil || order.Order.Payment.State != orderconst.PaymentStateDone {
 				continue
 			}
