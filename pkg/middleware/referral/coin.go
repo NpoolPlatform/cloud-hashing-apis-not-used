@@ -6,6 +6,7 @@ import (
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
 	cache "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/cache"
+	cachekey "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral/cachekey"
 	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
@@ -17,7 +18,9 @@ const (
 )
 
 func getCoinSummaries(ctx context.Context, appID, userID string) ([]*npool.CoinSummary, error) {
-	mySummaries := cache.GetEntry(CacheKey(appID, userID, cacheCoinSummaries))
+	mySummaries := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheCoinSummaries), func(data []byte) (interface{}, error) {
+		return cache.UnmarshalCoinSummaries(data)
+	})
 	if mySummaries != nil {
 		return mySummaries.([]*npool.CoinSummary), nil
 	}
@@ -60,7 +63,7 @@ func getCoinSummaries(ctx context.Context, appID, userID string) ([]*npool.CoinS
 	}
 
 	if len(summaries) > 0 {
-		cache.AddEntry(CacheKey(appID, userID, cacheCoinSummaries), summaries)
+		cache.AddEntry(cachekey.CacheKey(appID, userID, cacheCoinSummaries), summaries)
 	}
 
 	return summaries, nil

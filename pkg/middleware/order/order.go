@@ -87,7 +87,9 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 	invalidUUID := uuid.UUID{}.String()
 
 	if !base && info.Order.CouponID != invalidUUID {
-		couponAllocated := cache.GetEntry(cacheKey(cacheFixAmount, info.Order.CouponID))
+		couponAllocated := cache.GetEntry(cacheKey(cacheFixAmount, info.Order.CouponID), func(data []byte) (interface{}, error) {
+			return cache.UnmarshalCouponAllocated(data)
+		})
 		if couponAllocated != nil {
 			coupon = couponAllocated.(*inspirepb.CouponAllocatedDetail) //nolint
 		}
@@ -128,7 +130,9 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 	var accountInfo *billingpb.CoinAccountInfo
 
 	if info.Payment != nil {
-		coinInfo := cache.GetEntry(cacheKey(cacheCoin, info.Payment.CoinInfoID))
+		coinInfo := cache.GetEntry(cacheKey(cacheCoin, info.Payment.CoinInfoID), func(data []byte) (interface{}, error) {
+			return cache.UnmarshalCoinInfo(data)
+		})
 		if coinInfo != nil {
 			paymentCoinInfo = coinInfo.(*coininfopb.CoinInfo) //nolint
 		}
@@ -158,7 +162,9 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 	var discountCoupon *inspirepb.CouponAllocatedDetail
 
 	if !base && info.Order.DiscountCouponID != invalidUUID {
-		discount := cache.GetEntry(cacheKey(cacheDiscount, info.Order.DiscountCouponID))
+		discount := cache.GetEntry(cacheKey(cacheDiscount, info.Order.DiscountCouponID), func(data []byte) (interface{}, error) {
+			return cache.UnmarshalCouponAllocated(data)
+		})
 		if discount != nil {
 			discountCoupon = discount.(*inspirepb.CouponAllocatedDetail) //nolint
 		}
@@ -198,7 +204,9 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 	var userSpecialReduction *inspirepb.UserSpecialReduction
 
 	if !base && info.Order.UserSpecialReductionID != invalidUUID {
-		special := cache.GetEntry(cacheKey(cacheSpecialOffer, info.Order.UserSpecialReductionID))
+		special := cache.GetEntry(cacheKey(cacheSpecialOffer, info.Order.UserSpecialReductionID), func(data []byte) (interface{}, error) {
+			return cache.UnmarshalSpecialOffer(data)
+		})
 		if special != nil {
 			userSpecialReduction = special.(*inspirepb.UserSpecialReduction) //nolint
 		}
@@ -237,7 +245,9 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 
 	var goodInfo *npool.Good
 
-	cacheGoodInfo := cache.GetEntry(cacheKey(cacheGood, info.Order.GetGoodID()))
+	cacheGoodInfo := cache.GetEntry(cacheKey(cacheGood, info.Order.GetGoodID()), func(data []byte) (interface{}, error) {
+		return cache.UnmarshalGood(data)
+	})
 	if cacheGoodInfo != nil {
 		goodInfo = cacheGoodInfo.(*npool.Good) //nolint
 	}
@@ -255,7 +265,9 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 
 	var appGood *goodspb.AppGoodInfo
 
-	cacheAppGoodInfo := cache.GetEntry(cacheKey(cacheAppGood, fmt.Sprintf(info.Order.GetAppID(), info.Order.GetGoodID())))
+	cacheAppGoodInfo := cache.GetEntry(cacheKey(cacheAppGood, fmt.Sprintf(info.Order.GetAppID(), info.Order.GetGoodID())), func(data []byte) (interface{}, error) {
+		return cache.UnmarshalAppGoodInfo(data)
+	})
 	if cacheAppGoodInfo != nil {
 		appGood = cacheAppGoodInfo.(*goodspb.AppGoodInfo) //nolint
 	}
@@ -273,7 +285,9 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 
 	var promotion *goodspb.AppGoodPromotion
 
-	cachedAppGoodPromotion := cache.GetEntry(cacheKey(cacheAppGoodPromotion, info.Order.PromotionID))
+	cachedAppGoodPromotion := cache.GetEntry(cacheKey(cacheAppGoodPromotion, info.Order.PromotionID), func(data []byte) (interface{}, error) {
+		return cache.UnmarshalAppGoodPromotion(data)
+	})
 	if cachedAppGoodPromotion != nil {
 		promotion = cachedAppGoodPromotion.(*goodspb.AppGoodPromotion) //nolint
 	}
@@ -439,7 +453,7 @@ func GetOrdersByGood(ctx context.Context, in *npool.GetOrdersByGoodRequest) (*np
 	}, nil
 }
 
-func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.SubmitOrderResponse, error) { //nolint
+func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest, orderType string) (*npool.SubmitOrderResponse, error) { //nolint
 	payments, err := grpc2.GetPaymentsByAppUserState(ctx, &orderpb.GetPaymentsByAppUserStateRequest{
 		AppID:  in.GetAppID(),
 		UserID: in.GetUserID(),
@@ -518,6 +532,7 @@ func SubmitOrder(ctx context.Context, in *npool.SubmitOrderRequest) (*npool.Subm
 			DiscountCouponID:       in.GetDiscountCouponID(),
 			UserSpecialReductionID: in.GetUserSpecialReductionID(),
 			PromotionID:            promotionID,
+			OrderType:              orderType,
 		},
 	})
 	if err != nil {
@@ -694,19 +709,33 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		logger.Sugar().Errorf("fail get pay currency info: %v", err)
 	}
 	if payCurrency != nil {
-		paymentCoinCurrency = payCurrency.AppPriceVSUSDT
-		paymentLocalCoinCurrency = payCurrency.PriceVSUSDT
+		if payCurrency.AppPriceVSUSDT > 0 {
+			paymentCoinCurrency = payCurrency.AppPriceVSUSDT
+		}
+		if payCurrency.PriceVSUSDT > 0 {
+			paymentLocalCoinCurrency = payCurrency.PriceVSUSDT
+		}
+	}
+	if paymentCoinCurrency <= 0 {
+		return nil, xerrors.Errorf("invalid payment coin currency")
 	}
 
 	goodPrice := myOrder.Info.Good.Good.Good.Price
-	if myOrder.Info.AppGood != nil {
+	if myOrder.Info.AppGood != nil && myOrder.Info.AppGood.Price > 0 {
 		goodPrice = myOrder.Info.AppGood.Price
 	}
-	if myOrder.Info.Promotion != nil {
+	if myOrder.Info.Promotion != nil && myOrder.Info.Promotion.Price > 0 {
 		goodPrice = myOrder.Info.Promotion.Price
+	}
+	if goodPrice <= 0 {
+		return nil, xerrors.Errorf("invalid good price")
 	}
 
 	amountUSD := float64(myOrder.Info.Order.Order.Units) * goodPrice
+	if amountUSD <= 0 {
+		return nil, xerrors.Errorf("invalid payment amount")
+	}
+
 	if myOrder.Info.DiscountCoupon != nil {
 		discount := myOrder.Info.DiscountCoupon.Discount
 		if discount.Start < uint32(time.Now().Unix()) && uint32(time.Now().Unix()) < discount.Start+uint32(discount.DurationDays)*secondsInDay {
@@ -769,10 +798,10 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 
 	// TODO: Check if idle address is available with lock
 	paymentAccount, err := peekIdlePaymentAccount(ctx, myOrder.Info, paymentCoinInfo)
-	if err != nil {
+	if err != nil || paymentAccount == nil {
 		paymentAccount, err = createNewPaymentAccount(ctx, myOrder.Info, paymentCoinInfo)
 	}
-	if err != nil {
+	if err != nil || paymentAccount == nil {
 		return nil, xerrors.Errorf("cannot get valid payment account: %v", err)
 	}
 
@@ -780,8 +809,8 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 		Name:    paymentCoinInfo.Name,
 		Address: paymentAccount.Address,
 	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail get wallet balance: %v", err)
+	if err != nil || balance == nil {
+		return nil, xerrors.Errorf("fail get wallet balance for %v %v: %v", paymentCoinInfo.Name, paymentAccount.Address, err)
 	}
 	balanceAmount := balance.Balance
 
@@ -801,7 +830,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 			CoinInfoID:           in.GetPaymentCoinTypeID(),
 		},
 	})
-	if err != nil {
+	if err != nil || myPayment == nil {
 		return nil, xerrors.Errorf("fail create payment: %v", err)
 	}
 
@@ -834,7 +863,7 @@ func CreateOrderPayment(ctx context.Context, in *npool.CreateOrderPaymentRequest
 	orderDetail, err := GetOrder(ctx, &npool.GetOrderRequest{
 		ID: myOrder.Info.Order.Order.ID,
 	})
-	if err != nil {
+	if err != nil || orderDetail.Info == nil {
 		return nil, xerrors.Errorf("fail get order detail: %v", err)
 	}
 

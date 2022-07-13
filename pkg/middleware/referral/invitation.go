@@ -5,19 +5,15 @@ import (
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	cache "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/cache"
+	cachekey "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral/cachekey"
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
 
 	"golang.org/x/xerrors"
 )
 
-func GetInvitees(ctx context.Context, appID, userID string) ([]*inspirepb.RegistrationInvitation, error) {
-	cacheFor := "invitees"
+const cacheForInvitees = "invitees"
 
-	invitees := cache.GetEntry(CacheKey(appID, userID, cacheFor))
-	if invitees != nil {
-		return invitees.([]*inspirepb.RegistrationInvitation), nil
-	}
-
+func GetInviteesRT(ctx context.Context, appID, userID string) ([]*inspirepb.RegistrationInvitation, error) {
 	invitees, err := grpc2.GetRegistrationInvitationsByAppInviter(ctx, &inspirepb.GetRegistrationInvitationsByAppInviterRequest{
 		AppID:     appID,
 		InviterID: userID,
@@ -26,16 +22,27 @@ func GetInvitees(ctx context.Context, appID, userID string) ([]*inspirepb.Regist
 		return nil, xerrors.Errorf("fail get invitations: %v", err)
 	}
 
-	if len(invitees.([]*inspirepb.RegistrationInvitation)) > 0 {
-		cache.AddEntry(CacheKey(appID, userID, cacheFor), invitees)
+	cache.AddEntry(cachekey.CacheKey(appID, userID, cacheForInvitees), invitees)
+	return invitees, nil
+}
+
+func GetInvitees(ctx context.Context, appID, userID string) ([]*inspirepb.RegistrationInvitation, error) {
+	invitees := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheForInvitees), func(data []byte) (interface{}, error) {
+		return cache.UnmarshalInvitees(data)
+	})
+	if invitees != nil {
+		return invitees.([]*inspirepb.RegistrationInvitation), nil
 	}
-	return invitees.([]*inspirepb.RegistrationInvitation), nil
+
+	return GetInviteesRT(ctx, appID, userID)
 }
 
 func GetInviter(ctx context.Context, appID, userID string) (*inspirepb.RegistrationInvitation, error) {
 	cacheFor := "inviter"
 
-	inviter := cache.GetEntry(CacheKey(appID, userID, cacheFor))
+	inviter := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheFor), func(data []byte) (interface{}, error) {
+		return cache.UnmarshalInviter(data)
+	})
 	if inviter != nil {
 		return inviter.(*inspirepb.RegistrationInvitation), nil
 	}
@@ -48,7 +55,7 @@ func GetInviter(ctx context.Context, appID, userID string) (*inspirepb.Registrat
 		return nil, xerrors.Errorf("fail get inviter: %v", err)
 	}
 
-	cache.AddEntry(CacheKey(appID, userID, cacheFor), inviter)
+	cache.AddEntry(cachekey.CacheKey(appID, userID, cacheFor), inviter)
 	return inviter.(*inspirepb.RegistrationInvitation), nil
 }
 

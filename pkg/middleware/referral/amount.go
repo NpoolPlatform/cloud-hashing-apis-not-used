@@ -2,27 +2,15 @@ package referral
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
-	cache "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/cache"
 	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
 
 	"golang.org/x/xerrors"
 )
 
-const (
-	cacheUSDAmount       = "referral:usd:amount"
-	cachePeriodUSDAmount = "referral:period:usd:amount"
-)
-
 func GetUSDAmount(ctx context.Context, appID, userID string) (float64, error) {
-	amount := cache.GetEntry(CacheKey(appID, userID, cacheUSDAmount))
-	if amount != nil {
-		return *(amount.(*float64)), nil
-	}
-
 	// TODO: let database to sum orders amount
 	orders, err := GetOrders(ctx, appID, userID)
 	if err != nil {
@@ -31,6 +19,16 @@ func GetUSDAmount(ctx context.Context, appID, userID string) (float64, error) {
 
 	totalAmount := 0.0
 	for _, order := range orders {
+		switch order.Order.Order.OrderType {
+		case orderconst.OrderTypeNormal:
+		case orderconst.OrderTypeOffline:
+			fallthrough //nolint
+		case orderconst.OrderTypeAirdrop:
+			continue
+		default:
+			return 0, xerrors.Errorf("invalid order type: %v", order.Order.Order.OrderType)
+		}
+
 		if order.Order.Payment == nil || order.Order.Payment.State != orderconst.PaymentStateDone {
 			continue
 		}
@@ -38,8 +36,6 @@ func GetUSDAmount(ctx context.Context, appID, userID string) (float64, error) {
 		logger.Sugar().Infof("order %v units %v amount %v user %v", order.Order.Order.ID, order.Order.Order.Units, orderAmount, userID)
 		totalAmount += orderAmount
 	}
-
-	cache.AddEntry(CacheKey(appID, userID, cacheUSDAmount), &totalAmount)
 
 	return totalAmount, nil
 }
@@ -63,12 +59,6 @@ func GetSubUSDAmount(ctx context.Context, appID, userID string) (float64, error)
 }
 
 func GetPeriodUSDAmount(ctx context.Context, appID, userID string, start, end uint32) (float64, error) {
-	key := fmt.Sprintf("%v:%v:%v", CacheKey(appID, userID, cachePeriodUSDAmount), start, end)
-	amount := cache.GetEntry(key)
-	if amount != nil {
-		return *(amount.(*float64)), nil
-	}
-
 	orders, err := GetOrders(ctx, appID, userID)
 	if err != nil {
 		return 0, xerrors.Errorf("fail get orders: %v", err)
@@ -76,6 +66,16 @@ func GetPeriodUSDAmount(ctx context.Context, appID, userID string, start, end ui
 
 	totalAmount := 0.0
 	for _, order := range orders {
+		switch order.Order.Order.OrderType {
+		case orderconst.OrderTypeNormal:
+		case orderconst.OrderTypeOffline:
+			fallthrough //nolint
+		case orderconst.OrderTypeAirdrop:
+			continue
+		default:
+			return 0, xerrors.Errorf("invalid order type: %v", order.Order.Order.OrderType)
+		}
+
 		if order.Order.Payment == nil || order.Order.Payment.State != orderconst.PaymentStateDone {
 			continue
 		}
@@ -86,8 +86,6 @@ func GetPeriodUSDAmount(ctx context.Context, appID, userID string, start, end ui
 		orderAmount := order.Order.Payment.Amount * order.Order.Payment.CoinUSDCurrency
 		totalAmount += orderAmount
 	}
-
-	cache.AddEntry(key, &totalAmount)
 
 	return totalAmount, nil
 }

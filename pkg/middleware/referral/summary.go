@@ -5,6 +5,7 @@ import (
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	cache "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/cache"
+	cachekey "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral/cachekey"
 	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
@@ -20,7 +21,9 @@ const (
 )
 
 func getReferralUser(ctx context.Context, appID, userID string) (*appusermgrpb.AppUser, error) {
-	user := cache.GetEntry(CacheKey(appID, userID, cacheReferralUser))
+	user := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheReferralUser), func(data []byte) (interface{}, error) {
+		return cache.UnmarshalAppUser(data)
+	})
 	if user != nil {
 		return user.(*appusermgrpb.AppUser), nil
 	}
@@ -36,13 +39,15 @@ func getReferralUser(ctx context.Context, appID, userID string) (*appusermgrpb.A
 		return nil, xerrors.Errorf("invalid app user")
 	}
 
-	cache.AddEntry(CacheKey(appID, userID, cacheReferralUser), user)
+	cache.AddEntry(cachekey.CacheKey(appID, userID, cacheReferralUser), user)
 
 	return user.(*appusermgrpb.AppUser), nil
 }
 
 func getReferralExtra(ctx context.Context, appID, userID string) (*appusermgrpb.AppUserExtra, error) {
-	extra := cache.GetEntry(CacheKey(appID, userID, cacheReferralExtra))
+	extra := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheReferralExtra), func(data []byte) (interface{}, error) {
+		return cache.UnmarshalAppUserExtra(data)
+	})
 	if extra != nil {
 		return extra.(*appusermgrpb.AppUserExtra), nil
 	}
@@ -55,64 +60,35 @@ func getReferralExtra(ctx context.Context, appID, userID string) (*appusermgrpb.
 		return nil, xerrors.Errorf("fail get app user extra: %v", err)
 	}
 
-	cache.AddEntry(CacheKey(appID, userID, cacheReferralExtra), extra)
+	cache.AddEntry(cachekey.CacheKey(appID, userID, cacheReferralExtra), extra)
 
 	return extra.(*appusermgrpb.AppUserExtra), nil
 }
 
 func getLayeredGoodSummaries(ctx context.Context, appID, userID string) ([]*npool.GoodSummary, error) {
-	mySummaries := cache.GetEntry(CacheKey(appID, userID, cacheLayeredGoodSummaries))
+	mySummaries := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheLayeredGoodSummaries), func(data []byte) (interface{}, error) {
+		return cache.UnmarshalGoodSummaries(data)
+	})
 	if mySummaries != nil {
 		return mySummaries.([]*npool.GoodSummary), nil
 	}
 
-	coinSummaries, err := getGoodSummaries(ctx, appID, userID)
+	sums, err := GetGoodSummaries(ctx, appID, userID)
 	if err != nil {
-		return nil, xerrors.Errorf("fail get coin summaries: %v", err)
-	}
-
-	invitees, err := GetLayeredInvitees(ctx, appID, userID)
-	if err != nil {
-		return nil, xerrors.Errorf("fail get invitees: %v", err)
-	}
-
-	sums := make([]*npool.GoodSummary, len(coinSummaries))
-	for i, sum := range coinSummaries {
-		sums[i] = &npool.GoodSummary{
-			GoodID:     sum.GoodID,
-			CoinTypeID: sum.CoinTypeID,
-			CoinName:   sum.CoinName,
-			Units:      sum.Units,
-			Unit:       sum.Unit,
-			Amount:     sum.Amount,
-		}
-	}
-
-	for _, iv := range invitees {
-		summaries, err := getGoodSummaries(ctx, iv.AppID, iv.InviteeID)
-		if err != nil {
-			return nil, xerrors.Errorf("fail get coin summaries: %v", err)
-		}
-
-		for _, sum1 := range sums {
-			for _, sum2 := range summaries {
-				if sum1.GoodID == sum2.GoodID {
-					sum1.Units += sum2.Units
-					sum1.Amount += sum2.Amount
-				}
-			}
-		}
+		return nil, xerrors.Errorf("fail get good summaries: %v", err)
 	}
 
 	if len(sums) > 0 {
-		cache.AddEntry(CacheKey(appID, userID, cacheLayeredGoodSummaries), sums)
+		cache.AddEntry(cachekey.CacheKey(appID, userID, cacheLayeredGoodSummaries), sums)
 	}
 
 	return sums, nil
 }
 
 func getLayeredCoinSummaries(ctx context.Context, appID, userID string) ([]*npool.CoinSummary, error) {
-	mySummaries := cache.GetEntry(CacheKey(appID, userID, cacheLayeredCoinSummaries))
+	mySummaries := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheLayeredCoinSummaries), func(data []byte) (interface{}, error) {
+		return cache.UnmarshalCoinSummaries(data)
+	})
 	if mySummaries != nil {
 		return mySummaries.([]*npool.CoinSummary), nil
 	}
@@ -155,7 +131,7 @@ func getLayeredCoinSummaries(ctx context.Context, appID, userID string) ([]*npoo
 	}
 
 	if len(sums) > 0 {
-		cache.AddEntry(CacheKey(appID, userID, cacheLayeredCoinSummaries), sums)
+		cache.AddEntry(cachekey.CacheKey(appID, userID, cacheLayeredCoinSummaries), sums)
 	}
 
 	return sums, nil

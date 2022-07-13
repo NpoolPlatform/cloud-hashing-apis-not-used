@@ -5,6 +5,7 @@ import (
 
 	cache "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/cache"
 	ordermw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/order"
+	cachekey "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral/cachekey"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
 	"golang.org/x/xerrors"
@@ -13,7 +14,9 @@ import (
 const cacheOrders = "referral:orders"
 
 func GetOrders(ctx context.Context, appID, userID string) ([]*npool.Order, error) {
-	myOrders := cache.GetEntry(CacheKey(appID, userID, cacheOrders))
+	myOrders := cache.GetEntry(cachekey.CacheKey(appID, userID, cacheOrders), func(data []byte) (interface{}, error) {
+		return cache.UnmarshalOrders(data)
+	})
 	if myOrders != nil {
 		return myOrders.([]*npool.Order), nil
 	}
@@ -27,9 +30,7 @@ func GetOrders(ctx context.Context, appID, userID string) ([]*npool.Order, error
 		return nil, xerrors.Errorf("fail get orders: %v", err)
 	}
 
-	if len(orders.Infos) > 0 {
-		cache.AddEntry(CacheKey(appID, userID, cacheOrders), orders.Infos)
-	}
+	cache.AddEntry(cachekey.CacheKey(appID, userID, cacheOrders), orders.Infos)
 
 	return orders.Infos, nil
 }

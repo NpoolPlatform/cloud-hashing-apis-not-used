@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral/setting"
+	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
 	"github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/commission/kpi"
 	"github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/commission/separate"
@@ -12,24 +13,24 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func getIncoming(ctx context.Context, appID, userID string) (float64, error) {
+func getGoodCommissions(ctx context.Context, appID, userID string) ([]*npool.GoodCommission, error) {
 	_kpi, err := setting.KPISetting(ctx, appID)
 	if err != nil {
-		return 0, xerrors.Errorf("fail get kpi setting: %v", err)
+		return nil, xerrors.Errorf("fail get kpi setting: %v", err)
 	}
 
 	if _kpi {
-		return kpi.GetKPIIncoming(ctx, appID, userID)
+		return kpi.GetKPIGoodCommissions(ctx, appID, userID)
 	}
 
 	_unique, err := setting.UniqueSetting(ctx, appID)
 	if err != nil {
-		return 0, xerrors.Errorf("fail get unique setting: %v", err)
+		return nil, xerrors.Errorf("fail get unique setting: %v", err)
 	}
 
 	if _unique {
-		return unique.GetUniqueIncoming(ctx, appID, userID)
+		return unique.GetUniqueGoodCommissions(ctx, appID, userID)
 	}
 
-	return separate.GetSeparateIncoming(ctx, appID, userID)
+	return separate.GetSeparateGoodCommissions(ctx, appID, userID)
 }

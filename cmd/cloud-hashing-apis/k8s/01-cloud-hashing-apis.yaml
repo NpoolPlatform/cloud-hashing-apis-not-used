@@ -4,7 +4,7 @@ metadata:
   name: cloud-hashing-apis-v2
   namespace: kube-system
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: cloud-hashing-apis-v2
@@ -42,6 +42,13 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+        resources:
+          requests:
+            memory: "200Mi"
+            cpu: "100m"
+          limits:
+            memory: "200Mi"
+            cpu: "100m"
 
 ---
 apiVersion: v1

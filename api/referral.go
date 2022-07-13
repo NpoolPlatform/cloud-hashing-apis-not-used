@@ -32,3 +32,18 @@ func (s *Server) GetLayeredReferrals(ctx context.Context, in *npool.GetLayeredRe
 	}
 	return resp, nil
 }
+
+func (s *Server) CreateInvitationCode(ctx context.Context, in *npool.CreateInvitationCodeRequest) (*npool.CreateInvitationCodeResponse, error) {
+	code, err := referral.CreateInvitationCode(
+		ctx,
+		in.GetAppID(), in.GetUserID(), in.GetTargetUserID(), in.GetLangID(),
+		in.GetInviterName(), in.GetInviteeName(),
+		in.GetInfo())
+	if err != nil {
+		logger.Sugar().Errorf("create invitation code error: %w", err)
+		return &npool.CreateInvitationCodeResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return &npool.CreateInvitationCodeResponse{
+		Info: code,
+	}, nil
+}

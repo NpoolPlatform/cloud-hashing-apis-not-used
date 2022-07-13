@@ -1,4 +1,4 @@
-package incoming
+package separate
 
 import (
 	"context"
@@ -6,8 +6,8 @@ import (
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
-	commissionsetting "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/commission/setting"
 	"github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral"
+	commissionsetting "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral/setting"
 	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
@@ -20,30 +20,45 @@ func dayBeginning() uint32 {
 }
 
 func getRebate(ctx context.Context, appID, userID string) (float64, error) {
+	orders, err := referral.GetOrders(ctx, appID, userID)
+	if err != nil {
+		return 0, xerrors.Errorf("fail get orders: %v", err)
+	}
+
 	settings, err := commissionsetting.GetAmountSettingsByAppUser(ctx, appID, userID)
 	if err != nil {
 		return 0, xerrors.Errorf("fail get amount settings: %v", err)
 	}
 
 	totalAmount := 0.0
+	for _, order := range orders {
+		switch order.Order.Order.OrderType {
+		case orderconst.OrderTypeNormal:
+		case orderconst.OrderTypeOffline:
+			fallthrough //nolint
+		case orderconst.OrderTypeAirdrop:
+			continue
+		default:
+			return 0, xerrors.Errorf("invalid order type: %v", order.Order.Order.OrderType)
+		}
 
-	for _, setting := range settings {
-		if setting.Start >= dayBeginning() {
+		if order.Order.Payment == nil || order.Order.Payment.State != orderconst.PaymentStateDone {
 			continue
 		}
 
-		end := setting.End
-		if end == 0 || end >= dayBeginning() {
-			end = dayBeginning()
+		if order.Order.Order.CreateAt >= dayBeginning() {
+			continue
 		}
 
-		amount, err := referral.GetPeriodUSDAmount(ctx, appID, userID, setting.Start, end)
-		if err != nil {
-			return 0, xerrors.Errorf("fail get period usd amount: %v", err)
+		setting := commissionsetting.GetOrderAmountSetting(settings, order)
+		if setting == nil {
+			continue
 		}
-		totalAmount += amount * float64(setting.Percent) / 100.0
 
-		logger.Sugar().Infof("amount %v percent %v user %v", amount, setting.Percent, userID)
+		orderAmount := order.Order.Payment.Amount * order.Order.Payment.CoinUSDCurrency
+		totalAmount += orderAmount * float64(setting.Percent) / 100.0
+
+		logger.Sugar().Infof("order %v amount %v percent %v user %v", order.Order.Order.ID, orderAmount, setting.Percent, userID)
 	}
 
 	return totalAmount, nil
@@ -62,6 +77,7 @@ func getOrderParentRebate(_ context.Context, order *npool.Order, roots, nexts []
 	if setting == nil {
 		return 0
 	}
+
 	rootPercent := int(setting.Percent)
 
 	nextPercent := 0
@@ -93,6 +109,16 @@ func getPeriodRebate(ctx context.Context, appID, userID string, roots, nexts []*
 	totalRootAmount := 0.0
 
 	for _, order := range orders {
+		switch order.Order.Order.OrderType {
+		case orderconst.OrderTypeNormal:
+		case orderconst.OrderTypeOffline:
+			fallthrough //nolint
+		case orderconst.OrderTypeAirdrop:
+			continue
+		default:
+			return 0, xerrors.Errorf("invalid order type: %v", order.Order.Order.OrderType)
+		}
+
 		totalRootAmount += getOrderParentRebate(ctx, order, roots, nexts)
 	}
 

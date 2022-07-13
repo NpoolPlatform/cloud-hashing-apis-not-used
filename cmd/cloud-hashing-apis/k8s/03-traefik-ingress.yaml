@@ -12,6 +12,7 @@ metadata:
                                                       kube-system-common-headers@kubernetescrd,
                                                       kube-system-headers-appid-to-body@kubernetescrd,
                                                       kube-system-headers-userid-to-body@kubernetescrd,
+                                                      kube-system-headers-langid-to-body@kubernetescrd,
                                                       kube-system-headers-app-login-token-to-body@kubernetescrd,
                                                       kube-system-app-user-role-rbac-auth@kubernetescrd
 
@@ -25,6 +26,14 @@ spec:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
           - path: /api/cloud-hashing-apis-v2/v1/submit/order
+            backend:
+              serviceName: cloud-hashing-apis-v2
+              servicePort: 50140
+          - path: /api/cloud-hashing-apis-v2/v1/submit/user/order
+            backend:
+              serviceName: cloud-hashing-apis-v2
+              servicePort: 50140
+          - path: /api/cloud-hashing-apis-v2/v1/submit/app/user/order
             backend:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
@@ -129,6 +138,18 @@ spec:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
           - path: /api/cloud-hashing-apis-v2/v1/get/current/fee
+            backend:
+              serviceName: cloud-hashing-apis-v2
+              servicePort: 50140
+          - path: /api/cloud-hashing-apis-v2/v1/get/amount/settings
+            backend:
+              serviceName: cloud-hashing-apis-v2
+              servicePort: 50140
+          - path: /api/cloud-hashing-apis-v2/v1/create/invitation/code
+            backend:
+              serviceName: cloud-hashing-apis-v2
+              servicePort: 50140
+          - path: /api/cloud-hashing-apis-v2/v1/create/amount/setting
             backend:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
