@@ -134,9 +134,9 @@ spec:
               servicePort: 50140
     - host: api.procyon.vip
       http: *http_rules
-    - host: api.xpool.top
-      http: *http_rules
     - host: api.ohhash.com
+      http: *http_rules
+    - host: api.ohhash-production.npool.top
       http: *http_rules
 
 ---
@@ -189,7 +189,7 @@ spec:
               servicePort: 50140
     - host: api.procyon.vip
       http: *http_rules
-    - host: api.xpool.top
-      http: *http_rules
     - host: api.ohhash.com
+      http: *http_rules
+    - host: api.ohhash-production.npool.top
       http: *http_rules
