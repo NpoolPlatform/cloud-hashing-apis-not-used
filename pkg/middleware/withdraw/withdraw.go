@@ -22,6 +22,7 @@ import (
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 	currency "github.com/NpoolPlatform/oracle-manager/pkg/middleware/currency"
 
+	billingcli "github.com/NpoolPlatform/cloud-hashing-billing/pkg/client"
 	billingstate "github.com/NpoolPlatform/cloud-hashing-billing/pkg/const"
 	billingconst "github.com/NpoolPlatform/cloud-hashing-billing/pkg/message/const"
 	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
@@ -55,6 +56,8 @@ func Outcoming(ctx context.Context, appID, userID, coinTypeID, withdrawType stri
 			return 0, xerrors.Errorf("fail get user withdraws: %v", err)
 		}
 	case billingstate.WithdrawTypeCommission:
+		fallthrough //nolint
+	case billingstate.WithdrawTypeUserPaymentBalance:
 		withdraws, err = grpc2.GetUserWithdrawItemsByAppUserWithdrawType(ctx, &billingpb.GetUserWithdrawItemsByAppUserWithdrawTypeRequest{
 			AppID:        appID,
 			UserID:       userID,
@@ -132,50 +135,101 @@ func CommissionCoinTypeID(ctx context.Context) (string, error) {
 	return coin.CoinTypeID, nil
 }
 
-func commissionWithdrawable(ctx context.Context, appID, userID, withdrawType string, amount float64, includeReviewing bool) (bool, error) {
-	myCommission, err := commissionmw.GetCommission(ctx, appID, userID)
+func userPaymentBalanceWithdrawable(ctx context.Context, appID, userID, withdrawType string, amount float64, includeReviewing bool, separateFee bool) (bool, float64, float64, error) { //nolint
+	balances, err := billingcli.GetUserPaymentBalances(ctx, appID, userID)
 	if err != nil {
-		return false, xerrors.Errorf("fail get total amount: %v", err)
+		return false, 0, 0, xerrors.Errorf("fail get user payment balances: %v", err)
+	}
+
+	paymentBalance := 0.0
+	invalidUUID := uuid.UUID{}.String()
+
+	for _, balance := range balances {
+		if balance.UsedByPaymentID == "" || balance.UsedByPaymentID == invalidUUID {
+			continue
+		}
+		paymentBalance += balance.Amount * balance.CoinUSDCurrency
 	}
 
 	coinTypeID, err := CommissionCoinTypeID(ctx)
 	if err != nil {
-		return false, xerrors.Errorf("fail get coin type id: %v", err)
+		return false, 0, 0, xerrors.Errorf("fail get coin type id: %v", err)
 	}
 
 	outcoming, err := Outcoming(ctx, appID, userID, coinTypeID, withdrawType, includeReviewing)
 	if err != nil {
-		return false, xerrors.Errorf("fail get withdraw outcoming: %v", err)
+		return false, 0, 0, xerrors.Errorf("fail get withdraw outcoming: %v", err)
 	}
 
-	if myCommission < outcoming {
-		return false, xerrors.Errorf("invalid billing input")
+	feeAmount := 0.0
+	if separateFee {
+		feeAmount, err = fee.Amount(ctx, coinTypeID)
+		if err != nil {
+			return false, 0, 0, xerrors.Errorf("fail get fee amount: %v", err)
+		}
+	}
+
+	if amount <= feeAmount {
+		return false, 0, 0, xerrors.Errorf("transfer amount is not enough for fee")
+	}
+
+	if paymentBalance-outcoming < amount {
+		return false, 0, 0, xerrors.Errorf("not sufficient funds")
+	}
+
+	return true, amount, 0, nil
+}
+
+func commissionWithdrawable(ctx context.Context, appID, userID, withdrawType string, amount float64, includeReviewing bool) (bool, float64, float64, error) { //nolint
+	myCommission, err := commissionmw.GetCommission(ctx, appID, userID)
+	if err != nil {
+		return false, 0, 0, xerrors.Errorf("fail get total amount: %v", err)
+	}
+
+	coinTypeID, err := CommissionCoinTypeID(ctx)
+	if err != nil {
+		return false, 0, 0, xerrors.Errorf("fail get coin type id: %v", err)
+	}
+
+	outcoming, err := Outcoming(ctx, appID, userID, coinTypeID, withdrawType, includeReviewing)
+	if err != nil {
+		return false, 0, 0, xerrors.Errorf("fail get withdraw outcoming: %v", err)
+	}
+
+	if myCommission <= outcoming {
+		return false, 0, 0, xerrors.Errorf("invalid billing input")
 	}
 
 	feeAmount, err := fee.Amount(ctx, coinTypeID)
 	if err != nil {
-		return false, xerrors.Errorf("fail get fee amount: %v", err)
+		return false, 0, 0, xerrors.Errorf("fail get fee amount: %v", err)
 	}
 
 	if amount <= feeAmount {
-		return false, xerrors.Errorf("transfer amount is not enough for fee")
+		return false, 0, 0, xerrors.Errorf("transfer amount is not enough for fee")
 	}
 
 	if myCommission-outcoming < amount {
-		return false, xerrors.Errorf("not sufficient funds")
+		able, _, _, err := userPaymentBalanceWithdrawable(ctx, appID, userID, withdrawType, amount-(myCommission-outcoming), includeReviewing, false)
+		if err != nil {
+			return false, 0, 0, xerrors.Errorf("fail check user payment balance: %v", err)
+		}
+		if !able {
+			return false, 0, 0, xerrors.Errorf("not sufficient funds")
+		}
 	}
 
-	return true, nil
+	return true, myCommission - outcoming, amount - (myCommission - outcoming), nil
 }
 
-func benefitWithdrawable(ctx context.Context, appID, userID, coinTypeID, withdrawType string, amount float64, includeReviewing bool) (bool, error) {
+func benefitWithdrawable(ctx context.Context, appID, userID, coinTypeID, withdrawType string, amount float64, includeReviewing bool) (bool, float64, float64, error) { //nolint
 	benefits, err := grpc2.GetUserBenefitsByAppUserCoin(ctx, &billingpb.GetUserBenefitsByAppUserCoinRequest{
 		AppID:      appID,
 		UserID:     userID,
 		CoinTypeID: coinTypeID,
 	})
 	if err != nil {
-		return false, xerrors.Errorf("fail get user benefits: %v", err)
+		return false, 0, 0, xerrors.Errorf("fail get user benefits: %v", err)
 	}
 
 	incoming := 0.0
@@ -185,37 +239,39 @@ func benefitWithdrawable(ctx context.Context, appID, userID, coinTypeID, withdra
 
 	outcoming, err := Outcoming(ctx, appID, userID, coinTypeID, withdrawType, includeReviewing)
 	if err != nil {
-		return false, xerrors.Errorf("fail get withdraw outcoming: %v", err)
+		return false, 0, 0, xerrors.Errorf("fail get withdraw outcoming: %v", err)
 	}
 
 	if incoming < outcoming {
-		return false, xerrors.Errorf("invalid billing input")
+		return false, 0, 0, xerrors.Errorf("invalid billing input")
 	}
 
 	feeAmount, err := fee.Amount(ctx, coinTypeID)
 	if err != nil {
-		return false, xerrors.Errorf("fail get fee amount: %v", err)
+		return false, 0, 0, xerrors.Errorf("fail get fee amount: %v", err)
 	}
 
 	if amount <= feeAmount {
-		return false, xerrors.Errorf("transfer amount is not enough for fee")
+		return false, 0, 0, xerrors.Errorf("transfer amount is not enough for fee")
 	}
 
 	if incoming-outcoming < amount {
-		return false, xerrors.Errorf("not sufficient funds %v - %v < %v", incoming, outcoming, amount)
+		return false, 0, 0, xerrors.Errorf("not sufficient funds %v - %v < %v", incoming, outcoming, amount)
 	}
 
-	return true, nil
+	return true, amount, 0, nil
 }
 
-func withdrawable(ctx context.Context, appID, userID, coinTypeID, withdrawType string, amount float64, includeReviewing bool) (bool, error) {
+func withdrawable(ctx context.Context, appID, userID, coinTypeID, withdrawType string, amount float64, includeReviewing bool) (bool, float64, float64, error) { //nolint
 	switch withdrawType {
 	case billingstate.WithdrawTypeBenefit:
 		return benefitWithdrawable(ctx, appID, userID, coinTypeID, withdrawType, amount, includeReviewing)
 	case billingstate.WithdrawTypeCommission:
 		return commissionWithdrawable(ctx, appID, userID, withdrawType, amount, includeReviewing)
+	case billingstate.WithdrawTypeUserPaymentBalance:
+		return userPaymentBalanceWithdrawable(ctx, appID, userID, withdrawType, amount, includeReviewing, true)
 	}
-	return false, xerrors.Errorf("invalid withdraw type")
+	return false, 0, 0, xerrors.Errorf("invalid withdraw type")
 }
 
 func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.SubmitUserWithdrawResponse, error) { //nolint
@@ -266,7 +322,7 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 		}
 	}
 
-	if ok, err := withdrawable(
+	ok, amount1, amount2, err := withdrawable(
 		ctx,
 		in.GetInfo().GetAppID(),
 		in.GetInfo().GetUserID(),
@@ -274,7 +330,8 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 		in.GetInfo().GetWithdrawType(),
 		in.GetInfo().GetAmount(),
 		true,
-	); !ok || err != nil {
+	)
+	if !ok || err != nil {
 		return nil, xerrors.Errorf("user not withdrawable: %v", err)
 	}
 
@@ -371,25 +428,63 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 		return nil, xerrors.Errorf("fail lock withdraw review: %v", err)
 	}
 
-	withdrawItem, err := grpc2.CreateUserWithdrawItem(ctx, &billingpb.CreateUserWithdrawItemRequest{
-		Info: in.GetInfo(),
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("fail create user withdraw item: %v", err)
+	wInfo := in.GetInfo()
+
+	var _review1 *reviewpb.Review
+	var withdrawItem1 *billingpb.UserWithdrawItem
+	var _review2 *reviewpb.Review
+	var withdrawItem2 *billingpb.UserWithdrawItem
+
+	if amount1 > 0 {
+		wInfo.Amount = amount1
+
+		withdrawItem1, err = grpc2.CreateUserWithdrawItem(ctx, &billingpb.CreateUserWithdrawItemRequest{
+			Info: wInfo,
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail create user withdraw item: %v", err)
+		}
+
+		_review1, err = grpc2.CreateReview(ctx, &reviewpb.CreateReviewRequest{
+			Info: &reviewpb.Review{
+				AppID:      in.GetInfo().GetAppID(),
+				Domain:     billingconst.ServiceName,
+				ObjectType: constant.ReviewObjectWithdraw,
+				ObjectID:   withdrawItem1.ID,
+				Trigger:    reason,
+			},
+		})
+		if err != nil {
+			// TODO: rollback user withdraw item database
+			return nil, xerrors.Errorf("fail create user withdraw item review: %v", err)
+		}
 	}
 
-	_review, err := grpc2.CreateReview(ctx, &reviewpb.CreateReviewRequest{
-		Info: &reviewpb.Review{
-			AppID:      in.GetInfo().GetAppID(),
-			Domain:     billingconst.ServiceName,
-			ObjectType: constant.ReviewObjectWithdraw,
-			ObjectID:   withdrawItem.ID,
-			Trigger:    reason,
-		},
-	})
-	if err != nil {
-		// TODO: rollback user withdraw item database
-		return nil, xerrors.Errorf("fail create user withdraw item review: %v", err)
+	if amount2 > 0 && wInfo.GetWithdrawType() == billingstate.WithdrawTypeCommission {
+		wInfo.Amount = amount2
+		wInfo.WithdrawType = billingstate.WithdrawTypeUserPaymentBalance
+		wInfo.ExemptFee = true
+
+		withdrawItem2, err = grpc2.CreateUserWithdrawItem(ctx, &billingpb.CreateUserWithdrawItemRequest{
+			Info: wInfo,
+		})
+		if err != nil {
+			return nil, xerrors.Errorf("fail create user withdraw item: %v", err)
+		}
+
+		_review2, err = grpc2.CreateReview(ctx, &reviewpb.CreateReviewRequest{
+			Info: &reviewpb.Review{
+				AppID:      in.GetInfo().GetAppID(),
+				Domain:     billingconst.ServiceName,
+				ObjectType: constant.ReviewObjectWithdraw,
+				ObjectID:   withdrawItem2.ID,
+				Trigger:    reason,
+			},
+		})
+		if err != nil {
+			// TODO: rollback user withdraw item database
+			return nil, xerrors.Errorf("fail create user withdraw item review: %v", err)
+		}
 	}
 
 	// TODO: check 24 hours total withdraw amount: if overflow, goto review
@@ -423,23 +518,52 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 			return nil, xerrors.Errorf("fail create coin account transaction: %v", err)
 		}
 
-		withdrawItem.PlatformTransactionID = tx.ID
-		_, err = grpc2.UpdateUserWithdrawItem(ctx, &billingpb.UpdateUserWithdrawItemRequest{
-			Info: withdrawItem,
-		})
-		if err != nil {
-			return nil, xerrors.Errorf("fail update user withdraw item: %v", err)
+		if withdrawItem1 != nil {
+			withdrawItem1.PlatformTransactionID = tx.ID
+			_, err = grpc2.UpdateUserWithdrawItem(ctx, &billingpb.UpdateUserWithdrawItemRequest{
+				Info: withdrawItem1,
+			})
+			if err != nil {
+				return nil, xerrors.Errorf("fail update user withdraw item: %v", err)
+			}
 		}
 
-		_review.State = reviewconst.StateApproved
-		_, err = grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{
-			Info: _review,
-		})
-		if err != nil {
-			return nil, xerrors.Errorf("fail update review state: %v", err)
+		if withdrawItem2 != nil {
+			withdrawItem2.PlatformTransactionID = tx.ID
+			_, err = grpc2.UpdateUserWithdrawItem(ctx, &billingpb.UpdateUserWithdrawItemRequest{
+				Info: withdrawItem2,
+			})
+			if err != nil {
+				return nil, xerrors.Errorf("fail update user withdraw item: %v", err)
+			}
+		}
+
+		if _review1 != nil {
+			_review1.State = reviewconst.StateApproved
+			_, err = grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{
+				Info: _review1,
+			})
+			if err != nil {
+				return nil, xerrors.Errorf("fail update review state: %v", err)
+			}
+		}
+
+		if _review2 != nil {
+			_review2.State = reviewconst.StateApproved
+			_, err = grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{
+				Info: _review2,
+			})
+			if err != nil {
+				return nil, xerrors.Errorf("fail update review state: %v", err)
+			}
 		}
 
 		reviewState = reviewconst.StateApproved
+	}
+
+	withdrawItem := withdrawItem1
+	if withdrawItem == nil {
+		withdrawItem = withdrawItem2
 	}
 
 	return &npool.SubmitUserWithdrawResponse{
@@ -501,7 +625,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		return nil, xerrors.Errorf("fail get account info: %v", err)
 	}
 
-	if ok, err := withdrawable(
+	ok, _, _, err := withdrawable(
 		ctx,
 		withdrawItem.AppID,
 		withdrawItem.UserID,
@@ -509,7 +633,8 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		withdrawItem.WithdrawType,
 		withdrawItem.Amount,
 		false,
-	); !ok || err != nil {
+	)
+	if !ok || err != nil {
 		return nil, xerrors.Errorf("user not withdrawable: %v", err)
 	}
 
@@ -594,9 +719,13 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 			return nil, xerrors.Errorf("fail get account info: %v", err)
 		}
 
-		feeAmount, err := fee.Amount(ctx, withdrawItem.CoinTypeID)
-		if err != nil {
-			return nil, xerrors.Errorf("fail get fee amount: %v", err)
+		feeAmount := 0.0
+
+		if !withdrawItem.ExemptFee {
+			feeAmount, err = fee.Amount(ctx, withdrawItem.CoinTypeID)
+			if err != nil {
+				return nil, xerrors.Errorf("fail get fee amount: %v", err)
+			}
 		}
 
 		tx, err := grpc2.CreateCoinAccountTransaction(ctx, &billingpb.CreateCoinAccountTransactionRequest{
