@@ -209,7 +209,13 @@ func commissionWithdrawable(ctx context.Context, appID, userID, withdrawType str
 		return false, 0, 0, xerrors.Errorf("transfer amount is not enough for fee")
 	}
 
+	amount1 := amount
+	amount2 := 0.0
+
 	if myCommission-outcoming < amount {
+		amount1 = myCommission - outcoming
+		amount2 = amount - amount1
+
 		able, _, _, err := userPaymentBalanceWithdrawable(ctx, appID, userID, withdrawType, amount-(myCommission-outcoming), includeReviewing, false)
 		if err != nil {
 			return false, 0, 0, xerrors.Errorf("fail check user payment balance: %v", err)
@@ -219,7 +225,7 @@ func commissionWithdrawable(ctx context.Context, appID, userID, withdrawType str
 		}
 	}
 
-	return true, myCommission - outcoming, amount - (myCommission - outcoming), nil
+	return true, amount1, amount2, nil
 }
 
 func benefitWithdrawable(ctx context.Context, appID, userID, coinTypeID, withdrawType string, amount float64, includeReviewing bool) (bool, float64, float64, error) { //nolint
