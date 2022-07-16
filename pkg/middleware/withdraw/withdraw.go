@@ -170,7 +170,7 @@ func userPaymentBalanceWithdrawable(ctx context.Context, appID, userID, withdraw
 	}
 
 	if amount <= feeAmount {
-		return false, 0, 0, xerrors.Errorf("transfer amount is not enough for fee")
+		return false, 0, 0, xerrors.Errorf("transfer payment balance amount is not enough for fee %v <= %v | %v", amount, feeAmount, separateFee)
 	}
 
 	if paymentBalance-outcoming < amount {
@@ -206,7 +206,7 @@ func commissionWithdrawable(ctx context.Context, appID, userID, withdrawType str
 	}
 
 	if amount <= feeAmount {
-		return false, 0, 0, xerrors.Errorf("transfer amount is not enough for fee")
+		return false, 0, 0, xerrors.Errorf("transfer commission amount is not enough for fee %v <= %v", amount, feeAmount)
 	}
 
 	amount1 := amount
