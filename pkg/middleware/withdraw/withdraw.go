@@ -216,7 +216,7 @@ func commissionWithdrawable(ctx context.Context, appID, userID, withdrawType str
 		amount1 = myCommission - outcoming
 		amount2 = amount - amount1
 
-		able, _, _, err := userPaymentBalanceWithdrawable(ctx, appID, userID, withdrawType, amount-(myCommission-outcoming), includeReviewing, false)
+		able, _, _, err := userPaymentBalanceWithdrawable(ctx, appID, userID, billingstate.WithdrawTypeUserPaymentBalance, amount-(myCommission-outcoming), includeReviewing, false)
 		if err != nil {
 			return false, 0, 0, xerrors.Errorf("fail check user payment balance (%v - %v < %v): %v", myCommission, outcoming, amount, err)
 		}
