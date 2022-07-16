@@ -258,7 +258,7 @@ func benefitWithdrawable(ctx context.Context, appID, userID, coinTypeID, withdra
 	}
 
 	if amount <= feeAmount {
-		return false, 0, 0, xerrors.Errorf("transfer amount is not enough for fee")
+		return false, 0, 0, xerrors.Errorf("transfer benefit amount is not enough for fee %v < %v", amount, feeAmount)
 	}
 
 	if incoming-outcoming < amount {
