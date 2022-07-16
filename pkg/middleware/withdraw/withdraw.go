@@ -135,7 +135,7 @@ func CommissionCoinTypeID(ctx context.Context) (string, error) {
 	return coin.CoinTypeID, nil
 }
 
-func userPaymentBalanceWithdrawable(ctx context.Context, appID, userID, withdrawType string, amount float64, includeReviewing bool, separateFee bool) (bool, float64, float64, error) { //nolint
+func userPaymentBalanceWithdrawable(ctx context.Context, appID, userID, withdrawType string, amount float64, includeReviewing bool, exemptFee bool) (bool, float64, float64, error) { //nolint
 	balances, err := billingcli.GetUserPaymentBalances(ctx, appID, userID)
 	if err != nil {
 		return false, 0, 0, xerrors.Errorf("fail get user payment balances: %v", err)
@@ -162,7 +162,7 @@ func userPaymentBalanceWithdrawable(ctx context.Context, appID, userID, withdraw
 	}
 
 	feeAmount := 0.0
-	if separateFee {
+	if !exemptFee {
 		feeAmount, err = fee.Amount(ctx, coinTypeID)
 		if err != nil {
 			return false, 0, 0, xerrors.Errorf("fail get fee amount: %v", err)
@@ -170,7 +170,7 @@ func userPaymentBalanceWithdrawable(ctx context.Context, appID, userID, withdraw
 	}
 
 	if amount <= feeAmount {
-		return false, 0, 0, xerrors.Errorf("transfer payment balance amount is not enough for fee %v <= %v | %v", amount, feeAmount, separateFee)
+		return false, 0, 0, xerrors.Errorf("transfer payment balance amount is not enough for fee %v <= %v | %v", amount, feeAmount, exemptFee)
 	}
 
 	if paymentBalance-outcoming < amount {
@@ -216,7 +216,7 @@ func commissionWithdrawable(ctx context.Context, appID, userID, withdrawType str
 		amount1 = myCommission - outcoming
 		amount2 = amount - amount1
 
-		able, _, _, err := userPaymentBalanceWithdrawable(ctx, appID, userID, billingstate.WithdrawTypeUserPaymentBalance, amount-(myCommission-outcoming), includeReviewing, false)
+		able, _, _, err := userPaymentBalanceWithdrawable(ctx, appID, userID, billingstate.WithdrawTypeUserPaymentBalance, amount-(myCommission-outcoming), includeReviewing, true)
 		if err != nil {
 			return false, 0, 0, xerrors.Errorf("fail check user payment balance (%v - %v < %v): %v", myCommission, outcoming, amount, err)
 		}
@@ -268,14 +268,14 @@ func benefitWithdrawable(ctx context.Context, appID, userID, coinTypeID, withdra
 	return true, amount, 0, nil
 }
 
-func withdrawable(ctx context.Context, appID, userID, coinTypeID, withdrawType string, amount float64, includeReviewing bool) (bool, float64, float64, error) { //nolint
+func withdrawable(ctx context.Context, appID, userID, coinTypeID, withdrawType string, amount float64, includeReviewing bool, exemptFee bool) (bool, float64, float64, error) { //nolint
 	switch withdrawType {
 	case billingstate.WithdrawTypeBenefit:
 		return benefitWithdrawable(ctx, appID, userID, coinTypeID, withdrawType, amount, includeReviewing)
 	case billingstate.WithdrawTypeCommission:
 		return commissionWithdrawable(ctx, appID, userID, withdrawType, amount, includeReviewing)
 	case billingstate.WithdrawTypeUserPaymentBalance:
-		return userPaymentBalanceWithdrawable(ctx, appID, userID, withdrawType, amount, includeReviewing, true)
+		return userPaymentBalanceWithdrawable(ctx, appID, userID, withdrawType, amount, includeReviewing, exemptFee)
 	}
 	return false, 0, 0, xerrors.Errorf("invalid withdraw type")
 }
@@ -336,6 +336,7 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 		in.GetInfo().GetWithdrawType(),
 		in.GetInfo().GetAmount(),
 		true,
+		false,
 	)
 	if !ok || err != nil {
 		return nil, xerrors.Errorf("user not withdrawable: %v", err)
@@ -639,6 +640,7 @@ func Update(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*np
 		withdrawItem.WithdrawType,
 		withdrawItem.Amount,
 		false,
+		withdrawItem.ExemptFee,
 	)
 	if !ok || err != nil {
 		return nil, xerrors.Errorf("user not withdrawable: %v", err)
