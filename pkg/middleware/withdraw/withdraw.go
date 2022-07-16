@@ -218,7 +218,7 @@ func commissionWithdrawable(ctx context.Context, appID, userID, withdrawType str
 
 		able, _, _, err := userPaymentBalanceWithdrawable(ctx, appID, userID, withdrawType, amount-(myCommission-outcoming), includeReviewing, false)
 		if err != nil {
-			return false, 0, 0, xerrors.Errorf("fail check user payment balance: %v", err)
+			return false, 0, 0, xerrors.Errorf("fail check user payment balance (%v - %v < %v): %v", myCommission, outcoming, amount, err)
 		}
 		if !able {
 			return false, 0, 0, xerrors.Errorf("not sufficient funds")
