@@ -145,7 +145,7 @@ func userPaymentBalanceWithdrawable(ctx context.Context, appID, userID, withdraw
 	invalidUUID := uuid.UUID{}.String()
 
 	for _, balance := range balances {
-		if balance.UsedByPaymentID == "" || balance.UsedByPaymentID == invalidUUID {
+		if balance.UsedByPaymentID != "" && balance.UsedByPaymentID != invalidUUID {
 			continue
 		}
 		paymentBalance += balance.Amount * balance.CoinUSDCurrency
