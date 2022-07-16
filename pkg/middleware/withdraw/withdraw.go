@@ -174,7 +174,7 @@ func userPaymentBalanceWithdrawable(ctx context.Context, appID, userID, withdraw
 	}
 
 	if paymentBalance-outcoming < amount {
-		return false, 0, 0, xerrors.Errorf("not sufficient funds")
+		return false, 0, 0, xerrors.Errorf("not sufficient funds (%v - %v < %v)", paymentBalance, outcoming, amount)
 	}
 
 	return true, amount, 0, nil
