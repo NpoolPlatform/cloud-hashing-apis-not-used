@@ -155,8 +155,8 @@ github.com/NpoolPlatform/message v0.0.0-20220501030927-34f296682c0c/go.mod h1:i/
 github.com/NpoolPlatform/message v0.0.0-20220501143407-c230f4ca021b/go.mod h1:i/F/sQWjQk44RGvfgEB0zH0oAK/0qLvgJ1AsJDZQDkk=
 github.com/NpoolPlatform/message v0.0.0-20220606130737-824c3198b695/go.mod h1:3Enb49K3JrhlSwA+6bcsBuTdTzVxVKhdkllDGgv0n3M=
 github.com/NpoolPlatform/message v0.0.0-20220616144445-e670acc37bf4/go.mod h1:VWuStqZaa5i8scdETxGvBh5CJzebGWw1dxTE0EUqRXk=
-github.com/NpoolPlatform/message v0.0.0-20220714075917-2ba73782c509 h1:fG2tRL76TRPbaWDXYLcC71opxNfABySAikZreUdQmq0=
-github.com/NpoolPlatform/message v0.0.0-20220714075917-2ba73782c509/go.mod h1:mzveZUmOwAsS1QAcmeUCdQjmyZKf52i0xwij58KF5K4=
+github.com/NpoolPlatform/message v0.0.0-20220722090727-1dd92f106f32 h1:ktuIZviYJURIUkV4TkQpzCGgFwRezfDUxQBmsLO6/uY=
+github.com/NpoolPlatform/message v0.0.0-20220722090727-1dd92f106f32/go.mod h1:8YXp4MghMHLZ9bBdQQyfjcRtLI2RbEHAQoNCejT2nZU=
 github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da h1:qZX3tw6TEsxaWyY/ZEeEtI6zSZzoYoCiqmDdt6DhxfA=
 github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da/go.mod h1:ieZ2gIh/zSlJ2hIr/fIuMvi5QMGRY0rXugKiBc+5ZKI=
 github.com/NpoolPlatform/oracle-manager v0.0.0-20220606135947-0f09e9f3818a/go.mod h1:f9Seypsw5N+Kc0P13IurAD/WNHXhzYsBt+d/R17oLfA=
@@ -2606,8 +2606,9 @@ google.golang.org/grpc v1.44.0/go.mod h1:k+4IHHFw41K8+bbowsex27ge2rCb65oeWqe4jJ5
 google.golang.org/grpc v1.45.0/go.mod h1:lN7owxKUQEqMfSyQikvvk5tf/6zMPsrK+ONuO11+0rQ=
 google.golang.org/grpc v1.46.0/go.mod h1:vN9eftEi1UMyUsIF80+uQXhHjbXYbm0uXoFCACuMGWk=
 google.golang.org/grpc v1.46.2/go.mod h1:vN9eftEi1UMyUsIF80+uQXhHjbXYbm0uXoFCACuMGWk=
-google.golang.org/grpc v1.47.0 h1:9n77onPX5F3qfFCqjy9dhn8PbNQsIKeVU04J9G7umt8=
 google.golang.org/grpc v1.47.0/go.mod h1:vN9eftEi1UMyUsIF80+uQXhHjbXYbm0uXoFCACuMGWk=
+google.golang.org/grpc v1.48.0 h1:rQOsyJ/8+ufEDJd/Gdsz7HG220Mh9HAhFHRGnIjda0w=
+google.golang.org/grpc v1.48.0/go.mod h1:vN9eftEi1UMyUsIF80+uQXhHjbXYbm0uXoFCACuMGWk=
 google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.1.0/go.mod h1:6Kw0yEErY5E/yWrBtf03jp27GLLJujG4z/JK95pnjjw=
 google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.2.0 h1:TLkBREm4nIsEcexnCjgQd5GQWaHcqMzwQV0TX9pq8S0=
 google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.2.0/go.mod h1:DNq5QpG7LJqD2AamLZ7zvKE0DEpVl2BSEVjFycAAjRY=

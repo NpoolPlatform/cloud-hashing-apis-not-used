@@ -1,3 +1,4 @@
+//go:build !codeanalysis
 // +build !codeanalysis
 
 package api
@@ -20,6 +21,16 @@ func (s *Server) GetReferrals(ctx context.Context, in *npool.GetReferralsRequest
 	if err != nil {
 		logger.Sugar().Errorf("get referrals error: %w", err)
 		return &npool.GetReferralsResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	return resp, nil
+}
+
+// 管理员根据用户ID拉取
+func (s *Server) GetUserReferrals(ctx context.Context, in *npool.GetUserReferralsRequest) (*npool.GetUserReferralsResponse, error) {
+	resp, err := referral.GetUserReferrals(ctx, in)
+	if err != nil {
+		logger.Sugar().Errorf("get referrals error: %w", err)
+		return &npool.GetUserReferralsResponse{}, status.Error(codes.Internal, err.Error())
 	}
 	return resp, nil
 }
