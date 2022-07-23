@@ -57,7 +57,7 @@ spec:
             backend:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/get/referrals/by/other/app/user
+          - path: /api/cloud-hashing-apis-v2/v1/get/user/referrals
             backend:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
