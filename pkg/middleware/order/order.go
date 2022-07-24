@@ -567,12 +567,15 @@ func peekIdlePaymentAccount(ctx context.Context, order *npool.Order, paymentCoin
 			continue
 		}
 
-		if !info.Idle {
+		err = accountlock.Lock(info.AccountID)
+		if err != nil {
 			continue
 		}
 
-		err = accountlock.Lock(info.AccountID)
-		if err != nil {
+		if !info.Idle {
+			if err := accountlock.Unlock(info.AccountID); err != nil {
+				logger.Sugar().Errorw("peekIdlePaymentAccount", "error", err)
+			}
 			continue
 		}
 
@@ -602,11 +605,12 @@ func peekIdlePaymentAccount(ctx context.Context, order *npool.Order, paymentCoin
 		Info: paymentAccount,
 	})
 	if err != nil {
-		xerr := accountlock.Unlock(paymentAccount.AccountID)
-		if xerr != nil {
-			logger.Sugar().Errorf("cannot unlock %v: %v", paymentAccount.AccountID, xerr)
-		}
 		return nil, xerrors.Errorf("fail update good payment: %v", err)
+	}
+
+	err = accountlock.Unlock(paymentAccount.AccountID)
+	if err != nil {
+		logger.Sugar().Errorf("cannot unlock %v: %v", paymentAccount.AccountID, err)
 	}
 
 	return account, nil
