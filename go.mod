@@ -16,7 +16,7 @@ require (
 	github.com/NpoolPlatform/login-gateway v0.0.0-20220328094651-99c681b06955
 	github.com/NpoolPlatform/message v0.0.0-20220723022642-0b884ac8001b
 	github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da
-	github.com/NpoolPlatform/oracle-manager v0.0.0-20220624095427-6931c8e8b3f3
+	github.com/NpoolPlatform/oracle-manager v0.0.0-20220728091309-6931c8e8b3f3
 	github.com/NpoolPlatform/review-service v0.0.0-20220322082433-0c2b7ee284ed
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20220322095158-52237287c832
 	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20220323034620-cea972617ed5
