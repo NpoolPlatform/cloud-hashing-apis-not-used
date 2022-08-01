@@ -7,14 +7,14 @@ require (
 	github.com/NpoolPlatform/api-manager v0.0.0-20220421114434-bf0e069b0c83
 	github.com/NpoolPlatform/appuser-manager v0.0.0-20220322075937-0c7b778de20c
 	github.com/NpoolPlatform/cloud-hashing-billing v0.0.0-20220716065311-82e652286c9e
-	github.com/NpoolPlatform/cloud-hashing-goods v0.0.0-20220501102606-7252485fb495
+	github.com/NpoolPlatform/cloud-hashing-goods v0.0.0-20220725094415-a027a03521e7
 	github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220616152100-2248cbd3d90b
 	github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220706022206-f2cdf41ea8ed
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20220621040055-34fc92738141
 	github.com/NpoolPlatform/kyc-management v0.0.0-20220322081324-f537a7bcd812
-	github.com/NpoolPlatform/libent-cruder v0.0.0-20220526050249-956b54fac9f1
+	github.com/NpoolPlatform/libent-cruder v0.0.0-20220621110548-8f3f8049ecc5
 	github.com/NpoolPlatform/login-gateway v0.0.0-20220328094651-99c681b06955
-	github.com/NpoolPlatform/message v0.0.0-20220723022642-0b884ac8001b
+	github.com/NpoolPlatform/message v0.0.0-20220801130452-dd7094dd918a
 	github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da
 	github.com/NpoolPlatform/oracle-manager v0.0.0-20220624095427-ce43ee0215f9
 	github.com/NpoolPlatform/review-service v0.0.0-20220322082433-0c2b7ee284ed

@@ -10,7 +10,7 @@ import (
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
 	appusermgrconst "github.com/NpoolPlatform/appuser-manager/pkg/const"
-	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
+	appusermgrpb "github.com/NpoolPlatform/message/npool/appuser/mgr/v1"
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
 	logingwpb "github.com/NpoolPlatform/message/npool/logingateway"
 	thirdgwpb "github.com/NpoolPlatform/message/npool/thirdgateway"

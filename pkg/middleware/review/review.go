@@ -11,7 +11,7 @@ import (
 	billingconst "github.com/NpoolPlatform/cloud-hashing-billing/pkg/message/const"
 	goodsconst "github.com/NpoolPlatform/cloud-hashing-goods/pkg/message/const"
 	kycconst "github.com/NpoolPlatform/kyc-management/pkg/message/const"
-	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
+	appusermgrpb "github.com/NpoolPlatform/message/npool/appuser/mgr/v1"
 	billingpb "github.com/NpoolPlatform/message/npool/cloud-hashing-billing"
 	kycmgrpb "github.com/NpoolPlatform/message/npool/kyc"
 	reviewpb "github.com/NpoolPlatform/message/npool/review-service"

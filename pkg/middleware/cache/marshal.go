@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
+	appusermgrpb "github.com/NpoolPlatform/message/npool/appuser/mgr/v1"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 	goodspb "github.com/NpoolPlatform/message/npool/cloud-hashing-goods"
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
