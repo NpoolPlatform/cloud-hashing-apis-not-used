@@ -254,6 +254,15 @@ pipeline {
       }
     }
 
+    stage('Release docker image for feature test') {
+      when {
+        expression { RELEASE_TARGET == 'true' }
+      }
+      steps {
+        sh 'TAG=feature DOCKER_REGISTRY=$DOCKER_REGISTRY make release-docker-images'
+      }
+    }
+
     stage('Release docker image for testing') {
       when {
         expression { RELEASE_TARGET == 'true' }
