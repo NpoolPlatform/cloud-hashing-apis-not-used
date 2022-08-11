@@ -12,7 +12,6 @@ require (
 	github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220706022206-f2cdf41ea8ed
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20220726144547-41aefeaea336
 	github.com/NpoolPlatform/kyc-management v0.0.0-20220322081324-f537a7bcd812
-	github.com/NpoolPlatform/ledger-middleware v0.0.0-20220811054139-8ee942532891
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20220621110548-8f3f8049ecc5
 	github.com/NpoolPlatform/login-gateway v0.0.0-20220328094651-99c681b06955
 	github.com/NpoolPlatform/message v0.0.0-20220811055003-c46a227689fb
@@ -91,7 +90,6 @@ require (
 	github.com/prometheus/common v0.32.1 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
-	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/spf13/afero v1.8.2 // indirect
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
