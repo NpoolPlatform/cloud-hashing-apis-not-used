@@ -2,6 +2,7 @@ package separate
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
@@ -10,19 +11,17 @@ import (
 	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
-
-	"golang.org/x/xerrors"
 )
 
 func getUserGoodCommissions(ctx context.Context, appID, userID string) ([]*npool.GoodCommission, error) { // nolint
 	orders, err := referral.GetOrders(ctx, appID, userID)
 	if err != nil {
-		return nil, xerrors.Errorf("fail get orders: %v", err)
+		return nil, fmt.Errorf("fail get orders: %v", err)
 	}
 
 	settings, err := commissionsetting.GetAmountSettingsByAppUser(ctx, appID, userID)
 	if err != nil {
-		return nil, xerrors.Errorf("fail get amount settings: %v", err)
+		return nil, fmt.Errorf("fail get amount settings: %v", err)
 	}
 
 	commissions := []*npool.GoodCommission{}
@@ -35,7 +34,7 @@ func getUserGoodCommissions(ctx context.Context, appID, userID string) ([]*npool
 		case orderconst.OrderTypeAirdrop:
 			continue
 		default:
-			return nil, xerrors.Errorf("invalid order type: %v", order.Order.Order.OrderType)
+			return nil, fmt.Errorf("invalid order type: %v", order.Order.Order.OrderType)
 		}
 
 		if order.Order.Payment == nil || order.Order.Payment.State != orderconst.PaymentStateDone {
@@ -80,7 +79,7 @@ func getUserGoodCommissions(ctx context.Context, appID, userID string) ([]*npool
 func getOrderParentGoodCommissions(ctx context.Context, appID, userID string, roots, nexts []*inspirepb.AppPurchaseAmountSetting) ([]*npool.GoodCommission, error) {
 	orders, err := referral.GetOrders(ctx, appID, userID)
 	if err != nil {
-		return nil, xerrors.Errorf("fail get orders: %v", err)
+		return nil, fmt.Errorf("fail get orders: %v", err)
 	}
 
 	commissions := []*npool.GoodCommission{}
@@ -93,7 +92,7 @@ func getOrderParentGoodCommissions(ctx context.Context, appID, userID string, ro
 		case orderconst.OrderTypeAirdrop:
 			continue
 		default:
-			return nil, xerrors.Errorf("invalid order type: %v", order.Order.Order.OrderType)
+			return nil, fmt.Errorf("invalid order type: %v", order.Order.Order.OrderType)
 		}
 
 		amount := getOrderParentRebate(ctx, order, roots, nexts)
@@ -126,12 +125,12 @@ func getOrderParentGoodCommissions(ctx context.Context, appID, userID string, ro
 func getDirectInviteeGoodCommissions(ctx context.Context, appID, userID string) ([]*npool.GoodCommission, error) { //nolint
 	roots, err := commissionsetting.GetAmountSettingsByAppUser(ctx, appID, userID)
 	if err != nil {
-		return nil, xerrors.Errorf("fail get amount settings: %v", err)
+		return nil, fmt.Errorf("fail get amount settings: %v", err)
 	}
 
 	invitees, err := referral.GetLayeredInvitees(ctx, appID, userID)
 	if err != nil {
-		return nil, xerrors.Errorf("fail get layered invitees: %v", err)
+		return nil, fmt.Errorf("fail get layered invitees: %v", err)
 	}
 
 	commissions := []*npool.GoodCommission{}
@@ -139,17 +138,17 @@ func getDirectInviteeGoodCommissions(ctx context.Context, appID, userID string) 
 	for _, iv := range invitees {
 		inviteeID, err := findRootInviter(ctx, userID, iv.InviteeID, invitees)
 		if err != nil {
-			return nil, xerrors.Errorf("fail find root inviter: %v", err)
+			return nil, fmt.Errorf("fail find root inviter: %v", err)
 		}
 
 		nexts, err := commissionsetting.GetAmountSettingsByAppUser(ctx, iv.AppID, inviteeID)
 		if err != nil {
-			return nil, xerrors.Errorf("fail get amount settings: %v", err)
+			return nil, fmt.Errorf("fail get amount settings: %v", err)
 		}
 
 		comms, err := getOrderParentGoodCommissions(ctx, iv.AppID, iv.InviteeID, roots, nexts)
 		if err != nil {
-			return nil, xerrors.Errorf("fail get good commissions: %v", err)
+			return nil, fmt.Errorf("fail get good commissions: %v", err)
 		}
 
 		for _, comm := range comms {
@@ -173,12 +172,12 @@ func getDirectInviteeGoodCommissions(ctx context.Context, appID, userID string) 
 func getSeparateGoodCommissions(ctx context.Context, appID, userID string) ([]*npool.GoodCommission, error) {
 	commissions, err := getUserGoodCommissions(ctx, appID, userID)
 	if err != nil {
-		return nil, xerrors.Errorf("fail get user good commissions: %v", err)
+		return nil, fmt.Errorf("fail get user good commissions: %v", err)
 	}
 
 	comms, err := getDirectInviteeGoodCommissions(ctx, appID, userID)
 	if err != nil {
-		return nil, xerrors.Errorf("fail get invitees good commissions: %v", err)
+		return nil, fmt.Errorf("fail get invitees good commissions: %v", err)
 	}
 
 	for _, comm := range comms {
@@ -206,28 +205,28 @@ func getSeparateGoodCommissions(ctx context.Context, appID, userID string) ([]*n
 func getSeparateGoodContributions(ctx context.Context, comms []*npool.GoodCommission, appID, userID string) ([]*npool.GoodCommission, error) {
 	invitees, err := referral.GetLayeredInvitees(ctx, appID, userID)
 	if err != nil {
-		return nil, xerrors.Errorf("fail get invitees: %v", err)
+		return nil, fmt.Errorf("fail get invitees: %v", err)
 	}
 
 	roots, err := commissionsetting.GetAmountSettingsByAppUser(ctx, appID, userID)
 	if err != nil {
-		return nil, xerrors.Errorf("fail get amount settings: %v", err)
+		return nil, fmt.Errorf("fail get amount settings: %v", err)
 	}
 
 	for _, iv := range invitees {
 		inviteeID, err := findRootInviter(ctx, userID, iv.InviteeID, invitees)
 		if err != nil {
-			return nil, xerrors.Errorf("cannot find root inviter: %v", err)
+			return nil, fmt.Errorf("cannot find root inviter: %v", err)
 		}
 
 		nexts, err := commissionsetting.GetAmountSettingsByAppUser(ctx, iv.AppID, inviteeID)
 		if err != nil {
-			return nil, xerrors.Errorf("fail get amount settings: %v", err)
+			return nil, fmt.Errorf("fail get amount settings: %v", err)
 		}
 
 		orders, err := referral.GetOrders(ctx, appID, iv.InviteeID)
 		if err != nil {
-			return nil, xerrors.Errorf("fail get orders: %v", err)
+			return nil, fmt.Errorf("fail get orders: %v", err)
 		}
 
 		for _, order := range orders {
@@ -238,7 +237,7 @@ func getSeparateGoodContributions(ctx context.Context, comms []*npool.GoodCommis
 			case orderconst.OrderTypeAirdrop:
 				continue
 			default:
-				return nil, xerrors.Errorf("invalid order type: %v", order.Order.Order.OrderType)
+				return nil, fmt.Errorf("invalid order type: %v", order.Order.Order.OrderType)
 			}
 
 			if order.Order.Payment == nil || order.Order.Payment.State != orderconst.PaymentStateDone {
@@ -294,25 +293,25 @@ func getSeparateGoodContributions(ctx context.Context, comms []*npool.GoodCommis
 func GetSeparateGoodCommissions(ctx context.Context, appID, userID string) ([]*npool.GoodCommission, error) {
 	comms, err := getSeparateGoodCommissions(ctx, appID, userID)
 	if err != nil {
-		return nil, xerrors.Errorf("fail get user good commissions: %v", err)
+		return nil, fmt.Errorf("fail get user good commissions: %v", err)
 	}
 
 	invitees, err := referral.GetInvitees(ctx, appID, userID)
 	if err != nil {
-		return nil, xerrors.Errorf("fail get invitees: %v", err)
+		return nil, fmt.Errorf("fail get invitees: %v", err)
 	}
 
 	for _, iv := range invitees {
 		commissions, err := getSeparateGoodCommissions(ctx, appID, iv.InviteeID)
 		if err != nil {
-			return nil, xerrors.Errorf("fail get user good commissions: %v", err)
+			return nil, fmt.Errorf("fail get user good commissions: %v", err)
 		}
 		comms = append(comms, commissions...)
 	}
 
 	comms, err = getSeparateGoodContributions(ctx, comms, appID, userID)
 	if err != nil {
-		return nil, xerrors.Errorf("fail get user good contributions: %v", err)
+		return nil, fmt.Errorf("fail get user good contributions: %v", err)
 	}
 
 	return comms, nil

@@ -2,8 +2,8 @@ package kyc
 
 import (
 	"context"
+	"fmt"
 
-	"entgo.io/ent/entc/integration/edgefield/ent/info"
 	appusermgrpb "github.com/NpoolPlatform/message/npool/appuser/mgr/v1"
 
 	notificationconstant "github.com/NpoolPlatform/notification/pkg/const"
@@ -21,8 +21,6 @@ import (
 	reviewconst "github.com/NpoolPlatform/review-service/pkg/const"
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
-
-	"golang.org/x/xerrors"
 )
 
 func Create(ctx context.Context, in *npool.CreateKycRequest) (*npool.CreateKycResponse, error) {
@@ -30,7 +28,7 @@ func Create(ctx context.Context, in *npool.CreateKycRequest) (*npool.CreateKycRe
 		Info: in.GetInfo(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail create kyc: %v", err)
+		return nil, fmt.Errorf("fail create kyc: %v", err)
 	}
 
 	_, err = grpc2.CreateReview(ctx, &reviewpb.CreateReviewRequest{
@@ -43,7 +41,7 @@ func Create(ctx context.Context, in *npool.CreateKycRequest) (*npool.CreateKycRe
 	})
 	if err != nil {
 		// TODO: rollback kyc database
-		return nil, xerrors.Errorf("fail create kyc review: %v", err)
+		return nil, fmt.Errorf("fail create kyc review: %v", err)
 	}
 
 	return &npool.CreateKycResponse{
@@ -76,14 +74,14 @@ func Update(ctx context.Context, in *npool.UpdateKycRequest) (*npool.UpdateKycRe
 	}
 
 	if !allowed {
-		return nil, xerrors.Errorf("not allowed update kyc")
+		return nil, fmt.Errorf("not allowed update kyc")
 	}
 
 	kyc, err := grpc2.UpdateKyc(ctx, &kycmgrpb.UpdateKycRequest{
 		Info: in.GetInfo(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail update kyc: %v", err)
+		return nil, fmt.Errorf("fail update kyc: %v", err)
 	}
 
 	if !reviewing {
@@ -97,7 +95,7 @@ func Update(ctx context.Context, in *npool.UpdateKycRequest) (*npool.UpdateKycRe
 		})
 		if err != nil {
 			// TODO: rollback kyc database
-			return nil, xerrors.Errorf("fail create kyc review: %v", err)
+			return nil, fmt.Errorf("fail create kyc review: %v", err)
 		}
 	}
 
@@ -115,7 +113,7 @@ func GetByAppUser(ctx context.Context, in *npool.GetKycByAppUserRequest) (*npool
 		UserID: in.GetUserID(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get kyc: %v", err)
+		return nil, fmt.Errorf("fail get kyc: %v", err)
 	}
 
 	reviewState, reviewMessage, err := review.GetReviewState(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
@@ -125,7 +123,7 @@ func GetByAppUser(ctx context.Context, in *npool.GetKycByAppUserRequest) (*npool
 		ObjectID:   kyc.ID,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get review state: %v", err)
+		return nil, fmt.Errorf("fail get review state: %v", err)
 	}
 
 	return &npool.GetKycByAppUserResponse{
@@ -146,10 +144,10 @@ func UpdateKycReview(ctx context.Context, in *npool.UpdateKycReviewRequest) (*np
 		},
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get kyc info for %v: %v", info.ID, err)
+		return nil, fmt.Errorf("fail get kyc info for %v: %v", reviewInfo.ID, err)
 	}
 	if len(kycs) == 0 {
-		return nil, xerrors.Errorf("empty kyc info for %v", reviewInfo.GetObjectID())
+		return nil, fmt.Errorf("empty kyc info for %v", reviewInfo.GetObjectID())
 	}
 
 	user, err := grpc2.GetAppUserInfoByAppUser(ctx, &appusermgrpb.GetAppUserInfoByAppUserRequest{
@@ -157,20 +155,20 @@ func UpdateKycReview(ctx context.Context, in *npool.UpdateKycReviewRequest) (*np
 		UserID: kycs[0].GetUserID(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get app user: %v", err)
+		return nil, fmt.Errorf("fail get app user: %v", err)
 	}
 	if user == nil {
-		return nil, xerrors.Errorf("fail get app user")
+		return nil, fmt.Errorf("fail get app user")
 	}
 
 	reviewResp, err := grpc2.GetReview(ctx, &reviewpb.GetReviewRequest{
 		ID: reviewInfo.GetID(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get review: %v", err)
+		return nil, fmt.Errorf("fail get review: %v", err)
 	}
 	if reviewResp == nil {
-		return nil, xerrors.Errorf("fail get review")
+		return nil, fmt.Errorf("fail get review")
 	}
 	reviewUpResp, err := grpc2.UpdateReview(ctx, &reviewpb.UpdateReviewRequest{
 		Info: in.GetInfo(),
@@ -195,7 +193,7 @@ func UpdateKycReview(ctx context.Context, in *npool.UpdateKycReviewRequest) (*np
 			UserName: user.GetExtra().GetUsername(),
 		})
 		if err != nil {
-			return nil, xerrors.Errorf("fail create notification: %v", err)
+			return nil, fmt.Errorf("fail create notification: %v", err)
 		}
 	}
 

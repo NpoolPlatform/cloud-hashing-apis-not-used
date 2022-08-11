@@ -1,14 +1,7 @@
 package main
 
 import (
-	"time"
-
 	"github.com/NpoolPlatform/cloud-hashing-apis/api"
-	db "github.com/NpoolPlatform/cloud-hashing-apis/pkg/db"
-	msgcli "github.com/NpoolPlatform/cloud-hashing-apis/pkg/message/client"
-	msglistener "github.com/NpoolPlatform/cloud-hashing-apis/pkg/message/listener"
-	msg "github.com/NpoolPlatform/cloud-hashing-apis/pkg/message/message"
-	msgsrv "github.com/NpoolPlatform/cloud-hashing-apis/pkg/message/server"
 
 	apimgrcli "github.com/NpoolPlatform/api-manager/pkg/client"
 
@@ -27,25 +20,11 @@ var runCmd = &cli.Command{
 	Aliases: []string{"s"},
 	Usage:   "Run the daemon",
 	Action: func(c *cli.Context) error {
-		if err := db.Init(); err != nil {
-			return err
-		}
-
 		go func() {
 			if err := grpc2.RunGRPC(rpcRegister); err != nil {
 				logger.Sugar().Errorf("fail to run grpc server: %v", err)
 			}
 		}()
-
-		if err := msgsrv.Init(); err != nil {
-			return err
-		}
-		if err := msgcli.Init(); err != nil {
-			return err
-		}
-
-		go msglistener.Listen()
-		go msgSender()
 
 		return grpc2.RunGRPCGateWay(rpcGatewayRegister)
 	},
@@ -65,20 +44,4 @@ func rpcGatewayRegister(mux *runtime.ServeMux, endpoint string, opts []grpc.Dial
 	apimgrcli.Register(mux)
 
 	return nil
-}
-
-func msgSender() {
-	id := 0
-	for {
-		err := msgsrv.PublishExample(&msg.Example{
-			ID:      id,
-			Example: "hello world",
-		})
-		if err != nil {
-			logger.Sugar().Errorf("fail to send example: %v", err)
-			return
-		}
-		id++
-		time.Sleep(3 * time.Second)
-	}
 }
