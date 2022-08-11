@@ -5,7 +5,7 @@ import (
 
 	appusermgrconst "github.com/NpoolPlatform/appuser-manager/pkg/const"
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
-	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
+	appusermgrpb "github.com/NpoolPlatform/message/npool/appuser/mgr/v1"
 	thirdgwpb "github.com/NpoolPlatform/message/npool/thirdgateway"
 
 	"golang.org/x/xerrors"

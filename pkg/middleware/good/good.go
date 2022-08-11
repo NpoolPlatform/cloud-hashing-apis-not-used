@@ -56,7 +56,10 @@ func constructGood(
 
 func GetAll(ctx context.Context, in *npool.GetGoodsRequest) (*npool.GetGoodsResponse, error) {
 	goods, err := grpc2.GetGoodsDetail(ctx, &goodspb.GetGoodsDetailRequest{
-		PageInfo: in.GetPageInfo(),
+		PageInfo: &goodspb.PageInfo{
+			Offset: in.GetPageInfo().GetOffset(),
+			Limit:  in.GetPageInfo().GetLimit(),
+		},
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get goods info: %v", err)
@@ -213,8 +216,11 @@ func GetRecommendsByApp(ctx context.Context, in *npool.GetRecommendGoodsByAppReq
 
 func GetByApp(ctx context.Context, in *npool.GetGoodsByAppRequest) (*npool.GetGoodsByAppResponse, error) {
 	goods, err := grpc2.GetGoodsDetailByApp(ctx, &goodspb.GetGoodsDetailByAppRequest{
-		AppID:    in.GetAppID(),
-		PageInfo: in.GetPageInfo(),
+		AppID: in.GetAppID(),
+		PageInfo: &goodspb.PageInfo{
+			Offset: in.GetPageInfo().GetOffset(),
+			Limit:  in.GetPageInfo().GetLimit(),
+		},
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("fail get goods info: %v", err)

@@ -25,7 +25,7 @@ import (
 	billingcli "github.com/NpoolPlatform/cloud-hashing-billing/pkg/client"
 	billingstate "github.com/NpoolPlatform/cloud-hashing-billing/pkg/const"
 	billingconst "github.com/NpoolPlatform/cloud-hashing-billing/pkg/message/const"
-	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
+	appusermgrpb "github.com/NpoolPlatform/message/npool/appuser/mgr/v1"
 	billingpb "github.com/NpoolPlatform/message/npool/cloud-hashing-billing"
 	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
 	reviewpb "github.com/NpoolPlatform/message/npool/review-service"

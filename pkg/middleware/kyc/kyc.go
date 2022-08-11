@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"entgo.io/ent/entc/integration/edgefield/ent/info"
-	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
+	appusermgrpb "github.com/NpoolPlatform/message/npool/appuser/mgr/v1"
 
 	notificationconstant "github.com/NpoolPlatform/notification/pkg/const"
 

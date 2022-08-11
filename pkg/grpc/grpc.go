@@ -28,7 +28,7 @@ import (
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
 
 	appusermgrconst "github.com/NpoolPlatform/appuser-manager/pkg/message/const" //nolint
-	appusermgrpb "github.com/NpoolPlatform/message/npool/appusermgr"
+	appusermgrpb "github.com/NpoolPlatform/message/npool/appuser/mgr/v1"
 
 	kycmgrconst "github.com/NpoolPlatform/kyc-management/pkg/message/const" //nolint
 	kycmgrpb "github.com/NpoolPlatform/message/npool/kyc"
