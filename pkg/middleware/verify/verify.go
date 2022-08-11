@@ -2,13 +2,12 @@ package verify
 
 import (
 	"context"
+	"fmt"
 
 	appusermgrconst "github.com/NpoolPlatform/appuser-manager/pkg/const"
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	appusermgrpb "github.com/NpoolPlatform/message/npool/appuser/mgr/v1"
 	thirdgwpb "github.com/NpoolPlatform/message/npool/thirdgateway"
-
-	"golang.org/x/xerrors"
 )
 
 func verifyByMobile(ctx context.Context, appID, phoneNO, code, usedFor string) (int32, error) {
@@ -19,7 +18,7 @@ func verifyByMobile(ctx context.Context, appID, phoneNO, code, usedFor string) (
 		Code:    code,
 	})
 	if err != nil {
-		return -1, xerrors.Errorf("fail verify sms code: %v", err)
+		return -1, fmt.Errorf("fail verify sms code: %v", err)
 	}
 
 	return resp.Code, nil
@@ -33,7 +32,7 @@ func verifyByEmail(ctx context.Context, appID, emailAddr, code, usedFor string) 
 		Code:         code,
 	})
 	if err != nil {
-		return -1, xerrors.Errorf("fail verify email code: %v", err)
+		return -1, fmt.Errorf("fail verify email code: %v", err)
 	}
 
 	return resp.Code, nil
@@ -46,7 +45,7 @@ func verifyByGoogle(ctx context.Context, appID, userID, code string) (int32, err
 		Code:   code,
 	})
 	if err != nil {
-		return -1, xerrors.Errorf("fail verify google code: %v", err)
+		return -1, fmt.Errorf("fail verify google code: %v", err)
 	}
 
 	return resp.Code, nil
@@ -62,17 +61,17 @@ func VerifyCode(ctx context.Context, appID, userID, account, accountType, code, 
 			UserID: userID,
 		})
 		if err != nil {
-			return xerrors.Errorf("fail get app user: %v", err)
+			return fmt.Errorf("fail get app user: %v", err)
 		}
 
 		switch accountType {
 		case appusermgrconst.SignupByMobile:
 			if user.PhoneNO != account {
-				return xerrors.Errorf("invalid mobile")
+				return fmt.Errorf("invalid mobile")
 			}
 		case appusermgrconst.SignupByEmail:
 			if user.EmailAddress != account {
-				return xerrors.Errorf("invalid email")
+				return fmt.Errorf("invalid email")
 			}
 		}
 	}
@@ -87,10 +86,10 @@ func VerifyCode(ctx context.Context, appID, userID, account, accountType, code, 
 	}
 
 	if err != nil {
-		return xerrors.Errorf("fail verify code: %v", err)
+		return fmt.Errorf("fail verify code: %v", err)
 	}
 	if verified < 0 {
-		return xerrors.Errorf("fail verify code")
+		return fmt.Errorf("fail verify code")
 	}
 
 	return nil

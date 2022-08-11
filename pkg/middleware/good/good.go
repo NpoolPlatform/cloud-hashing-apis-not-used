@@ -2,6 +2,7 @@ package good
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
@@ -16,8 +17,6 @@ import (
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 
 	"github.com/google/uuid"
-
-	"golang.org/x/xerrors"
 )
 
 func constructGood(
@@ -43,7 +42,7 @@ func constructGood(
 	}
 
 	if myCoinInfo == nil {
-		return nil, xerrors.Errorf("not found coin info %v", info.Good.CoinInfoID)
+		return nil, fmt.Errorf("not found coin info %v", info.Good.CoinInfoID)
 	}
 
 	return &npool.Good{
@@ -62,7 +61,7 @@ func GetAll(ctx context.Context, in *npool.GetGoodsRequest) (*npool.GetGoodsResp
 		},
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get goods info: %v", err)
+		return nil, fmt.Errorf("fail get goods info: %v", err)
 	}
 
 	coinInfos, err := grpc2.GetCoinInfos(ctx, &coininfopb.GetCoinInfosRequest{
@@ -70,7 +69,7 @@ func GetAll(ctx context.Context, in *npool.GetGoodsRequest) (*npool.GetGoodsResp
 		Limit:  100,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get coin infos: %v", err)
+		return nil, fmt.Errorf("fail get coin infos: %v", err)
 	}
 
 	details := []*npool.Good{}
@@ -82,7 +81,7 @@ func GetAll(ctx context.Context, in *npool.GetGoodsRequest) (*npool.GetGoodsResp
 			ObjectID:   info.Good.ID,
 		})
 		if err != nil {
-			return nil, xerrors.Errorf("fail get reviews by app domain object type id: %v", err)
+			return nil, fmt.Errorf("fail get reviews by app domain object type id: %v", err)
 		}
 
 		detail, err := constructGood(info, coinInfos, reviews)
@@ -104,7 +103,7 @@ func Create(ctx context.Context, in *npool.CreateGoodRequest) (*npool.CreateGood
 		Info: in.GetInfo(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail create good: %v", err)
+		return nil, fmt.Errorf("fail create good: %v", err)
 	}
 
 	_, err = grpc2.CreateReview(ctx, &reviewpb.CreateReviewRequest{
@@ -117,14 +116,14 @@ func Create(ctx context.Context, in *npool.CreateGoodRequest) (*npool.CreateGood
 	})
 	if err != nil {
 		// TODO: rollback good database
-		return nil, xerrors.Errorf("fail create good review: %v", err)
+		return nil, fmt.Errorf("fail create good review: %v", err)
 	}
 
 	detail, err := Get(ctx, &npool.GetGoodRequest{
 		ID: good.ID,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get good detail: %v", err)
+		return nil, fmt.Errorf("fail get good detail: %v", err)
 	}
 
 	return &npool.CreateGoodResponse{
@@ -137,7 +136,7 @@ func Get(ctx context.Context, in *npool.GetGoodRequest) (*npool.GetGoodResponse,
 		ID: in.GetID(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get good detail: %v", err)
+		return nil, fmt.Errorf("fail get good detail: %v", err)
 	}
 
 	coinInfos, err := grpc2.GetCoinInfos(ctx, &coininfopb.GetCoinInfosRequest{
@@ -145,7 +144,7 @@ func Get(ctx context.Context, in *npool.GetGoodRequest) (*npool.GetGoodResponse,
 		Limit:  100,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get coin infos: %v", err)
+		return nil, fmt.Errorf("fail get coin infos: %v", err)
 	}
 
 	reviews, err := grpc2.GetReviewsByAppDomainObjectTypeID(ctx, &reviewpb.GetReviewsByAppDomainObjectTypeIDRequest{
@@ -155,12 +154,12 @@ func Get(ctx context.Context, in *npool.GetGoodRequest) (*npool.GetGoodResponse,
 		ObjectID:   good.Good.ID,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get reviews by app domain object type id: %v", err)
+		return nil, fmt.Errorf("fail get reviews by app domain object type id: %v", err)
 	}
 
 	detail, err := constructGood(good, coinInfos, reviews)
 	if err != nil {
-		return nil, xerrors.Errorf("fail construct good detail: %v", err)
+		return nil, fmt.Errorf("fail construct good detail: %v", err)
 	}
 
 	return &npool.GetGoodResponse{
@@ -173,7 +172,7 @@ func GetRecommendsByApp(ctx context.Context, in *npool.GetRecommendGoodsByAppReq
 		AppID: in.GetAppID(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get goods info: %v", err)
+		return nil, fmt.Errorf("fail get goods info: %v", err)
 	}
 
 	coinInfos, err := grpc2.GetCoinInfos(ctx, &coininfopb.GetCoinInfosRequest{
@@ -181,7 +180,7 @@ func GetRecommendsByApp(ctx context.Context, in *npool.GetRecommendGoodsByAppReq
 		Limit:  100,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get coin infos: %v", err)
+		return nil, fmt.Errorf("fail get coin infos: %v", err)
 	}
 
 	details := []*npool.RecommendGood{}
@@ -194,7 +193,7 @@ func GetRecommendsByApp(ctx context.Context, in *npool.GetRecommendGoodsByAppReq
 			ObjectID:   info.Good.Good.ID,
 		})
 		if err != nil {
-			return nil, xerrors.Errorf("fail get reviews by app domain object type id: %v", err)
+			return nil, fmt.Errorf("fail get reviews by app domain object type id: %v", err)
 		}
 
 		detail, err := constructGood(info.Good, coinInfos, reviews)
@@ -223,7 +222,7 @@ func GetByApp(ctx context.Context, in *npool.GetGoodsByAppRequest) (*npool.GetGo
 		},
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get goods info: %v", err)
+		return nil, fmt.Errorf("fail get goods info: %v", err)
 	}
 
 	coinInfos, err := grpc2.GetCoinInfos(ctx, &coininfopb.GetCoinInfosRequest{
@@ -231,7 +230,7 @@ func GetByApp(ctx context.Context, in *npool.GetGoodsByAppRequest) (*npool.GetGo
 		Limit:  100,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get coin infos: %v", err)
+		return nil, fmt.Errorf("fail get coin infos: %v", err)
 	}
 
 	details := []*npool.Good{}
@@ -243,7 +242,7 @@ func GetByApp(ctx context.Context, in *npool.GetGoodsByAppRequest) (*npool.GetGo
 			ObjectID:   info.Good.ID,
 		})
 		if err != nil {
-			return nil, xerrors.Errorf("fail get reviews by app domain object type id: %v", err)
+			return nil, fmt.Errorf("fail get reviews by app domain object type id: %v", err)
 		}
 
 		detail, err := constructGood(info, coinInfos, reviews)
