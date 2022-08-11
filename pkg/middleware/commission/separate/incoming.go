@@ -2,6 +2,7 @@ package separate
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
@@ -11,8 +12,6 @@ import (
 	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
-
-	"golang.org/x/xerrors"
 )
 
 func dayBeginning() uint32 {
@@ -22,12 +21,12 @@ func dayBeginning() uint32 {
 func getRebate(ctx context.Context, appID, userID string) (float64, error) {
 	orders, err := referral.GetOrders(ctx, appID, userID)
 	if err != nil {
-		return 0, xerrors.Errorf("fail get orders: %v", err)
+		return 0, fmt.Errorf("fail get orders: %v", err)
 	}
 
 	settings, err := commissionsetting.GetAmountSettingsByAppUser(ctx, appID, userID)
 	if err != nil {
-		return 0, xerrors.Errorf("fail get amount settings: %v", err)
+		return 0, fmt.Errorf("fail get amount settings: %v", err)
 	}
 
 	totalAmount := 0.0
@@ -39,7 +38,7 @@ func getRebate(ctx context.Context, appID, userID string) (float64, error) {
 		case orderconst.OrderTypeAirdrop:
 			continue
 		default:
-			return 0, xerrors.Errorf("invalid order type: %v", order.Order.Order.OrderType)
+			return 0, fmt.Errorf("invalid order type: %v", order.Order.Order.OrderType)
 		}
 
 		if order.Order.Payment == nil || order.Order.Payment.State != orderconst.PaymentStateDone {
@@ -103,7 +102,7 @@ func getOrderParentRebate(_ context.Context, order *npool.Order, roots, nexts []
 func getPeriodRebate(ctx context.Context, appID, userID string, roots, nexts []*inspirepb.AppPurchaseAmountSetting) (float64, error) {
 	orders, err := referral.GetOrders(ctx, appID, userID)
 	if err != nil {
-		return 0, xerrors.Errorf("fail get orders: %v", err)
+		return 0, fmt.Errorf("fail get orders: %v", err)
 	}
 
 	totalRootAmount := 0.0
@@ -116,7 +115,7 @@ func getPeriodRebate(ctx context.Context, appID, userID string, roots, nexts []*
 		case orderconst.OrderTypeAirdrop:
 			continue
 		default:
-			return 0, xerrors.Errorf("invalid order type: %v", order.Order.Order.OrderType)
+			return 0, fmt.Errorf("invalid order type: %v", order.Order.Order.OrderType)
 		}
 
 		totalRootAmount += getOrderParentRebate(ctx, order, roots, nexts)
@@ -136,18 +135,18 @@ getInviter:
 			goto getInviter
 		}
 	}
-	return "", xerrors.Errorf("cannot find root inviter")
+	return "", fmt.Errorf("cannot find root inviter")
 }
 
 func getIncomings(ctx context.Context, appID, userID string) (float64, error) {
 	roots, err := commissionsetting.GetAmountSettingsByAppUser(ctx, appID, userID)
 	if err != nil {
-		return 0, xerrors.Errorf("fail get amount settings: %v", err)
+		return 0, fmt.Errorf("fail get amount settings: %v", err)
 	}
 
 	invitees, err := referral.GetLayeredInvitees(ctx, appID, userID)
 	if err != nil {
-		return 0, xerrors.Errorf("fail get layered invitees: %v", err)
+		return 0, fmt.Errorf("fail get layered invitees: %v", err)
 	}
 
 	totalRootAmount := 0.0
@@ -155,17 +154,17 @@ func getIncomings(ctx context.Context, appID, userID string) (float64, error) {
 	for _, iv := range invitees {
 		inviteeID, err := findRootInviter(ctx, userID, iv.InviteeID, invitees)
 		if err != nil {
-			return 0, xerrors.Errorf("fail find root inviter: %v", err)
+			return 0, fmt.Errorf("fail find root inviter: %v", err)
 		}
 
 		nexts, err := commissionsetting.GetAmountSettingsByAppUser(ctx, iv.AppID, inviteeID)
 		if err != nil {
-			return 0, xerrors.Errorf("fail get amount settings: %v", err)
+			return 0, fmt.Errorf("fail get amount settings: %v", err)
 		}
 
 		rootAmount, err := getPeriodRebate(ctx, iv.AppID, iv.InviteeID, roots, nexts)
 		if err != nil {
-			return 0, xerrors.Errorf("fail get rebate: %v", err)
+			return 0, fmt.Errorf("fail get rebate: %v", err)
 		}
 
 		totalRootAmount += rootAmount
@@ -177,12 +176,12 @@ func getIncomings(ctx context.Context, appID, userID string) (float64, error) {
 func GetSeparateIncoming(ctx context.Context, appID, userID string) (float64, error) {
 	incoming, err := getRebate(ctx, appID, userID)
 	if err != nil {
-		return 0, xerrors.Errorf("fail get total incoming: %v", err)
+		return 0, fmt.Errorf("fail get total incoming: %v", err)
 	}
 
 	subAmount, err := getIncomings(ctx, appID, userID)
 	if err != nil {
-		return 0, xerrors.Errorf("fail get sub incomings: %v", err)
+		return 0, fmt.Errorf("fail get sub incomings: %v", err)
 	}
 
 	incoming += subAmount

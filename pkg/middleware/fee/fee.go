@@ -2,14 +2,13 @@ package fee
 
 import (
 	"context"
+	"fmt"
 
 	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/const"
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
 	currency "github.com/NpoolPlatform/oracle-manager/pkg/middleware/currency"
-
-	"golang.org/x/xerrors"
 )
 
 func amount(ctx context.Context, coinTypeID string, amount float64) (float64, error) {
@@ -17,12 +16,12 @@ func amount(ctx context.Context, coinTypeID string, amount float64) (float64, er
 		ID: coinTypeID,
 	})
 	if err != nil {
-		return 0, xerrors.Errorf("invalid coin info id: %v", err)
+		return 0, fmt.Errorf("invalid coin info id: %v", err)
 	}
 
 	price, err := currency.USDPrice(ctx, coin.Name)
 	if err != nil {
-		return 0, xerrors.Errorf("cannot get usd currency for coin: %v", err)
+		return 0, fmt.Errorf("cannot get usd currency for coin: %v", err)
 	}
 
 	return amount / price, nil
@@ -40,7 +39,7 @@ func ExtraAmount(ctx context.Context, coinTypeID string) (float64, error) {
 func GetCurrentFee(ctx context.Context, in *npool.GetCurrentFeeRequest) (*npool.GetCurrentFeeResponse, error) {
 	amount, err := Amount(ctx, in.GetCoinTypeID())
 	if err != nil {
-		return nil, xerrors.Errorf("fail get fee amount: %v", err)
+		return nil, fmt.Errorf("fail get fee amount: %v", err)
 	}
 
 	return &npool.GetCurrentFeeResponse{

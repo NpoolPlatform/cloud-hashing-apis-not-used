@@ -2,6 +2,7 @@ package referral
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
@@ -9,8 +10,6 @@ import (
 	cachekey "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral/cachekey"
 	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
-
-	"golang.org/x/xerrors"
 )
 
 const (
@@ -27,7 +26,7 @@ func getCoinSummaries(ctx context.Context, appID, userID string) ([]*npool.CoinS
 
 	orders, err := GetOrders(ctx, appID, userID)
 	if err != nil {
-		return nil, xerrors.Errorf("fail get orders: %v", err)
+		return nil, fmt.Errorf("fail get orders: %v", err)
 	}
 
 	summaries := []*npool.CoinSummary{}
