@@ -2,6 +2,7 @@ package setting
 
 import (
 	"context"
+	"fmt"
 	"sort"
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
@@ -11,7 +12,6 @@ import (
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
 
 	"github.com/google/uuid"
-	"golang.org/x/xerrors"
 )
 
 func getCoins(ctx context.Context) ([]*inspirepb.CommissionCoinSetting, error) {
@@ -21,7 +21,7 @@ func getCoins(ctx context.Context) ([]*inspirepb.CommissionCoinSetting, error) {
 func GetUsingCoin(ctx context.Context) (*inspirepb.CommissionCoinSetting, error) {
 	coins, err := getCoins(ctx)
 	if err != nil {
-		return nil, xerrors.Errorf("fail get coins: %v", err)
+		return nil, fmt.Errorf("fail get coins: %v", err)
 	}
 
 	for _, coin := range coins {
@@ -30,7 +30,7 @@ func GetUsingCoin(ctx context.Context) (*inspirepb.CommissionCoinSetting, error)
 		}
 	}
 
-	return nil, xerrors.Errorf("no using coin")
+	return nil, fmt.Errorf("no using coin")
 }
 
 func UniqueSetting(ctx context.Context, appID string) (bool, error) {
@@ -38,7 +38,7 @@ func UniqueSetting(ctx context.Context, appID string) (bool, error) {
 		AppID: appID,
 	})
 	if err != nil || setting == nil {
-		return false, xerrors.Errorf("fail get app commission setting: %v", err)
+		return false, fmt.Errorf("fail get app commission setting: %v", err)
 	}
 
 	return setting.UniqueSetting, nil
@@ -49,7 +49,7 @@ func KPISetting(ctx context.Context, appID string) (bool, error) {
 		AppID: appID,
 	})
 	if err != nil || setting == nil {
-		return false, xerrors.Errorf("fail get app commission setting: %v", err)
+		return false, fmt.Errorf("fail get app commission setting: %v", err)
 	}
 
 	return setting.KPISetting, nil
@@ -79,7 +79,7 @@ func GetAmountSettingsByAppUser(ctx context.Context, appID, userID string) ([]*i
 		UserID: userID,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get app purchase amount setting: %v", err)
+		return nil, fmt.Errorf("fail get app purchase amount setting: %v", err)
 	}
 
 	sort.Slice(settings, func(i, j int) bool {
@@ -95,7 +95,7 @@ func GetAmountSettingsByAppUser(ctx context.Context, appID, userID string) ([]*i
 			continue
 		}
 		if setting.Start != lastSetting.End {
-			return nil, xerrors.Errorf("invalid purchase amount setting: %v", err)
+			return nil, fmt.Errorf("invalid purchase amount setting: %v", err)
 		}
 	}
 

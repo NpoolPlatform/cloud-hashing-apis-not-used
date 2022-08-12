@@ -2,6 +2,7 @@ package kpi
 
 import (
 	"context"
+	"fmt"
 	"sort"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
@@ -9,14 +10,12 @@ import (
 	"github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral"
 	commissionsetting "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral/setting"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
-
-	"golang.org/x/xerrors"
 )
 
 func getAmount(ctx context.Context, appID, userID string) (float64, error) {
 	settings, err := commissionsetting.GetAmountSettingsByAppUser(ctx, appID, userID)
 	if err != nil {
-		return 0, xerrors.Errorf("fail get level settings: %v", err)
+		return 0, fmt.Errorf("fail get level settings: %v", err)
 	}
 
 	if len(settings) == 0 {
@@ -36,12 +35,12 @@ func getAmount(ctx context.Context, appID, userID string) (float64, error) {
 
 	totalAmount, err := referral.GetUSDAmount(ctx, appID, userID)
 	if err != nil {
-		return 0, xerrors.Errorf("fail get usd amount: %v", err)
+		return 0, fmt.Errorf("fail get usd amount: %v", err)
 	}
 
 	subAmount, err := referral.GetSubUSDAmount(ctx, appID, userID)
 	if err != nil {
-		return 0, xerrors.Errorf("fail get sub usd amount: %v", err)
+		return 0, fmt.Errorf("fail get sub usd amount: %v", err)
 	}
 
 	totalAmount += subAmount
@@ -92,19 +91,19 @@ func getRootAmount(ctx context.Context, appID, userID string) (float64, error) {
 func GetKPIIncoming(ctx context.Context, appID, userID string) (float64, error) {
 	rootAmount, err := getRootAmount(ctx, appID, userID)
 	if err != nil {
-		return 0, xerrors.Errorf("fail get root amount: %v", err)
+		return 0, fmt.Errorf("fail get root amount: %v", err)
 	}
 
 	invitees, err := referral.GetInvitees(ctx, appID, userID)
 	if err != nil {
-		return 0, xerrors.Errorf("fail get invitees: %v", err)
+		return 0, fmt.Errorf("fail get invitees: %v", err)
 	}
 
 	totalSubAmount := 0.0
 	for _, iv := range invitees {
 		subAmount, err := getRootAmount(ctx, iv.AppID, iv.InviteeID)
 		if err != nil {
-			return 0, xerrors.Errorf("fail get invitee amount: %v", err)
+			return 0, fmt.Errorf("fail get invitee amount: %v", err)
 		}
 		totalSubAmount += subAmount
 	}
@@ -115,5 +114,5 @@ func GetKPIIncoming(ctx context.Context, appID, userID string) (float64, error) 
 }
 
 func GetKPIGoodCommissions(ctx context.Context, appID, userID string) ([]*npool.GoodCommission, error) {
-	return nil, xerrors.Errorf("NOT IMPLEMENTED")
+	return nil, fmt.Errorf("NOT IMPLEMENTED")
 }

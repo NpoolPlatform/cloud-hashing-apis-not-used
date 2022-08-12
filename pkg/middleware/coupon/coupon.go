@@ -2,6 +2,7 @@ package coupon
 
 import (
 	"context"
+	"fmt"
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
@@ -10,8 +11,6 @@ import (
 	orderpb "github.com/NpoolPlatform/message/npool/cloud-hashing-order"
 
 	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
-
-	"golang.org/x/xerrors"
 )
 
 func GetCouponsByAppUser(ctx context.Context, in *npool.GetCouponsByAppUserRequest) (*npool.GetCouponsByAppUserResponse, error) {
@@ -20,7 +19,7 @@ func GetCouponsByAppUser(ctx context.Context, in *npool.GetCouponsByAppUserReque
 		UserID: in.GetUserID(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get coupons: %v", err)
+		return nil, fmt.Errorf("fail get coupons: %v", err)
 	}
 
 	coupons := []*npool.Coupon{}
@@ -32,7 +31,7 @@ func GetCouponsByAppUser(ctx context.Context, in *npool.GetCouponsByAppUserReque
 			CouponID:   info.Allocated.ID,
 		})
 		if err != nil {
-			return nil, xerrors.Errorf("fail get order for coupon: %v", err)
+			return nil, fmt.Errorf("fail get order for coupon: %v", err)
 		}
 
 		coupons = append(coupons, &npool.Coupon{
@@ -46,7 +45,7 @@ func GetCouponsByAppUser(ctx context.Context, in *npool.GetCouponsByAppUserReque
 		UserID: in.GetUserID(),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get user special offer: %v", err)
+		return nil, fmt.Errorf("fail get user special offer: %v", err)
 	}
 
 	offers := []*npool.UserSpecial{}
@@ -58,7 +57,7 @@ func GetCouponsByAppUser(ctx context.Context, in *npool.GetCouponsByAppUserReque
 			CouponID:   info.ID,
 		})
 		if err != nil {
-			return nil, xerrors.Errorf("fail get order for coupon: %v", err)
+			return nil, fmt.Errorf("fail get order for coupon: %v", err)
 		}
 		offers = append(offers, &npool.UserSpecial{
 			Coupon: info,

@@ -2,13 +2,12 @@ package referral
 
 import (
 	"context"
+	"fmt"
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	cache "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/cache"
 	cachekey "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral/cachekey"
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
-
-	"golang.org/x/xerrors"
 )
 
 const cacheForInvitees = "invitees"
@@ -19,7 +18,7 @@ func GetInviteesRT(ctx context.Context, appID, userID string) ([]*inspirepb.Regi
 		InviterID: userID,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get invitations: %v", err)
+		return nil, fmt.Errorf("fail get invitations: %v", err)
 	}
 
 	cache.AddEntry(cachekey.CacheKey(appID, userID, cacheForInvitees), invitees)
@@ -52,7 +51,7 @@ func GetInviter(ctx context.Context, appID, userID string) (*inspirepb.Registrat
 		InviteeID: userID,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("fail get inviter: %v", err)
+		return nil, fmt.Errorf("fail get inviter: %v", err)
 	}
 
 	cache.AddEntry(cachekey.CacheKey(appID, userID, cacheFor), inviter)
@@ -65,7 +64,7 @@ func getNextLayerInvitees(ctx context.Context, curLayer []*inspirepb.Registratio
 	for _, iv := range curLayer {
 		ivs, err := GetInvitees(ctx, iv.AppID, iv.InviteeID)
 		if err != nil {
-			return nil, xerrors.Errorf("fail get invitees: %v", err)
+			return nil, fmt.Errorf("fail get invitees: %v", err)
 		}
 		invitees = append(invitees, ivs...)
 	}
@@ -76,7 +75,7 @@ func getNextLayerInvitees(ctx context.Context, curLayer []*inspirepb.Registratio
 func GetLayeredInvitees(ctx context.Context, appID, userID string) ([]*inspirepb.RegistrationInvitation, error) {
 	invitees, err := GetInvitees(ctx, appID, userID)
 	if err != nil {
-		return nil, xerrors.Errorf("fail get invitees: %v", err)
+		return nil, fmt.Errorf("fail get invitees: %v", err)
 	}
 
 	curLayer := invitees
@@ -84,7 +83,7 @@ func GetLayeredInvitees(ctx context.Context, appID, userID string) ([]*inspirepb
 	for {
 		nextLayer, err := getNextLayerInvitees(ctx, curLayer)
 		if err != nil {
-			return nil, xerrors.Errorf("fail get invitees: %v", err)
+			return nil, fmt.Errorf("fail get invitees: %v", err)
 		}
 
 		if len(nextLayer) == 0 {
