@@ -37,7 +37,6 @@ import (
 	thirdgwpb "github.com/NpoolPlatform/message/npool/thirdgateway"
 	thirdgwconst "github.com/NpoolPlatform/third-gateway/pkg/message/const"
 
-	logingwconst "github.com/NpoolPlatform/login-gateway/pkg/message/const"
 	logingwpb "github.com/NpoolPlatform/message/npool/logingateway"
 
 	notificationpb "github.com/NpoolPlatform/message/npool/notification"
@@ -1856,39 +1855,8 @@ func VerifySMSCode(ctx context.Context, in *thirdgwpb.VerifySMSCodeRequest) (*th
 	return cli.VerifySMSCode(ctx, in)
 }
 
-func VerifyGoogleAuthentication(ctx context.Context, in *thirdgwpb.VerifyGoogleAuthenticationRequest) (*thirdgwpb.VerifyGoogleAuthenticationResponse, error) {
-	conn, err := grpc2.GetGRPCConn(thirdgwconst.ServiceName, grpc2.GRPCTAG)
-	if err != nil {
-		return nil, fmt.Errorf("fail get third gateway connection: %v", err)
-	}
-	defer conn.Close()
-
-	cli := thirdgwpb.NewThirdGatewayClient(conn)
-
-	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
-	defer cancel()
-
-	return cli.VerifyGoogleAuthentication(ctx, in)
-}
-
 //---------------------------------------------------------------------------------------------------------------------------
 
 func UpdateCache(ctx context.Context, in *logingwpb.UpdateCacheRequest) (*appusermgrpb.AppUserInfo, error) {
-	conn, err := grpc2.GetGRPCConn(logingwconst.ServiceName, grpc2.GRPCTAG)
-	if err != nil {
-		return nil, fmt.Errorf("fail get login gateway connection: %v", err)
-	}
-	defer conn.Close()
-
-	cli := logingwpb.NewLoginGatewayClient(conn)
-
-	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
-	defer cancel()
-
-	resp, err := cli.UpdateCache(ctx, in)
-	if err != nil {
-		return nil, fmt.Errorf("fail update cache: %v", err)
-	}
-
-	return resp.Info, nil
+	return nil, fmt.Errorf("DEPRACATED FUNCTION")
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	ga "github.com/NpoolPlatform/appuser-gateway/pkg/ga"
 	appusermgrconst "github.com/NpoolPlatform/appuser-manager/pkg/const"
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	appusermgrpb "github.com/NpoolPlatform/message/npool/appuser/mgr/v1"
@@ -39,16 +40,10 @@ func verifyByEmail(ctx context.Context, appID, emailAddr, code, usedFor string) 
 }
 
 func verifyByGoogle(ctx context.Context, appID, userID, code string) (int32, error) {
-	resp, err := grpc2.VerifyGoogleAuthentication(ctx, &thirdgwpb.VerifyGoogleAuthenticationRequest{
-		AppID:  appID,
-		UserID: userID,
-		Code:   code,
-	})
-	if err != nil {
-		return -1, fmt.Errorf("fail verify google code: %v", err)
+	if _, err := ga.VerifyGoogleAuth(ctx, appID, userID, code); err != nil {
+		return -1, err
 	}
-
-	return resp.Code, nil
+	return 0, nil
 }
 
 func VerifyCode(ctx context.Context, appID, userID, account, accountType, code, usedFor string, accountMatch bool) error { //nolint
