@@ -8,6 +8,7 @@ import (
 	appusermgrconst "github.com/NpoolPlatform/appuser-manager/pkg/const"
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	appusermgrpb "github.com/NpoolPlatform/message/npool/appuser/mgr/v1"
+	signmethod "github.com/NpoolPlatform/message/npool/appuser/mgr/v2/signmethod"
 	thirdgwpb "github.com/NpoolPlatform/message/npool/thirdgateway"
 )
 
@@ -61,10 +62,14 @@ func VerifyCode(ctx context.Context, appID, userID, account, accountType, code, 
 
 		switch accountType {
 		case appusermgrconst.SignupByMobile:
+			fallthrough //nolint
+		case signmethod.SignMethodType_Mobile.String():
 			if user.PhoneNO != account {
 				return fmt.Errorf("invalid mobile")
 			}
 		case appusermgrconst.SignupByEmail:
+			fallthrough //nolint
+		case signmethod.SignMethodType_Email.String():
 			if user.EmailAddress != account {
 				return fmt.Errorf("invalid email")
 			}
@@ -73,8 +78,12 @@ func VerifyCode(ctx context.Context, appID, userID, account, accountType, code, 
 
 	switch accountType {
 	case appusermgrconst.SignupByMobile:
+		fallthrough //nolint
+	case signmethod.SignMethodType_Mobile.String():
 		verified, err = verifyByMobile(ctx, appID, account, code, usedFor)
 	case appusermgrconst.SignupByEmail:
+		fallthrough //nolint
+	case signmethod.SignMethodType_Email.String():
 		verified, err = verifyByEmail(ctx, appID, account, code, usedFor)
 	default:
 		verified, err = verifyByGoogle(ctx, appID, userID, code)
