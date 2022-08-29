@@ -4,8 +4,8 @@ go 1.17
 
 require (
 	github.com/NpoolPlatform/api-manager v0.0.0-20220826022307-d72866fe3ec0
-	github.com/NpoolPlatform/appuser-gateway v0.0.6-0.20220828042118-89808c8705fb
-	github.com/NpoolPlatform/appuser-manager v0.0.0-20220826155650-96d25626c01b
+	github.com/NpoolPlatform/appuser-gateway v0.0.0-20220829081400-722de7ba6f59
+	github.com/NpoolPlatform/appuser-manager v0.0.0-20220829023336-2041fdaab4cd
 	github.com/NpoolPlatform/cloud-hashing-billing v0.0.0-20220716065311-82e652286c9e
 	github.com/NpoolPlatform/cloud-hashing-goods v0.0.0-20220725094415-a027a03521e7
 	github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220826143628-2e00dfa1a95f
@@ -35,7 +35,7 @@ require (
 require (
 	ariga.io/atlas v0.5.1-0.20220717122844-8593d7eb1a8e // indirect
 	entgo.io/ent v0.11.2 // indirect
-	github.com/NpoolPlatform/appuser-middleware v0.0.0-20220827101203-322dd43e5c2f // indirect
+	github.com/NpoolPlatform/appuser-middleware v0.0.0-20220829071341-b6736e2c1c01 // indirect
 	github.com/Shonminh/apollo-client v0.4.0 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
