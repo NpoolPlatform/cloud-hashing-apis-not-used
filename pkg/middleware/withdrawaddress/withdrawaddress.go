@@ -3,6 +3,7 @@ package withdrawaddress
 import (
 	"context"
 	"fmt"
+
 	usermwcli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
 
 	"github.com/NpoolPlatform/message/npool/appuser/mgr/v2/signmethod"

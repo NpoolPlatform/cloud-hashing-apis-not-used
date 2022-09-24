@@ -3,8 +3,9 @@ package withdraw
 import (
 	"context"
 	"fmt"
-	usermwcli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
 	"time"
+
+	usermwcli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
 
 	"github.com/NpoolPlatform/message/npool/appuser/mgr/v2/signmethod"
 	"github.com/NpoolPlatform/message/npool/third/mgr/v1/usedfor"
