@@ -21,7 +21,7 @@ require (
 	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20220323034620-cea972617ed5
 	github.com/NpoolPlatform/staker-manager v0.0.0-20220606140400-2b2168e378b3
 	github.com/NpoolPlatform/stock-manager v0.0.0-20220501144918-883eece82647
-	github.com/NpoolPlatform/third-middleware v0.0.0-20220923062137-692da0068fc0
+	github.com/NpoolPlatform/third-middleware v0.0.0-20220924075054-4c3370415028
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.3
@@ -35,7 +35,6 @@ require (
 require (
 	ariga.io/atlas v0.5.1-0.20220717122844-8593d7eb1a8e // indirect
 	entgo.io/ent v0.11.2 // indirect
-	github.com/NpoolPlatform/third-manager v0.0.0-20220919031951-8e47b471a0b1 // indirect
 	github.com/Shonminh/apollo-client v0.4.0 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect

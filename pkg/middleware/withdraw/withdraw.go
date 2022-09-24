@@ -3,6 +3,7 @@ package withdraw
 import (
 	"context"
 	"fmt"
+	usermwcli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
 	"time"
 
 	"github.com/NpoolPlatform/message/npool/appuser/mgr/v2/signmethod"
@@ -284,10 +285,22 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 		return nil, fmt.Errorf("invalid amount")
 	}
 
-	err := thirdmwcli.VerifyCode(
+	user, err := usermwcli.GetUser(ctx, in.GetInfo().GetAppID(), in.GetInfo().GetUserID())
+	if err != nil {
+		return nil, err
+	}
+
+	accountN := in.GetAccount()
+
+	accountType := signmethod.SignMethodType(signmethod.SignMethodType_value[in.GetAccountType()])
+	if accountType == signmethod.SignMethodType_Google {
+		accountN = user.GetGoogleSecret()
+	}
+
+	err = thirdmwcli.VerifyCode(
 		ctx,
 		in.GetInfo().GetAppID(),
-		in.GetAccount(),
+		accountN,
 		in.GetVerificationCode(),
 		signmethod.SignMethodType(signmethod.SignMethodType_value[in.GetAccountType()]),
 		usedfor.UsedFor_Withdraw,

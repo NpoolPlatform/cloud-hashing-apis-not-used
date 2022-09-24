@@ -177,10 +177,8 @@ github.com/NpoolPlatform/staker-manager v0.0.0-20220606140400-2b2168e378b3 h1:qR
 github.com/NpoolPlatform/staker-manager v0.0.0-20220606140400-2b2168e378b3/go.mod h1:cPOGgVyURkQND9TUvBTB5QaVUIRqZ3JULsnxBtAW78s=
 github.com/NpoolPlatform/stock-manager v0.0.0-20220501144918-883eece82647 h1:erFhrIDGmIbRlIG38/2zokITwCTzyN+N6zN++IKSDD4=
 github.com/NpoolPlatform/stock-manager v0.0.0-20220501144918-883eece82647/go.mod h1:S1yJ9ElTOv0gJspG2IptpcEWzfuP+rrhBFnPlpWaDJ0=
-github.com/NpoolPlatform/third-manager v0.0.0-20220919031951-8e47b471a0b1 h1:0xXB2dSAqAmTTxYcNoIR3JK7ypUVreuhk+xAWbU2Rj4=
-github.com/NpoolPlatform/third-manager v0.0.0-20220919031951-8e47b471a0b1/go.mod h1:FLva05DmNg1e8yirEDVUjVCXyo+pONsfuz80vUUFJQ0=
-github.com/NpoolPlatform/third-middleware v0.0.0-20220923062137-692da0068fc0 h1:/rgjMzmymKgHxA7KW6QYSLH3JhM7tk/Q1s+kVCr8+80=
-github.com/NpoolPlatform/third-middleware v0.0.0-20220923062137-692da0068fc0/go.mod h1:dkxn4CH0tvG0qII1N4N+nGwr5KxQqcI2C1PUMMwWokM=
+github.com/NpoolPlatform/third-middleware v0.0.0-20220924075054-4c3370415028 h1:VtDFOEfA0DZcnHcEqrq3RyeTi/4PeNetoEzEOBEA1/c=
+github.com/NpoolPlatform/third-middleware v0.0.0-20220924075054-4c3370415028/go.mod h1:dkxn4CH0tvG0qII1N4N+nGwr5KxQqcI2C1PUMMwWokM=
 github.com/OneOfOne/xxhash v1.2.2 h1:KMrpdQIwFcEqXDklaen+P1axHaj9BSKzvpUUfnHldSE=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/PuerkitoBio/purell v1.1.1/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbtSwDGJws/X0=

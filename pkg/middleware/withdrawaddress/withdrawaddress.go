@@ -3,6 +3,7 @@ package withdrawaddress
 import (
 	"context"
 	"fmt"
+	usermwcli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
 
 	"github.com/NpoolPlatform/message/npool/appuser/mgr/v2/signmethod"
 	"github.com/NpoolPlatform/message/npool/third/mgr/v1/usedfor"
@@ -25,10 +26,22 @@ import (
 )
 
 func Set(ctx context.Context, in *npool.SetWithdrawAddressRequest) (*npool.SetWithdrawAddressResponse, error) {
-	err := thirdmwcli.VerifyCode(
+	user, err := usermwcli.GetUser(ctx, in.GetAppID(), in.GetUserID())
+	if err != nil {
+		return nil, err
+	}
+
+	accountN := in.GetAccount()
+
+	accountType := signmethod.SignMethodType(signmethod.SignMethodType_value[in.GetAccountType()])
+	if accountType == signmethod.SignMethodType_Google {
+		accountN = user.GetGoogleSecret()
+	}
+
+	err = thirdmwcli.VerifyCode(
 		ctx,
 		in.GetAppID(),
-		in.GetAccount(),
+		accountN,
 		in.GetVerificationCode(),
 		signmethod.SignMethodType(signmethod.SignMethodType_value[in.GetAccountType()]),
 		usedfor.UsedFor_SetWithdrawAddress,
