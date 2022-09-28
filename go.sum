@@ -157,8 +157,8 @@ github.com/NpoolPlatform/message v0.0.0-20220501030927-34f296682c0c/go.mod h1:i/
 github.com/NpoolPlatform/message v0.0.0-20220501143407-c230f4ca021b/go.mod h1:i/F/sQWjQk44RGvfgEB0zH0oAK/0qLvgJ1AsJDZQDkk=
 github.com/NpoolPlatform/message v0.0.0-20220606130737-824c3198b695/go.mod h1:3Enb49K3JrhlSwA+6bcsBuTdTzVxVKhdkllDGgv0n3M=
 github.com/NpoolPlatform/message v0.0.0-20220819134247-1dc75c85fe43/go.mod h1:8YXp4MghMHLZ9bBdQQyfjcRtLI2RbEHAQoNCejT2nZU=
-github.com/NpoolPlatform/message v0.0.0-20220922072549-e30711ea955c h1:4RU8l/8aKlKi+YxtY7mfky7LtGLVGfCaP1SvULFGwJs=
-github.com/NpoolPlatform/message v0.0.0-20220922072549-e30711ea955c/go.mod h1:dJ9HB+nfu9iNKhhZjauFE7Hbsj/kJmJb3BwUnYGHEOk=
+github.com/NpoolPlatform/message v0.0.0-20220928062841-3a5d4902c9ed h1:B2N/+39fDpwLxC6aJkkYT0SPPf3llvpr5SDP8zR+CQ4=
+github.com/NpoolPlatform/message v0.0.0-20220928062841-3a5d4902c9ed/go.mod h1:dJ9HB+nfu9iNKhhZjauFE7Hbsj/kJmJb3BwUnYGHEOk=
 github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da h1:qZX3tw6TEsxaWyY/ZEeEtI6zSZzoYoCiqmDdt6DhxfA=
 github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da/go.mod h1:ieZ2gIh/zSlJ2hIr/fIuMvi5QMGRY0rXugKiBc+5ZKI=
 github.com/NpoolPlatform/oracle-manager v0.0.0-20220606135947-0f09e9f3818a/go.mod h1:f9Seypsw5N+Kc0P13IurAD/WNHXhzYsBt+d/R17oLfA=
@@ -177,8 +177,8 @@ github.com/NpoolPlatform/staker-manager v0.0.0-20220606140400-2b2168e378b3 h1:qR
 github.com/NpoolPlatform/staker-manager v0.0.0-20220606140400-2b2168e378b3/go.mod h1:cPOGgVyURkQND9TUvBTB5QaVUIRqZ3JULsnxBtAW78s=
 github.com/NpoolPlatform/stock-manager v0.0.0-20220501144918-883eece82647 h1:erFhrIDGmIbRlIG38/2zokITwCTzyN+N6zN++IKSDD4=
 github.com/NpoolPlatform/stock-manager v0.0.0-20220501144918-883eece82647/go.mod h1:S1yJ9ElTOv0gJspG2IptpcEWzfuP+rrhBFnPlpWaDJ0=
-github.com/NpoolPlatform/third-middleware v0.0.0-20220924075054-4c3370415028 h1:VtDFOEfA0DZcnHcEqrq3RyeTi/4PeNetoEzEOBEA1/c=
-github.com/NpoolPlatform/third-middleware v0.0.0-20220924075054-4c3370415028/go.mod h1:dkxn4CH0tvG0qII1N4N+nGwr5KxQqcI2C1PUMMwWokM=
+github.com/NpoolPlatform/third-middleware v0.0.0-20220928032420-338b26196b65 h1:YbbQxhDLoUCiF4NeYfT3zCsy1S21V0me2iJJVKrADFo=
+github.com/NpoolPlatform/third-middleware v0.0.0-20220928032420-338b26196b65/go.mod h1:dkxn4CH0tvG0qII1N4N+nGwr5KxQqcI2C1PUMMwWokM=
 github.com/OneOfOne/xxhash v1.2.2 h1:KMrpdQIwFcEqXDklaen+P1axHaj9BSKzvpUUfnHldSE=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/PuerkitoBio/purell v1.1.1/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbtSwDGJws/X0=

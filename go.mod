@@ -13,7 +13,7 @@ require (
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20220908115503-7dd1d00f71fa
 	github.com/NpoolPlatform/kyc-management v0.0.0-20220716053838-1a0c1957144a
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20220821121920-9559f5776d15
-	github.com/NpoolPlatform/message v0.0.0-20220922072549-e30711ea955c
+	github.com/NpoolPlatform/message v0.0.0-20220928062841-3a5d4902c9ed
 	github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da
 	github.com/NpoolPlatform/oracle-manager v0.0.0-20220728100526-493b72e128d3
 	github.com/NpoolPlatform/review-service v0.0.0-20220826135931-2f311aae9cbd
@@ -21,7 +21,7 @@ require (
 	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20220323034620-cea972617ed5
 	github.com/NpoolPlatform/staker-manager v0.0.0-20220606140400-2b2168e378b3
 	github.com/NpoolPlatform/stock-manager v0.0.0-20220501144918-883eece82647
-	github.com/NpoolPlatform/third-middleware v0.0.0-20220924075054-4c3370415028
+	github.com/NpoolPlatform/third-middleware v0.0.0-20220928032420-338b26196b65
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.3

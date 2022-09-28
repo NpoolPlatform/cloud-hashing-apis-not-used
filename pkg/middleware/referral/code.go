@@ -70,6 +70,10 @@ func CreateInvitationCode(
 		inviterName,
 		inviteeName,
 	)
+
+	fmt.Println("**********************err")
+	fmt.Println(err)
+
 	if err != nil {
 		logger.Sugar().Warnf("fail notify email: %v", err)
 	}
