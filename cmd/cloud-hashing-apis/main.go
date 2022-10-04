@@ -13,7 +13,7 @@ import (
 
 	goodsconst "github.com/NpoolPlatform/cloud-hashing-goods/pkg/message/const"
 
-	"github.com/NpoolPlatform/cloud-hashing-apis/pkg/service-name" //nolint
+	servicename "github.com/NpoolPlatform/cloud-hashing-apis/pkg/service-name" //nolint
 
 	cli "github.com/urfave/cli/v2"
 )

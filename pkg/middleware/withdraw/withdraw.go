@@ -5,6 +5,12 @@ import (
 	"fmt"
 	"time"
 
+	usermwcli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
+
+	"github.com/NpoolPlatform/message/npool/appuser/mgr/v2/signmethod"
+	"github.com/NpoolPlatform/message/npool/third/mgr/v1/usedfor"
+	thirdmwcli "github.com/NpoolPlatform/third-middleware/pkg/client/verify"
+
 	notificationpbpb "github.com/NpoolPlatform/message/npool/notification"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
@@ -15,13 +21,12 @@ import (
 	commissionmw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/commission"
 	fee "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/fee"
 	commissionsettingmw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral/setting"
-	verifymw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/verify"
-
 	review "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/review"
 	redis2 "github.com/NpoolPlatform/go-service-framework/pkg/redis"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 	currency "github.com/NpoolPlatform/oracle-manager/pkg/middleware/currency"
 
+	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	billingcli "github.com/NpoolPlatform/cloud-hashing-billing/pkg/client"
 	billingstate "github.com/NpoolPlatform/cloud-hashing-billing/pkg/const"
 	billingconst "github.com/NpoolPlatform/cloud-hashing-billing/pkg/message/const"
@@ -31,9 +36,6 @@ import (
 	reviewpb "github.com/NpoolPlatform/message/npool/review-service"
 	sphinxproxypb "github.com/NpoolPlatform/message/npool/sphinxproxy"
 	reviewconst "github.com/NpoolPlatform/review-service/pkg/const"
-	thirdgwconst "github.com/NpoolPlatform/third-gateway/pkg/const"
-
-	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 
 	"github.com/google/uuid"
 )
@@ -284,15 +286,25 @@ func Create(ctx context.Context, in *npool.SubmitUserWithdrawRequest) (*npool.Su
 		return nil, fmt.Errorf("invalid amount")
 	}
 
-	err := verifymw.VerifyCode(
+	user, err := usermwcli.GetUser(ctx, in.GetInfo().GetAppID(), in.GetInfo().GetUserID())
+	if err != nil {
+		return nil, err
+	}
+
+	accountN := in.GetAccount()
+
+	accountType := signmethod.SignMethodType(signmethod.SignMethodType_value[in.GetAccountType()])
+	if accountType == signmethod.SignMethodType_Google {
+		accountN = user.GetGoogleSecret()
+	}
+
+	err = thirdmwcli.VerifyCode(
 		ctx,
 		in.GetInfo().GetAppID(),
-		in.GetInfo().GetUserID(),
-		in.GetAccount(),
-		in.GetAccountType(),
+		accountN,
 		in.GetVerificationCode(),
-		thirdgwconst.UsedForWithdraw,
-		true,
+		signmethod.SignMethodType(signmethod.SignMethodType_value[in.GetAccountType()]),
+		usedfor.UsedFor_Withdraw,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("fail verify code: %v", err)

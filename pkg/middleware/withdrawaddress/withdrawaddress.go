@@ -4,10 +4,15 @@ import (
 	"context"
 	"fmt"
 
+	usermwcli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
+
+	"github.com/NpoolPlatform/message/npool/appuser/mgr/v2/signmethod"
+	"github.com/NpoolPlatform/message/npool/third/mgr/v1/usedfor"
+	thirdmwcli "github.com/NpoolPlatform/third-middleware/pkg/client/verify"
+
 	constant "github.com/NpoolPlatform/cloud-hashing-apis/pkg/const"
 	account "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/account"
 	review "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/review"
-	verifymw "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/verify"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
 	billingconst "github.com/NpoolPlatform/cloud-hashing-billing/pkg/message/const"
@@ -17,21 +22,30 @@ import (
 	reviewpb "github.com/NpoolPlatform/message/npool/review-service"
 	sphinxproxypb "github.com/NpoolPlatform/message/npool/sphinxproxy"
 	reviewconst "github.com/NpoolPlatform/review-service/pkg/const"
-	thirdgwconst "github.com/NpoolPlatform/third-gateway/pkg/const"
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 )
 
 func Set(ctx context.Context, in *npool.SetWithdrawAddressRequest) (*npool.SetWithdrawAddressResponse, error) {
-	err := verifymw.VerifyCode(
+	user, err := usermwcli.GetUser(ctx, in.GetAppID(), in.GetUserID())
+	if err != nil {
+		return nil, err
+	}
+
+	accountN := in.GetAccount()
+
+	accountType := signmethod.SignMethodType(signmethod.SignMethodType_value[in.GetAccountType()])
+	if accountType == signmethod.SignMethodType_Google {
+		accountN = user.GetGoogleSecret()
+	}
+
+	err = thirdmwcli.VerifyCode(
 		ctx,
 		in.GetAppID(),
-		in.GetUserID(),
-		in.GetAccount(),
-		in.GetAccountType(),
+		accountN,
 		in.GetVerificationCode(),
-		thirdgwconst.UsedForSetWithdrawAddress,
-		true,
+		signmethod.SignMethodType(signmethod.SignMethodType_value[in.GetAccountType()]),
+		usedfor.UsedFor_SetWithdrawAddress,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("fail verify code: %v", err)

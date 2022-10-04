@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	usermwcli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
+	"github.com/NpoolPlatform/message/npool/third/mgr/v1/usedfor"
+
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
@@ -11,9 +14,7 @@ import (
 	rsetting "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/referral/setting"
 	inspirecli "github.com/NpoolPlatform/cloud-hashing-inspire/pkg/client"
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
-	thirdgwpb "github.com/NpoolPlatform/message/npool/thirdgateway"
-	thirdgwcli "github.com/NpoolPlatform/third-gateway/pkg/client"
-	thirdgwconst "github.com/NpoolPlatform/third-gateway/pkg/const"
+	thirdmwcli "github.com/NpoolPlatform/third-middleware/pkg/client/notify"
 )
 
 func GetAmountSettings(ctx context.Context, appID, userID string) ([]*inspirepb.AppPurchaseAmountSetting, error) {
@@ -113,15 +114,26 @@ func CreateAmountSetting(
 		referral.UpdateGoodSummariesCache(ctx, appID, userID, summaries)
 	}
 
-	err = thirdgwcli.NotifyEmail(ctx, &thirdgwpb.NotifyEmailRequest{
-		AppID:        appID,
-		UserID:       userID,
-		ReceiverID:   targetUserID,
-		LangID:       langID,
-		SenderName:   inviterName,
-		ReceiverName: inviteeName,
-		UsedFor:      thirdgwconst.UsedForSetCommission,
-	})
+	user, err := usermwcli.GetUser(ctx, appID, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	targetUser, err := usermwcli.GetUser(ctx, appID, targetUserID)
+	if err != nil {
+		return nil, err
+	}
+
+	err = thirdmwcli.NotifyEmail(
+		ctx,
+		appID,
+		user.GetEmailAddress(),
+		usedfor.UsedFor_SetCommission,
+		targetUser.GetEmailAddress(),
+		langID,
+		inviterName,
+		inviteeName,
+	)
 	if err != nil {
 		logger.Sugar().Warnf("fail notify email: %v", err)
 	}
