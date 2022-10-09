@@ -108,7 +108,6 @@ github.com/NpoolPlatform/api-manager v0.0.0-20220826022307-d72866fe3ec0 h1:yIEwS
 github.com/NpoolPlatform/api-manager v0.0.0-20220826022307-d72866fe3ec0/go.mod h1:+Xj8fVgWZWGakBtqZbFn/zY0qd47AywCjLPOGdTqJDU=
 github.com/NpoolPlatform/appuser-manager v0.0.0-20220210093932-4b9db1361d89/go.mod h1:6yR7+wzkEEYss6p8oX+SjvHaDl65HelY3TCqbL4OrlQ=
 github.com/NpoolPlatform/appuser-manager v0.0.0-20220829023336-2041fdaab4cd h1:ACwuhQSW7POhVDYwHyQFq8d7qNfPEZNuXYu9ogyfYi0=
-github.com/NpoolPlatform/appuser-manager v0.0.0-20220829023336-2041fdaab4cd/go.mod h1:skBIsgrkDPxX6+mP31nWh0psf1ytnTLJSl73wJRXC5Y=
 github.com/NpoolPlatform/appuser-middleware v0.0.0-20220829071341-b6736e2c1c01 h1:YYAlfdmv/JjkUotR97/wGXpE0X65iNrb0msOyoOoMt8=
 github.com/NpoolPlatform/appuser-middleware v0.0.0-20220829071341-b6736e2c1c01/go.mod h1:WYSbWpY84NyLkRIXYVBUl/9iFobhmVrs7NDdR52J6Ec=
 github.com/NpoolPlatform/cloud-hashing-billing v0.0.0-20220211112041-cb90970f6df1/go.mod h1:XjIMD/UTr6zXfDDesd/Aez2XR+r6XFZuQVWCkpOIEbA=
@@ -135,8 +134,6 @@ github.com/NpoolPlatform/go-service-framework v0.0.0-20220404143809-82c40930388a
 github.com/NpoolPlatform/go-service-framework v0.0.0-20220818105452-9457611ae070/go.mod h1:QPI3Fu/AU5iUOUnf9EictZP1lqPQdPcVLqveIB2HovI=
 github.com/NpoolPlatform/go-service-framework v0.0.0-20220908115503-7dd1d00f71fa h1:12hE8mL+Nx5e8EMnIRag9SlLmHA+2Nzbchkv2g2GmX8=
 github.com/NpoolPlatform/go-service-framework v0.0.0-20220908115503-7dd1d00f71fa/go.mod h1:/sor3E0i0XR8BaKInJwWC85aXLmbMFRNLdIuw+ed+ig=
-github.com/NpoolPlatform/kyc-management v0.0.0-20220716053838-1a0c1957144a h1:k8ejWQEadGmUcQkbZN/X7YF0iKWY0ZsTQh2PlROoq/M=
-github.com/NpoolPlatform/kyc-management v0.0.0-20220716053838-1a0c1957144a/go.mod h1:Zdf1mQcER/oePPIFUvEUyqAXv02Wv8ONhv7iqEkVmhQ=
 github.com/NpoolPlatform/libent-cruder v0.0.0-20220501112906-1fd771ed0198/go.mod h1:zvvqlRwbOdTUauPQ9dFDhDuxa91ILV0CQfVdPBZj+eA=
 github.com/NpoolPlatform/libent-cruder v0.0.0-20220526050249-956b54fac9f1/go.mod h1:zvvqlRwbOdTUauPQ9dFDhDuxa91ILV0CQfVdPBZj+eA=
 github.com/NpoolPlatform/libent-cruder v0.0.0-20220801075201-cab5db8b6290/go.mod h1:zvvqlRwbOdTUauPQ9dFDhDuxa91ILV0CQfVdPBZj+eA=
@@ -147,7 +144,6 @@ github.com/NpoolPlatform/message v0.0.0-20211209105313-0e3b812f0809/go.mod h1:1s
 github.com/NpoolPlatform/message v0.0.0-20220120075427-38182760a780/go.mod h1:tnsf7zHQ5Mv2uG0ezOwCfm/bxluiRW10DeuIl4SjG4Y=
 github.com/NpoolPlatform/message v0.0.0-20220121040326-31d316062cdc/go.mod h1:tnsf7zHQ5Mv2uG0ezOwCfm/bxluiRW10DeuIl4SjG4Y=
 github.com/NpoolPlatform/message v0.0.0-20220210092619-65547799bb09/go.mod h1:r9cCQsBi8z8pljMAHa6sK6o2iXIG9tRpZ9idBxVpc44=
-github.com/NpoolPlatform/message v0.0.0-20220210124827-36110d474a7c/go.mod h1:r9cCQsBi8z8pljMAHa6sK6o2iXIG9tRpZ9idBxVpc44=
 github.com/NpoolPlatform/message v0.0.0-20220211111719-fcdd2da891ec/go.mod h1:r9cCQsBi8z8pljMAHa6sK6o2iXIG9tRpZ9idBxVpc44=
 github.com/NpoolPlatform/message v0.0.0-20220214123742-b6016b615933/go.mod h1:r9cCQsBi8z8pljMAHa6sK6o2iXIG9tRpZ9idBxVpc44=
 github.com/NpoolPlatform/message v0.0.0-20220224024531-84b89035cb9d/go.mod h1:r9cCQsBi8z8pljMAHa6sK6o2iXIG9tRpZ9idBxVpc44=
@@ -157,8 +153,8 @@ github.com/NpoolPlatform/message v0.0.0-20220501030927-34f296682c0c/go.mod h1:i/
 github.com/NpoolPlatform/message v0.0.0-20220501143407-c230f4ca021b/go.mod h1:i/F/sQWjQk44RGvfgEB0zH0oAK/0qLvgJ1AsJDZQDkk=
 github.com/NpoolPlatform/message v0.0.0-20220606130737-824c3198b695/go.mod h1:3Enb49K3JrhlSwA+6bcsBuTdTzVxVKhdkllDGgv0n3M=
 github.com/NpoolPlatform/message v0.0.0-20220819134247-1dc75c85fe43/go.mod h1:8YXp4MghMHLZ9bBdQQyfjcRtLI2RbEHAQoNCejT2nZU=
-github.com/NpoolPlatform/message v0.0.0-20220928085422-7409d1e2c015 h1:wm4XlkA7TbDPjYdZj5EfzQfR4Jj4vAr52UdT3SRZMjg=
-github.com/NpoolPlatform/message v0.0.0-20220928085422-7409d1e2c015/go.mod h1:dJ9HB+nfu9iNKhhZjauFE7Hbsj/kJmJb3BwUnYGHEOk=
+github.com/NpoolPlatform/message v0.0.0-20221009084051-c80f3ac356ac h1:jr7Jgl0ZYdFX5QU79XDnvr0ygzB0oa8SAnZ78S2ox7U=
+github.com/NpoolPlatform/message v0.0.0-20221009084051-c80f3ac356ac/go.mod h1:aI9DKOBVYAT+HvuMRCqVzrnPBqb83G7EbzR90nFTXA4=
 github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da h1:qZX3tw6TEsxaWyY/ZEeEtI6zSZzoYoCiqmDdt6DhxfA=
 github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da/go.mod h1:ieZ2gIh/zSlJ2hIr/fIuMvi5QMGRY0rXugKiBc+5ZKI=
 github.com/NpoolPlatform/oracle-manager v0.0.0-20220606135947-0f09e9f3818a/go.mod h1:f9Seypsw5N+Kc0P13IurAD/WNHXhzYsBt+d/R17oLfA=
@@ -2703,8 +2699,8 @@ google.golang.org/grpc v1.45.0/go.mod h1:lN7owxKUQEqMfSyQikvvk5tf/6zMPsrK+ONuO11
 google.golang.org/grpc v1.46.0/go.mod h1:vN9eftEi1UMyUsIF80+uQXhHjbXYbm0uXoFCACuMGWk=
 google.golang.org/grpc v1.46.2/go.mod h1:vN9eftEi1UMyUsIF80+uQXhHjbXYbm0uXoFCACuMGWk=
 google.golang.org/grpc v1.48.0/go.mod h1:vN9eftEi1UMyUsIF80+uQXhHjbXYbm0uXoFCACuMGWk=
-google.golang.org/grpc v1.49.0 h1:WTLtQzmQori5FUH25Pq4WT22oCsv8USpQ+F6rqtsmxw=
-google.golang.org/grpc v1.49.0/go.mod h1:ZgQEeidpAuNRZ8iRrlBKXZQP1ghovWIVhdJRyCDK+GI=
+google.golang.org/grpc v1.50.0 h1:fPVVDxY9w++VjTZsYvXWqEf9Rqar/e+9zYfxKK+W+YU=
+google.golang.org/grpc v1.50.0/go.mod h1:ZgQEeidpAuNRZ8iRrlBKXZQP1ghovWIVhdJRyCDK+GI=
 google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.1.0/go.mod h1:6Kw0yEErY5E/yWrBtf03jp27GLLJujG4z/JK95pnjjw=
 google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.2.0 h1:TLkBREm4nIsEcexnCjgQd5GQWaHcqMzwQV0TX9pq8S0=
 google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.2.0/go.mod h1:DNq5QpG7LJqD2AamLZ7zvKE0DEpVl2BSEVjFycAAjRY=

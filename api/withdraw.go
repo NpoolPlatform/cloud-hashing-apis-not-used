@@ -26,33 +26,6 @@ func (s *Server) SubmitUserWithdraw(ctx context.Context, in *npool.SubmitUserWit
 	return resp, nil
 }
 
-func (s *Server) UpdateUserWithdrawReview(ctx context.Context, in *npool.UpdateUserWithdrawReviewRequest) (*npool.UpdateUserWithdrawReviewResponse, error) {
-	resp, err := withdraw.Update(ctx, in)
-	if err != nil {
-		logger.Sugar().Errorf("update user withdraw error: %v", err)
-		return &npool.UpdateUserWithdrawReviewResponse{}, status.Error(codes.Internal, err.Error())
-	}
-	return resp, nil
-}
-
-func (s *Server) UpdateUserWithdrawReviewForOtherAppUser(ctx context.Context, in *npool.UpdateUserWithdrawReviewForOtherAppUserRequest) (*npool.UpdateUserWithdrawReviewForOtherAppUserResponse, error) {
-	info := in.GetInfo()
-	info.AppID = in.GetTargetAppID()
-
-	resp, err := withdraw.Update(ctx, &npool.UpdateUserWithdrawReviewRequest{
-		AppID:  in.GetAppID(),
-		UserID: in.GetUserID(),
-		Info:   info,
-	})
-	if err != nil {
-		logger.Sugar().Errorf("update user withdraw error: %v", err)
-		return &npool.UpdateUserWithdrawReviewForOtherAppUserResponse{}, status.Error(codes.Internal, err.Error())
-	}
-	return &npool.UpdateUserWithdrawReviewForOtherAppUserResponse{
-		Info: resp.Info,
-	}, nil
-}
-
 func (s *Server) GetUserWithdrawsByAppUser(ctx context.Context, in *npool.GetUserWithdrawsByAppUserRequest) (*npool.GetUserWithdrawsByAppUserResponse, error) {
 	resp, err := withdraw.GetByAppUser(ctx, in)
 	if err != nil {
@@ -85,15 +58,6 @@ func (s *Server) GetWithdrawAddressesByAppUser(ctx context.Context, in *npool.Ge
 	if err != nil {
 		logger.Sugar().Errorf("get user withdraw address error: %v", err)
 		return &npool.GetWithdrawAddressesByAppUserResponse{}, status.Error(codes.Internal, err.Error())
-	}
-	return resp, nil
-}
-
-func (s *Server) UpdateWithdrawReview(ctx context.Context, in *npool.UpdateWithdrawReviewRequest) (*npool.UpdateWithdrawReviewResponse, error) {
-	resp, err := withdraw.UpdateWithdrawReview(ctx, in)
-	if err != nil {
-		logger.Sugar().Errorf("update withdraw review error: %w", err)
-		return &npool.UpdateWithdrawReviewResponse{}, status.Error(codes.Internal, err.Error())
 	}
 	return resp, nil
 }

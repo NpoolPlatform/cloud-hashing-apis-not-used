@@ -16,7 +16,6 @@ import (
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
 	billingconst "github.com/NpoolPlatform/cloud-hashing-billing/pkg/message/const"
-	appusermgrpb "github.com/NpoolPlatform/message/npool/appuser/mgr/v1"
 	billingpb "github.com/NpoolPlatform/message/npool/cloud-hashing-billing"
 	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
 	reviewpb "github.com/NpoolPlatform/message/npool/review-service"
@@ -149,12 +148,13 @@ func Delete(ctx context.Context, in *npool.DeleteWithdrawAddressRequest) (*npool
 }
 
 func GetByAppUser(ctx context.Context, in *npool.GetWithdrawAddressesByAppUserRequest) (*npool.GetWithdrawAddressesByAppUserResponse, error) {
-	_, err := grpc2.GetAppUserByAppUser(ctx, &appusermgrpb.GetAppUserByAppUserRequest{
-		AppID:  in.GetAppID(),
-		UserID: in.GetUserID(),
-	})
+	user, err := usermwcli.GetUser(ctx, in.GetAppID(), in.GetUserID())
 	if err != nil {
 		return nil, fmt.Errorf("fail get app user: %v", err)
+	}
+
+	if user == nil {
+		return nil, fmt.Errorf("fail get app user")
 	}
 
 	infos, err := grpc2.GetUserWithdrawsByAppUser(ctx, &billingpb.GetUserWithdrawsByAppUserRequest{

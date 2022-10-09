@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	appusermgrpb "github.com/NpoolPlatform/message/npool/appuser/mgr/v1"
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 	goodspb "github.com/NpoolPlatform/message/npool/cloud-hashing-goods"
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
@@ -51,30 +50,6 @@ func UnmarshalOrders(data []byte) ([]*npool.Order, error) {
 		return nil, fmt.Errorf("fail unmarshal orders: %v", err)
 	}
 	return s, nil
-}
-
-func UnmarshalAppUsers(data []byte) ([]*appusermgrpb.AppUser, error) {
-	s := []*appusermgrpb.AppUser{}
-	if err := json.Unmarshal(data, &s); err != nil {
-		return nil, fmt.Errorf("fail unmarshal app users: %v", err)
-	}
-	return s, nil
-}
-
-func UnmarshalAppUser(data []byte) (*appusermgrpb.AppUser, error) {
-	s := appusermgrpb.AppUser{}
-	if err := json.Unmarshal(data, &s); err != nil {
-		return nil, fmt.Errorf("fail unmarshal app users: %v", err)
-	}
-	return &s, nil
-}
-
-func UnmarshalAppUserExtra(data []byte) (*appusermgrpb.AppUserExtra, error) {
-	s := appusermgrpb.AppUserExtra{}
-	if err := json.Unmarshal(data, &s); err != nil {
-		return nil, fmt.Errorf("fail unmarshal app user extra: %v", err)
-	}
-	return &s, nil
 }
 
 func UnmarshalAppGoodInfo(data []byte) (*goodspb.AppGoodInfo, error) {
