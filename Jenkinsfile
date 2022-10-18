@@ -261,7 +261,7 @@ pipeline {
       steps {
         sh(returnStdout: false, script: '''
           set +e
-          docker images | grep staker-manager | grep feature
+          docker images | grep cloud-hashing-apis-v2 | grep feature
           rc=$?
           set -e
           if [ 0 -eq $rc ]; then
