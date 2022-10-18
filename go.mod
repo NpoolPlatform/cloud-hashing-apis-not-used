@@ -11,7 +11,7 @@ require (
 	github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220706022206-f2cdf41ea8ed
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20220908115503-7dd1d00f71fa
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20220821121920-9559f5776d15
-	github.com/NpoolPlatform/message v0.0.0-20221009084051-c80f3ac356ac
+	github.com/NpoolPlatform/message v0.0.0-20221018090940-ae53f9bbd02c
 	github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da
 	github.com/NpoolPlatform/oracle-manager v0.0.0-20220728100526-493b72e128d3
 	github.com/NpoolPlatform/review-service v0.0.0-20220826135931-2f311aae9cbd
@@ -113,11 +113,11 @@ require (
 	go.uber.org/ratelimit v0.1.0 // indirect
 	go.uber.org/zap v1.21.0 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
-	golang.org/x/net v0.0.0-20220722155237-a158d28d115b // indirect
-	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
+	golang.org/x/net v0.0.0-20220909164309-bea034e7d591 // indirect
+	golang.org/x/sys v0.0.0-20220728004956-3c1f35247d10 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/xerrors v0.0.0-20220411194840-2f41105eb62f // indirect
-	google.golang.org/genproto v0.0.0-20220822174746-9e6da59bd2fc // indirect
+	google.golang.org/genproto v0.0.0-20221010155953-15ba04fc1c0e // indirect
 	gopkg.in/ini.v1 v1.66.4 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
