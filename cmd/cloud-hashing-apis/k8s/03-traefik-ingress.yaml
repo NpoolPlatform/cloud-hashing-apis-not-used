@@ -21,135 +21,15 @@ spec:
     - host: api.npool.top
       http: &http_rules
         paths:
-          - path: /api/cloud-hashing-apis-v2/v1/create/good
+          - path: /api/cloud-hashing-apis-v2/v1/get/withdraw/address/reviews/by/app
             backend:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/submit/order
+          - path: /api/cloud-hashing-apis-v2/v1/get/withdraw/address/reviews/by/other/app
             backend:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/submit/user/order
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/submit/app/user/order
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/submit/user/withdraw
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/create/order/payment
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/get/order
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/get/orders/by/app/user
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/get/referrals
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/get/user/referrals
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/get/kyc/reviews
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/get/good/reviews
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/get/kyc/by/app/user
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/create/kyc
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/update/kyc
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/update/app/user
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/create/app/user
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/update/password/by/app/user
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/update/emailaddress
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/update/phoneno
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/update/account
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/create/platform/coin/account
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/create/user/coin/account
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/set/withdraw
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/delete/withdraw
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/get/withdraw
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/update/user/withdraw
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/get/coupons
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/get/commission
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/get/user
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/get/current/fee
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/get/amount/settings
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/create/invitation/code
+          - path: /api/cloud-hashing-apis-v2/v1/get/withdraw/address/reviews/by/app
             backend:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
@@ -157,6 +37,39 @@ spec:
             backend:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
+          - path: /api/cloud-hashing-apis-v2/v1/create/invitation/code
+            backend:
+              serviceName: cloud-hashing-apis-v2
+              servicePort: 50140
+          - path: /api/cloud-hashing-apis-v2/v1/get/amount/settings
+            backend:
+              serviceName: cloud-hashing-apis-v2
+              servicePort: 50140
+          - path: /api/cloud-hashing-apis-v2/v1/get/current/fee
+            backend:
+              serviceName: cloud-hashing-apis-v2
+              servicePort: 50140
+          - path: /api/cloud-hashing-apis-v2/v1/get/withdraw/addresses/by/app/user
+            backend:
+              serviceName: cloud-hashing-apis-v2
+              servicePort: 50140
+          - path: /api/cloud-hashing-apis-v2/v1/delete/withdraw/address
+            backend:
+              serviceName: cloud-hashing-apis-v2
+              servicePort: 50140
+          - path: /api/cloud-hashing-apis-v2/v1/set/withdraw/address
+            backend:
+              serviceName: cloud-hashing-apis-v2
+              servicePort: 50140
+          - path: /api/cloud-hashing-apis-v2/v1/create/user/coin/account
+            backend:
+              serviceName: cloud-hashing-apis-v2
+              servicePort: 50140
+          - path: /api/cloud-hashing-apis-v2/v1/create/platform/coin/account
+            backend:
+              serviceName: cloud-hashing-apis-v2
+              servicePort: 50140
+
     - host: api.procyon.vip
       http: *http_rules
     - host: api.ohhash.com
@@ -198,26 +111,6 @@ spec:
     - host: api.npool.top
       http: &http_rules
         paths:
-          - path: /api/cloud-hashing-apis-v2/v1/get/good
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/get/goods
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/get/recommend/goods/by/app
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/signup
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
-          - path: /api/cloud-hashing-apis-v2/v1/update/password
-            backend:
-              serviceName: cloud-hashing-apis-v2
-              servicePort: 50140
           - path: /api/cloud-hashing-apis-v2/version
             backend:
               serviceName: cloud-hashing-apis-v2
