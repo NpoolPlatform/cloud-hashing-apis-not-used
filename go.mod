@@ -11,7 +11,7 @@ require (
 	github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220706022206-f2cdf41ea8ed
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20221015040432-cd676d323379
 	github.com/NpoolPlatform/good-middleware v0.0.0-20221020081337-e2a047d5c1d7
-	github.com/NpoolPlatform/message v0.0.0-20221021083807-f64855bfe13c
+	github.com/NpoolPlatform/message v0.0.0-20221021092836-09e6481248df
 	github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da
 	github.com/NpoolPlatform/oracle-manager v0.0.0-20220728100526-493b72e128d3
 	github.com/NpoolPlatform/review-service v0.0.0-20220826135931-2f311aae9cbd
@@ -122,3 +122,9 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/NpoolPlatform/message v0.0.0-20221020102336-1dd7c20bb59d => ../message
+
+replace entgo.io/ent => entgo.io/ent v0.11.2
+
+replace ariga.io/atlas => ariga.io/atlas v0.5.1-0.20220717122844-8593d7eb1a8e

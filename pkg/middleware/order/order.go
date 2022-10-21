@@ -22,6 +22,9 @@ import (
 	orderconst "github.com/NpoolPlatform/cloud-hashing-order/pkg/const"
 
 	"github.com/google/uuid"
+
+	appgoodmwcli "github.com/NpoolPlatform/good-middleware/pkg/appgood"
+	appgoodmgrpb "github.com/NpoolPlatform/message/npool/good/mgr/v1/appgood"
 )
 
 const (
@@ -256,6 +259,13 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 	}
 
 	if appGood == nil {
+		appgoodmwcli.GetGoods(ctx, &appgoodmgrpb.Conds{
+			ID:      nil,
+			AppID:   nil,
+			GoodID:  nil,
+			GoodIDs: nil,
+		}, 0, 0)
+
 		appGood, err = grpc2.GetAppGoodByAppGood(ctx, &goodspb.GetAppGoodByAppGoodRequest{
 			AppID:  info.Order.GetAppID(),
 			GoodID: info.Order.GetGoodID(),
