@@ -9,7 +9,7 @@ import (
 
 	grpc2 "github.com/NpoolPlatform/cloud-hashing-apis/pkg/grpc"
 	cache "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/cache"
-	gooddetail "github.com/NpoolPlatform/good-middleware/pkg/client/good"
+	gooddetail "github.com/NpoolPlatform/cloud-hashing-apis/pkg/middleware/good"
 
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
@@ -236,11 +236,13 @@ func expandOrder(ctx context.Context, info *orderpb.OrderDetail, base bool) (*np
 	}
 
 	if goodInfo == nil {
-		resp, err := gooddetail.GetGood(ctx, info.Order.GetGoodID())
-		if err != nil || resp == nil {
+		resp, err := gooddetail.Get(ctx, &npool.GetGoodRequest{
+			ID: info.Order.GetGoodID(),
+		})
+		if err != nil || resp.Info == nil {
 			return nil, fmt.Errorf("fail get good info: %v", err)
 		}
-		goodInfo = resp
+		goodInfo = resp.Info
 		cache.AddEntry(cacheKey(cacheGood, info.Order.GetGoodID()), goodInfo)
 	}
 

@@ -11,7 +11,7 @@ require (
 	github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220706022206-f2cdf41ea8ed
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20221015040432-cd676d323379
 	github.com/NpoolPlatform/good-middleware v0.0.0-20221020081337-e2a047d5c1d7
-	github.com/NpoolPlatform/message v0.0.0-20221020102336-1dd7c20bb59d
+	github.com/NpoolPlatform/message v0.0.0-20221021083807-f64855bfe13c
 	github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da
 	github.com/NpoolPlatform/oracle-manager v0.0.0-20220728100526-493b72e128d3
 	github.com/NpoolPlatform/review-service v0.0.0-20220826135931-2f311aae9cbd
@@ -23,7 +23,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.3
 	github.com/stretchr/testify v1.8.0
 	github.com/urfave/cli/v2 v2.16.3
-	google.golang.org/grpc v1.50.0
+	google.golang.org/grpc v1.50.1
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.2.0
 	google.golang.org/protobuf v1.28.1
 )

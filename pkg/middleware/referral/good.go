@@ -43,31 +43,31 @@ func getGoodSummaries(ctx context.Context, appID, userID string) ([]*npool.GoodS
 
 		var summary *npool.GoodSummary
 		for _, sum := range summaries {
-			if sum.GoodID == order.Good.Good.Good.ID {
+			if sum.GoodID == order.Good.Good.ID {
 				summary = sum
 				break
 			}
 		}
 
 		percent := uint32(0)
-		s := setting.GetGoodAmountSetting(settings, order.Good.Good.Good.ID)
+		s := setting.GetGoodAmountSetting(settings, order.Good.Good.ID)
 		if s != nil {
 			percent = s.Percent
 		}
 
 		if summary == nil {
 			summary = &npool.GoodSummary{
-				GoodID:     order.Good.Good.Good.ID,
+				GoodID:     order.Good.Good.ID,
 				CoinTypeID: order.Good.Main.ID,
 				CoinName:   order.Good.Main.Unit,
-				Unit:       order.Good.Good.Good.Unit,
+				Unit:       order.Good.Good.Unit,
 			}
 			summaries = append(summaries, summary)
 		}
 
 		amount := order.Order.Payment.Amount * order.Order.Payment.CoinUSDCurrency
 		logger.Sugar().Infof("order %v good %v coin %v | %v units %v amount %v user %v",
-			order.Order.Order.ID, order.Good.Good.Good.ID,
+			order.Order.Order.ID, order.Good.Good.ID,
 			order.Good.Main.ID, order.Good.Main.Unit,
 			order.Order.Order.Units, amount, userID)
 
