@@ -69,6 +69,10 @@ spec:
             backend:
               serviceName: cloud-hashing-apis-v2
               servicePort: 50140
+          - path: /cloud-hashing-apis-v2/v1/get/withdraw/addresses/by/app/user
+            backend:
+              serviceName: cloud-hashing-apis-v2
+              servicePort: 50140
           - path: /cloud-hashing-apis-v2/v1/set/withdraw/address
             backend:
               serviceName: cloud-hashing-apis-v2
