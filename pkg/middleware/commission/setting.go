@@ -99,20 +99,20 @@ func CreateAmountSetting(
 		return nil, fmt.Errorf("fail get amount settings: %v", err)
 	}
 
-	rsetting.UpdateAmountSettingsCache(ctx, appID, targetUserID, settings)
-	summaries, err := referral.GetGoodSummaries(ctx, appID, targetUserID)
-	if err != nil {
-		logger.Sugar().Warnf("fail get good summaries: %v", err)
-	}
-	if summaries != nil {
-		for _, sum := range summaries {
-			if sum.GoodID == setting.GoodID {
-				sum.Percent = setting.Percent
-				break
-			}
-		}
-		referral.UpdateGoodSummariesCache(ctx, appID, userID, summaries)
-	}
+	//rsetting.UpdateAmountSettingsCache(ctx, appID, targetUserID, settings)
+	//summaries, err := referral.GetGoodSummaries(ctx, appID, targetUserID)
+	//if err != nil {
+	//	logger.Sugar().Warnf("fail get good summaries: %v", err)
+	//}
+	//if summaries != nil {
+	//	for _, sum := range summaries {
+	//		if sum.GoodID == setting.GoodID {
+	//			sum.Percent = setting.Percent
+	//			break
+	//		}
+	//	}
+	//	referral.UpdateGoodSummariesCache(ctx, appID, userID, summaries)
+	//}
 
 	user, err := usermwcli.GetUser(ctx, appID, userID)
 	if err != nil {
