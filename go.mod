@@ -9,7 +9,8 @@ require (
 	github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220826143628-2e00dfa1a95f
 	github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220706022206-f2cdf41ea8ed
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20221015040432-cd676d323379
-	github.com/NpoolPlatform/message v0.0.0-20221021092836-09e6481248df
+	github.com/NpoolPlatform/good-middleware v0.0.0-20221101014034-837ff83fd534
+	github.com/NpoolPlatform/message v0.0.0-20221031081057-b46ab48df6de
 	github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da
 	github.com/NpoolPlatform/oracle-manager v0.0.0-20220728100526-493b72e128d3
 	github.com/NpoolPlatform/review-service v0.0.0-20220826135931-2f311aae9cbd

@@ -15,6 +15,8 @@ import (
 	inspirecli "github.com/NpoolPlatform/cloud-hashing-inspire/pkg/client"
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
 	thirdmwcli "github.com/NpoolPlatform/third-middleware/pkg/client/notify"
+
+	goodcli "github.com/NpoolPlatform/good-middleware/pkg/client/good"
 )
 
 func GetAmountSettings(ctx context.Context, appID, userID string) ([]*inspirepb.AppPurchaseAmountSetting, error) {
@@ -51,6 +53,13 @@ func CreateAmountSetting(
 	inviterName, inviteeName string,
 	setting *inspirepb.AppPurchaseAmountSetting,
 ) ([]*inspirepb.AppPurchaseAmountSetting, error) {
+	good, err := goodcli.GetGood(ctx, setting.GoodID)
+	if err != nil {
+		return nil, err
+	}
+	if good == nil {
+		return nil, fmt.Errorf("good not exist")
+	}
 	iv, err := grpc2.GetRegistrationInvitationByAppInvitee(ctx, &inspirepb.GetRegistrationInvitationByAppInviteeRequest{
 		AppID:     appID,
 		InviteeID: targetUserID,
