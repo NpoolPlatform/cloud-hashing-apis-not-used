@@ -27,6 +27,10 @@ func (s *Server) GetAmountSettings(ctx context.Context, in *npool.GetAmountSetti
 }
 
 func (s *Server) CreateAmountSetting(ctx context.Context, in *npool.CreateAmountSettingRequest) (*npool.CreateAmountSettingResponse, error) {
+	if in.Info == nil {
+		logger.Sugar().Errorf("info empty")
+		return &npool.CreateAmountSettingResponse{}, status.Error(codes.InvalidArgument, "Info is empty")
+	}
 	settings, err := commission.CreateAmountSetting(
 		ctx,
 		in.GetAppID(), in.GetUserID(), in.GetTargetUserID(), in.GetLangID(),
