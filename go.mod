@@ -8,7 +8,7 @@ require (
 	github.com/NpoolPlatform/cloud-hashing-billing v0.0.0-20220716065311-82e652286c9e
 	github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220826143628-2e00dfa1a95f
 	github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20220706022206-f2cdf41ea8ed
-	github.com/NpoolPlatform/go-service-framework v0.0.0-20221015040432-cd676d323379
+	github.com/NpoolPlatform/go-service-framework v0.0.0-20221102072657-7fcc5e6f1012
 	github.com/NpoolPlatform/good-middleware v0.0.0-20221101014034-837ff83fd534
 	github.com/NpoolPlatform/message v0.0.0-20221031081057-b46ab48df6de
 	github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da
