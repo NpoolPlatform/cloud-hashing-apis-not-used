@@ -53,6 +53,16 @@ func CreateAmountSetting(
 	inviterName, inviteeName string,
 	setting *inspirepb.AppPurchaseAmountSetting,
 ) ([]*inspirepb.AppPurchaseAmountSetting, error) {
+	inCode, err := grpc2.GetUserInvitationCodeByAppUser(ctx, &inspirepb.GetUserInvitationCodeByAppUserRequest{
+		AppID:  appID,
+		UserID: targetUserID,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if inCode == nil {
+		return nil, fmt.Errorf("user is not KOL")
+	}
 	good, err := goodcli.GetGood(ctx, setting.GoodID)
 	if err != nil {
 		return nil, err
