@@ -15,6 +15,8 @@ import (
 	inspirecli "github.com/NpoolPlatform/cloud-hashing-inspire/pkg/client"
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
 	thirdmwcli "github.com/NpoolPlatform/third-middleware/pkg/client/notify"
+
+	goodcli "github.com/NpoolPlatform/good-middleware/pkg/client/good"
 )
 
 func GetAmountSettings(ctx context.Context, appID, userID string) ([]*inspirepb.AppPurchaseAmountSetting, error) {
@@ -51,6 +53,23 @@ func CreateAmountSetting(
 	inviterName, inviteeName string,
 	setting *inspirepb.AppPurchaseAmountSetting,
 ) ([]*inspirepb.AppPurchaseAmountSetting, error) {
+	inCode, err := grpc2.GetUserInvitationCodeByAppUser(ctx, &inspirepb.GetUserInvitationCodeByAppUserRequest{
+		AppID:  appID,
+		UserID: targetUserID,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if inCode == nil {
+		return nil, fmt.Errorf("user is not KOL")
+	}
+	good, err := goodcli.GetGood(ctx, setting.GoodID)
+	if err != nil {
+		return nil, err
+	}
+	if good == nil {
+		return nil, fmt.Errorf("good not exist")
+	}
 	iv, err := grpc2.GetRegistrationInvitationByAppInvitee(ctx, &inspirepb.GetRegistrationInvitationByAppInviteeRequest{
 		AppID:     appID,
 		InviteeID: targetUserID,
@@ -72,6 +91,9 @@ func CreateAmountSetting(
 
 	percent := uint32(0)
 	for _, s := range settings {
+		if s == nil {
+			continue
+		}
 		if s.End != 0 || s.GoodID != setting.GoodID {
 			continue
 		}
@@ -99,20 +121,20 @@ func CreateAmountSetting(
 		return nil, fmt.Errorf("fail get amount settings: %v", err)
 	}
 
-	rsetting.UpdateAmountSettingsCache(ctx, appID, targetUserID, settings)
-	summaries, err := referral.GetGoodSummaries(ctx, appID, targetUserID)
-	if err != nil {
-		logger.Sugar().Warnf("fail get good summaries: %v", err)
-	}
-	if summaries != nil {
-		for _, sum := range summaries {
-			if sum.GoodID == setting.GoodID {
-				sum.Percent = setting.Percent
-				break
-			}
-		}
-		referral.UpdateGoodSummariesCache(ctx, appID, userID, summaries)
-	}
+	//rsetting.UpdateAmountSettingsCache(ctx, appID, targetUserID, settings)
+	//summaries, err := referral.GetGoodSummaries(ctx, appID, targetUserID)
+	//if err != nil {
+	//	logger.Sugar().Warnf("fail get good summaries: %v", err)
+	//}
+	//if summaries != nil {
+	//	for _, sum := range summaries {
+	//		if sum.GoodID == setting.GoodID {
+	//			sum.Percent = setting.Percent
+	//			break
+	//		}
+	//	}
+	//	referral.UpdateGoodSummariesCache(ctx, appID, userID, summaries)
+	//}
 
 	user, err := usermwcli.GetUser(ctx, appID, userID)
 	if err != nil {
