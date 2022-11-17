@@ -30,28 +30,6 @@ const (
 	grpcTimeout = 60 * time.Second
 )
 
-//---------------------------------------------------------------------------------------------------------------------------
-
-func GetCoinInfos(ctx context.Context, in *coininfopb.GetCoinInfosRequest) ([]*coininfopb.CoinInfo, error) {
-	conn, err := grpc2.GetGRPCConn(coininfoconst.ServiceName, grpc2.GRPCTAG)
-	if err != nil {
-		return nil, fmt.Errorf("fail get coininfo connection: %v", err)
-	}
-	defer conn.Close()
-
-	cli := coininfopb.NewSphinxCoinInfoClient(conn)
-
-	ctx, cancel := context.WithTimeout(ctx, grpcTimeout)
-	defer cancel()
-
-	resp, err := cli.GetCoinInfos(ctx, in)
-	if err != nil {
-		return nil, fmt.Errorf("fail get coin infos: %v", err)
-	}
-
-	return resp.Infos, nil
-}
-
 func GetCoinInfo(ctx context.Context, in *coininfopb.GetCoinInfoRequest) (*coininfopb.CoinInfo, error) {
 	conn, err := grpc2.GetGRPCConn(coininfoconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
