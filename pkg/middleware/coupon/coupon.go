@@ -9,7 +9,7 @@ import (
 	npool "github.com/NpoolPlatform/message/npool/cloud-hashing-apis"
 
 	inspirepb "github.com/NpoolPlatform/message/npool/cloud-hashing-inspire"
-	orderpb "github.com/NpoolPlatform/message/npool/order/mgr/v1/order"
+	orderpb "github.com/NpoolPlatform/message/npool/order/mw/v1/order"
 
 	npoolpb "github.com/NpoolPlatform/message/npool"
 	ordercli "github.com/NpoolPlatform/order-middleware/pkg/client/order"

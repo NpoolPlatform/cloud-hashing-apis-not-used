@@ -7,14 +7,13 @@ require (
 	github.com/NpoolPlatform/appuser-middleware v0.0.0-20220829071341-b6736e2c1c01
 	github.com/NpoolPlatform/cloud-hashing-billing v0.0.0-20220716065311-82e652286c9e
 	github.com/NpoolPlatform/cloud-hashing-inspire v0.0.0-20220826143628-2e00dfa1a95f
-	github.com/NpoolPlatform/cloud-hashing-order v0.0.0-20221101065506-ed1fa1f491e8
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20221102072657-7fcc5e6f1012
 	github.com/NpoolPlatform/good-middleware v0.0.0-20221109024849-724709e2093e
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20221109023947-366125b690fb
-	github.com/NpoolPlatform/message v0.0.0-20221115112414-84f871dc7384
+	github.com/NpoolPlatform/message v0.0.0-20221117083318-f2150fb0c377
 	github.com/NpoolPlatform/notification v0.0.0-20220324103731-5bfc670637da
 	github.com/NpoolPlatform/oracle-manager v0.0.0-20220728100526-493b72e128d3
-	github.com/NpoolPlatform/order-middleware v0.0.0-20221115110738-19dc7c129cac
+	github.com/NpoolPlatform/order-middleware v0.0.0-20221117090447-f989baeeee3c
 	github.com/NpoolPlatform/review-service v0.0.0-20220826135931-2f311aae9cbd
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20220322095158-52237287c832
 	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20220323034620-cea972617ed5
